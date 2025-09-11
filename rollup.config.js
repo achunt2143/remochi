@@ -6,37 +6,41 @@ import { terser } from 'rollup-plugin-terser';
 import url from '@rollup/plugin-url';
 
 export default {
-    input: 'src/index.jsx', // your entry point
-    output: [
-        {
-            file: 'dist/index.cjs.js',
-            format: 'cjs',
-            exports: 'named',
-            sourcemap: true,
-        },
-        {
-            file: 'dist/index.esm.js',
-            format: 'esm',
-            sourcemap: true,
-        },
-    ],
-    plugins: [
-        peerDepsExternal(),
-        resolve({ extensions: ['.js', '.jsx', '.png', '.gif', '.svg'] }),
-        commonjs(),
-        url({
-            include: ['**/*.svg', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg'],
-            limit: 8192, // files smaller than 8kB will be inlined as base64 strings
-            emitFiles: true, // copies files to dist folder
-            fileName: '[name][hash][extname]', // output file naming pattern
-            destDir: 'dist/assets' // where to copy files in dist
-        }),
-        babel({
-            exclude: 'node_modules/**',
-            babelHelpers: 'bundled',
-            extensions: ['.js', '.jsx'],
-        }),
-        terser(),
-    ],
-    external: ['react', 'react-dom'], // externalize react deps for peer dependency
+  input: 'src/index.jsx',
+  output: [
+    {
+      file: 'dist/index.cjs.js',
+      format: 'cjs',
+      exports: 'named',
+      sourcemap: true,
+    },
+    {
+      file: 'dist/index.esm.js',
+      format: 'esm',
+      sourcemap: true,
+    },
+  ],
+  plugins: [
+    peerDepsExternal(), // This handles peer deps automatically
+    resolve({
+      extensions: ['.js', '.jsx'],
+    }),
+    commonjs(),
+    url({
+      include: ['**/*.svg', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg'],
+      limit: 8192,
+      emitFiles: true,
+    }),
+    babel({
+      exclude: 'node_modules/**',
+      babelHelpers: 'bundled',
+      extensions: ['.js', '.jsx'],
+      presets: [
+        '@babel/preset-env',
+        ['@babel/preset-react', { runtime: 'automatic' }]
+      ],
+    }),
+    terser(),
+  ],
+  external: ['react', 'react-dom', 'react/jsx-runtime'], // Include jsx-runtime
 };
