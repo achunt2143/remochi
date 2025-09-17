@@ -101,6 +101,7 @@ const Label = styled.span`
     if (type === "disabled") return colors.disabled;
     return colors.normal;
   }};
+  margin-top: 0.2em;
   letter-spacing: 0.02em;
 `;
 

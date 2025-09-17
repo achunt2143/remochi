@@ -30,7 +30,8 @@ or
 
 Import and use the components as you would with any React library:
 
-```import React, { useState } from "react";
+```
+import React, { useState } from "react";
 import {
 MochiButton,
 MochiRadio,
@@ -68,7 +69,8 @@ return (
   </MochiPopupPanel>
 </>
 );
-}```
+}
+```
 
 
 ## Development

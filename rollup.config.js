@@ -4,6 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 import url from '@rollup/plugin-url';
+const pkg = require('./package.json');
 
 export default {
   input: 'src/index.jsx',
@@ -30,6 +31,8 @@ export default {
       include: ['**/*.svg', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg'],
       limit: 8192,
       emitFiles: true,
+      fileName: '[name][hash][extname]',
+      destDir: 'dist/assets'
     }),
     babel({
       exclude: 'node_modules/**',
@@ -42,5 +45,8 @@ export default {
     }),
     terser(),
   ],
-  external: ['react', 'react-dom', 'react/jsx-runtime'], // Include jsx-runtime
+  external: [
+    ...Object.keys(pkg.peerDependencies),
+    'react/jsx-runtime'
+  ],
 };
