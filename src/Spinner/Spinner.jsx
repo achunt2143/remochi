@@ -21,9 +21,13 @@ export const Spinner = ({ active = true, styleType = "light", size = "normal", a
   let src;
 
   if (styleType === "dark") {
-    src = size === "large" ? darkSpinnerLarge : darkSpinnerSmall;
+    src = size === "large"
+      ? new URL('./spinners/spinner-dark-large.gif', import.meta.url).href
+      : new URL('./spinners/spinner-dark.gif', import.meta.url).href;
   } else {
-    src = size === "large" ? lightSpinnerLarge : lightSpinnerSmall;
+    src = size === "large"
+      ? new URL('./spinners/spinner-large-light.gif', import.meta.url).href
+      : new URL('./spinners/spinner-light.gif', import.meta.url).href;
   }
 
   return <SpinnerImg src={src} alt={alt} active={active} size={size} />;
