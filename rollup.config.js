@@ -1,12 +1,13 @@
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import typescript from '@rollup/plugin-typescript';
 import babel from '@rollup/plugin-babel';
-import { terser } from 'rollup-plugin-terser';
+import dts from 'rollup-plugin-dts';
+import terser from '@rollup/plugin-terser';
 import url from '@rollup/plugin-url';
-const pkg = require('./package.json');
 
-export default {
+const jsConfig = {
   input: 'src/index.jsx',
   output: [
     {
@@ -22,31 +23,39 @@ export default {
     },
   ],
   plugins: [
-    peerDepsExternal(), // This handles peer deps automatically
+    peerDepsExternal(),
     resolve({
-      extensions: ['.js', '.jsx'],
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
     }),
     commonjs(),
     url({
       include: ['**/*.svg', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg'],
-      limit: 8192,
-      emitFiles: true,
-      fileName: '[name][hash][extname]',
-      destDir: 'dist/assets'
+      limit: Infinity,    // inline all assets as base64 to avoid file copies
+      emitFiles: false,
+      fileName: '[name][extname]',
+      destDir: 'dist/assets',
     }),
+    typescript({ tsconfig: './tsconfig.json' }),
     babel({
       exclude: 'node_modules/**',
       babelHelpers: 'bundled',
-      extensions: ['.js', '.jsx'],
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
       presets: [
         '@babel/preset-env',
-        ['@babel/preset-react', { runtime: 'automatic' }]
+        ['@babel/preset-react', { runtime: 'automatic' }],
       ],
     }),
     terser(),
   ],
   external: [
-    ...Object.keys(pkg.peerDependencies),
-    'react/jsx-runtime'
+    'react/jsx-runtime',
   ],
 };
+
+const dtsConfig = {
+  input: 'remochi.d.ts',
+  output: [{ file: 'dist/index.d.ts', format: 'es' }],
+  plugins: [dts()],
+};
+
+export default [jsConfig, dtsConfig];

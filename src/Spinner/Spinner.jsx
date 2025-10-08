@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-// Import your spinner GIFs (adjust paths)
+// Use the static imported URLs directly
 import lightSpinnerSmall from "./spinners/spinner-light.gif";
 import lightSpinnerLarge from "./spinners/spinner-large-light.gif";
 import darkSpinnerSmall from "./spinners/spinner-dark.gif";
@@ -21,13 +21,9 @@ export const Spinner = ({ active = true, styleType = "light", size = "normal", a
   let src;
 
   if (styleType === "dark") {
-    src = size === "large"
-      ? new URL('./spinners/spinner-dark-large.gif', import.meta.url).href
-      : new URL('./spinners/spinner-dark.gif', import.meta.url).href;
+    src = size === "large" ? darkSpinnerLarge : darkSpinnerSmall;
   } else {
-    src = size === "large"
-      ? new URL('./spinners/spinner-large-light.gif', import.meta.url).href
-      : new URL('./spinners/spinner-light.gif', import.meta.url).href;
+    src = size === "large" ? lightSpinnerLarge : lightSpinnerSmall;
   }
 
   return <SpinnerImg src={src} alt={alt} active={active} size={size} />;
