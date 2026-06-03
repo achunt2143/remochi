@@ -6,6 +6,7 @@ import babel from '@rollup/plugin-babel';
 import dts from 'rollup-plugin-dts';
 import terser from '@rollup/plugin-terser';
 import url from '@rollup/plugin-url';
+import postcss from 'rollup-plugin-postcss';
 
 const jsConfig = {
   input: 'src/index.jsx',
@@ -27,6 +28,13 @@ const jsConfig = {
     resolve({
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     }),
+    postcss({
+        extract: true,
+        minimize: true,
+        sourceMap: true,
+        modules: false,
+        use: ['sass']
+      }),
     commonjs(),
     url({
       include: ['**/*.svg', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg'],

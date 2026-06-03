@@ -1,0 +1,104 @@
+// Root divider container
+.remochi-divider {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+
+// Horizontal orientation
+.remochi-divider--horizontal {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+// Vertical orientation
+.remochi-divider--vertical {
+  flex-direction: column;
+  justify-content: stretch;
+}
+
+// Cap containers
+.divider-cap {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+// Horizontal caps: 4px tall, some fixed length (tweak as needed)
+.divider-cap--horizontal {
+  height: 100%;      // thickness is controlled on parent
+  width: 16px;       // adjust to match sprite width
+}
+
+// Vertical caps: 4px wide
+.divider-cap--vertical {
+  width: 100%;       // thickness is controlled on parent
+  height: 16px;      // adjust to match sprite height
+}
+
+// Inner cap layers (normal + flipped)
+.divider-cap-layer {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+// Flip along the correct axis
+.remochi-divider--horizontal .divider-cap-layer--flipped {
+  transform: scaleY(-1);
+  transform-origin: center;
+}
+
+.remochi-divider--vertical .divider-cap-layer--flipped {
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+
+// Flexbox ordering
+.divider-cap-left {
+  order: 1;
+}
+
+.divider-cap-right {
+  order: 3;
+}
+
+// Middle stretching section
+.divider-middle {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  order: 2;
+}
+
+// Middle layers (normal + flipped)
+.divider-middle-layer {
+  position: absolute;
+  inset: 0;
+  background-position: 0 0;
+}
+
+// Horizontal middle: repeat-x in a thin band
+.divider-middle--horizontal .divider-middle-layer {
+  background-repeat: repeat-x;
+  background-size: auto 4px; // tile height = 4px
+}
+
+// Vertical middle: repeat-y in a thin band
+.divider-middle--vertical .divider-middle-layer {
+  background-repeat: repeat-y;
+  background-size: 4px auto; // tile width = 4px
+}
+
+// Flip the second middle layer
+.remochi-divider--horizontal .divider-middle-layer--flipped {
+  transform: scaleY(-1);
+  transform-origin: center;
+}
+
+.remochi-divider--vertical .divider-middle-layer--flipped {
+  transform: scaleX(-1);
+  transform-origin: center;
+}

@@ -1,0 +1,21 @@
+/* Mochi Subheader Component - Preserved CSS from original */
+
+.mochi-subheader {
+  height: 56px;
+  padding: 0px 32px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+
+  .mochi-subheader-content {
+    font-family: "Mochi Medium", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 18px;
+    font-style: italic;
+    color: #323232;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    line-height: 26px;
+    padding-top: 30px;
+  }
+}

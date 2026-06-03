@@ -1,0 +1,748 @@
+// StackedMochiPanels.scss - SCSS version for better maintainability and distribution
+
+// ========================================
+// Mochi Design System Variables
+// ========================================
+
+$mochi-panel-radius: 12px;
+$mochi-panel-radius-right: 0;
+$mochi-transition-duration: 250ms;
+$mochi-transition-easing: cubic-bezier(0.16, 1, 0.3, 1);
+$mochi-handle-size: 48px;
+
+// Color palette
+$color-slate-900: #134252;
+$color-slate-500: #626c71;
+$color-gray-200: #f5f5f5;
+$color-gray-300: #a7a9a9;
+$color-gray-400: #777c7c;
+$color-cream-50: #fcfcf9;
+$color-cream-100: #fffff5;
+$color-teal-300: #32b8c6;
+$color-teal-400: #2da6b2;
+$color-teal-500: #208085;
+$color-teal-600: #1d7480;
+$color-teal-700: #1a6873;
+$color-brown-600: #5e5240;
+
+// Shadows
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+
+// ========================================
+// Light Mode (Default)
+// ========================================
+
+:root {
+  --color-background: #{$color-cream-50};
+  --color-surface: #{$color-cream-100};
+  --color-text: #{$color-slate-900};
+  --color-text-secondary: #{$color-slate-500};
+  --color-border: rgba(#{94}, #{82}, #{64}, 0.2);
+  --color-card-border: rgba(#{94}, #{82}, #{64}, 0.12);
+  --color-secondary: rgba(#{94}, #{82}, #{64}, 0.12);
+  --color-secondary-hover: rgba(#{94}, #{82}, #{64}, 0.2);
+  --color-secondary-active: rgba(#{94}, #{82}, #{64}, 0.25);
+  --color-primary: #{$color-teal-500};
+  --color-primary-hover: #{$color-teal-600};
+  --color-btn-primary-text: #{$color-cream-50};
+}
+
+// ========================================
+// Dark Mode
+// ========================================
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #1f2121;
+    --color-surface: #262828;
+    --color-text: #f5f5f5;
+    --color-text-secondary: rgba(#{167}, #{169}, #{169}, 0.7);
+    --color-border: rgba(#{119}, #{124}, #{124}, 0.3);
+    --color-card-border: rgba(#{119}, #{124}, #{124}, 0.2);
+    --color-secondary: rgba(#{119}, #{124}, #{124}, 0.15);
+    --color-secondary-hover: rgba(#{119}, #{124}, #{124}, 0.25);
+    --color-secondary-active: rgba(#{119}, #{124}, #{124}, 0.3);
+    --color-primary: #{$color-teal-300};
+    --color-primary-hover: #{$color-teal-400};
+    --color-btn-primary-text: #1f2121;
+  }
+}
+
+[data-color-scheme='dark'] {
+  --color-background: #1f2121;
+  --color-surface: #262828;
+  --color-text: #f5f5f5;
+  --color-text-secondary: rgba(#{167}, #{169}, #{169}, 0.7);
+  --color-border: rgba(#{119}, #{124}, #{124}, 0.3);
+  --color-card-border: rgba(#{119}, #{124}, #{124}, 0.2);
+  --color-secondary: rgba(#{119}, #{124}, #{124}, 0.15);
+  --color-secondary-hover: rgba(#{119}, #{124}, #{124}, 0.25);
+  --color-secondary-active: rgba(#{119}, #{124}, #{124}, 0.3);
+  --color-primary: #{$color-teal-300};
+  --color-primary-hover: #{$color-teal-400};
+  --color-btn-primary-text: #1f2121;
+}
+
+[data-color-scheme='light'] {
+  --color-background: #{$color-cream-50};
+  --color-surface: #{$color-cream-100};
+  --color-text: #{$color-slate-900};
+  --color-text-secondary: #{$color-slate-500};
+  --color-border: rgba(#{94}, #{82}, #{64}, 0.2);
+  --color-card-border: rgba(#{94}, #{82}, #{64}, 0.12);
+  --color-secondary: rgba(#{94}, #{82}, #{64}, 0.12);
+  --color-secondary-hover: rgba(#{94}, #{82}, #{64}, 0.2);
+  --color-secondary-active: rgba(#{94}, #{82}, #{64}, 0.25);
+  --color-primary: #{$color-teal-500};
+  --color-primary-hover: #{$color-teal-600};
+  --color-btn-primary-text: #{$color-cream-50};
+}
+
+// ========================================
+// Root Container
+// ========================================
+
+.mochi-panels-root {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    var(--color-background) 0%,
+    var(--color-secondary) 100%
+  );
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+// ========================================
+// Panel Wrapper (Positioning & Stacking)
+// ========================================
+
+.mochi-panel-wrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  transition: 
+    left $mochi-transition-duration $mochi-transition-easing,
+    width $mochi-transition-duration $mochi-transition-easing,
+    box-shadow $mochi-transition-duration $mochi-transition-easing;
+
+  cursor: pointer;
+
+  &.mochi-panel--dragging {
+    transition: none;
+    z-index: 9999 !important;
+  }
+
+  &.mochi-panel--active .mochi-panel {
+    box-shadow: #{$shadow-lg};
+    transform: translateY(-2px);
+  }
+}
+
+// ========================================
+// Panel Card (Book-spine styling)
+// ========================================
+
+.mochi-panel {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  // Book spine: rounded LEFT only, sharp RIGHT
+  border-radius: $mochi-panel-radius 0 0 $mochi-panel-radius;
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  box-shadow: #{$shadow-sm};
+  overflow: hidden;
+
+  transition: 
+    box-shadow $mochi-transition-duration $mochi-transition-easing,
+    transform $mochi-transition-duration $mochi-transition-easing,
+    background-color 150ms ease-out;
+
+  &:hover:not(.mochi-panel-wrapper.mochi-panel--dragging *) {
+    box-shadow: #{$shadow-md};
+  }
+}
+
+// ========================================
+// Content Area
+// ========================================
+
+.mochi-panel-content {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.5;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-secondary);
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--color-secondary);
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 6px;
+
+    &:hover {
+      background: var(--color-text-secondary);
+    }
+  }
+}
+
+// ========================================
+// Drag Handle
+// ========================================
+
+.mochi-panel-handle {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  width: $mochi-handle-size;
+  height: $mochi-handle-size;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  padding: 0;
+  background: var(--color-secondary);
+  border-radius: 10px;
+
+  cursor: grab;
+  outline: none;
+  z-index: 10;
+
+  transition: 
+    background-color 150ms $mochi-transition-easing,
+    transform 150ms $mochi-transition-easing,
+    box-shadow 150ms $mochi-transition-easing;
+
+  will-change: background-color, transform;
+
+  &:hover {
+    background: var(--color-secondary-hover);
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: #{$shadow-md};
+  }
+
+  &:active {
+    cursor: grabbing;
+    background: var(--color-secondary-active);
+    transform: scale(0.96);
+    box-shadow: #{$shadow-sm};
+  }
+}
+
+.mochi-panel-wrapper.mochi-panel--dragging .mochi-panel-handle {
+  pointer-events: none;
+}
+
+// ========================================
+// Handle Grip Lines
+// ========================================
+
+.mochi-panel-handle-lines {
+  position: relative;
+  width: 18px;
+  height: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  &::before,
+  &::after {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--color-text-secondary);
+    transition: all 150ms $mochi-transition-easing;
+  }
+
+  &::before {
+    box-shadow: 0 0 0 var(--color-text-secondary);
+  }
+
+  &::after {
+    width: 12px;
+    margin-left: 4px;
+  }
+}
+
+.mochi-panel-handle:hover .mochi-panel-handle-lines {
+  &::before {
+    box-shadow: 0 5px 0 var(--color-text);
+  }
+
+  &::after {
+    width: 18px;
+    margin-left: 0;
+    background: var(--color-text);
+  }
+}
+
+// ========================================
+// Drag Hint Overlay
+// ========================================
+
+.mochi-drag-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  padding: 12px 24px;
+  background: var(--color-primary);
+  color: var(--color-btn-primary-text);
+  border-radius: 10px;
+
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+
+  pointer-events: none;
+  z-index: 10000;
+
+  box-shadow: #{$shadow-lg};
+
+  animation: mochi-hint-in 150ms $mochi-transition-easing forwards;
+}
+
+@keyframes mochi-hint-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+// ========================================
+// Responsive Design
+// ========================================
+
+@media (max-width: 768px) {
+  .mochi-panels-root {
+    height: 320px;
+  }
+
+  .mochi-panel-content {
+    padding: 20px;
+  }
+
+  .mochi-panel-handle {
+    left: 12px;
+    bottom: 12px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mochi-panels-root {
+    height: 280px;
+  }
+
+  .mochi-panel-content {
+    padding: 16px;
+    font-size: 12px;
+  }
+
+  .mochi-panel-handle {
+    left: 10px;
+    bottom: 10px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .mochi-panel-handle-lines {
+    width: 16px;
+    height: 10px;
+
+    &::before,
+    &::after {
+      width: 16px;
+    }
+
+    &::after {
+      width: 10px;
+    }
+  }
+
+  .mochi-drag-hint {
+    padding: 10px 20px;
+    font-size: 11px;
+  }
+}
+
+// ========================================
+// Accessibility
+// ========================================
+
+.mochi-panel-handle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(33, 128, 141, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mochi-panel-wrapper,
+  .mochi-panel,
+  .mochi-panel-handle {
+    transition: none;
+  }
+
+  .mochi-drag-hint {
+    animation: none;
+  }
+}
+/* StackedMochiPanels Enhanced CSS - Controls Section */
+
+/* ========================================
+   CONTROL BUTTONS
+   ======================================== */
+
+.mochi-panel-controls {
+  position: absolute;
+  bottom: var(--space-16);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-8);
+  z-index: 1000;
+  align-items: center;
+
+  /* Backdrop blur for visibility over panels */
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ========================================
+   BUTTON STYLES
+   ======================================== */
+
+.mochi-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-btn-primary-text);
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 150ms var(--ease-standard);
+  outline: none;
+  -webkit-user-select: none;
+  user-select: none;
+
+  /* Better touch targets on mobile */
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.mochi-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mochi-btn:active:not(:disabled) {
+  background: var(--color-primary-active);
+  transform: scale(0.95);
+  box-shadow: var(--shadow-sm);
+}
+
+.mochi-btn:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
+.mochi-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   NAVIGATION BUTTONS (Prev/Next)
+   ======================================== */
+
+.mochi-btn-nav {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+.mochi-btn-nav:hover:not(:disabled) {
+  background: var(--color-secondary-hover);
+}
+
+.mochi-btn-nav:active:not(:disabled) {
+  background: var(--color-secondary-active);
+}
+
+.mochi-btn-prev,
+.mochi-btn-next {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* ========================================
+   EXPAND BUTTON - STATE CHANGES
+   ======================================== */
+
+.mochi-btn-expand {
+  min-width: 30px;
+  min-height: 30px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+}
+
+/* Collapsed state (default) */
+.mochi-btn-expand {
+  background: var(--color-primary);
+}
+
+/* Expanded state */
+.mochi-btn-expand.expanded {
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 2px var(--color-btn-primary-text);
+}
+
+/* Fullscreen state */
+.mochi-btn-expand.fullscreen {
+  background: var(--color-warning);
+  color: white;
+}
+
+/* Long press feedback */
+.mochi-btn-expand:active {
+  transform: scale(0.92);
+}
+
+/* ========================================
+   CLOSE BUTTON (Fullscreen)
+   ======================================== */
+
+.mochi-btn-close {
+  position: absolute;
+  top: var(--space-16);
+  right: var(--space-16);
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 18px;
+  border-radius: var(--radius-base);
+  z-index: 2000;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+.mochi-btn-close:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* ========================================
+   BUTTON ICON STYLING
+   ======================================== */
+
+.mochi-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 768px) {
+  .mochi-panel-controls {
+    bottom: var(--space-12);
+    padding: var(--space-10) var(--space-12);
+    gap: var(--space-6);
+  }
+
+  .mochi-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+
+  .mochi-btn-expand {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+
+  .mochi-btn-close {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    top: var(--space-12);
+    right: var(--space-12);
+  }
+}
+
+@media (max-width: 480px) {
+  .mochi-panel-controls {
+    bottom: var(--space-8);
+    padding: var(--space-8) var(--space-10);
+    gap: var(--space-4);
+  }
+
+  .mochi-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+  }
+
+  .mochi-btn-expand {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+  }
+}
+
+/* ========================================
+   DARK MODE SUPPORT
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  .mochi-panel-controls {
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .mochi-btn-nav {
+    background: var(--color-secondary);
+  }
+}
+
+[data-color-scheme='dark'] .mochi-controls {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+[data-color-scheme='dark'] .mochi-btn-nav {
+  background: var(--color-secondary);
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+.mochi-btn:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .mochi-btn {
+    border: 2px solid currentColor;
+  }
+
+  .mochi-panel-controls {
+    border: 2px solid var(--color-text);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mochi-btn,
+  .mochi-controls {
+    transition: none;
+  }
+
+  .mochi-fullscreen-overlay {
+    animation: none;
+  }
+
+  .mochi-btn:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .mochi-btn:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ========================================
+   STATE-BASED STYLING
+   ======================================== */
+
+[data-fullscreen='true'] {
+  /* Don't blur panels */
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-fullscreen='true'] .mochi-panel {
+  /* Full panel without blur */
+  filter: none;
+}
+
+/* When fullscreen mode is active */
+[data-fullscreen='true'] .mochi-panel-controls {
+  display: none;
+}
+
+[data-fullscreen='true'] .mochi-panel-wrapper {
+  /* Prevent clicking on hidden panels in fullscreen */
+  pointer-events: none;
+}
+
+[data-fullscreen='true'] .mochi-panel-wrapper.mochi-panel--active {
+  pointer-events: auto;
+}
