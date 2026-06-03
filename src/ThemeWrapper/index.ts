@@ -1,1 +1,1 @@
-export { default as ThemeWrapper } from './MochiThemeWrapper';
+export { default as ThemeWrapper, useTheme } from './MochiThemeWrapper';

@@ -1,1 +1,1 @@
-export { default as PopupPanel } from './MochiPopupPanel';
+export { MochiPopupPanel as PopupPanel } from './MochiPopupPanel';

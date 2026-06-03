@@ -1,1 +1,1 @@
-export { default as ProgressBar } from './MochiProgressBar';
+export { MochiProgressBar as ProgressBar } from './MochiProgressBar';

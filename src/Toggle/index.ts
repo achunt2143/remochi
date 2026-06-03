@@ -1,1 +1,1 @@
-export { default as Toggle } from './MochiToggle';
+export { MochiToggle as Toggle } from './MochiToggle';
