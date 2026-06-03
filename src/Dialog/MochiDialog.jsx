@@ -39,7 +39,7 @@ const MochiDialog = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  // if (!isOpen) return null;
 
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget && onClose) {
