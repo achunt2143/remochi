@@ -1,1 +1,1 @@
-export { default as Slider } from './MochiSlider';
+export { MochiSlider as Slider } from './MochiSlider';

@@ -1,1 +1,1 @@
-export { StackedPanels, StackedPanel } from './StackedMochiPanels';
+export { StackedMochiPanels as StackedPanels, StackedMochiPanel as StackedPanel } from './StackedMochiPanels';

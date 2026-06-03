@@ -9,7 +9,7 @@ import url from '@rollup/plugin-url';
 import postcss from 'rollup-plugin-postcss';
 
 const jsConfig = {
-  input: 'src/index.jsx',
+  input: 'src/index.ts',
   output: [
     {
       file: 'dist/index.cjs.js',
@@ -38,7 +38,7 @@ const jsConfig = {
     commonjs(),
     url({
       include: ['**/*.svg', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg'],
-      limit: Infinity,    // inline all assets as base64 to avoid file copies
+      limit: Infinity,
       emitFiles: false,
       fileName: '[name][extname]',
       destDir: 'dist/assets',
