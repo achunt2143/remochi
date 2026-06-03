@@ -7,7 +7,7 @@ import {
   ContentArea,
   ButtonBar,
 } from "./MochiPopupPanel.styles";
-import { MochiButton } from "../Button/MochiButton";
+import { Button as MochiButton } from "../Button";
 
 export function MochiPopupPanel({
   isOpen,

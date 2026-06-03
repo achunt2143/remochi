@@ -1,7 +1,7 @@
 // MochiWizard.jsx
 import React, { useState } from 'react';
 import './MochiWizard.scss';
-import { MochiButton } from '../Button/MochiButton';
+import { Button as MochiButton } from '../Button';
 
 const MochiWizard = ({
   steps = [],

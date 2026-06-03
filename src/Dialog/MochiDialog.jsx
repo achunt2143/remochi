@@ -1,7 +1,7 @@
 // MochiDialog.jsx
 import React, { useEffect, useRef } from 'react';
 import './MochiDialog.scss';
-import { MochiButton } from '../Button/MochiButton';
+import { Button as MochiButton } from '../Button';
 
 const MochiDialog = ({
   isOpen = false,

@@ -50,7 +50,7 @@ const CheckmarkSVG = styled.svg`
   height: 20px;
 `;
 
-export const MochiRadio = ({
+const MochiRadio = ({
   name,
   value,
   checked,
@@ -86,3 +86,5 @@ export const MochiRadio = ({
     {children}
   </MochiRadioLabel>
 );
+
+export default MochiRadio;
