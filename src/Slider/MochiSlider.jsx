@@ -6,6 +6,15 @@ const trackHeight = "5px";
 const thumbDefault = 28;
 const thumbPressed = 40;
 
+// Canvas bubble is 62x37px. We want the text centred over it.
+// BubbleCanvas sits at left:100%, transform: translate(-10%, 0), top:-45px
+// relative to the Thumb. The popup text needs to match that position.
+// Bubble width = 62px. Its left edge is at ~(thumbWidth - 62*0.1) from thumb left.
+// Simplest: make PopupText absolute, same anchor as the canvas, then centre.
+
+const BUBBLE_W = 62;
+const BUBBLE_H = 37;
+
 const Track = styled.div`
   width: ${({ width }) => width || "100%"};
   height: ${trackHeight};
@@ -52,17 +61,32 @@ const Thumb = styled.div`
   cursor: grab;
 `;
 
-const Popup = styled.div`
+// Sits in the same stacking context as BubbleCanvas (both children of Thumb).
+// BubbleCanvas: left:100%, translateX(-10%), top:-45px, width:62px
+// We mirror that anchor then shift right by half the bubble width to centre.
+const PopupText = styled.div`
   position: absolute;
-  left: 70%;
-  top: -40px;
-  transform: translate(50%, 0);
+  /* Match BubbleCanvas anchor exactly */
+  left: 100%;
+  top: -45px;
+  /* BubbleCanvas translateX is -10% of its own width = -6.2px.
+     Centre of bubble from its left edge = 62/2 = 31px.
+     So centre from our left:100% = -6.2 + 31 = 24.8px.
+     We then shift back by 50% of our own width via translateX(-50%)
+     but since we're text we use a fixed offset instead. */
+  transform: translate(calc(-10% + ${BUBBLE_W / 2}px - 50%), 0);
+  width: max-content;
+
+  /* Typography */
   color: #fff;
-  font-size: 1.15rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: ${BUBBLE_H}px;   /* vertically centre in the 37px tall bubble */
+  text-align: center;
   white-space: nowrap;
   pointer-events: none;
-  z-index: 300;
+  z-index: 101;                  /* above the canvas (z-index: 100) */
+
   opacity: ${({ $shown }) => ($shown ? 1 : 0)};
   transition: opacity 0.18s;
 `;
@@ -89,6 +113,10 @@ export const MochiSlider = ({
   const [active, setActive] = useState(false);
   const [internalVal, setInternalVal] = useState(value);
   const trackRef = useRef();
+
+  // Resolved color: explicit prop → CSS variable fallback string
+  // BubbleCanvas receives this same value so canvas fill always matches.
+  const resolvedColor = color || "var(--mochi-primary, #04B2F9)";
 
   const percent = ((internalVal - min) * 100) / (max - min);
 
@@ -132,14 +160,14 @@ export const MochiSlider = ({
       aria-valuenow={internalVal}
       aria-valuemin={min}
       aria-valuemax={max}
-      aria-valuetext={`${internalVal}%`}
+      aria-valuetext={`${internalVal}`}
     >
       <Track ref={trackRef} width={width} onClick={handleTrackClick}>
-        <Fill $percent={percent} $color={color} />
+        <Fill $percent={percent} $color={resolvedColor} />
         <Thumb
           $percent={percent}
           $active={active}
-          $color={color}
+          $color={resolvedColor}
           onMouseDown={startDrag}
           onTouchStart={(e) => {
             e.stopPropagation();
@@ -148,8 +176,12 @@ export const MochiSlider = ({
         >
           {active && (
             <>
-              <BubbleCanvas color={color || "var(--mochi-primary, #04B2F9)"} />
-              <Popup $shown={active}>{internalVal}%</Popup>
+              {/* Canvas draws the bubble shape in the correct color */}
+              <BubbleCanvas color={resolvedColor} />
+              {/* Text layered on top, centred over the bubble */}
+              <PopupText $shown={active}>
+                {internalVal}{min === 0 && max === 100 ? '%' : ''}
+              </PopupText>
             </>
           )}
         </Thumb>
