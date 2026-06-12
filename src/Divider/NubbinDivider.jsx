@@ -1,48 +1,33 @@
 /**
  * NubbinDivider
  *
- * A Divider line with one of the mochi contextual-popup nubbin images
- * rendered on top of it at a fully customisable position.
+ * Three-part divider:  [left cap] [nubbin image] [right cap]
  *
- * ┌────────────────────────────────────────────────────────┐
- * │  Props                                                 │
- * ├─────────────────┬──────────────────────────────────────┤
- * │ nubbin          │ Which nubbin image to show.          │
- * │                 │ Straight: 'up' | 'down' |            │
- * │                 │           'left' | 'right'           │
- * │                 │ Corner:   'top-left-up'              │
- * │                 │           'top-right-up'             │
- * │                 │           'top-left-left'            │
- * │                 │           'top-right-right'          │
- * │                 │           'bottom-left-down'         │
- * │                 │           'bottom-right-down'        │
- * │                 │           'bottom-left-left'         │
- * │                 │           'bottom-right-right'       │
- * │                 │ Default: 'up'                        │
- * ├─────────────────┬──────────────────────────────────────┤
- * │ nubbinOffset    │ CSS value placing the nubbin center  │
- * │                 │ along the main axis of the line.     │
- * │                 │ e.g. '50%', '120px', 'calc(…)'      │
- * │                 │ Default: '50%'                       │
- * ├─────────────────┬──────────────────────────────────────┤
- * │ nubbinCross     │ How to position nubbin on cross-axis │
- * │                 │ (vertical nubbin on horizontal line):│
- * │                 │   'above' | 'center' | 'below'       │
- * │                 │ (horizontal nubbin on vertical line):│
- * │                 │   'before' | 'center' | 'after'      │
- * │                 │ Default: 'center'                    │
- * ├─────────────────┬──────────────────────────────────────┤
- * │ orientation     │ 'horizontal' (default) | 'vertical'  │
- * │ thickness       │ line thickness px (default 4)        │
- * │ width / height  │ passed through to Divider            │
- * │ className       │ extra class on wrapper               │
- * └─────────────────┴──────────────────────────────────────┘
+ * The left and right caps each grow to fill their half of the available
+ * width. The nubbin image sits fixed-size between them, centred on the
+ * divider line.
+ *
+ * Props:
+ *   nubbin        Which nubbin image to show.
+ *                 Straight : 'up' | 'down' | 'left' | 'right'
+ *                 Corner   : 'top-left-up' | 'top-right-up'
+ *                            'top-left-left' | 'top-right-right'
+ *                            'bottom-left-down' | 'bottom-right-down'
+ *                            'bottom-left-left' | 'bottom-right-right'
+ *                 Default  : 'up'
+ *   nubbinOffset  CSS left value to shift the nubbin from centre.
+ *                 e.g. '50%' (default) | '120px' | 'calc(...)'
+ *                 When '50%' the nubbin lands exactly in the middle.
+ *   orientation   'horizontal' (default) | 'vertical'
+ *   thickness     Line thickness in px (default 4)
+ *   className     Extra class string
+ *   style         Inline style overrides on the root element
  */
 import React from 'react';
-import Divider from './Divider';
 import './NubbinDivider.scss';
+import capLeftImage  from './div-img/div-left.png';
+import capRightImage from './div-img/div-right.png';
 
-// ── nubbin image catalogue ─────────────────────────────────────────────────
 import imgUp               from '../Popup/nubbinImages/up.png';
 import imgDown             from '../Popup/nubbinImages/down.png';
 import imgLeft             from '../Popup/nubbinImages/left.png';
@@ -56,104 +41,49 @@ import imgBottomRightDown  from '../Popup/nubbinImages/bottom-right-corner-down.
 import imgBottomLeftLeft   from '../Popup/nubbinImages/bottom-left-corner-left.png';
 import imgBottomRightRight from '../Popup/nubbinImages/bottom-right-corner-right.png';
 
-// Straight nubbins: width × height in px (matches popup CSS exactly)
-// Horizontal nubbins (up/down): 71 × 20
-// Vertical nubbins (left/right): 20 × 71
 const NUB_INFO = {
-  // name               : { src, w,  h,  axis }
-  'up'                  : { src: imgUp,               w: 71, h: 20, axis: 'vertical'   },
-  'down'                : { src: imgDown,             w: 71, h: 20, axis: 'vertical'   },
-  'left'                : { src: imgLeft,             w: 20, h: 71, axis: 'horizontal' },
-  'right'               : { src: imgRight,            w: 20, h: 71, axis: 'horizontal' },
-  'top-left-up'         : { src: imgTopLeftUp,        w: 71, h: 20, axis: 'vertical',   corner: true },
-  'top-right-up'        : { src: imgTopRightUp,       w: 71, h: 20, axis: 'vertical',   corner: true },
-  'top-left-left'       : { src: imgTopLeftLeft,      w: 20, h: 71, axis: 'horizontal', corner: true },
-  'top-right-right'     : { src: imgTopRightRight,    w: 20, h: 71, axis: 'horizontal', corner: true },
-  'bottom-left-down'    : { src: imgBottomLeftDown,   w: 71, h: 20, axis: 'vertical',   corner: true },
-  'bottom-right-down'   : { src: imgBottomRightDown,  w: 71, h: 20, axis: 'vertical',   corner: true },
-  'bottom-left-left'    : { src: imgBottomLeftLeft,   w: 20, h: 71, axis: 'horizontal', corner: true },
-  'bottom-right-right'  : { src: imgBottomRightRight, w: 20, h: 71, axis: 'horizontal', corner: true },
+  'up'                 : { src: imgUp,               w: 71, h: 20 },
+  'down'               : { src: imgDown,             w: 71, h: 20 },
+  'left'               : { src: imgLeft,             w: 20, h: 71 },
+  'right'              : { src: imgRight,            w: 20, h: 71 },
+  'top-left-up'        : { src: imgTopLeftUp,        w: 71, h: 20 },
+  'top-right-up'       : { src: imgTopRightUp,       w: 71, h: 20 },
+  'top-left-left'      : { src: imgTopLeftLeft,      w: 20, h: 71 },
+  'top-right-right'    : { src: imgTopRightRight,    w: 20, h: 71 },
+  'bottom-left-down'   : { src: imgBottomLeftDown,   w: 71, h: 20 },
+  'bottom-right-down'  : { src: imgBottomRightDown,  w: 71, h: 20 },
+  'bottom-left-left'   : { src: imgBottomLeftLeft,   w: 20, h: 71 },
+  'bottom-right-right' : { src: imgBottomRightRight, w: 20, h: 71 },
 };
 
 const NubbinDivider = ({
-  // nubbin config
-  nubbin        = 'up',
-  nubbinOffset  = '50%',
-  nubbinCross   = 'center',
-  // pass-through to Divider
-  orientation   = 'horizontal',
-  thickness     = 4,
-  width,
-  height,
-  className     = '',
-  style         = {},
+  nubbin       = 'up',
+  nubbinOffset = '50%',
+  orientation  = 'horizontal',
+  thickness    = 4,
+  className    = '',
+  style        = {},
 }) => {
-  const info = NUB_INFO[nubbin] ?? NUB_INFO['up'];
-  const isHorizLine = orientation === 'horizontal';
+  const info       = NUB_INFO[nubbin] ?? NUB_INFO['up'];
+  const isHoriz    = orientation === 'horizontal';
 
-  // ── cross-axis positioning ─────────────────────────────────────────────
-  // For a horizontal divider, the nubbin sits along the horizontal line.
-  // Its cross-axis is vertical (up/down nubbins hang above/below the line).
-  // For a vertical divider, the cross-axis is horizontal (left/right nubbin).
-  let crossStyle = {};
-
-  if (isHorizLine) {
-    // nubbin.axis === 'vertical'  → image is 71×20, straddles the line top/bottom
-    // nubbin.axis === 'horizontal' → image is 20×71, extends left/right of line
-    if (nubbinCross === 'above') {
-      crossStyle = { bottom: '50%' };
-    } else if (nubbinCross === 'below') {
-      crossStyle = { top: '50%' };
-    } else {
-      // center: translate so nubbin image midpoint aligns with line midpoint
-      crossStyle = {
-        top:  '50%',
-        transform: `translateX(-50%) translateY(-${info.h / 2}px)`,
-      };
-    }
-  } else {
-    // vertical line — nubbin moves along Y, cross-axis is horizontal
-    if (nubbinCross === 'before') {
-      crossStyle = { right: '50%' };
-    } else if (nubbinCross === 'after') {
-      crossStyle = { left: '50%' };
-    } else {
-      crossStyle = {
-        left: '50%',
-        transform: `translateY(-50%) translateX(-${info.w / 2}px)`,
-      };
-    }
-  }
-
-  // ── main-axis positioning ─────────────────────────────────────────────
-  const mainAxisStyle = isHorizLine
-    ? { left: nubbinOffset, transform: undefined }  // left drives horizontal position
-    : { top:  nubbinOffset };
-
-  // merge; if crossStyle already has transform, use it; otherwise compose
-  const nubStyle = {
-    position: 'absolute',
-    width:  info.w,
-    height: info.h,
-    ...(isHorizLine ? { left: nubbinOffset } : { top: nubbinOffset }),
-    ...crossStyle,
-    // if crossStyle set its own transform, keep it; otherwise reset
+  const rootStyle = {
+    ...style,
+    ...(isHoriz ? { height: info.h } : { width: info.w }),
   };
 
   return (
     <div
       className={`mochi-nubbin-divider mochi-nubbin-divider--${orientation} ${className}`}
-      style={style}
+      style={rootStyle}
     >
-      {/* The actual divider line */}
-      <Divider
-        orientation={orientation}
-        thickness={thickness}
-        width={width}
-        height={height}
+      {/* Left / Top cap — stretches to fill its side */}
+      <div
+        className="mochi-nubbin-divider__cap mochi-nubbin-divider__cap--left"
+        style={{ backgroundImage: `url('${capLeftImage}')` }}
       />
 
-      {/* The nubbin image, absolutely positioned over the line */}
+      {/* Nubbin image — fixed size, centred on the line */}
       <img
         src={info.src}
         alt=""
@@ -161,7 +91,13 @@ const NubbinDivider = ({
         width={info.w}
         height={info.h}
         className="mochi-nubbin-divider__nub"
-        style={nubStyle}
+        draggable={false}
+      />
+
+      {/* Right / Bottom cap — stretches to fill its side */}
+      <div
+        className="mochi-nubbin-divider__cap mochi-nubbin-divider__cap--right"
+        style={{ backgroundImage: `url('${capRightImage}')` }}
       />
     </div>
   );

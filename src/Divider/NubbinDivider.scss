@@ -1,35 +1,46 @@
-/* NubbinDivider — divider line + contextual-popup nubbin image overlay */
+// NubbinDivider — [left cap] [nubbin] [right cap]
+// Caps grow to fill their side; nubbin is fixed-size in the middle.
 
 .mochi-nubbin-divider {
-  position: relative;
   display: flex;
-  align-items: center;
+  align-items: center;  // vertically centre all three parts on the line
+  width: 100%;
+  overflow: hidden;
 
-  &--horizontal {
-    width: 100%;
-    flex-direction: row;
+  // ── Caps ──────────────────────────────────────────────────
+  &__cap {
+    flex: 1 1 0;          // grow equally on each side of the nubbin
+    // thickness (height for horiz, width for vert) is set by the root
+    // style; we just need to fill that cross-axis dimension
+    background-repeat: no-repeat;
+    background-size: 100% 100%;  // stretch to fill the cap's full area
+    background-position: center;
+
+    // Horizontal: cap height = root height (set inline); width = flex
+    .mochi-nubbin-divider--horizontal & {
+      height: 100%;
+    }
+
+    // Vertical: cap width = root width (set inline); height = flex
+    .mochi-nubbin-divider--vertical & {
+      width: 100%;
+    }
   }
 
-  &--vertical {
-    height: 100%;
-    flex-direction: column;
-  }
-
-  // The Divider inside fills the container
-  .remochi-divider {
-    flex: 1 1 auto;
-    width: 100%;
-  }
-
-  // Nubbin image sits on top of the line, absolutely positioned
+  // ── Nubbin image ────────────────────────────────────────────
   &__nub {
-    // position is set inline; these are safety defaults
-    position: absolute;
+    flex: 0 0 auto;       // never shrink or grow — always its natural size
     display: block;
-    // no pointer-events — purely decorative
     pointer-events: none;
-    // prevent image drag
     user-select: none;
     -webkit-user-drag: none;
+  }
+
+  // ── Vertical orientation ──────────────────────────────────────
+  &--vertical {
+    flex-direction: column;
+    height: 100%;
+    width: auto;
+    align-items: center;
   }
 }
