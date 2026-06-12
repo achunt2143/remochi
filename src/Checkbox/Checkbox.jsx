@@ -1,21 +1,21 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Checkbox.scss';
 
 /**
- * Mochi Checkbox React Component
- * 
- * A checkbox that shows or hides a check mark when clicked.
- * Fires onChange event when toggled. Supports animation, theming, and disabled state.
- * 
+ * Mochi Checkbox
+ *
+ * A box that shows or hides a check mark when clicked.
+ * Fires onChange when toggled. Use `checked` prop to read state externally.
+ *
  * Props:
- *   - checked: Boolean for checked state (default: false)
- *   - onChange: Callback function fired when checkbox is toggled
- *   - disabled: Boolean to disable the checkbox (default: false)
- *   - canAnimate: Boolean to enable transition animation (default: true)
- *   - colorActive: CSS color when checked (default: '#ffb80d')
- *   - colorInactive: CSS color when unchecked (default: '#fff')
- *   - colorActiveDisabled: CSS color when checked and disabled (default: '#ffb80d')
- *   - colorInactiveDisabled: CSS color when unchecked and disabled (default: '#fff')
+ *   checked            {boolean}  Controlled checked state (default: false)
+ *   onChange           {Function} Called with { checked, value } on toggle
+ *   disabled           {boolean}  Disables interaction (default: false)
+ *   canAnimate         {boolean}  Animate background-color transition (default: true)
+ *   colorActive        {string}   Background when checked (default: '#ffb80d')
+ *   colorInactive      {string}   Background when unchecked (default: '#fff')
+ *   colorActiveDisabled   {string}   Background when checked + disabled (default: '#ffb80d')
+ *   colorInactiveDisabled {string}   Background when unchecked + disabled (default: '#fff')
  */
 const Checkbox = ({
   checked = false,
@@ -25,47 +25,44 @@ const Checkbox = ({
   colorActive = '#ffb80d',
   colorInactive = '#fff',
   colorActiveDisabled = '#ffb80d',
-  colorInactiveDisabled = '#fff'
+  colorInactiveDisabled = '#fff',
 }) => {
   const [isChecked, setIsChecked] = useState(checked);
 
+  // Keep internal state in sync when controlled prop changes
+  useEffect(() => {
+    setIsChecked(checked);
+  }, [checked]);
+
   const handleToggle = useCallback(() => {
     if (disabled) return;
-
-    const newCheckedState = !isChecked;
-    setIsChecked(newCheckedState);
-    onChange({
-      checked: newCheckedState,
-      value: newCheckedState
-    });
+    const next = !isChecked;
+    setIsChecked(next);
+    onChange({ checked: next, value: next });
   }, [isChecked, disabled, onChange]);
 
-  // Determine which color to use based on state
   const getBackgroundColor = () => {
-    if (disabled) {
-      return isChecked ? colorActiveDisabled : colorInactiveDisabled;
-    }
+    if (disabled) return isChecked ? colorActiveDisabled : colorInactiveDisabled;
     return isChecked ? colorActive : colorInactive;
   };
 
-  const checkboxClasses = [
+  const classes = [
     'mochi-checkbox',
-    isChecked && 'checked',
-    disabled && 'disabled',
-    canAnimate && 'mochi-checkbox-animate'
-  ]
-    .filter(Boolean)
-    .join(' ');
+    isChecked  && 'checked',
+    disabled   && 'disabled',
+    canAnimate && 'mochi-checkbox-animate',
+  ].filter(Boolean).join(' ');
 
-  const checkboxStyle = {
-    backgroundColor: getBackgroundColor(),
-    cursor: disabled ? 'not-allowed' : 'pointer'
-  };
+  // When checked the CSS supplies the image; backgroundColor drives the tint.
+  // When unchecked we still honour the colorInactive prop inline.
+  const style = isChecked
+    ? { backgroundColor: getBackgroundColor() }
+    : { backgroundColor: getBackgroundColor() };
 
   return (
     <div
-      className={checkboxClasses}
-      style={checkboxStyle}
+      className={classes}
+      style={style}
       onClick={handleToggle}
       role="checkbox"
       aria-checked={isChecked}
@@ -77,21 +74,7 @@ const Checkbox = ({
           handleToggle();
         }
       }}
-    >
-      {isChecked && (
-        <svg
-          className="mochi-checkbox-checkmark"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-      )}
-    </div>
+    />
   );
 };
 
