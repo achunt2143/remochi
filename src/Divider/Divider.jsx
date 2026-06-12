@@ -1,89 +1,47 @@
 import React from 'react';
 import './Divider.scss';
-import capLeftImage from './div-img/div-left.png';
-import middleImage from './div-img/div-mid.png';
+import capLeftImage  from './div-img/div-left.png';
 import capRightImage from './div-img/div-right.png';
 
 /**
- * Divider Component - Scalable divider with fade caps and repeating middle
+ * Divider
  *
- * Supports both horizontal and vertical orientations with automatic
- * stretching and no size constraints. The middle section repeats as needed,
- * while the left/right or top/bottom caps remain fixed size.
+ * Two-cap divider: the left cap fills the left half, the right cap fills the
+ * right half, and they meet seamlessly in the centre. No repeating middle
+ * section. Both caps stretch to cover their half via background-size: 100% 100%.
  *
- * @component
- * @param {Object} props - Component props
- * @param {'horizontal' | 'vertical'} [props.orientation='horizontal'] - Orientation of the divider
- * @param {string | number} [props.width] - Width for horizontal dividers (any valid CSS dimension)
- * @param {string | number} [props.height] - Height for vertical dividers (any valid CSS dimension)
- * @param {string} [props.className] - Custom CSS class name
- * @param {Object} [props.style] - Custom inline styles
+ * Props:
+ *   orientation  'horizontal' | 'vertical'  (default 'horizontal')
+ *   thickness    px height (horiz) or px width (vert)  (default 4)
+ *   className    extra class string
+ *   style        inline style overrides
  */
-
 const Divider = ({
   orientation = 'horizontal',
-  width,
-  height,
-  thickness = 4,
-  className = '',
-  style = {},
+  thickness   = 4,
+  className   = '',
+  style       = {},
 }) => {
   const isHorizontal = orientation === 'horizontal';
 
-  const componentStyle = {
+  const rootStyle = {
     ...style,
-    ...(isHorizontal && width != null ? { width } : {}),
-    ...(!isHorizontal && height != null ? { height } : {}),
-    // enforce thickness on the cross‑axis
     ...(isHorizontal ? { height: thickness } : { width: thickness }),
   };
 
   return (
     <div
       className={`remochi-divider remochi-divider--${orientation} ${className}`}
-      style={componentStyle}
+      style={rootStyle}
     >
-      {/* Left / Top cap container */}
       <div
-        className={`divider-cap divider-cap-left divider-cap--${isHorizontal ? 'horizontal' : 'vertical'}`}
-      >
-        <div
-          className="divider-cap-layer divider-cap-layer--normal"
-          style={{ backgroundImage: `url('${capLeftImage}')` }}
-        />
-        <div
-          className="divider-cap-layer divider-cap-layer--flipped"
-          style={{ backgroundImage: `url('${capLeftImage}')` }}
-        />
-      </div>
-
-      {/* Middle repeating section */}
+        className="divider-cap divider-cap-left"
+        style={{ backgroundImage: `url('${capLeftImage}')` }}
+      />
       <div
-        className={`divider-middle divider-middle--${orientation}`}
-      >
-        <div
-          className="divider-middle-layer divider-middle-layer--normal"
-          style={{ backgroundImage: `url('${middleImage}')` }}
-        />
-        <div
-          className="divider-middle-layer divider-middle-layer--flipped"
-          style={{ backgroundImage: `url('${middleImage}')` }}
-        />
-      </div>
-
-      {/* Right / Bottom cap container */}
-      <div
-        className={`divider-cap divider-cap-right divider-cap--${isHorizontal ? 'horizontal' : 'vertical'}`}
-      >
-        <div
-          className="divider-cap-layer divider-cap-layer--normal"
-          style={{ backgroundImage: `url('${capRightImage}')` }}
-        />
-        <div
-          className="divider-cap-layer divider-cap-layer--flipped"
-          style={{ backgroundImage: `url('${capRightImage}')` }}
-        />
-      </div>
+        className="divider-cap divider-cap-right"
+        style={{ backgroundImage: `url('${capRightImage}')` }}
+      />
     </div>
   );
 };
