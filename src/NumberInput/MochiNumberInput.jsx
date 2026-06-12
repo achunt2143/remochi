@@ -1,83 +1,108 @@
 // MochiNumberInput.jsx
+// Composes MochiButton + MochiInput — no custom stylesheet needed.
 import React, { useState, useEffect } from 'react';
-import './MochiNumberInput.scss';
+import { MochiButton } from '../Button/MochiButton';
+import { MochiInput }  from '../Input/MochiInput';
+
+// Hide the browser’s native number-input spin arrows; we provide our own
+const noSpinStyle = {
+  MozAppearance:    'textfield',
+  WebkitAppearance: 'none',
+  appearance:       'none',
+  textAlign:        'center',
+  width:            '80px',
+  marginRight:      0,       // override MochiInput’s default right margin
+};
 
 const MochiNumberInput = ({
-  value = 0,
+  value    = 0,
   onChange,
   min,
   max,
-  step = 1,
+  step       = 1,
   label,
   unit,
-  disabled = false,
+  disabled   = false,
   showControls = true,
-  className = ''
+  className  = '',
 }) => {
-  const [localValue, setLocalValue] = useState(value);
+  const [local, setLocal] = useState(Number(value));
 
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
+  useEffect(() => { setLocal(Number(value)); }, [value]);
 
-  const handleIncrement = () => {
-    const newValue = localValue + step;
-    if (max === undefined || newValue <= max) {
-      setLocalValue(newValue);
-      if (onChange) onChange(newValue);
-    }
+  const commit = (next) => {
+    setLocal(next);
+    onChange?.(next);
   };
 
-  const handleDecrement = () => {
-    const newValue = localValue - step;
-    if (min === undefined || newValue >= min) {
-      setLocalValue(newValue);
-      if (onChange) onChange(newValue);
-    }
+  const decrement = () => {
+    const next = local - step;
+    if (min === undefined || next >= min) commit(next);
   };
 
-  const handleInputChange = (e) => {
-    const newValue = parseFloat(e.target.value);
-    if (!isNaN(newValue)) {
-      if ((min === undefined || newValue >= min) && (max === undefined || newValue <= max)) {
-        setLocalValue(newValue);
-        if (onChange) onChange(newValue);
-      }
-    }
+  const increment = () => {
+    const next = local + step;
+    if (max === undefined || next <= max) commit(next);
   };
+
+  const handleChange = (e) => {
+    const next = parseFloat(e.target.value);
+    if (isNaN(next)) return;
+    if ((min === undefined || next >= min) && (max === undefined || next <= max)) commit(next);
+  };
+
+  const atMin = min !== undefined && local <= min;
+  const atMax = max !== undefined && local >= max;
 
   return (
-    <div className={`mochi-number-input ${className}`}>
-      {label && <label className="mochi-number-input-label">{label}</label>}
-      <div className="mochi-number-input-wrapper">
+    <div
+      className={className}
+      style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px' }}
+    >
+      {label && (
+        <label style={{ fontSize: '0.9rem', color: 'var(--mochi-text-muted, #888)' }}>
+          {label}
+        </label>
+      )}
+
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
         {showControls && (
-          <button
-            className="mochi-number-input-btn"
-            onClick={handleDecrement}
-            disabled={disabled || (min !== undefined && localValue <= min)}
+          <MochiButton
+            type={disabled || atMin ? 'disabled' : 'normal'}
+            onClick={decrement}
+            disabled={disabled || atMin}
+            aria-label="Decrement"
           >
             −
-          </button>
+          </MochiButton>
         )}
-        <input
+
+        <MochiInput
           type="number"
-          className="mochi-number-input-field"
-          value={localValue}
-          onChange={handleInputChange}
+          value={local}
+          onChange={handleChange}
           disabled={disabled}
           min={min}
           max={max}
           step={step}
+          style={noSpinStyle}
         />
-        {unit && <span className="mochi-number-input-unit">{unit}</span>}
+
+        {unit && (
+          <span style={{ color: 'var(--mochi-text-muted, #888)', fontSize: '0.9rem' }}>
+            {unit}
+          </span>
+        )}
+
         {showControls && (
-          <button
-            className="mochi-number-input-btn"
-            onClick={handleIncrement}
-            disabled={disabled || (max !== undefined && localValue >= max)}
+          <MochiButton
+            type={disabled || atMax ? 'disabled' : 'normal'}
+            onClick={increment}
+            disabled={disabled || atMax}
+            aria-label="Increment"
           >
             +
-          </button>
+          </MochiButton>
         )}
       </div>
     </div>
