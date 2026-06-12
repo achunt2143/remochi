@@ -1,29 +1,28 @@
-/* Mochi Checkbox Component - Preserved CSS from original */
+/* Mochi Checkbox Component */
 
 .mochi-checkbox {
   cursor: pointer;
   height: 22px;
   width: 22px;
-  margin: 0px;
+  margin: 0;
   display: inline-block;
   vertical-align: middle;
-  border-radius: 13px;
-  border: 2px solid #646464;
+  border-radius: 6px;
+  border: 2px solid var(--mochi-text-muted, #646464);
   position: relative;
-  transition: background-color 0.1s linear;
+  transition: background-color 0.1s linear, border-color 0.15s ease;
+  background: var(--mochi-surface, #fff);
 
   &.mochi-checkbox-animate {
-    -webkit-transition: background-color 0.1s linear;
-    -moz-transition: background-color 0.1s linear;
-    -o-transition: background-color 0.1s linear;
-    transition: background-color 0.1s linear;
+    transition: background-color 0.1s linear, border-color 0.15s ease;
   }
 
   &.checked {
-    border: 2px solid #646464;
-    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>") no-repeat center;
+    border-color: var(--mochi-primary, #5b9dd9);
+    background: var(--mochi-primary-soft, rgba(91,157,217,0.15))
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b9dd9' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>")
+      no-repeat center;
     background-size: 16px;
-    padding: 2px;
   }
 
   &.disabled {
@@ -38,16 +37,16 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #333;
+    color: var(--mochi-primary, #5b9dd9);
     pointer-events: none;
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 184, 13, 0.3);
+    box-shadow: 0 0 0 3px var(--mochi-primary-soft, rgba(91,157,217,0.3));
   }
 
   &:hover:not(.disabled) {
-    border-color: #ffb80d;
+    border-color: var(--mochi-primary, #5b9dd9);
   }
 }
