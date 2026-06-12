@@ -1,12 +1,12 @@
 /* MochiMenu — contextual popup used by MochiDropdown */
 
 // Full-screen transparent overlay (autoDismiss tap target)
-.mochi-menu-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  background: transparent;
-}
+// .mochi-menu-overlay {
+//   position: fixed;
+//   inset: 0;
+//   z-index: 999;
+//   background: transparent;
+// }
 
 // Suppress nubbin — menus never have a nubbin arrow
 .mochi-contextual-popup.mochi-menu::after {

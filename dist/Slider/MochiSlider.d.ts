@@ -1,6 +1,6 @@
-export function MochiSlider({ value, color, width, min, max, step, onChange }: {
+export function MochiSlider({ value, color, width, min, max, step, onChange, }: {
     value?: number | undefined;
-    color?: string | undefined;
+    color: any;
     width?: string | undefined;
     min?: number | undefined;
     max?: number | undefined;

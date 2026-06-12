@@ -80,7 +80,7 @@ const MochiMenu = ({
   return createPortal(
     <>
       {/* Transparent overlay — click outside to close */}
-      <div className="mochi-menu-overlay" onClick={onClose} />
+      {/* <div className="mochi-menu-overlay" onClick={onClose} /> */}
 
       {/* Panel reuses the same styled-component as MochiPopupPanel:
           bg, border, border-radius, box-shadow, fadeIn animation.

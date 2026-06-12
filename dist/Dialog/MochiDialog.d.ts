@@ -1,5 +1,5 @@
 export default MochiDialog;
-declare function MochiDialog({ isOpen, onClose, title, children, type, onConfirm, onCancel, confirmText, cancelText, showCloseButton, size, className, promptValue, onPromptChange }: {
+declare function MochiDialog({ isOpen, onClose, title, children, type, onConfirm, onCancel, confirmText, cancelText, showCloseButton, size, className, promptValue, onPromptChange, actions, }: {
     isOpen?: boolean | undefined;
     onClose: any;
     title: any;
@@ -14,4 +14,5 @@ declare function MochiDialog({ isOpen, onClose, title, children, type, onConfirm
     className?: string | undefined;
     promptValue?: string | undefined;
     onPromptChange: any;
+    actions: any;
 }): any;

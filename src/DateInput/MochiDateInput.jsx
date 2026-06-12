@@ -1,5 +1,5 @@
 // MochiDateInput.jsx
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { MochiInput }      from '../Input/MochiInput';
 import { MochiButton }     from '../Button/MochiButton';
 import { MochiPopupPanel } from '../Popup/MochiPopupPanel';
@@ -135,6 +135,7 @@ const MochiDateInput = ({
   // Pass the DOM ref directly — PopupPanel reads a fresh getBoundingClientRect()
   // each time it computes position, so there's no stale-snapshot problem.
   const triggerRef = useRef(null);
+  const [anchorRect, setAnchorRect] = useState(null);
 
   const open  = useCallback(() => { if (!disabled) setIsOpen(true);  }, [disabled]);
   const close = useCallback(() => setIsOpen(false), []);
@@ -144,6 +145,12 @@ const MochiDateInput = ({
     onChange?.(date);
     close();
   };
+
+  useEffect(() => {
+    if (triggerRef.current) {
+      setAnchorRect(triggerRef.current.getBoundingClientRect());
+    }
+  }, []);
 
   const displayValue = selected ? formatDisplay(selected) : '';
 
@@ -171,6 +178,7 @@ const MochiDateInput = ({
       <MochiPopupPanel
         isOpen={isOpen}
         anchorEl={triggerRef}
+        anchorRect={anchorRect}
         onClose={close}
         title="Select a date"
       >

@@ -1,5 +1,5 @@
 export default MochiPagination;
-declare function MochiPagination({ currentPage, totalPages, onPageChange, showFirstLast, showPrevNext, maxVisible, className }: {
+declare function MochiPagination({ currentPage, totalPages, onPageChange, showFirstLast, showPrevNext, maxVisible, className, }: {
     currentPage?: number | undefined;
     totalPages?: number | undefined;
     onPageChange: any;

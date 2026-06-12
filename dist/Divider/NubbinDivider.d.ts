@@ -1,11 +1,9 @@
-export function NubbinDivider({ orientation, side, color, thickness, notchRadius, fadeSize, length, crossSize, className, }: {
+export default NubbinDivider;
+declare function NubbinDivider({ nubbin, nubbinOffset, orientation, thickness, className, style, }: {
+    nubbin?: string | undefined;
+    nubbinOffset?: string | undefined;
     orientation?: string | undefined;
-    side: any;
-    color?: string | undefined;
     thickness?: number | undefined;
-    notchRadius?: number | undefined;
-    fadeSize?: number | undefined;
-    length?: string | undefined;
-    crossSize?: number | undefined;
     className?: string | undefined;
+    style?: {} | undefined;
 }): any;

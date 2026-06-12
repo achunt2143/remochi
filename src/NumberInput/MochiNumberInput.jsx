@@ -78,7 +78,7 @@ const MochiNumberInput = ({
         )}
 
         <MochiInput
-          type="number"
+          // type="number"
           value={local}
           onChange={handleChange}
           disabled={disabled}

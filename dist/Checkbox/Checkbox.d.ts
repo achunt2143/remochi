@@ -1,21 +1,21 @@
 export default Checkbox;
 /**
- * Mochi Checkbox React Component
+ * Mochi Checkbox
  *
- * A checkbox that shows or hides a check mark when clicked.
- * Fires onChange event when toggled. Supports animation, theming, and disabled state.
+ * A box that shows or hides a check mark when clicked.
+ * Fires onChange when toggled. Use `checked` prop to read state externally.
  *
  * Props:
- *   - checked: Boolean for checked state (default: false)
- *   - onChange: Callback function fired when checkbox is toggled
- *   - disabled: Boolean to disable the checkbox (default: false)
- *   - canAnimate: Boolean to enable transition animation (default: true)
- *   - colorActive: CSS color when checked (default: '#ffb80d')
- *   - colorInactive: CSS color when unchecked (default: '#fff')
- *   - colorActiveDisabled: CSS color when checked and disabled (default: '#ffb80d')
- *   - colorInactiveDisabled: CSS color when unchecked and disabled (default: '#fff')
+ *   checked            {boolean}  Controlled checked state (default: false)
+ *   onChange           {Function} Called with { checked, value } on toggle
+ *   disabled           {boolean}  Disables interaction (default: false)
+ *   canAnimate         {boolean}  Animate background-color transition (default: true)
+ *   colorActive        {string}   Background when checked (default: '#ffb80d')
+ *   colorInactive      {string}   Background when unchecked (default: '#fff')
+ *   colorActiveDisabled   {string}   Background when checked + disabled (default: '#ffb80d')
+ *   colorInactiveDisabled {string}   Background when unchecked + disabled (default: '#fff')
  */
-declare function Checkbox({ checked, onChange, disabled, canAnimate, colorActive, colorInactive, colorActiveDisabled, colorInactiveDisabled }: {
+declare function Checkbox({ checked, onChange, disabled, canAnimate, colorActive, colorInactive, colorActiveDisabled, colorInactiveDisabled, }: {
     checked?: boolean | undefined;
     onChange?: (() => void) | undefined;
     disabled?: boolean | undefined;

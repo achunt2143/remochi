@@ -1,5 +1,5 @@
 export default MochiNumberInput;
-declare function MochiNumberInput({ value, onChange, min, max, step, label, unit, disabled, showControls, className }: {
+declare function MochiNumberInput({ value, onChange, min, max, step, label, unit, disabled, showControls, className, }: {
     value?: number | undefined;
     onChange: any;
     min: any;

@@ -1,5 +1,5 @@
 export default MochiDateInput;
-declare function MochiDateInput({ value, onChange, label, placeholder, minDate, maxDate, disabled, className }: {
+declare function MochiDateInput({ value, onChange, label, placeholder, minDate, maxDate, disabled, className, }: {
     value: any;
     onChange: any;
     label: any;

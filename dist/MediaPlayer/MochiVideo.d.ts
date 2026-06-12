@@ -1,5 +1,5 @@
 export default MochiVideo;
-declare function MochiVideo({ src, poster, autoPlay, loop, muted, controls, className, onPlay, onPause, onEnded, onTimeUpdate }: {
+declare function MochiVideo({ src, poster, autoPlay, loop, muted, controls, className, onPlay, onPause, onEnded, onTimeUpdate, }: {
     src: any;
     poster: any;
     autoPlay?: boolean | undefined;

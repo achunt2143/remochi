@@ -1,23 +1,20 @@
 export default Divider;
 /**
- * Divider Component - Scalable divider with fade caps and repeating middle
+ * Divider
  *
- * Supports both horizontal and vertical orientations with automatic
- * stretching and no size constraints. The middle section repeats as needed,
- * while the left/right or top/bottom caps remain fixed size.
+ * Two-cap divider: the left cap fills the left half, the right cap fills the
+ * right half, and they meet seamlessly in the centre. No repeating middle
+ * section. Both caps stretch to cover their half via background-size: 100% 100%.
  *
- * @component
- * @param {Object} props - Component props
- * @param {'horizontal' | 'vertical'} [props.orientation='horizontal'] - Orientation of the divider
- * @param {string | number} [props.width] - Width for horizontal dividers (any valid CSS dimension)
- * @param {string | number} [props.height] - Height for vertical dividers (any valid CSS dimension)
- * @param {string} [props.className] - Custom CSS class name
- * @param {Object} [props.style] - Custom inline styles
+ * Props:
+ *   orientation  'horizontal' | 'vertical'  (default 'horizontal')
+ *   thickness    px height (horiz) or px width (vert)  (default 4)
+ *   className    extra class string
+ *   style        inline style overrides
  */
-declare function Divider({ orientation, width, height, thickness, className, style, }: {
-    orientation?: "horizontal" | "vertical" | undefined;
-    width?: string | number | undefined;
-    height?: string | number | undefined;
+declare function Divider({ orientation, thickness, className, style, }: {
+    orientation?: string | undefined;
+    thickness?: number | undefined;
     className?: string | undefined;
-    style?: Object | undefined;
+    style?: {} | undefined;
 }): any;
