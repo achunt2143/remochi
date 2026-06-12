@@ -2,70 +2,63 @@
  * MochiMenu — lightweight contextual popup for menus
  *
  * Mirrors mochi.Menu (extends mochi.ContextualPopup):
- * - Renders into a Portal (document.body) so z-index/overflow never clips it
- * - Uses .mochi-contextual-popup CSS classes for the pill-border style
+ * - Renders into a Portal (document.body), position: fixed
  * - Positions below activator by default; flips above if viewport is tight
- * - maxHeight + overflow-y scroll (default 200px, mirrors mochi.Menu.maxHeight)
+ * - maxHeight + overflow-y scroll (default 200px)
  * - Modal: click outside closes the menu
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import './MochiMenu.scss';
 
-const MARGIN    = 4;   // gap between activator and menu
-const MAX_H_DEFAULT = 200;
+const MARGIN = 4; // px gap between activator bottom and menu top
 
 const MochiMenu = ({
   isOpen,
-  anchorEl,          // ref or DOM element for the activator
+  anchorEl,   // React ref whose .current is the trigger DOM node
   onClose,
-  maxHeight = MAX_H_DEFAULT,
+  maxHeight = 200,
   children,
 }) => {
-  const menuRef  = useRef(null);
-  const [style, setStyle]   = useState({});
-  const [menuUp, setMenuUp] = useState(false);
+  const menuRef = useRef(null);
+  // Start invisible so there's no flash at 0,0 before we measure
+  const [style, setStyle] = useState({ visibility: 'hidden' });
 
-  // mirrors adjustPosition / getPageOffset from mochi.Menu
+  // position: fixed — coords come straight from getBoundingClientRect (viewport-relative)
+  // NO scroll offsets needed
   const adjustPosition = useCallback(() => {
     const anchor = anchorEl?.current ?? anchorEl;
     if (!anchor || !menuRef.current) return;
 
-    const r         = anchor.getBoundingClientRect();
-    const scrollY   = window.pageYOffset ?? document.documentElement.scrollTop;
-    const scrollX   = window.pageXOffset ?? document.documentElement.scrollLeft;
-    const innerH    = window.innerHeight ?? document.documentElement.clientHeight;
-    const innerW    = window.innerWidth  ?? document.documentElement.clientWidth;
-    const menuH     = menuRef.current.offsetHeight;
-    const menuW     = menuRef.current.offsetWidth;
+    const r      = anchor.getBoundingClientRect();
+    const innerH = window.innerHeight  || document.documentElement.clientHeight;
+    const innerW = window.innerWidth   || document.documentElement.clientWidth;
+    const menuH  = menuRef.current.offsetHeight;
+    const menuW  = menuRef.current.offsetWidth;
 
-    // Decide: show above or below?
-    const spaceBelow = innerH - (r.bottom);
+    // Flip above when not enough room below and more room above
+    const spaceBelow = innerH - r.bottom;
     const spaceAbove = r.top;
-    const up = (r.top + r.height + menuH > innerH) && (spaceAbove > spaceBelow);
-    setMenuUp(up);
+    const up = spaceBelow < menuH + MARGIN && spaceAbove > spaceBelow;
 
-    let top  = up
-      ? r.top  + scrollY - menuH - MARGIN
-      : r.bottom + scrollY + MARGIN;
+    const top  = up ? r.top - menuH - MARGIN : r.bottom + MARGIN;
 
-    // Horizontal: align left edge to activator, clamp to viewport
-    let left = r.left + scrollX;
-    if (left + menuW > innerW - MARGIN) left = innerW - menuW - MARGIN + scrollX;
+    // Align left edge to activator, clamp to viewport
+    let left = r.left;
+    const minWidth = Math.max(r.width, 150);
+    if (left + minWidth > innerW - MARGIN) left = Math.max(MARGIN, innerW - minWidth - MARGIN);
     if (left < MARGIN) left = MARGIN;
 
-    // Width: at least as wide as the activator
-    const width = Math.max(r.width, 150);
-
-    setStyle({ top, left, width, maxHeight });
+    setStyle({ top, left, width: minWidth, maxHeight, visibility: 'visible' });
   }, [anchorEl, maxHeight]);
 
   useEffect(() => {
     if (!isOpen) return;
-    // Use rAF so the menu has rendered and has measurable dimensions
+    // Hide again when re-opening so stale position isn't briefly visible
+    setStyle({ visibility: 'hidden' });
     const frame = requestAnimationFrame(() => adjustPosition());
-    window.addEventListener('resize', adjustPosition);
-    window.addEventListener('scroll', adjustPosition, true);
+    window.addEventListener('resize',  adjustPosition);
+    window.addEventListener('scroll',  adjustPosition, true);
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', adjustPosition);
@@ -85,16 +78,20 @@ const MochiMenu = ({
 
   return createPortal(
     <>
-      {/* Transparent modal overlay — click outside closes */}
+      {/* Transparent overlay — click outside to close */}
       <div className="mochi-menu-overlay" onClick={onClose} />
 
       <div
         ref={menuRef}
-        className={`mochi-contextual-popup mochi-menu vertical ${menuUp ? 'above' : 'below'}`}
+        className="mochi-contextual-popup mochi-menu"
         style={style}
-        role="menu"
+        role="listbox"
       >
-        <div className="mochi-menu-scroller" style={{ maxHeight, overflowY: 'auto' }}>
+        {/* Scrollable item list */}
+        <div
+          className="mochi-menu-scroller"
+          style={{ maxHeight, overflowY: 'auto' }}
+        >
           {children}
         </div>
       </div>
