@@ -1,5 +1,7 @@
 // MochiDialog.jsx
-import React, { useEffect, useRef } from 'react';
+// webOS-inspired bottom-sheet dialog.
+// Renders via React portal into document.body so no parent context can clip it.
+import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import './MochiDialog.scss';
 import { Button as MochiButton } from '../Button';
@@ -9,26 +11,25 @@ const MochiDialog = ({
   onClose,
   title,
   children,
-  type = 'default', // 'default', 'alert', 'confirm', 'prompt'
+  type = 'default',       // 'default' | 'alert' | 'confirm' | 'prompt'
   onConfirm,
   onCancel,
   confirmText = 'OK',
   cancelText = 'Cancel',
   showCloseButton = true,
-  size = 'medium', // 'small', 'medium', 'large'
+  size = 'medium',        // 'small' | 'medium' | 'large'
   className = '',
   promptValue = '',
   onPromptChange,
-  // Custom actions array: [{ label, onClick, type? }]
+  // Custom actions: [{ label, onClick, type? }]
   actions,
 }) => {
   const dialogRef = useRef(null);
 
+  // Keyboard + scroll-lock management
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen && onClose) {
-        onClose();
-      }
+      if (e.key === 'Escape' && isOpen && onClose) onClose();
     };
 
     if (isOpen) {
@@ -42,34 +43,33 @@ const MochiDialog = ({
     };
   }, [isOpen, onClose]);
 
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget && onClose) {
-      onClose();
+  // Focus trap: move focus into dialog when opened
+  useEffect(() => {
+    if (isOpen && dialogRef.current) {
+      const focusable = dialogRef.current.querySelector(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      focusable?.focus();
     }
-  };
+  }, [isOpen]);
 
-  const handleConfirm = () => {
-    if (onConfirm) {
-      onConfirm(type === 'prompt' ? promptValue : true);
-    }
-    if (onClose) {
-      onClose();
-    }
-  };
+  const handleOverlayClick = useCallback((e) => {
+    if (e.target === e.currentTarget && onClose) onClose();
+  }, [onClose]);
 
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    }
-    if (onClose) {
-      onClose();
-    }
-  };
+  const handleConfirm = useCallback(() => {
+    onConfirm?.(type === 'prompt' ? promptValue : true);
+    onClose?.();
+  }, [onConfirm, onClose, type, promptValue]);
 
-  // Determine which action bar to render
+  const handleCancel = useCallback(() => {
+    onCancel?.();
+    onClose?.();
+  }, [onCancel, onClose]);
+
   const renderActions = () => {
-    // Custom actions array takes priority
-    if (actions && actions.length > 0) {
+    // Custom actions array takes priority over type-based defaults
+    if (actions?.length) {
       return (
         <div className="mochi-dialog-actions">
           {actions.map((action, i) => (
@@ -85,7 +85,6 @@ const MochiDialog = ({
       );
     }
 
-    // Built-in action types
     if (type === 'alert') {
       return (
         <div className="mochi-dialog-actions">
@@ -108,16 +107,17 @@ const MochiDialog = ({
 
   const dialog = (
     <div
-      className={`mochi-dialog-overlay ${isOpen ? 'open' : ''}`}
+      className={`mochi-dialog-overlay${isOpen ? ' open' : ''}`}
       onClick={handleOverlayClick}
       aria-hidden={!isOpen}
     >
       <div
         ref={dialogRef}
-        className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type} ${className}`}
+        className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type}${className ? ` ${className}` : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="mochi-dialog-title"
+        aria-labelledby={title ? 'mochi-dialog-title' : undefined}
+        tabIndex={-1}
       >
         {title && (
           <div className="mochi-dialog-header">
@@ -128,7 +128,7 @@ const MochiDialog = ({
                 onClick={onClose}
                 aria-label="Close dialog"
               >
-                ×
+                &times;
               </button>
             )}
           </div>
@@ -142,7 +142,7 @@ const MochiDialog = ({
                 type="text"
                 className="mochi-dialog-prompt-input"
                 value={promptValue}
-                onChange={(e) => onPromptChange && onPromptChange(e.target.value)}
+                onChange={(e) => onPromptChange?.(e.target.value)}
                 autoFocus
               />
             </>
@@ -156,7 +156,6 @@ const MochiDialog = ({
     </div>
   );
 
-  // Render into document.body via portal so no parent transform/overflow can clip it
   return createPortal(dialog, document.body);
 };
 
