@@ -1,159 +1,134 @@
 // MochiVideo.jsx
 import React, { useState, useRef, useEffect } from 'react';
+import { MochiButton } from '../Button/MochiButton';
+import { MochiSlider } from '../Slider/MochiSlider';
+import {
+  FaPlay, FaPause,
+  FaVolumeUp, FaVolumeDown, FaVolumeMute,
+  FaExpand, FaCompress,
+} from 'react-icons/fa';
 import './MochiVideo.scss';
+
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
 
 const MochiVideo = ({
   src,
   poster,
-  autoPlay = false,
-  loop = false,
-  muted = false,
-  controls = true,
+  autoPlay  = false,
+  loop      = false,
+  muted     = false,
+  controls  = true,
   className = '',
   onPlay,
   onPause,
   onEnded,
-  onTimeUpdate
+  onTimeUpdate,
 }) => {
-  const videoRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(muted);
-  const [showControls, setShowControls] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const controlsTimeoutRef = useRef(null);
+  const videoRef          = useRef(null);
+  const controlsTimeout  = useRef(null);
 
+  const [isPlaying,     setIsPlaying]     = useState(false);
+  const [currentTime,   setCurrentTime]   = useState(0);
+  const [duration,      setDuration]      = useState(0);
+  const [volume,        setVolume]        = useState(1);
+  const [isMuted,       setIsMuted]       = useState(muted);
+  const [showControls,  setShowControls]  = useState(false);
+  const [isFullscreen,  setIsFullscreen]  = useState(false);
+
+  // ── video event wiring ───────────────────────────────────────────────────
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const v = videoRef.current;
+    if (!v) return;
 
-    const handleLoadedMetadata = () => {
-      setDuration(video.duration);
-    };
+    const onMeta    = () => setDuration(v.duration);
+    const onTime    = () => { setCurrentTime(v.currentTime); onTimeUpdate?.(v.currentTime); };
+    const onPlayEvt = () => { setIsPlaying(true);  onPlay?.(); };
+    const onPauseEvt= () => { setIsPlaying(false); onPause?.(); };
+    const onEndEvt  = () => { setIsPlaying(false); onEnded?.(); };
+    const onFS      = () => setIsFullscreen(!!document.fullscreenElement);
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(video.currentTime);
-      if (onTimeUpdate) {
-        onTimeUpdate(video.currentTime);
-      }
-    };
-
-    const handlePlay = () => {
-      setIsPlaying(true);
-      if (onPlay) onPlay();
-    };
-
-    const handlePause = () => {
-      setIsPlaying(false);
-      if (onPause) onPause();
-    };
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      if (onEnded) onEnded();
-    };
-
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('play', handlePlay);
-    video.addEventListener('pause', handlePause);
-    video.addEventListener('ended', handleEnded);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    v.addEventListener('loadedmetadata', onMeta);
+    v.addEventListener('timeupdate',     onTime);
+    v.addEventListener('play',           onPlayEvt);
+    v.addEventListener('pause',          onPauseEvt);
+    v.addEventListener('ended',          onEndEvt);
+    document.addEventListener('fullscreenchange', onFS);
 
     return () => {
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('play', handlePlay);
-      video.removeEventListener('pause', handlePause);
-      video.removeEventListener('ended', handleEnded);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      v.removeEventListener('loadedmetadata', onMeta);
+      v.removeEventListener('timeupdate',     onTime);
+      v.removeEventListener('play',           onPlayEvt);
+      v.removeEventListener('pause',          onPauseEvt);
+      v.removeEventListener('ended',          onEndEvt);
+      document.removeEventListener('fullscreenchange', onFS);
     };
   }, [onPlay, onPause, onEnded, onTimeUpdate]);
 
+  // ── control handlers ─────────────────────────────────────────────────────
   const handlePlayPause = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (isPlaying) {
-      video.pause();
-    } else {
-      video.play();
-    }
+    const v = videoRef.current;
+    if (!v) return;
+    isPlaying ? v.pause() : v.play();
   };
 
-  const handleSeek = (e) => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    video.currentTime = percent * duration;
+  // MochiSlider reports value in the same units as min/max, so for the
+  // timeline slider that means seconds directly.
+  const handleSeek = (val) => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = val;
+    setCurrentTime(val);
   };
 
-  const handleVolumeChange = (e) => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    video.volume = newVolume;
-    setIsMuted(newVolume === 0);
+  const handleVolumeChange = (val) => {
+    const v = videoRef.current;
+    if (!v) return;
+    const norm = val / 100;        // MochiSlider default range is 0-100
+    setVolume(norm);
+    v.volume = norm;
+    setIsMuted(norm === 0);
   };
 
   const handleMuteToggle = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const newMuted = !isMuted;
-    setIsMuted(newMuted);
-    video.muted = newMuted;
+    const v = videoRef.current;
+    if (!v) return;
+    const next = !isMuted;
+    setIsMuted(next);
+    v.muted = next;
   };
 
   const handleFullscreen = () => {
     const container = videoRef.current?.parentElement;
     if (!container) return;
-
-    if (!isFullscreen) {
-      if (container.requestFullscreen) {
-        container.requestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
+    if (!isFullscreen) container.requestFullscreen?.();
+    else              document.exitFullscreen?.();
   };
 
-  const showControlsTemporarily = () => {
+  const revealControls = () => {
     setShowControls(true);
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
-    controlsTimeoutRef.current = setTimeout(() => {
-      if (isPlaying) {
-        setShowControls(false);
-      }
+    clearTimeout(controlsTimeout.current);
+    controlsTimeout.current = setTimeout(() => {
+      if (isPlaying) setShowControls(false);
     }, 3000);
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  // Volume icon selection
+  const VolumeIcon = isMuted || volume === 0
+    ? FaVolumeMute
+    : volume < 0.5
+      ? FaVolumeDown
+      : FaVolumeUp;
 
   return (
     <div
       className={`mochi-video-container ${className} ${isFullscreen ? 'fullscreen' : ''}`}
-      onMouseMove={showControlsTemporarily}
+      onMouseMove={revealControls}
       onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
+      onMouseLeave={() => !isPlaying && setShowControls(false)}
     >
       <video
         ref={videoRef}
@@ -168,50 +143,63 @@ const MochiVideo = ({
 
       {controls && (
         <div className={`mochi-video-controls ${showControls || !isPlaying ? 'visible' : ''}`}>
-          <button
-            className="mochi-video-play-btn"
+
+          {/* ── Play / Pause ── */}
+          <MochiButton
+            className="mochi-video-btn"
             onClick={handlePlayPause}
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
-            {isPlaying ? '⏸' : '▶'}
-          </button>
+            {isPlaying ? <FaPause /> : <FaPlay />}
+          </MochiButton>
 
-          <div className="mochi-video-timeline" onClick={handleSeek}>
-            <div
-              className="mochi-video-timeline-progress"
-              style={{ width: `${(currentTime / duration) * 100}%` }}
+          {/* ── Seek timeline ── */}
+          <div className="mochi-video-timeline">
+            <MochiSlider
+              value={currentTime}
+              min={0}
+              max={duration || 1}
+              step={0.5}
+              width="100%"
+              onChange={handleSeek}
             />
           </div>
 
+          {/* ── Time readout ── */}
           <span className="mochi-video-time">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
 
-          <button
-            className="mochi-video-mute-btn"
+          {/* ── Mute toggle ── */}
+          <MochiButton
+            className="mochi-video-btn"
             onClick={handleMuteToggle}
             aria-label={isMuted ? 'Unmute' : 'Mute'}
           >
-            {isMuted || volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊'}
-          </button>
+            <VolumeIcon />
+          </MochiButton>
 
-          <input
-            type="range"
-            className="mochi-video-volume"
-            min="0"
-            max="1"
-            step="0.1"
-            value={volume}
-            onChange={handleVolumeChange}
-          />
+          {/* ── Volume slider ── */}
+          <div className="mochi-video-volume">
+            <MochiSlider
+              value={Math.round(volume * 100)}
+              min={0}
+              max={100}
+              step={1}
+              width="80px"
+              onChange={handleVolumeChange}
+            />
+          </div>
 
-          <button
-            className="mochi-video-fullscreen-btn"
+          {/* ── Fullscreen ── */}
+          <MochiButton
+            className="mochi-video-btn"
             onClick={handleFullscreen}
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           >
-            {isFullscreen ? '⊡' : '⊞'}
-          </button>
+            {isFullscreen ? <FaCompress /> : <FaExpand />}
+          </MochiButton>
+
         </div>
       )}
     </div>
