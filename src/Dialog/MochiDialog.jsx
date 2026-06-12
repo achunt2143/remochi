@@ -1,5 +1,6 @@
 // MochiDialog.jsx
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './MochiDialog.scss';
 import { Button as MochiButton } from '../Button';
 
@@ -17,7 +18,9 @@ const MochiDialog = ({
   size = 'medium', // 'small', 'medium', 'large'
   className = '',
   promptValue = '',
-  onPromptChange
+  onPromptChange,
+  // Custom actions array: [{ label, onClick, type? }]
+  actions,
 }) => {
   const dialogRef = useRef(null);
 
@@ -35,11 +38,9 @@ const MochiDialog = ({
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
-
-  // if (!isOpen) return null;
 
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget && onClose) {
@@ -65,23 +66,64 @@ const MochiDialog = ({
     }
   };
 
-  return (
-    <div 
+  // Determine which action bar to render
+  const renderActions = () => {
+    // Custom actions array takes priority
+    if (actions && actions.length > 0) {
+      return (
+        <div className="mochi-dialog-actions">
+          {actions.map((action, i) => (
+            <MochiButton
+              key={i}
+              type={action.type || 'normal'}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </MochiButton>
+          ))}
+        </div>
+      );
+    }
+
+    // Built-in action types
+    if (type === 'alert') {
+      return (
+        <div className="mochi-dialog-actions">
+          <MochiButton onClick={handleConfirm}>{confirmText}</MochiButton>
+        </div>
+      );
+    }
+
+    if (type === 'confirm' || type === 'prompt') {
+      return (
+        <div className="mochi-dialog-actions">
+          <MochiButton type="warning" onClick={handleCancel}>{cancelText}</MochiButton>
+          <MochiButton onClick={handleConfirm}>{confirmText}</MochiButton>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const dialog = (
+    <div
       className={`mochi-dialog-overlay ${isOpen ? 'open' : ''}`}
       onClick={handleOverlayClick}
+      aria-hidden={!isOpen}
     >
-      <div 
+      <div
         ref={dialogRef}
         className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type} ${className}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="dialog-title"
+        aria-labelledby="mochi-dialog-title"
       >
         {title && (
           <div className="mochi-dialog-header">
-            <h2 id="dialog-title" className="mochi-dialog-title">{title}</h2>
+            <h2 id="mochi-dialog-title" className="mochi-dialog-title">{title}</h2>
             {showCloseButton && (
-              <button 
+              <button
                 className="mochi-dialog-close"
                 onClick={onClose}
                 aria-label="Close dialog"
@@ -109,23 +151,13 @@ const MochiDialog = ({
           )}
         </div>
 
-        {(type === 'alert' || type === 'confirm' || type === 'prompt') && (
-          <div className="mochi-dialog-actions">
-            {type === 'alert' ? (
-              <MochiButton onClick={handleConfirm}>{confirmText}</MochiButton>
-            ) : (
-              <>
-                <MochiButton variant="secondary" onClick={handleCancel}>
-                  {cancelText}
-                </MochiButton>
-                <MochiButton onClick={handleConfirm}>{confirmText}</MochiButton>
-              </>
-            )}
-          </div>
-        )}
+        {renderActions()}
       </div>
     </div>
   );
+
+  // Render into document.body via portal so no parent transform/overflow can clip it
+  return createPortal(dialog, document.body);
 };
 
 export default MochiDialog;
