@@ -1,24 +1,21 @@
 // MochiDialog.scss
 .mochi-dialog-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity 0.3s ease, visibility 0.3s ease;
-  height: 98dvh;
 
   &.open {
     opacity: 1;
     visibility: visible;
-    height: 98dvh;
+    pointer-events: auto;
 
     .mochi-dialog {
       transform: scale(1);
@@ -32,8 +29,9 @@
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   padding: 0;
-  max-width: 90vw;
-  max-height: 90vh;
+  width: 500px;
+  max-width: min(90vw, 100%);
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   transform: scale(0.9);
@@ -58,13 +56,13 @@
     justify-content: space-between;
     padding: 20px 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
   }
 
   &-title {
     margin: 0;
     font-size: 20px;
     font-weight: 600;
-    // color: #fff;
   }
 
   &-close {
@@ -81,10 +79,10 @@
     justify-content: center;
     border-radius: 4px;
     transition: background-color 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
-      // color: #fff;
     }
   }
 
@@ -92,7 +90,6 @@
     padding: 24px;
     overflow-y: auto;
     flex: 1;
-    // color: #ccc;
     line-height: 1.6;
   }
 
@@ -106,7 +103,6 @@
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
-    // color: #fff;
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s ease, background-color 0.2s ease;
@@ -123,5 +119,6 @@
     justify-content: flex-end;
     padding: 16px 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
   }
 }
