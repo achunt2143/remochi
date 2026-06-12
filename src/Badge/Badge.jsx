@@ -1,33 +1,66 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import './Badge.scss';
+
+// Variant → background color map
+const VARIANT_COLORS = {
+  default: '#69cdff',
+  success: '#4caf50',
+  warning: '#ff9800',
+  error:   '#f44336',
+  danger:  '#f44336',
+  info:    '#2196f3',
+};
 
 /**
  * MochiBadge — faithful React port of mochi.Badge.
  *
+ * Supports two usage styles:
+ *
+ *   1. Variant label badge (demo style):
+ *      <Badge variant="success">Active</Badge>
+ *      <Badge count={7}>Notifications</Badge>
+ *
+ *   2. Legacy content prop:
+ *      <Badge content="42" />
+ *
  * Props:
- *   content    {string|number}  Text to display. Empty = hidden (transparent bg).
- *   background {string}         CSS color for background (default: '#69cdff').
- *   color      {string}         CSS color for text (default: '#ffffff').
+ *   children   {ReactNode}      Label text (takes priority over `content`)
+ *   content    {string|number}  Legacy: text to display
+ *   variant    {string}         'default'|'success'|'warning'|'error'|'danger'|'info'
+ *   count      {number}         If provided, renders a count pill after the label
+ *   background {string}         Override background color (overrides variant)
+ *   color      {string}         Text color (default: '#ffffff')
  */
-const Badge = ({ content = '', background = '#69cdff', color = '#ffffff' }) => {
-  const originalBackground = useRef(background);
+const Badge = ({
+  children,
+  content,
+  variant    = 'default',
+  count,
+  background,
+  color      = '#ffffff',
+}) => {
+  // Resolve label: children > content > empty
+  const label = children ?? (content !== undefined ? String(content) : '');
+  const isEmpty = label === '' && count === undefined;
 
-  useEffect(() => { originalBackground.current = background; }, [background]);
+  if (isEmpty) return null;
 
-  const isEmpty = content === '' || content === null || content === undefined;
-  const contentStr = isEmpty ? '' : content.toString();
-  const isOval = contentStr.length > 2;  // 3+ chars → oval, 1-2 → round circle
+  // Resolve background: explicit prop > variant map > default
+  const bg = background || VARIANT_COLORS[variant] || VARIANT_COLORS.default;
 
-  const displayBackground = isEmpty ? 'transparent' : background;
-  const innerClass = `mochi-badge-inner ${isOval ? 'oval' : 'round'}`;
+  const isOval = typeof label === 'string' && label.length > 2;
+  const innerClass = `mochi-badge-inner ${isOval || count !== undefined ? 'oval' : 'round'}`;
 
   return (
     <div className="mochi-badge">
       <div
         className={innerClass}
-        style={{ background: displayBackground, color }}
+        style={{ background: bg, color }}
       >
-        {contentStr}
+        {label}
+        {count !== undefined && (
+          <span className="mochi-badge-count">{count}</span>
+        )}
       </div>
     </div>
   );
