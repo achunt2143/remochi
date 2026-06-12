@@ -1,4 +1,4 @@
-// MochiNumberInput.scss
+// MochiNumberInput.scss — all colors from ThemeWrapper CSS variables
 .mochi-number-input {
   display: inline-block;
   width: 100%;
@@ -6,7 +6,7 @@
   &-label {
     display: block;
     margin-bottom: 8px;
-    color: #ccc;
+    color: var(--mochi-text-muted);
     font-size: 14px;
     font-weight: 500;
   }
@@ -20,18 +20,21 @@
   &-btn {
     width: 36px;
     height: 36px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--mochi-surface);
+    border: 1px solid var(--mochi-border);
     border-radius: 8px;
-    color: #5b9dd9;
+    color: var(--mochi-primary);
     font-size: 20px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover:not(:disabled) {
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-      border-color: #5b9dd9;
+      background: var(--mochi-hover);
+      border-color: var(--mochi-primary);
     }
 
     &:active:not(:disabled) {
@@ -47,18 +50,18 @@
   &-field {
     flex: 1;
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--mochi-surface);
+    border: 1px solid var(--mochi-border);
     border-radius: 8px;
-    color: #fff;
+    color: var(--mochi-text);
     font-size: 16px;
     text-align: center;
     outline: none;
     transition: all 0.2s ease;
 
     &:focus {
-      border-color: #5b9dd9;
-      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--mochi-primary);
+      background: var(--mochi-hover);
     }
 
     &:disabled {
@@ -78,7 +81,7 @@
   }
 
   &-unit {
-    color: #999;
+    color: var(--mochi-text-muted);
     font-size: 14px;
     white-space: nowrap;
   }

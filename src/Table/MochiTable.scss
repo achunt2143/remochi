@@ -1,24 +1,24 @@
-// MochiTable.scss
+// MochiTable.scss — all colors from ThemeWrapper CSS variables
 .mochi-table-container {
   width: 100%;
   overflow-x: auto;
-  background: linear-gradient(to bottom, #2a2a2a, #1a1a1a);
+  background: var(--mochi-surface);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--mochi-border);
 }
 
 .mochi-table {
   width: 100%;
   border-collapse: collapse;
-  color: #fff;
+  color: var(--mochi-text);
 
   &-header {
     padding: 12px 16px;
     text-align: left;
     font-weight: 600;
     font-size: 14px;
-    color: #999;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--mochi-text-muted);
+    border-bottom: 1px solid var(--mochi-border);
     -webkit-user-select: none;
     user-select: none;
 
@@ -27,12 +27,12 @@
       transition: background-color 0.2s ease;
 
       &:hover {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: var(--mochi-hover);
       }
     }
 
     &.active {
-      color: #5b9dd9;
+      color: var(--mochi-primary);
     }
 
     &-content {
@@ -44,13 +44,13 @@
 
   &-sort-indicator {
     font-size: 10px;
-    color: #5b9dd9;
+    color: var(--mochi-primary);
   }
 
   &-cell {
     padding: 12px 16px;
     font-size: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--mochi-border);
   }
 
   tbody tr {
@@ -62,10 +62,10 @@
   }
 
   &.hoverable tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--mochi-hover);
   }
 
   &.striped tbody tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: var(--mochi-stripe, var(--mochi-hover));
   }
 }
