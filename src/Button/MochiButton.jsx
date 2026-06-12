@@ -1,19 +1,21 @@
 import styled, { css, keyframes } from "styled-components";
 import { FaChevronDown } from "react-icons/fa";
 
+// Color map uses CSS vars with legacy hex fallbacks so the component works
+// even if rendered outside a ThemeWrapper (e.g. in isolation tests).
 const colors = {
-  normal: "#333",
-  warning: "#d34431",
-  disabled: "#adadad",
-  dropdown: "#6e9ebd",
-  default: "#6e9ebd",
+  normal:   "var(--mochi-text, #333)",
+  warning:  "var(--color-error, #d34431)",
+  disabled: "var(--mochi-text-faint, #adadad)",
+  dropdown: "var(--mochi-primary, #6e9ebd)",
+  default:  "var(--mochi-primary, #6e9ebd)",
 };
 
 const bounce = keyframes`
-  0% { transform: scale(1); }
-  30% { transform: scale(1.1); }
-  50% { transform: scale(0.95); }
-  70% { transform: scale(1.05); }
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.1); }
+  50%  { transform: scale(0.95); }
+  70%  { transform: scale(1.05); }
   100% { transform: scale(1); }
 `;
 
@@ -28,21 +30,20 @@ const ButtonWrapper = styled.button`
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
   opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
   padding: 0;
-  color: ${({ type }) => type === "warning" ? colors.warning : colors.normal};
-  ${({ type }) => type === "disabled" && css`color: ${colors.disabled};`}
+  color: ${({ $type }) => $type === "warning" ? colors.warning : colors.normal};
+  ${({ $type }) => $type === "disabled" && css`color: ${colors.disabled};`}
   outline: none;
   transition: transform 0.15s ease;
 
   &:focus {
     outline: none;
-    color: #222;
+    color: var(--mochi-text, #222);
   }
 
   &:active:not(:disabled) {
     transform: scale(1.05);
   }
 
-  /* On hover, target the UnderlineBar inside the TextContainer to animate it */
   &:hover > div > span {
     transform: scaleX(1);
     opacity: 1;
@@ -57,15 +58,15 @@ const TextContainer = styled.div`
 
 const UnderlineBar = styled.span`
   position: absolute;
-  bottom: 4px; /* slight spacing below text */
+  bottom: 4px;
   left: 15%;
   height: 3px;
   width: 70%;
   border-radius: 2px;
-  background-color: ${({ type }) => {
-    if (type === "warning") return colors.warning;
-    if (type === "disabled") return colors.disabled;
-    if (type === "dropdown") return colors.dropdown;
+  background-color: ${({ $type }) => {
+    if ($type === "warning")  return colors.warning;
+    if ($type === "disabled") return colors.disabled;
+    if ($type === "dropdown") return colors.dropdown;
     return colors.default;
   }};
   transform-origin: center;
@@ -85,20 +86,20 @@ const bracketStyle = css`
 
 const Bracket = styled.span`
   ${bracketStyle}
-  color: ${({ type, disabled }) => {
-    if (type === "warning") return colors.warning;
-    if (type === "disabled" || disabled) return colors.disabled;
+  color: ${({ $type, disabled }) => {
+    if ($type === "warning")              return colors.warning;
+    if ($type === "disabled" || disabled) return colors.disabled;
     return colors.normal;
   }};
-  font-style: ${({ type }) => (type === "disabled" ? "italic" : "normal")};
+  font-style: ${({ $type }) => ($type === "disabled" ? "italic" : "normal")};
 `;
 
 const Label = styled.span`
-  font-weight: ${({ type }) => (type === "disabled" ? "400" : "600")};
-  font-style: ${({ type }) => (type === "disabled" ? "italic" : "normal")};
-  color: ${({ type }) => {
-    if (type === "warning") return colors.warning;
-    if (type === "disabled") return colors.disabled;
+  font-weight: ${({ $type }) => ($type === "disabled" ? "400" : "600")};
+  font-style:  ${({ $type }) => ($type === "disabled" ? "italic" : "normal")};
+  color: ${({ $type }) => {
+    if ($type === "warning")  return colors.warning;
+    if ($type === "disabled") return colors.disabled;
     return colors.normal;
   }};
   margin-top: 0.2em;
@@ -119,13 +120,13 @@ export function MochiButton({
 }) {
   const disabled = type === "disabled";
   return (
-    <ButtonWrapper type={type} disabled={disabled} {...props}>
+    <ButtonWrapper $type={type} disabled={disabled} {...props}>
       <TextContainer>
-        <Bracket type={type} disabled={disabled}>(</Bracket>
-        <Label type={type}>{children}</Label>
+        <Bracket $type={type} disabled={disabled}>(</Bracket>
+        <Label $type={type}>{children}</Label>
         {type === "dropdown" && <DropdownIcon />}
-        <Bracket type={type} disabled={disabled}>)</Bracket>
-        <UnderlineBar type={type} />
+        <Bracket $type={type} disabled={disabled}>)</Bracket>
+        <UnderlineBar $type={type} />
       </TextContainer>
     </ButtonWrapper>
   );

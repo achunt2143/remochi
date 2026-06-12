@@ -1,10 +1,7 @@
 import styled, { css } from "styled-components";
 
-// Change these values to match your pixel-perfect reference!
 const SIZE = 30;
 const BORDER = 2;
-const ACTIVE_COLOR = "#ffb80d";
-const INACTIVE_BORDER = "#b2b2b2";
 
 const MochiRadioLabel = styled.label`
   display: flex;
@@ -12,7 +9,7 @@ const MochiRadioLabel = styled.label`
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
   font-size: 1.08rem;
   font-style: italic;
-  color: #4b4b4b;
+  color: var(--mochi-text, #4b4b4b);
   padding: 6px 10px;
   opacity: ${({ disabled }) => (disabled ? 0.48 : 1)};
   user-select: none;
@@ -25,18 +22,23 @@ const MochiRadioOuter = styled.span`
   width: ${SIZE}px;
   height: ${SIZE}px;
   border-radius: 50%;
-  background: ${({ checked, disabled }) =>
-    disabled ? "#ffdb86"
-    : checked ? ACTIVE_COLOR
-    : "#fff"};
+  background: ${({ $checked, disabled }) =>
+    disabled
+      ? "var(--mochi-primary-soft, #ffdb86)"
+      : $checked
+      ? "var(--mochi-primary, #ffb80d)"
+      : "var(--mochi-surface, #fff)"};
   margin-right: 8px;
   box-sizing: border-box;
   transition: background 0.15s;
 
-  ${({ checked, disabled }) =>
-    (!checked || disabled) &&
+  ${({ $checked, disabled }) =>
+    (!$checked || disabled) &&
     css`
-      border: ${BORDER}px solid ${disabled ? "#ddd" : INACTIVE_BORDER};
+      border: ${BORDER}px solid
+        ${disabled
+          ? "var(--mochi-border, #ddd)"
+          : "var(--mochi-text-faint, #b2b2b2)"};
     `}
 `;
 
@@ -45,19 +47,12 @@ const MochiRadioInput = styled.input.attrs({ type: "radio" })`
 `;
 
 const CheckmarkSVG = styled.svg`
-  display: ${({ checked }) => (checked ? "block" : "none")};
+  display: ${({ $checked }) => ($checked ? "block" : "none")};
   width: 20px;
   height: 20px;
 `;
 
-const MochiRadio = ({
-  name,
-  value,
-  checked,
-  onChange,
-  disabled,
-  children
-}) => (
+const MochiRadio = ({ name, value, checked, onChange, disabled, children }) => (
   <MochiRadioLabel disabled={disabled}>
     <MochiRadioInput
       name={name}
@@ -66,13 +61,8 @@ const MochiRadio = ({
       onChange={onChange}
       disabled={disabled}
     />
-    <MochiRadioOuter checked={checked} disabled={disabled}>
-      <CheckmarkSVG
-        checked={checked}
-        viewBox="0 0 18 14"
-        aria-hidden={!checked}
-      >
-        {/* Width, strokeWidth, and coordinates adjusted to match legacy mark */}
+    <MochiRadioOuter $checked={checked} disabled={disabled}>
+      <CheckmarkSVG $checked={checked} viewBox="0 0 18 14" aria-hidden={!checked}>
         <polyline
           points="4,8 8,12 14,4"
           fill="none"

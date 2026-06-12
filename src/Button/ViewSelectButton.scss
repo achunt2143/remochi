@@ -1,9 +1,9 @@
-/* Mochi ViewSelectButton (Combo Box) - Preserved CSS from original */
+/* Mochi ViewSelectButton — all colors from ThemeWrapper CSS variables */
 
 .mochi-view-select-button {
   position: relative;
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -33,11 +33,11 @@
     display: inline-block;
     font-family: "Mochi Bold Oblique", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: inherit;
-    color: #323232;
+    color: var(--mochi-text, #323232);
     font-style: oblique;
     font-weight: bold;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     white-space: nowrap;
     line-height: 34px;
     height: 34px;
@@ -58,34 +58,34 @@
 
   &:focus {
     outline: none;
-    box-shadow: inset 0 0 0 2px rgba(105, 205, 255, 0.3);
+    box-shadow: inset 0 0 0 2px var(--mochi-primary-soft, rgba(105, 205, 255, 0.3));
   }
 
   &:hover:not([aria-disabled="true"]) {
-    background-color: rgba(105, 205, 255, 0.1);
+    background-color: var(--mochi-hover);
   }
 }
 
-/* Button Bar - Selection indicator */
+/* Button Bar — animated selection indicator */
 .mochi-view-select-button .mochi-button-bar {
   position: absolute;
   bottom: 0;
   left: 0;
   height: 2px;
-  background-color: #69cdff;
+  background-color: var(--mochi-primary, #69cdff);
   pointer-events: none;
 }
 
-/* Decorator styling */
+/* Decorator brackets */
 .mochi-button-decorator {
   font-family: "Mochi Bold", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #4b4b4b;
+  color: var(--mochi-text-muted, #4b4b4b);
   display: inline-block;
   vertical-align: middle;
   margin: 0 4px;
-  padding: 0px;
+  padding: 0;
   transition: color 0.2s ease;
 
   &.mochi-button-decorator-left,
@@ -94,74 +94,68 @@
   }
 }
 
-/* Color Variants */
+/* ─── Color Variants ─── */
 .mochi-view-select-button {
+
+  /* warning — maps to --color-error (red) */
   &.mochi-button-warning {
     .mochi-button-bar {
-      background-color: #ff4a4a;
+      background-color: var(--color-error, #ff4a4a);
     }
-
     .mochi-button-decorator {
-      color: #ff4a4a;
+      color: var(--color-error, #ff4a4a);
     }
-
     .mochi-view-select-button-item {
       .mochi-button-base {
-        color: #ff4a4a;
+        color: var(--color-error, #ff4a4a);
       }
-
       &:hover:not([aria-disabled="true"]) {
-        background-color: rgba(255, 74, 74, 0.1);
+        background-color: var(--color-error-bg, rgba(255, 74, 74, 0.1));
       }
     }
   }
 
+  /* affirmative — maps to --color-success (green) */
   &.mochi-button-affirmative {
     .mochi-button-bar {
-      background-color: #00dd11;
+      background-color: var(--color-success, #00dd11);
     }
-
     .mochi-button-decorator {
-      color: #00dd11;
+      color: var(--color-success, #00dd11);
     }
-
     .mochi-view-select-button-item {
       .mochi-button-base {
-        color: #00dd11;
+        color: var(--color-success, #00dd11);
       }
-
       &:hover:not([aria-disabled="true"]) {
-        background-color: rgba(0, 221, 17, 0.1);
+        background-color: var(--color-success-bg, rgba(0, 221, 17, 0.1));
       }
     }
   }
 
+  /* blue — maps to --mochi-primary (blue) */
   &.mochi-button-blue {
     .mochi-button-bar {
-      background-color: #35a8ee;
+      background-color: var(--mochi-primary, #35a8ee);
     }
-
     .mochi-button-decorator {
-      color: #35a8ee;
+      color: var(--mochi-primary, #35a8ee);
     }
-
     .mochi-view-select-button-item {
       .mochi-button-base {
-        color: #35a8ee;
+        color: var(--mochi-primary, #35a8ee);
       }
-
       &:hover:not([aria-disabled="true"]) {
-        background-color: rgba(53, 168, 238, 0.1);
+        background-color: var(--mochi-hover);
       }
     }
   }
 }
 
-/* Responsive adjustments */
+/* Responsive */
 @media (max-width: 640px) {
   .mochi-view-select-button-item {
     padding: 0 4px;
-
     .mochi-button-base {
       font-size: 0.9rem;
     }
