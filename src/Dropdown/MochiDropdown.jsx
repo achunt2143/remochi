@@ -1,7 +1,27 @@
 // MochiDropdown.jsx
 import React, { useState, useRef, useEffect } from 'react';
+import MochiMenu from './MochiMenu';
 import './MochiDropdown.scss';
 
+/**
+ * MochiDropdown
+ *
+ * A styled trigger button that opens a MochiMenu (contextual popup) with a
+ * list of options. Mirrors the mochi.Menu + mochi.MenuDecorator pattern.
+ *
+ * Props:
+ *   options      {Array}    Array of option objects:
+ *                             { value, label }          — normal item
+ *                             { divider: true }         — horizontal rule
+ *                             { label: true, content }  — section header
+ *   value        {*}        Currently selected value
+ *   onChange     {Function} Called with the selected option's value
+ *   label        {string}   Optional field label rendered above the trigger
+ *   placeholder  {string}   Text shown when nothing is selected
+ *   disabled     {boolean}  Disables the trigger
+ *   maxHeight    {number}   Max height of the menu in px (default: 200)
+ *   className    {string}   Extra class on the root wrapper
+ */
 const MochiDropdown = ({
   options = [],
   value,
@@ -9,98 +29,85 @@ const MochiDropdown = ({
   label,
   placeholder = 'Select an option',
   disabled = false,
-  searchable = false,
-  className = ''
+  maxHeight = 200,
+  className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const containerRef = useRef(null);
-  const searchInputRef = useRef(null);
+  const triggerRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsOpen(false);
-        setSearchTerm('');
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      if (searchable && searchInputRef.current) {
-        searchInputRef.current.focus();
-      }
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, searchable]);
-
-  const selectedOption = options.find(opt => opt.value === value);
-
-  const filteredOptions = searchable && searchTerm
-    ? options.filter(opt => 
-        opt.label.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : options;
+  const selectedOption = options.find(opt => !opt.divider && !opt.label && opt.value === value);
 
   const handleSelect = (option) => {
-    if (onChange) {
-      onChange(option.value);
-    }
+    if (option.divider || option.label || option.disabled) return;
+    onChange?.(option.value);
     setIsOpen(false);
-    setSearchTerm('');
+  };
+
+  const handleTrigger = () => {
+    if (!disabled) setIsOpen(o => !o);
   };
 
   return (
-    <div className={`mochi-dropdown ${className}`} ref={containerRef}>
+    <div className={`mochi-dropdown ${className}`}>
       {label && <label className="mochi-dropdown-label">{label}</label>}
-      <div 
-        className={`mochi-dropdown-trigger ${disabled ? 'disabled' : ''} ${isOpen ? 'open' : ''}`}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+
+      {/* Activator / trigger button */}
+      <div
+        ref={triggerRef}
+        className={[
+          'mochi-dropdown-trigger',
+          disabled && 'disabled',
+          isOpen   && 'open',
+        ].filter(Boolean).join(' ')}
+        onClick={handleTrigger}
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); handleTrigger(); }
+          if (e.key === 'Escape') setIsOpen(false);
+        }}
       >
         <span className="mochi-dropdown-value">
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <span className={`mochi-dropdown-arrow ${isOpen ? 'open' : ''}`}>▼</span>
+        <span className={`mochi-dropdown-arrow ${isOpen ? 'open' : ''}`}>&#9660;</span>
       </div>
 
-      {isOpen && (
-        <div className="mochi-dropdown-menu">
-          {searchable && (
-            <div className="mochi-dropdown-search">
-              <input
-                ref={searchInputRef}
-                type="text"
-                className="mochi-dropdown-search-input"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-              />
+      {/* Contextual popup menu */}
+      <MochiMenu
+        isOpen={isOpen}
+        anchorEl={triggerRef}
+        onClose={() => setIsOpen(false)}
+        maxHeight={maxHeight}
+      >
+        {options.map((option, idx) => {
+          if (option.divider) {
+            return <div key={idx} className="mochi-menu-divider" role="separator" />;
+          }
+          if (option.label) {
+            return <div key={idx} className="mochi-menu-label">{option.content ?? option.label}</div>;
+          }
+          const isSelected = option.value === value;
+          return (
+            <div
+              key={option.value ?? idx}
+              className={[
+                'mochi-menu-item',
+                isSelected       && 'selected',
+                option.disabled  && 'disabled',
+              ].filter(Boolean).join(' ')}
+              role="option"
+              aria-selected={isSelected}
+              onClick={() => handleSelect(option)}
+            >
+              <span>{option.label}</span>
+              {isSelected && <span className="mochi-menu-item-check">✓</span>}
             </div>
-          )}
-          <div className="mochi-dropdown-options">
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`mochi-dropdown-option ${option.value === value ? 'selected' : ''}`}
-                  onClick={() => handleSelect(option)}
-                >
-                  {option.label}
-                  {option.value === value && (
-                    <span className="mochi-dropdown-check">✓</span>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="mochi-dropdown-empty">No options found</div>
-            )}
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </MochiMenu>
     </div>
   );
 };
