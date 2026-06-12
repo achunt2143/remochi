@@ -2,104 +2,103 @@ import React, { useState } from 'react';
 import './Collapsable.scss';
 
 /**
- * Mochi CollapsableHeader Component
- * 
- * Header/title for collapsable sections
+ * CollapsableHeader — clickable title bar.
+ * Used internally by Collapsable; also exported for custom layouts.
  */
-const CollapsableHeader = ({ children, onClick }) => {
-  return (
-    <div 
-      className="mochi-collapsable-header"
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick && onClick();
-        }
-      }}
-    >
-      {children}
-    </div>
-  );
-};
+export const CollapsableHeader = ({ children, onClick }) => (
+  <div
+    className="mochi-collapsable-header"
+    onClick={onClick}
+    role="button"
+    tabIndex={0}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick && onClick();
+      }
+    }}
+  >
+    {children}
+  </div>
+);
 
 /**
- * Mochi CollapsableItem Component
- * 
- * Content item within collapsable section
+ * CollapsableItem — styled content row.
+ * Wrap individual items inside a Collapsable for the original Enyo look.
  */
-const CollapsableItem = ({ children }) => {
-  return (
-    <div className="mochi-collapsable-item">
-      {children}
-    </div>
-  );
-};
+export const CollapsableItem = ({ children }) => (
+  <div className="mochi-collapsable-item">{children}</div>
+);
 
 /**
- * Mochi CollapsableFooter Component
- * 
- * Footer/divider for collapsable sections
+ * CollapsableFooter — bottom divider bar.
  */
-const CollapsableFooter = () => {
-  return <div className="mochi-collapsable-footer" />;
-};
+export const CollapsableFooter = () => (
+  <div className="mochi-collapsable-footer" />
+);
 
 /**
- * Mochi Collapsable React Component
- * 
- * A container for collapsable sections with header, content items, and footer.
- * Manages expand/collapse state and animations.
- * 
- * Props:
- *   - title: String for the header title
- *   - children: Content items to display when expanded
- *   - defaultExpanded: Boolean for initial expanded state (default: false)
- *   - onToggle: Callback fired when toggle state changes
+ * Collapsable
+ *
+ * Supports both controlled and uncontrolled usage:
+ *
+ *   Controlled:    <Collapsable title="…" isOpen={open} onToggle={setOpen}>
+ *   Uncontrolled:  <Collapsable title="…" defaultExpanded>
+ *
+ * Children are rendered as-is — no automatic CollapsableItem wrapping.
  */
-const Collapsable = ({ 
-  title, 
-  children, 
+const Collapsable = ({
+  title,
+  children,
+  // controlled
+  isOpen,
+  onToggle,
+  // uncontrolled fallback
   defaultExpanded = false,
-  onToggle = () => {}
 }) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [internalOpen, setInternalOpen] = useState(defaultExpanded);
+
+  // Controlled when isOpen is explicitly supplied; otherwise use internal state
+  const controlled = isOpen !== undefined;
+  const expanded = controlled ? isOpen : internalOpen;
 
   const handleToggle = () => {
-    const newState = !isExpanded;
-    setIsExpanded(newState);
-    onToggle(newState);
+    const next = !expanded;
+    if (!controlled) setInternalOpen(next);
+    onToggle && onToggle(next);
   };
 
   return (
     <div className="mochi-collapsable">
       <CollapsableHeader onClick={handleToggle}>
-        <span className="mochi-collapsable-toggle">
-          {isExpanded ? '▼' : '▶'}
+        <span
+          className="mochi-collapsable-toggle"
+          aria-hidden="true"
+          style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+        >
+          ▶
         </span>
         {title}
       </CollapsableHeader>
-      
-      {isExpanded && (
+
+      {/*
+        CSS grid trick: grid-template-rows transitions between 0fr and 1fr
+        giving a smooth height animation without needing a fixed max-height.
+        The inner wrapper has overflow:hidden so content is clipped during animation.
+      */}
+      <div
+        className="mochi-collapsable-body"
+        style={{ gridTemplateRows: expanded ? '1fr' : '0fr' }}
+        aria-hidden={!expanded}
+      >
         <div className="mochi-collapsable-content">
-          {Array.isArray(children) ? (
-            children.map((child, index) => (
-              <CollapsableItem key={index}>
-                {child}
-              </CollapsableItem>
-            ))
-          ) : (
-            <CollapsableItem>{children}</CollapsableItem>
-          )}
+          {children}
         </div>
-      )}
-      
+      </div>
+
       <CollapsableFooter />
     </div>
   );
 };
 
 export default Collapsable;
-export { CollapsableHeader, CollapsableItem, CollapsableFooter };
