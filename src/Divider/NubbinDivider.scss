@@ -1,0 +1,35 @@
+/* NubbinDivider — divider line + contextual-popup nubbin image overlay */
+
+.mochi-nubbin-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &--horizontal {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  &--vertical {
+    height: 100%;
+    flex-direction: column;
+  }
+
+  // The Divider inside fills the container
+  .remochi-divider {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  // Nubbin image sits on top of the line, absolutely positioned
+  &__nub {
+    // position is set inline; these are safety defaults
+    position: absolute;
+    display: block;
+    // no pointer-events — purely decorative
+    pointer-events: none;
+    // prevent image drag
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+}
