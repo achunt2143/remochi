@@ -1,4 +1,4 @@
-/* MochiMenu — contextual popup used by MochiDropdown */
+/* Menu.css + MochiMenu portal glue — ported from mochi.Menu */
 
 // Full-screen transparent overlay (modal: true)
 .mochi-menu-overlay {
@@ -8,16 +8,19 @@
   background: transparent;
 }
 
-// The popup panel itself sits above the overlay
+// The popup panel — sits above the overlay
+// Inherits .mochi-contextual-popup base styles (border, shadow, border-radius, bg)
 .mochi-contextual-popup.mochi-menu {
-  position: fixed;   // fixed so top/left from getBoundingClientRect() map directly
+  position: fixed;    // fixed so top/left from getBoundingClientRect map directly
   z-index: 1000;
-  overflow: hidden;  // scroller inside handles overflow
+  min-width: 160px;
+  // margin-top / bottom handled by JS positioning; these are the CSS fallback offsets
+  // for non-floating usage in the original. We keep the values for reference:
+  //   default (below): margin-top 2px  → MARGIN constant in MochiMenu.jsx
+  //   up (above):      margin-bottom 2px
+  padding: 3px 0;
 
-  // Remove the default padding from the generic popup — menu items have their own padding
-  padding: 4px 0;
-
-  // Nubbin hidden for menu dropdowns (matches showOnTop:false / no nubbin needed)
+  // Nubbin not used for menus
   &::after {
     display: none;
   }
@@ -34,54 +37,58 @@
   &::-webkit-scrollbar-thumb  { background: #ddd; border-radius: 3px; }
 }
 
-// Menu items — mochi.MenuItem equivalent
+// mochi.MenuItem — matches original exactly
 .mochi-menu-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  font-size: 14px;
-  color: var(--mochi-text, #4b4b4b);
+  display: block;
+  padding: 10px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 2;
   cursor: pointer;
-  white-space: nowrap;
+  color: var(--mochi-text, #4b4b4b);
   user-select: none;
+  white-space: nowrap;
 
   &:hover:not(.disabled) {
-    background-color: var(--mochi-hover, #f5f5f5);
+    background: var(--mochi-hover, #f5f5f5);
   }
 
   &.selected {
-    background-color: var(--mochi-primary-soft, #fff5d6);
+    background: var(--mochi-primary-soft, #fff5d6);
     color: var(--mochi-primary, #ffb80d);
-    font-weight: 600;
   }
 
   &.disabled {
     opacity: 0.4;
     cursor: default;
   }
+}
 
-  .mochi-menu-item-check {
-    color: var(--mochi-primary, #ffb80d);
-    font-weight: 700;
-    margin-left: 12px;
+// mochi-menu-divider — matches original: margin 6px 0, border-bottom 1px solid #aaa
+.mochi-menu-divider {
+  margin: 6px 0;
+  padding: 0;
+  border-bottom: 1px solid #aaa;
+
+  // No background on hover (matches .mochi-menu-divider:hover in original)
+  &:hover {
+    background: none;
   }
 }
 
-// mochi-menu-divider (matches onyx-menu-divider pattern from original)
-.mochi-menu-divider {
-  height: 1px;
-  background-color: var(--mochi-border, #ddd);
-  margin: 4px 0;
-}
-
-// mochi-menu-label (section header, matches onyx-menu-label)
+// mochi-menu-label — section header: disabled appearance, no hover
 .mochi-menu-label {
-  padding: 6px 16px 4px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--mochi-text-muted, #909090);
+  display: block;
+  padding: 10px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 2;
+  cursor: default;
   user-select: none;
+  // Original uses @mochi-disabled-opacity — standard value is 0.4
+  opacity: 0.4;
+
+  &:hover {
+    background: none;
+  }
 }

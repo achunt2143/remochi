@@ -1,5 +1,5 @@
 // MochiDropdown.jsx
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import MochiMenu from './MochiMenu';
 import './MochiDropdown.scss';
 
@@ -11,9 +11,9 @@ import './MochiDropdown.scss';
  *
  * Props:
  *   options      {Array}    Array of option objects:
- *                             { value, label }          — normal item
- *                             { divider: true }         — horizontal rule
- *                             { label: true, content }  — section header
+ *                             { value, label }                — normal item
+ *                             { divider: true }               — horizontal rule
+ *                             { sectionLabel: true, label }   — section header
  *   value        {*}        Currently selected value
  *   onChange     {Function} Called with the selected option's value
  *   label        {string}   Optional field label rendered above the trigger
@@ -35,10 +35,12 @@ const MochiDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef(null);
 
-  const selectedOption = options.find(opt => !opt.divider && !opt.label && opt.value === value);
+  const selectedOption = options.find(
+    opt => !opt.divider && !opt.sectionLabel && opt.value === value
+  );
 
   const handleSelect = (option) => {
-    if (option.divider || option.label || option.disabled) return;
+    if (option.divider || option.sectionLabel || option.disabled) return;
     onChange?.(option.value);
     setIsOpen(false);
   };
@@ -51,7 +53,7 @@ const MochiDropdown = ({
     <div className={`mochi-dropdown ${className}`}>
       {label && <label className="mochi-dropdown-label">{label}</label>}
 
-      {/* Activator / trigger button */}
+      {/* Activator — mirrors mochi.MenuDecorator activating control */}
       <div
         ref={triggerRef}
         className={[
@@ -75,7 +77,7 @@ const MochiDropdown = ({
         <span className={`mochi-dropdown-arrow ${isOpen ? 'open' : ''}`}>&#9660;</span>
       </div>
 
-      {/* Contextual popup menu */}
+      {/* mochi.Menu equivalent — contextual popup portal */}
       <MochiMenu
         isOpen={isOpen}
         anchorEl={triggerRef}
@@ -83,27 +85,29 @@ const MochiDropdown = ({
         maxHeight={maxHeight}
       >
         {options.map((option, idx) => {
+          // Divider — mochi-menu-divider
           if (option.divider) {
             return <div key={idx} className="mochi-menu-divider" role="separator" />;
           }
-          if (option.label) {
-            return <div key={idx} className="mochi-menu-label">{option.content ?? option.label}</div>;
+          // Section label — mochi-menu-label
+          if (option.sectionLabel) {
+            return <div key={idx} className="mochi-menu-label">{option.label}</div>;
           }
+          // Normal item — mochi.MenuItem
           const isSelected = option.value === value;
           return (
             <div
               key={option.value ?? idx}
               className={[
                 'mochi-menu-item',
-                isSelected       && 'selected',
-                option.disabled  && 'disabled',
+                isSelected      && 'selected',
+                option.disabled && 'disabled',
               ].filter(Boolean).join(' ')}
               role="option"
               aria-selected={isSelected}
               onClick={() => handleSelect(option)}
             >
-              <span>{option.label}</span>
-              {isSelected && <span className="mochi-menu-item-check">✓</span>}
+              {option.label}
             </div>
           );
         })}
