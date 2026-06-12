@@ -8,7 +8,7 @@
 .mochi-dialog-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -20,7 +20,8 @@
     visibility 0s linear 0.32s;
 
   &.open {
-    background-color: rgba(0, 0, 0, 0.55);
+    // Scrim uses a dedicated token so themes can adjust opacity
+    background-color: var(--mochi-overlay, rgba(0, 0, 0, 0.55));
     visibility: visible;
     pointer-events: auto;
     transition:
@@ -34,17 +35,16 @@
 }
 
 .mochi-dialog {
-  // Theme-aware surface & text — inherits vars from .mochi-theme-dark / .mochi-theme-light
-  background-color: var(--color-surface, #2a2a2a);
-  color: var(--color-text, #ffffff);
+  background-color: var(--mochi-surface, #2a2a2a);
+  color: var(--mochi-text, #ffffff);
 
   // Rounded top only, flush bottom
   border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
 
   // Shadow on the top edge only
   box-shadow:
-    0 -4px 24px rgba(0, 0, 0, 0.22),
-    0 -1px 0 var(--color-border-light, rgba(255, 255, 255, 0.08));
+    0 -4px 24px var(--mochi-shadow, rgba(0, 0, 0, 0.22)),
+    0 -1px 0 var(--mochi-border, rgba(255, 255, 255, 0.08));
 
   display: flex;
   flex-direction: column;
@@ -54,54 +54,54 @@
   transform: translateY(100%);
   transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 
-  // — Narrow screens: full width —
+  // Narrow screens: full width
   width: 100%;
 
-  // — Wide screens: 50% centered —
+  // Wide screens: 50% centered
   @media (min-width: 768px) {
     width: 50%;
     min-width: 420px;
   }
 
-  // — Size modifiers (cap max-height only on wide screens) —
+  // Size modifiers
   &-small  { @media (min-width: 768px) { max-height: 40vh; } }
   &-medium { @media (min-width: 768px) { max-height: 60vh; } }
   &-large  { @media (min-width: 768px) { max-height: 82vh; } }
 
-  // — Drag handle pill at the top —
+  // Drag handle pill
   &::before {
     content: '';
     display: block;
     width: 40px;
     height: 4px;
     border-radius: var(--radius-full, 9999px);
-    background: var(--color-border, rgba(255, 255, 255, 0.2));
+    background: var(--mochi-border);
     margin: 12px auto 0;
     flex-shrink: 0;
   }
 
-  // — Header —
+  // Header
   &-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-md, 12px) var(--spacing-xl, 24px) var(--spacing-md, 12px);
-    border-bottom: 1px solid var(--color-border-light, rgba(255, 255, 255, 0.08));
+    padding: var(--space-3, 12px) var(--space-6, 24px) var(--space-3, 12px);
+    border-bottom: 1px solid var(--mochi-border);
     flex-shrink: 0;
   }
 
   &-title {
     margin: 0;
-    font-size: var(--font-size-lg, 18px);
-    font-weight: var(--font-weight-semibold, 600);
-    color: var(--color-text, #ffffff);
-    line-height: var(--line-height-tight, 1.2);
+    font-size: var(--text-lg, 18px);
+    font-weight: 600;
+    color: var(--mochi-text);
+    line-height: 1.2;
   }
 
   &-close {
     background: none;
     border: none;
-    color: var(--color-text-secondary, #999999);
+    color: var(--mochi-text-muted);
     font-size: 26px;
     line-height: 1;
     cursor: pointer;
@@ -112,60 +112,60 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-sm, 6px);
-    transition: background-color var(--transition-fast, 150ms ease),
-                color var(--transition-fast, 150ms ease);
+    transition: background-color var(--transition-interactive, 150ms ease),
+                color var(--transition-interactive, 150ms ease);
     flex-shrink: 0;
 
     &:hover {
-      background-color: var(--color-border-light, rgba(255, 255, 255, 0.08));
-      color: var(--color-text, #ffffff);
+      background-color: var(--mochi-hover);
+      color: var(--mochi-text);
     }
   }
 
-  // — Body —
+  // Body
   &-content {
-    padding: var(--spacing-xl, 24px);
+    padding: var(--space-6, 24px);
     overflow-y: auto;
     flex: 1;
-    line-height: var(--line-height-normal, 1.5);
-    font-size: var(--font-size-base, 14px);
-    color: var(--color-text, #ffffff);
+    line-height: 1.5;
+    font-size: var(--text-sm, 14px);
+    color: var(--mochi-text);
   }
 
   &-message {
-    margin-bottom: var(--spacing-lg, 16px);
-    color: var(--color-text, #ffffff);
+    margin-bottom: var(--space-4, 16px);
+    color: var(--mochi-text);
   }
 
   &-prompt-input {
     width: 100%;
-    padding: 10px var(--spacing-md, 12px);
-    background: var(--color-surface-elevated, #333333);
-    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.2));
+    padding: 10px var(--space-3, 12px);
+    background: var(--mochi-surface-2, #333333);
+    border: 1px solid var(--mochi-border);
     border-radius: var(--radius-md, 8px);
-    color: var(--color-text, #ffffff);
-    font-size: var(--font-size-base, 14px);
+    color: var(--mochi-text);
+    font-size: var(--text-sm, 14px);
     outline: none;
-    transition: border-color var(--transition-fast, 150ms ease),
-                background-color var(--transition-fast, 150ms ease);
+    transition: border-color var(--transition-interactive, 150ms ease),
+                background-color var(--transition-interactive, 150ms ease);
 
     &:focus {
-      border-color: var(--color-primary, #5b9dd9);
-      background: var(--color-surface-elevated, #333333);
+      border-color: var(--mochi-primary);
+      background: var(--mochi-surface-2, #333333);
     }
 
     &::placeholder {
-      color: var(--color-text-muted, #666666);
+      color: var(--mochi-text-faint);
     }
   }
 
-  // — Actions footer —
+  // Actions footer
   &-actions {
     display: flex;
-    gap: var(--spacing-md, 12px);
+    gap: var(--space-3, 12px);
     justify-content: flex-end;
-    padding: var(--spacing-md, 12px) var(--spacing-xl, 24px) var(--spacing-xl, 24px);
-    border-top: 1px solid var(--color-border-light, rgba(255, 255, 255, 0.08));
+    padding: var(--space-3, 12px) var(--space-6, 24px) var(--space-6, 24px);
+    border-top: 1px solid var(--mochi-border);
     flex-shrink: 0;
   }
 }
