@@ -1,14 +1,20 @@
 /**
- * MochiMenu — lightweight contextual popup for menus
+ * MochiMenu — contextual popup for MochiDropdown
  *
- * Mirrors mochi.Menu (extends mochi.ContextualPopup):
- * - Renders into a Portal (document.body), position: fixed
- * - Positions below activator by default; flips above if viewport is tight
- * - maxHeight + overflow-y scroll (default 200px)
- * - Modal: click outside closes the menu
+ * Reuses the Panel styled-component from MochiPopupPanel so the menu gets
+ * the same background, border, border-radius, shadow, and fadeIn animation
+ * as every other contextual popup in Remochi. No nubbin is rendered.
+ *
+ * Behaviour:
+ *   - Portal into document.body (position: fixed)
+ *   - Positions below activator; flips above when viewport is tight
+ *   - Scrollable inner list (maxHeight, default 200px)
+ *   - Click-outside overlay closes the menu
+ *   - Escape key closes the menu
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { Panel } from '../Popup/MochiPopupPanel.styles.jsx';
 import './MochiMenu.scss';
 
 const MARGIN = 4; // px gap between activator bottom and menu top
@@ -21,11 +27,8 @@ const MochiMenu = ({
   children,
 }) => {
   const menuRef = useRef(null);
-  // Start invisible so there's no flash at 0,0 before we measure
-  const [style, setStyle] = useState({ visibility: 'hidden' });
+  const [style, setStyle] = useState({ visibility: 'hidden', position: 'fixed' });
 
-  // position: fixed — coords come straight from getBoundingClientRect (viewport-relative)
-  // NO scroll offsets needed
   const adjustPosition = useCallback(() => {
     const anchor = anchorEl?.current ?? anchorEl;
     if (!anchor || !menuRef.current) return;
@@ -45,17 +48,16 @@ const MochiMenu = ({
 
     // Align left edge to activator, clamp to viewport
     let left = r.left;
-    const minWidth = Math.max(r.width, 150);
+    const minWidth = Math.max(r.width, 160);
     if (left + minWidth > innerW - MARGIN) left = Math.max(MARGIN, innerW - minWidth - MARGIN);
     if (left < MARGIN) left = MARGIN;
 
-    setStyle({ top, left, width: minWidth, maxHeight, visibility: 'visible' });
-  }, [anchorEl, maxHeight]);
+    setStyle({ position: 'fixed', top, left, width: minWidth, maxWidth: 'none', visibility: 'visible' });
+  }, [anchorEl]);
 
   useEffect(() => {
     if (!isOpen) return;
-    // Hide again when re-opening so stale position isn't briefly visible
-    setStyle({ visibility: 'hidden' });
+    setStyle({ visibility: 'hidden', position: 'fixed' });
     const frame = requestAnimationFrame(() => adjustPosition());
     window.addEventListener('resize',  adjustPosition);
     window.addEventListener('scroll',  adjustPosition, true);
@@ -66,7 +68,6 @@ const MochiMenu = ({
     };
   }, [isOpen, adjustPosition]);
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
@@ -81,20 +82,22 @@ const MochiMenu = ({
       {/* Transparent overlay — click outside to close */}
       <div className="mochi-menu-overlay" onClick={onClose} />
 
-      <div
+      {/* Panel reuses the same styled-component as MochiPopupPanel:
+          bg, border, border-radius, box-shadow, fadeIn animation.
+          The 'mochi-menu' class adds no-nubbin override from MochiMenu.scss. */}
+      <Panel
         ref={menuRef}
-        className="mochi-contextual-popup mochi-menu"
+        className="mochi-menu"
         style={style}
         role="listbox"
       >
-        {/* Scrollable item list */}
         <div
           className="mochi-menu-scroller"
           style={{ maxHeight, overflowY: 'auto' }}
         >
           {children}
         </div>
-      </div>
+      </Panel>
     </>,
     document.body,
   );

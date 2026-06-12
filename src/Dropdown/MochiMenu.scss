@@ -1,6 +1,6 @@
 /* MochiMenu — contextual popup used by MochiDropdown */
 
-// Full-screen transparent overlay (modal)
+// Full-screen transparent overlay (autoDismiss tap target)
 .mochi-menu-overlay {
   position: fixed;
   inset: 0;
@@ -8,14 +8,9 @@
   background: transparent;
 }
 
-// Panel — position: fixed so viewport coords map directly
-.mochi-contextual-popup.mochi-menu {
-  position: fixed;
-  z-index: 1000;
-  min-width: 160px;
-  padding: 3px 0;
-  // Nubbin not used for menus
-  &::after { display: none; }
+// Suppress nubbin — menus never have a nubbin arrow
+.mochi-contextual-popup.mochi-menu::after {
+  display: none;
 }
 
 // Scrollable inner container
@@ -53,7 +48,7 @@
 .mochi-menu-divider {
   margin: 6px 0;
   padding: 0;
-  border-bottom: 1px solid #aaa;
+  border-bottom: 1px solid var(--mochi-border, #aaa);
   &:hover { background: none; }
 }
 
