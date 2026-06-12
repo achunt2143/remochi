@@ -1,5 +1,4 @@
 // MochiDateInput.jsx
-// Trigger: MochiInput (read-only). Calendar picker: MochiPopupPanel.
 import React, { useState, useRef, useCallback } from 'react';
 import { MochiInput }      from '../Input/MochiInput';
 import { MochiButton }     from '../Button/MochiButton';
@@ -13,7 +12,6 @@ const MONTHS = [
 ];
 
 function isoDate(d) {
-  // YYYY-MM-DD string from a Date
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
@@ -23,18 +21,15 @@ function formatDisplay(d) {
 }
 
 function buildGrid(year, month) {
-  // Returns 42 cells (6 rows × 7 cols) starting from Sun
-  const firstDow = new Date(year, month, 1).getDay();
-  const daysInMonth   = new Date(year, month + 1, 0).getDate();
-  const daysInPrev    = new Date(year, month, 0).getDate();
+  const firstDow    = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrev  = new Date(year, month, 0).getDate();
   const cells = [];
 
   for (let i = firstDow - 1; i >= 0; i--)
     cells.push({ day: daysInPrev - i, date: new Date(year, month - 1, daysInPrev - i), cur: false });
-
   for (let d = 1; d <= daysInMonth; d++)
     cells.push({ day: d, date: new Date(year, month, d), cur: true });
-
   const rem = 42 - cells.length;
   for (let d = 1; d <= rem; d++)
     cells.push({ day: d, date: new Date(year, month + 1, d), cur: false });
@@ -78,28 +73,14 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
 
   return (
     <div style={{ width: '252px', userSelect: 'none' }}>
-      {/* Month nav */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <MochiButton
-          type="normal"
-          onClick={() => setView(new Date(year, month - 1, 1))}
-          aria-label="Previous month"
-        >
-          ‹
-        </MochiButton>
+        <MochiButton type="normal" onClick={() => setView(new Date(year, month - 1, 1))} aria-label="Previous month">‹</MochiButton>
         <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--mochi-text, #333)' }}>
           {MONTHS[month]} {year}
         </span>
-        <MochiButton
-          type="normal"
-          onClick={() => setView(new Date(year, month + 1, 1))}
-          aria-label="Next month"
-        >
-          ›
-        </MochiButton>
+        <MochiButton type="normal" onClick={() => setView(new Date(year, month + 1, 1))} aria-label="Next month">›</MochiButton>
       </div>
 
-      {/* Weekday headers */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '4px' }}>
         {DAYS.map(d => (
           <div key={d} style={{ textAlign: 'center', fontSize: '0.75rem',
@@ -109,7 +90,6 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
         ))}
       </div>
 
-      {/* Day grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
         {cells.map((cell, idx) => {
           const sel      = sameDay(cell.date, selected);
@@ -119,13 +99,7 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
               key={idx}
               style={{
                 ...cellBase,
-                color: sel
-                  ? '#fff'
-                  : !cell.cur
-                    ? 'var(--mochi-text-faint, #bbb)'
-                    : disabled
-                      ? 'var(--mochi-text-faint, #bbb)'
-                      : 'var(--mochi-text, #333)',
+                color: sel ? '#fff' : !cell.cur || disabled ? 'var(--mochi-text-faint, #bbb)' : 'var(--mochi-text, #333)',
                 background: sel ? 'var(--mochi-primary, #43aae4)' : 'none',
                 fontWeight: sel ? 700 : 400,
                 cursor: disabled ? 'not-allowed' : 'pointer',
@@ -158,16 +132,11 @@ const MochiDateInput = ({
 }) => {
   const [isOpen,   setIsOpen]   = useState(false);
   const [selected, setSelected] = useState(value ? new Date(value) : null);
-  const [anchorRect, setAnchorRect] = useState(null);
+  // Pass the DOM ref directly — PopupPanel reads a fresh getBoundingClientRect()
+  // each time it computes position, so there's no stale-snapshot problem.
   const triggerRef = useRef(null);
 
-  const open = useCallback(() => {
-    if (disabled) return;
-    const rect = triggerRef.current?.getBoundingClientRect();
-    setAnchorRect(rect ? { ...rect, toJSON: () => {} } : null);
-    setIsOpen(true);
-  }, [disabled]);
-
+  const open  = useCallback(() => { if (!disabled) setIsOpen(true);  }, [disabled]);
   const close = useCallback(() => setIsOpen(false), []);
 
   const handleSelect = (date) => {
@@ -175,9 +144,6 @@ const MochiDateInput = ({
     onChange?.(date);
     close();
   };
-
-  // MochiInput is a styled.input so we attach the ref via the underlying DOM node
-  const handleTriggerRef = (node) => { triggerRef.current = node; };
 
   const displayValue = selected ? formatDisplay(selected) : '';
 
@@ -190,7 +156,7 @@ const MochiDateInput = ({
       )}
 
       <MochiInput
-        ref={handleTriggerRef}
+        ref={triggerRef}
         readOnly
         value={displayValue}
         placeholder={placeholder}
@@ -201,9 +167,10 @@ const MochiDateInput = ({
         aria-expanded={isOpen}
       />
 
+      {/* anchorEl receives the live ref so PopupPanel always gets a fresh rect */}
       <MochiPopupPanel
         isOpen={isOpen}
-        anchorRect={anchorRect}
+        anchorEl={triggerRef}
         onClose={close}
         title="Select a date"
       >

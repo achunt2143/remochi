@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useLayoutEffect, useRef, useCallback, useEffect } from "react";
 import {
   Overlay,
   PanelWrapper,
@@ -9,15 +9,13 @@ import {
 } from "./MochiPopupPanel.styles";
 import { Button as MochiButton } from "../Button";
 
-// Layout constants mirroring Enyo ContextualPopup
 const VERT_FLUSH_MARGIN  = 100;
 const HORIZ_FLUSH_MARGIN = 100;
 const WIDE_POPUP         = 200;
 const LONG_POPUP         = 200;
-const HORIZ_BUFFER       = 16;
 const MARGIN             = 8;
-const NUB_W              = 71;   // nubbin image width  (vertical nubbins)
-const NUB_SIDE           = 71;   // nubbin image size   (horizontal nubbins)
+const NUB_W              = 71;
+const NUB_SIDE           = 71;
 
 export function MochiPopupPanel({
   isOpen,
@@ -25,7 +23,11 @@ export function MochiPopupPanel({
   children,
   actions = [],
   onClose,
-  anchorRect,
+  // NEW: accept a ref object { current: HTMLElement } so we always read a
+  // fresh getBoundingClientRect() instead of a frozen snapshot.
+  // Legacy callers that still pass a plain anchorRect object still work.
+  anchorEl,
+  anchorRect: anchorRectProp,
 }) {
   const panelRef = useRef(null);
   const [pos, setPos] = useState(null);
@@ -34,197 +36,115 @@ export function MochiPopupPanel({
   const getViewH = () => window.innerHeight ?? document.documentElement.clientHeight;
 
   const computePosition = useCallback(() => {
-    if (!anchorRect || !panelRef.current) return;
+    if (!panelRef.current) return;
 
-    const pw     = panelRef.current.offsetWidth;
-    const ph     = panelRef.current.offsetHeight;
-    const viewW  = getViewW();
-    const viewH  = getViewH();
-    const a      = anchorRect;
+    // Prefer live ref → fresh rect every time
+    const a = anchorEl?.current
+      ? anchorEl.current.getBoundingClientRect()
+      : anchorRectProp;
+
+    if (!a) return;
+
+    const pw    = panelRef.current.offsetWidth;
+    const ph    = panelRef.current.offsetHeight;
+    const viewW = getViewW();
+    const viewH = getViewH();
+
+    // If panel hasn't laid out yet (hidden pass), skip
+    if (pw === 0 || ph === 0) return;
 
     const topFlushPt    = VERT_FLUSH_MARGIN;
     const bottomFlushPt = viewH - VERT_FLUSH_MARGIN;
     const leftFlushPt   = HORIZ_FLUSH_MARGIN;
     const rightFlushPt  = viewW - HORIZ_FLUSH_MARGIN;
 
-    let nubHOff = 0;  // --nubbin-h-offset for straight vertical nubbins
-    let nubVOff = 0;  // --nubbin-v-offset for straight horizontal nubbins
+    let nubHOff = 0;
+    let nubVOff = 0;
 
-    // —— vertical placement: returns { top, above } or null
     function tryVertical() {
       let t, above;
-      if (a.top < viewH / 2) {
-        t = a.bottom + MARGIN;
-        above = false;
-      } else {
-        t = a.top - ph - MARGIN;
-        above = true;
-      }
+      if (a.top < viewH / 2) { t = a.bottom + MARGIN; above = false; }
+      else                   { t = a.top - ph - MARGIN; above = true; }
       if (t + ph > viewH || t < 0) return null;
       return { top: t, above };
     }
 
-    // —— horizontal placement: returns { left, toRight } or null
-    // toRight = popup placed to the RIGHT of anchor (anchor is LEFT of popup)
     function tryHorizontal() {
       let l, toRight;
-      if (a.left + a.width < viewW / 2) {
-        l = a.right + MARGIN;
-        toRight = true;   // popup right of anchor → class 'left' (nub points left toward anchor)
-      } else {
-        l = a.left - pw - MARGIN;
-        toRight = false;  // popup left of anchor  → class 'right' (nub points right toward anchor)
-      }
+      if (a.left + a.width < viewW / 2) { l = a.right  + MARGIN; toRight = true;  }
+      else                              { l = a.left - pw - MARGIN; toRight = false; }
       if (l < 0 || l + pw > viewW) return null;
       return { left: l, toRight };
     }
 
-    // —— center popup horizontally over anchor, clamp to viewport
-    // Returns { left, dirClass } where dirClass is 'left'|'right'|'' (direction TO anchor)
     function centerHoriz() {
       const anchorCX = a.left + a.width / 2;
       let l = anchorCX - pw / 2;
       let dirClass = "";
-
-      if (l < MARGIN) {
-        l = MARGIN;
-        // popup snapped to left edge, anchor is to the RIGHT of popup center → class 'right'
-        dirClass = "right";
-      } else if (l + pw > viewW - MARGIN) {
-        l = viewW - pw - MARGIN;
-        // popup snapped to right edge, anchor is to the LEFT of popup center → class 'left'
-        dirClass = "left";
-      }
-
-      // dynamic nubbin offset: anchor center relative to panel left, minus half nub width
+      if      (l < MARGIN)            { l = MARGIN;             dirClass = "right"; }
+      else if (l + pw > viewW - MARGIN) { l = viewW - pw - MARGIN; dirClass = "left";  }
       nubHOff = Math.round(anchorCX - l - NUB_W / 2);
       return { left: l, dirClass };
     }
 
-    // —— center popup vertically beside anchor, clamp (high/low)
     function centerVert() {
       const anchorCY = a.top + a.height / 2;
       let t = anchorCY - ph / 2;
       let mod = "";
-      if (t < MARGIN) {
-        t = MARGIN;
-        mod = "high";
-      } else if (t + ph > viewH - MARGIN) {
-        t = viewH - ph - MARGIN;
-        mod = "low";
-      }
+      if      (t < MARGIN)            { t = MARGIN;              mod = "high"; }
+      else if (t + ph > viewH - MARGIN) { t = viewH - ph - MARGIN; mod = "low";  }
       nubVOff = Math.round(anchorCY - t - NUB_SIDE / 2);
       return { top: t, mod };
     }
 
-    // ══ RULE 1: Activator in top/bottom flush zone ══
     const inTopBottom = (a.bottom < topFlushPt) || (a.top > bottomFlushPt);
     const inLeftRight = (a.right  < leftFlushPt) || (a.left > rightFlushPt);
 
-    if (inTopBottom) {
-      // 1.a.i — flush vertical
+    function resolveVertical(corner = false) {
       const v = tryVertical();
-      if (v) {
-        const { left, dirClass } = centerHoriz();
-        if (dirClass) {
-          setPos({
-            top: v.top, left,
-            classes: `vertical ${v.above ? "above" : "below"} ${dirClass} corner`,
-            nubHOff, nubVOff,
-          });
-          return;
-        }
-      }
-
-      // 1.a.ii — flush horizontal
-      const h = tryHorizontal();
-      if (h) {
-        const { top: ct, mod } = centerVert();
-        // toRight=true → class 'left'; toRight=false → class 'right'
-        const dirClass = h.toRight ? "left" : "right";
-        setPos({
-          top: ct, left: h.left,
-          classes: `horizontal ${dirClass}${mod ? " " + mod : ""} corner`,
-          nubHOff, nubVOff,
-        });
-        return;
-      }
-
-      // 1.b — plain vertical
-      const v2 = tryVertical();
-      if (v2) {
-        const { left, dirClass } = centerHoriz();
-        setPos({
-          top: v2.top, left,
-          classes: `vertical ${v2.above ? "above" : "below"}${dirClass ? " " + dirClass : ""}`,
-          nubHOff, nubVOff,
-        });
-        return;
-      }
-    } else if (inLeftRight) {
-      // 1.b.iii/iv — horizontal
-      const h = tryHorizontal();
-      if (h) {
-        const { top: ct, mod } = centerVert();
-        const dirClass = h.toRight ? "left" : "right";
-        setPos({
-          top: ct, left: h.left,
-          classes: `horizontal ${dirClass}${mod ? " " + mod : ""}`,
-          nubHOff, nubVOff,
-        });
-        return;
-      }
-    }
-
-    // ══ RULE 3: Popup size ══
-    if (pw > WIDE_POPUP) {
-      const v = tryVertical();
-      if (v) {
-        const { left, dirClass } = centerHoriz();
-        setPos({
-          top: v.top, left,
-          classes: `vertical ${v.above ? "above" : "below"}${dirClass ? " " + dirClass : ""}`,
-          nubHOff, nubVOff,
-        });
-        return;
-      }
-    } else if (ph > LONG_POPUP) {
-      const h = tryHorizontal();
-      if (h) {
-        const { top: ct, mod } = centerVert();
-        const dirClass = h.toRight ? "left" : "right";
-        setPos({
-          top: ct, left: h.left,
-          classes: `horizontal ${dirClass}${mod ? " " + mod : ""}`,
-          nubHOff, nubVOff,
-        });
-        return;
-      }
-    }
-
-    // ══ RULE 4/5: Favor vertical (below) ══
-    const v = tryVertical();
-    if (v) {
+      if (!v) return false;
       const { left, dirClass } = centerHoriz();
       setPos({
         top: v.top, left,
-        classes: `vertical ${v.above ? "above" : "below"}${dirClass ? " " + dirClass : ""}`,
+        classes: `vertical ${v.above ? "above" : "below"}${dirClass ? " " + dirClass : ""}${corner ? " corner" : ""}`,
         nubHOff, nubVOff,
       });
-      return;
+      return true;
     }
 
-    const h = tryHorizontal();
-    if (h) {
+    function resolveHorizontal(corner = false) {
+      const h = tryHorizontal();
+      if (!h) return false;
       const { top: ct, mod } = centerVert();
       const dirClass = h.toRight ? "left" : "right";
       setPos({
         top: ct, left: h.left,
-        classes: `horizontal ${dirClass}${mod ? " " + mod : ""}`,
+        classes: `horizontal ${dirClass}${mod ? " " + mod : ""}${corner ? " corner" : ""}`,
         nubHOff, nubVOff,
       });
-      return;
+      return true;
     }
+
+    if (inTopBottom) {
+      const v = tryVertical();
+      if (v) {
+        const { left, dirClass } = centerHoriz();
+        if (dirClass) {
+          setPos({ top: v.top, left, classes: `vertical ${v.above ? "above" : "below"} ${dirClass} corner`, nubHOff, nubVOff });
+          return;
+        }
+      }
+      if (resolveHorizontal(true)) return;
+      if (resolveVertical()) return;
+    } else if (inLeftRight) {
+      if (resolveHorizontal()) return;
+    }
+
+    if (pw > WIDE_POPUP) { if (resolveVertical())   return; }
+    else if (ph > LONG_POPUP) { if (resolveHorizontal()) return; }
+
+    if (resolveVertical())   return;
+    if (resolveHorizontal()) return;
 
     // Ultimate fallback
     const { left, dirClass } = centerHoriz();
@@ -234,30 +154,40 @@ export function MochiPopupPanel({
       classes: `vertical below${dirClass ? " " + dirClass : ""}`,
       nubHOff, nubVOff,
     });
-  }, [anchorRect]);
+  }, [anchorEl, anchorRectProp]);
 
+  // useLayoutEffect fires synchronously after the DOM is painted.
+  // On first mount the panel renders with visibility:hidden so we can
+  // measure its real offsetWidth/offsetHeight, then immediately set pos
+  // before the browser shows anything — no flicker, no first-click miss.
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setPos(null);
+      return;
+    }
+    computePosition();
+  }, [isOpen, computePosition]);
+
+  // Also recompute on resize / scroll
   useEffect(() => {
     if (!isOpen) return;
-
-    const frame = requestAnimationFrame(() => {
-      computePosition();
-      panelRef.current?.focus();
-    });
-
-    document.body.style.overflow = "hidden";
     window.addEventListener("resize", computePosition);
     window.addEventListener("scroll", computePosition, true);
     const onKeyDown = (e) => { if (e.key === "Escape") onClose?.(); };
     window.addEventListener("keydown", onKeyDown);
-
+    document.body.style.overflow = "hidden";
     return () => {
-      cancelAnimationFrame(frame);
-      document.body.style.overflow = "";
       window.removeEventListener("resize", computePosition);
       window.removeEventListener("scroll", computePosition, true);
       window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
     };
   }, [isOpen, onClose, computePosition]);
+
+  // Focus panel once position is known
+  useEffect(() => {
+    if (pos) panelRef.current?.focus();
+  }, [pos]);
 
   if (!isOpen) return null;
 
@@ -268,7 +198,7 @@ export function MochiPopupPanel({
         "--nubbin-h-offset": `${pos.nubHOff}px`,
         "--nubbin-v-offset": `${pos.nubVOff}px`,
       }
-    : { visibility: "hidden" };
+    : { visibility: "hidden" }; // hidden while measuring on first paint
 
   return (
     <Overlay
