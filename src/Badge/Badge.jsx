@@ -1,57 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
+import './Badge.scss';
 
 /**
- * Mochi Badge React Component
- * 
- * A badge component in the Mochi style that dynamically adjusts between
- * circular (round) and oval shapes based on content length.
- * 
+ * MochiBadge — faithful React port of mochi.Badge.
+ *
  * Props:
- *   - content: String or number to display in the badge
- *   - background: CSS color string for background (default: '#69cdff')
- *   - color: CSS color string for text (default: '#ffffff')
+ *   content    {string|number}  Text to display. Empty = hidden (transparent bg).
+ *   background {string}         CSS color for background (default: '#69cdff').
+ *   color      {string}         CSS color for text (default: '#ffffff').
  */
 const Badge = ({ content = '', background = '#69cdff', color = '#ffffff' }) => {
-    const [isRound, setIsRound] = useState(true);
-    const [displayBackground, setDisplayBackground] = useState(background);
+  const originalBackground = useRef(background);
 
-    const originalBackground = useRef(background);
+  useEffect(() => { originalBackground.current = background; }, [background]);
 
-    useEffect(() => {
-        originalBackground.current = background;
-    }, [background]);
+  const isEmpty = content === '' || content === null || content === undefined;
+  const contentStr = isEmpty ? '' : content.toString();
+  const isOval = contentStr.length > 2;  // 3+ chars → oval, 1-2 → round circle
 
-    // contentChanged logic
-    useEffect(() => {
-        if (content === '' || content === null || content === undefined) {
-            setDisplayBackground('transparent');
-        } else {
-            setDisplayBackground(originalBackground.current);
-            const contentStr = content.toString();
+  const displayBackground = isEmpty ? 'transparent' : background;
+  const innerClass = `mochi-badge-inner ${isOval ? 'oval' : 'round'}`;
 
-            // More than 2 characters = oval, otherwise round
-            if (contentStr.length > 2) {
-                setIsRound(false);
-            } else {
-                setIsRound(true);
-            }
-        }
-    }, [content]);
-
-    const innerClassName = isRound ? 'mochi-badge-inner round' : 'mochi-badge-inner oval';
-
-    const innerStyle = {
-        background: displayBackground,
-        color: color
-    };
-
-    return (
-        <div className="mochi-badge">
-            <div className={innerClassName} style={innerStyle}>
-                {content}
-            </div>
-        </div>
-    );
+  return (
+    <div className="mochi-badge">
+      <div
+        className={innerClass}
+        style={{ background: displayBackground, color }}
+      >
+        {contentStr}
+      </div>
+    </div>
+  );
 };
 
 export { Badge };
+export { Badge as MochiBadge };
