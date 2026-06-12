@@ -3,9 +3,9 @@ import styled from "styled-components";
 export const MochiInput = styled.input.attrs(props => ({
   disabled: props.disabled
 }))`
-  background: #fff;
-  color: #444;
-  border: 2px solid ${({ disabled }) => disabled ? "#e4e4e4" : "#ccc"};
+  background: var(--mochi-surface, #fff);
+  color: var(--mochi-text, #444);
+  border: 2px solid var(--mochi-border, #ccc);
   border-radius: 24px;
   font-size: 1.13rem;
   padding: 8px 22px;
@@ -18,21 +18,22 @@ export const MochiInput = styled.input.attrs(props => ({
   margin-right: 14px;
 
   &:focus {
-    border-color: #43aae455;
-    background: #fff;
-    color: #222;
+    border-color: var(--mochi-primary, #43aae4);
+    background: var(--mochi-surface, #fff);
+    color: var(--mochi-text, #222);
+    box-shadow: 0 0 0 3px var(--mochi-primary-soft, rgba(67,170,228,0.18));
   }
 
   &::placeholder {
-    color: #b3b3b3;
+    color: var(--mochi-text-faint, #b3b3b3);
     font-style: italic;
     opacity: 1;
   }
 
   &:disabled {
-    background: #f7f7f7;
-    border-color: #e4e4e4;
-    color: #bcbcbc;
+    background: var(--mochi-bg, #f7f7f7);
+    border-color: var(--mochi-border, #e4e4e4);
+    color: var(--mochi-text-faint, #bcbcbc);
     cursor: not-allowed;
     opacity: 0.7;
   }
