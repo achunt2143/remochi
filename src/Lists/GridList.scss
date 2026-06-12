@@ -1,7 +1,7 @@
-/* Mochi GridList Component - Preserved CSS from original */
+/* Mochi GridList Component */
 
 .mochi-gridlist {
-  background: #ccc;
+  background: var(--mochi-surface, #ccc);
   font-family: "Mochi Light", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   width: 100%;
 }
@@ -42,9 +42,9 @@
   }
 
   &.selected {
-    background: #ff9900;
+    background: var(--mochi-primary, #ff9900);
     padding: 3px;
-    box-shadow: 0 0 0 3px #ff9900;
+    box-shadow: 0 0 0 3px var(--mochi-primary, #ff9900);
 
     img {
       opacity: 0.95;
@@ -52,11 +52,6 @@
   }
 
   &:hover:not(.selected) {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  &:focus {
-    outline: 2px solid #ffb80d;
-    outline-offset: 2px;
+    background: var(--mochi-hover);
   }
 }

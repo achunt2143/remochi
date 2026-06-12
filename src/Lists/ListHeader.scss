@@ -1,11 +1,10 @@
-/* Mochi ListHeader Component - Preserved CSS from original */
+/* Mochi ListHeader Component */
 
 .mochi-list-header {
   font-family: "Mochi Medium", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 18pt;
   font-weight: bold;
   font-style: italic;
-  color: #323232;
-  padding: 0 32px 0 32px;
+  color: var(--mochi-text, #323232);
   padding: 16px 32px;
 }

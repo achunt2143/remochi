@@ -1,11 +1,11 @@
-/* Mochi ListItem Component - Preserved CSS from original */
+/* Mochi ListItem Component */
 
 .mochi-list-item {
   font-family: "Mochi Medium", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14px;
   font-weight: bold;
   font-style: italic;
-  color: #4b4b4b;
+  color: var(--mochi-text, #4b4b4b);
   padding: 0 0 48px 32px;
   position: relative;
   -webkit-user-select: none;
@@ -13,12 +13,16 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
 
+  &:hover {
+    background-color: var(--mochi-hover);
+  }
+
   &.mochi-highlight {
     background-image: linear-gradient(
       to right,
-      rgba(255, 255, 255, 0),
-      #f5f5f5 50%,
-      rgba(255, 255, 255, 0)
+      transparent,
+      var(--mochi-hover, rgba(255,255,255,0.06)) 50%,
+      transparent
     );
   }
 
@@ -35,26 +39,15 @@
   line-height: 4px;
   left: 0;
   right: 0;
-  background: rgba(100, 100, 100, 0.2);
+  background: var(--mochi-border, rgba(100, 100, 100, 0.2));
 
   &.top {
     top: 0;
-    border-top: 1px solid rgba(100, 100, 100, 0.15);
+    border-top: 1px solid var(--mochi-border, rgba(100, 100, 100, 0.15));
   }
 
   &.bottom {
     bottom: 0;
-    border-bottom: 1px solid rgba(100, 100, 100, 0.15);
-  }
-
-  /* Support for wider lists */
-  &.large {
-    &.top {
-      border-top: 2px solid rgba(100, 100, 100, 0.15);
-    }
-
-    &.bottom {
-      border-bottom: 2px solid rgba(100, 100, 100, 0.15);
-    }
+    border-bottom: 1px solid var(--mochi-border, rgba(100, 100, 100, 0.15));
   }
 }
