@@ -1,4 +1,6 @@
-// MochiPagination.scss
+// MochiPagination.scss — all colors from ThemeWrapper CSS variables
+// Note: page buttons are now rendered using the Button component from ../Button;
+// this SCSS only styles the container, ellipsis, and info text.
 .mochi-pagination {
   display: flex;
   align-items: center;
@@ -6,43 +8,15 @@
   padding: 16px;
   flex-wrap: wrap;
 
-  &-btn {
-    min-width: 36px;
-    height: 36px;
-    padding: 0 12px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  // Active page button override — Button component renders .mochi-button;
+  // we layer an active background on top via a wrapper class.
+  .mochi-pagination-active .mochi-button {
+    color: var(--mochi-primary-text);
+    background-color: var(--mochi-primary);
     border-radius: 8px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
-    &:hover:not(:disabled) {
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-      border-color: #5b9dd9;
-      transform: translateY(-1px);
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0) scale(0.98);
-    }
-
-    &:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    &.active {
-      background: linear-gradient(to bottom, #6ba5db, #5b9dd9);
-      border-color: #5b9dd9;
-      color: #fff;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(91, 157, 217, 0.3);
+    .mochi-button-bar {
+      background-color: transparent;
     }
   }
 
@@ -53,7 +27,7 @@
   }
 
   &-ellipsis {
-    color: #999;
+    color: var(--mochi-text-muted);
     font-size: 14px;
     padding: 0 4px;
     -webkit-user-select: none;
@@ -62,19 +36,9 @@
 
   &-info {
     margin-left: auto;
-    color: #999;
+    color: var(--mochi-text-muted);
     font-size: 14px;
     white-space: nowrap;
-  }
-
-  &-first,
-  &-last {
-    font-size: 16px;
-  }
-
-  &-prev,
-  &-next {
-    font-size: 18px;
   }
 }
 

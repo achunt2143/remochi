@@ -1,4 +1,4 @@
-/* Mochi Header Component - Preserved CSS from original */
+/* MochiHeader — color from ThemeWrapper CSS variables */
 
 .mochi-header {
   height: 64px;
@@ -9,10 +9,9 @@
   justify-content: space-between;
 
   .mochi-header-content {
-    font-family: "Mochi Light", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 36px;
     line-height: 32px;
-    color: #4b4b4b;
+    color: var(--mochi-text);
     padding-top: 30px;
     text-overflow: ellipsis;
     text-transform: uppercase;

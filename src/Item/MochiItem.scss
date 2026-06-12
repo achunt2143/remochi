@@ -1,18 +1,18 @@
-// MochiItem.scss
+// MochiItem.scss — all colors from ThemeWrapper CSS variables
 .mochi-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--mochi-surface);
+  border: 1px solid var(--mochi-border);
   border-radius: 10px;
   transition: all 0.2s ease;
   position: relative;
 
   &.hoverable:hover:not(.disabled) {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--mochi-hover);
+    border-color: var(--mochi-primary);
   }
 
   &.clickable {
@@ -24,11 +24,11 @@
   }
 
   &.selected {
-    background: rgba(91, 157, 217, 0.15);
-    border-color: rgba(91, 157, 217, 0.4);
+    background: var(--mochi-primary-soft);
+    border-color: var(--mochi-primary);
 
     .mochi-item-title {
-      color: #5b9dd9;
+      color: var(--mochi-primary);
     }
   }
 
@@ -45,18 +45,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--mochi-hover);
+    border: 1px solid var(--mochi-border);
     border-radius: 10px;
     font-size: 20px;
-    color: #5b9dd9;
+    color: var(--mochi-primary);
     transition: all 0.2s ease;
 
     &[role='button'] {
       cursor: pointer;
 
       &:hover {
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+        background: var(--mochi-active);
         transform: scale(1.05);
       }
 
@@ -79,7 +79,7 @@
   }
 
   &-title {
-    color: #fff;
+    color: var(--mochi-text);
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 2px;
@@ -89,7 +89,7 @@
   }
 
   &-subtitle {
-    color: #999;
+    color: var(--mochi-text-muted);
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
@@ -98,7 +98,7 @@
 
   &-body {
     margin-top: 8px;
-    color: #ccc;
+    color: var(--mochi-text-muted);
     font-size: 14px;
     line-height: 1.5;
   }
@@ -107,7 +107,7 @@
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    color: #999;
+    color: var(--mochi-text-muted);
     font-size: 14px;
   }
 
@@ -159,7 +159,7 @@
       width: 100%;
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid var(--mochi-border);
     }
   }
 }
