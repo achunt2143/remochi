@@ -21,7 +21,7 @@ const fadeIn = keyframes`
 // Always stays in the DOM. When $hidden=true it is fully invisible and
 // non-interactive so it never interferes with the page beneath.
 export const Overlay = styled.div`
-  position: fixed;
+  position: sticky;
   inset: 0;
   background: transparent;
   z-index: 999;
@@ -35,7 +35,7 @@ export const Overlay = styled.div`
 `;
 
 export const PanelWrapper = styled.div`
-  position: fixed;
+  position: static;
   top: 0;
   left: 0;
   width: 100%;

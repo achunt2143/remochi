@@ -33,13 +33,15 @@
   line-height: 2;
   cursor: pointer;
   color: var(--mochi-text, #4b4b4b);
+  -webkit-user-select: none;
   user-select: none;
   white-space: nowrap;
 
-  &:hover:not(.disabled) { background: var(--mochi-hover, #f5f5f5); }
+  &:hover:not(.disabled) { background: var(--mochi-hover, #f5f5f5); border-radius: 32px; }
   &.selected {
     background: var(--mochi-primary-soft, #fff5d6);
     color: var(--mochi-primary, #ffb80d);
+    border-radius: 32px;
   }
   &.disabled { opacity: 0.4; cursor: default; }
 }
@@ -60,6 +62,7 @@
   font-weight: 500;
   line-height: 2;
   cursor: default;
+  -webkit-user-select: none;
   user-select: none;
   opacity: 0.4;
   &:hover { background: none; }
