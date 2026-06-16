@@ -132,13 +132,32 @@ const MochiDateInput = ({
 }) => {
   const [isOpen,   setIsOpen]   = useState(false);
   const [selected, setSelected] = useState(value ? new Date(value) : null);
-  // triggerRef is passed directly to MochiPopupPanel as anchorEl.
-  // PopupPanel calls getBoundingClientRect() fresh on every open,
-  // so the popup always positions relative to the current scroll position.
-  const triggerRef = useRef(null);
+  const triggerRef  = useRef(null);
+  // anchorRectRef holds the DOMRect captured synchronously at click time,
+  // before React re-renders or any side effects (like overflow:hidden) can
+  // shift the scroll position and invalidate the coordinates.
+  const anchorRectRef = useRef(null);
 
-  const open  = useCallback(() => { if (!disabled) setIsOpen(true);  }, [disabled]);
-  const close = useCallback(() => setIsOpen(false), []);
+  const open = useCallback(() => {
+    if (disabled) return;
+    // Capture the rect NOW — synchronously inside the click handler,
+    // before setIsOpen triggers a re-render or anything else moves the page.
+    if (triggerRef.current) {
+      const r = triggerRef.current.getBoundingClientRect();
+      // Convert to a plain object so it stays stable across renders.
+      anchorRectRef.current = {
+        top: r.top, bottom: r.bottom,
+        left: r.left, right: r.right,
+        width: r.width, height: r.height,
+      };
+    }
+    setIsOpen(true);
+  }, [disabled]);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+    anchorRectRef.current = null;
+  }, []);
 
   const handleSelect = (date) => {
     setSelected(date);
@@ -168,12 +187,11 @@ const MochiDateInput = ({
         aria-expanded={isOpen}
       />
 
-      {/* anchorEl passes the live ref — PopupPanel reads getBoundingClientRect()
-          at open time so the calendar always appears next to the input,
-          regardless of how far the user has scrolled. */}
+      {/* anchorRect is the rect captured synchronously at click time so the
+          popup positions correctly regardless of scroll position. */}
       <MochiPopupPanel
         isOpen={isOpen}
-        anchorEl={triggerRef}
+        anchorRect={anchorRectRef.current}
         onClose={close}
         title="Select a date"
       >

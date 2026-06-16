@@ -23,9 +23,13 @@ export function MochiPopupPanel({
   children,
   actions = [],
   onClose,
-  // NEW: accept a ref object { current: HTMLElement } so we always read a
-  // fresh getBoundingClientRect() instead of a frozen snapshot.
-  // Legacy callers that still pass a plain anchorRect object still work.
+  // anchorEl: a ref object { current: HTMLElement } — live element reference.
+  // anchorRect: a plain DOMRect-shaped object — pre-captured snapshot.
+  // When anchorEl is provided, rect is read from it inside computePosition.
+  // When anchorRect is provided (e.g. captured synchronously at click time),
+  // that snapshot is used directly — this is the preferred path for scrolled
+  // pages because the rect is captured before React re-renders and before any
+  // scroll-locking side effects can shift the page.
   anchorEl,
   anchorRect: anchorRectProp,
 }) {
@@ -38,10 +42,10 @@ export function MochiPopupPanel({
   const computePosition = useCallback(() => {
     if (!panelRef.current) return;
 
-    // Prefer live ref → fresh rect every time
-    const a = anchorEl?.current
-      ? anchorEl.current.getBoundingClientRect()
-      : anchorRectProp;
+    // Prefer pre-captured snapshot (anchorRectProp) so the rect reflects the
+    // scroll position at click time, not after React / side-effects have run.
+    // Fall back to reading the live ref when no snapshot is provided.
+    const a = anchorRectProp ?? anchorEl?.current?.getBoundingClientRect();
 
     if (!a) return;
 
@@ -50,7 +54,6 @@ export function MochiPopupPanel({
     const viewW = getViewW();
     const viewH = getViewH();
 
-    // If panel hasn't laid out yet (hidden pass), skip
     if (pw === 0 || ph === 0) return;
 
     const topFlushPt    = VERT_FLUSH_MARGIN;
@@ -81,7 +84,7 @@ export function MochiPopupPanel({
       const anchorCX = a.left + a.width / 2;
       let l = anchorCX - pw / 2;
       let dirClass = "";
-      if      (l < MARGIN)            { l = MARGIN;             dirClass = "right"; }
+      if      (l < MARGIN)              { l = MARGIN;             dirClass = "right"; }
       else if (l + pw > viewW - MARGIN) { l = viewW - pw - MARGIN; dirClass = "left";  }
       nubHOff = Math.round(anchorCX - l - NUB_W / 2);
       return { left: l, dirClass };
@@ -91,7 +94,7 @@ export function MochiPopupPanel({
       const anchorCY = a.top + a.height / 2;
       let t = anchorCY - ph / 2;
       let mod = "";
-      if      (t < MARGIN)            { t = MARGIN;              mod = "high"; }
+      if      (t < MARGIN)              { t = MARGIN;              mod = "high"; }
       else if (t + ph > viewH - MARGIN) { t = viewH - ph - MARGIN; mod = "low";  }
       nubVOff = Math.round(anchorCY - t - NUB_SIDE / 2);
       return { top: t, mod };
@@ -156,10 +159,6 @@ export function MochiPopupPanel({
     });
   }, [anchorEl, anchorRectProp]);
 
-  // useLayoutEffect fires synchronously after the DOM is painted.
-  // On first mount the panel renders with visibility:hidden so we can
-  // measure its real offsetWidth/offsetHeight, then immediately set pos
-  // before the browser shows anything — no flicker, no first-click miss.
   useLayoutEffect(() => {
     if (!isOpen) {
       setPos(null);
@@ -168,23 +167,23 @@ export function MochiPopupPanel({
     computePosition();
   }, [isOpen, computePosition]);
 
-  // Also recompute on resize / scroll
   useEffect(() => {
     if (!isOpen) return;
     window.addEventListener("resize", computePosition);
-    window.addEventListener("scroll", computePosition, true);
+    // NOTE: overflow:hidden is intentionally NOT set here.
+    // The Overlay is position:fixed and covers the full viewport, which already
+    // prevents interaction with the page beneath. Setting overflow:hidden on
+    // body causes browsers to reset the scroll position before computePosition
+    // has run, making the anchor rect stale and placing the popup at the wrong
+    // position on scrolled pages.
     const onKeyDown = (e) => { if (e.key === "Escape") onClose?.(); };
     window.addEventListener("keydown", onKeyDown);
-    document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("resize", computePosition);
-      window.removeEventListener("scroll", computePosition, true);
       window.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
     };
   }, [isOpen, onClose, computePosition]);
 
-  // Focus panel once position is known
   useEffect(() => {
     if (pos) panelRef.current?.focus();
   }, [pos]);
@@ -198,7 +197,7 @@ export function MochiPopupPanel({
         "--nubbin-h-offset": `${pos.nubHOff}px`,
         "--nubbin-v-offset": `${pos.nubVOff}px`,
       }
-    : { visibility: "hidden" }; // hidden while measuring on first paint
+    : { visibility: "hidden" };
 
   return (
     <Overlay
