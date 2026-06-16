@@ -7,6 +7,11 @@
   height: 100%;
   position: relative;
 
+  // Prevent the browser from showing a text cursor or any hover effect
+  // when the pointer moves over the panel surface or its children.
+  cursor: default;
+  user-select: none;
+
   // ── Default style (Overlay Base from Figma) ────────────────────────────
   &.mochi-panel--default {
     background: #f5f5f5;
