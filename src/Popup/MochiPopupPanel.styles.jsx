@@ -39,7 +39,7 @@ export const Panel = styled.div.attrs(({ className }) => ({
 }))`
   position: absolute;
   background: var(--mochi-surface, #ffffff);
-  border: 2px solid var(--mochi-border, #646464);
+  border: 2px solid var(--mochi-popup-border, #646464);
   border-radius: 24px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
   padding: 6px;
