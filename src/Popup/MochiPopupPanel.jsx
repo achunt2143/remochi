@@ -23,13 +23,6 @@ export function MochiPopupPanel({
   children,
   actions = [],
   onClose,
-  // anchorEl: a ref object { current: HTMLElement } — live element reference.
-  // anchorRect: a plain DOMRect-shaped object — pre-captured snapshot.
-  // When anchorEl is provided, rect is read from it inside computePosition.
-  // When anchorRect is provided (e.g. captured synchronously at click time),
-  // that snapshot is used directly — this is the preferred path for scrolled
-  // pages because the rect is captured before React re-renders and before any
-  // scroll-locking side effects can shift the page.
   anchorEl,
   anchorRect: anchorRectProp,
 }) {
@@ -42,11 +35,9 @@ export function MochiPopupPanel({
   const computePosition = useCallback(() => {
     if (!panelRef.current) return;
 
-    // Prefer pre-captured snapshot (anchorRectProp) so the rect reflects the
-    // scroll position at click time, not after React / side-effects have run.
-    // Fall back to reading the live ref when no snapshot is provided.
+    // Prefer pre-captured snapshot so the rect reflects scroll position at
+    // click time, before any re-renders or side-effects have run.
     const a = anchorRectProp ?? anchorEl?.current?.getBoundingClientRect();
-
     if (!a) return;
 
     const pw    = panelRef.current.offsetWidth;
@@ -149,7 +140,6 @@ export function MochiPopupPanel({
     if (resolveVertical())   return;
     if (resolveHorizontal()) return;
 
-    // Ultimate fallback
     const { left, dirClass } = centerHoriz();
     setPos({
       top:    Math.min(a.bottom + MARGIN, viewH - ph - MARGIN),
@@ -170,12 +160,6 @@ export function MochiPopupPanel({
   useEffect(() => {
     if (!isOpen) return;
     window.addEventListener("resize", computePosition);
-    // NOTE: overflow:hidden is intentionally NOT set here.
-    // The Overlay is position:fixed and covers the full viewport, which already
-    // prevents interaction with the page beneath. Setting overflow:hidden on
-    // body causes browsers to reset the scroll position before computePosition
-    // has run, making the anchor rect stale and placing the popup at the wrong
-    // position on scrolled pages.
     const onKeyDown = (e) => { if (e.key === "Escape") onClose?.(); };
     window.addEventListener("keydown", onKeyDown);
     return () => {
@@ -188,29 +172,37 @@ export function MochiPopupPanel({
     if (pos) panelRef.current?.focus();
   }, [pos]);
 
-  if (!isOpen) return null;
+  // Always render — never return null.
+  // Mounting/unmounting a position:fixed element triggers a browser reflow
+  // that can snap the page scroll to 0. Instead we keep the Overlay in the
+  // DOM at all times and hide it with CSS when closed so no reflow occurs.
+  const overlayHidden = !isOpen;
 
-  const panelStyle = pos
-    ? {
-        top:  pos.top,
-        left: pos.left,
-        "--nubbin-h-offset": `${pos.nubHOff}px`,
-        "--nubbin-v-offset": `${pos.nubVOff}px`,
-      }
-    : { visibility: "hidden" };
+  const panelStyle = isOpen
+    ? pos
+      ? {
+          top:  pos.top,
+          left: pos.left,
+          "--nubbin-h-offset": `${pos.nubHOff}px`,
+          "--nubbin-v-offset": `${pos.nubVOff}px`,
+        }
+      : { visibility: "hidden" }  // measuring pass — not yet positioned
+    : { visibility: "hidden" };   // closed
 
   return (
     <Overlay
-      onClick={(e) => e.target === e.currentTarget && onClose?.()}
-      aria-modal="true"
+      $hidden={overlayHidden}
+      onClick={(e) => !overlayHidden && e.target === e.currentTarget && onClose?.()}
+      aria-modal={isOpen ? "true" : undefined}
+      aria-hidden={overlayHidden ? "true" : undefined}
       role="dialog"
     >
       <PanelWrapper>
         <Panel
-          tabIndex={-1}
+          tabIndex={isOpen ? -1 : undefined}
           ref={panelRef}
           style={panelStyle}
-          className={pos?.classes ?? ""}
+          className={isOpen && pos ? pos.classes : ""}
         >
           {title && <PanelTitle>{title}</PanelTitle>}
           <ContentArea>{children}</ContentArea>

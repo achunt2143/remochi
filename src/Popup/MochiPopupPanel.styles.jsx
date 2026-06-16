@@ -17,12 +17,21 @@ const fadeIn = keyframes`
   to   { opacity: 1; transform: scale(1); }
 `;
 
-// Transparent overlay — acts as autoDismiss tap target only, not a modal scrim
+// Transparent overlay — acts as auto-dismiss tap target only, not a modal scrim.
+// Always stays in the DOM. When $hidden=true it is fully invisible and
+// non-interactive so it never interferes with the page beneath.
 export const Overlay = styled.div`
   position: fixed;
   inset: 0;
   background: transparent;
   z-index: 999;
+
+  /* When closed: invisible + non-interactive. The element stays in the DOM
+     so that no mount/unmount reflow can scroll the page to the top. */
+  ${({ $hidden }) => $hidden && `
+    visibility: hidden;
+    pointer-events: none;
+  `}
 `;
 
 export const PanelWrapper = styled.div`
@@ -54,7 +63,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
 
   /* ────────────────────────────────────────────────────────────────
      VERTICAL POPUP MARGIN OFFSETS
-     Extra top space so the nubbin doesn't overlap the panel border.
   ──────────────────────────────────────────────────────────────── */
   &.vertical.below {
     margin-top: 20px;
@@ -66,41 +74,24 @@ export const Panel = styled.div.attrs(({ className }) => ({
 
   /* ────────────────────────────────────────────────────────────────
      HORIZONTAL POPUP MARGIN OFFSETS
-     right = popup is LEFT of anchor (nub points right toward anchor)
-     left  = popup is RIGHT of anchor (nub points left toward anchor)
   ──────────────────────────────────────────────────────────────── */
   &.horizontal.right { margin-left: -11px; }
   &.horizontal.left  { margin-left:  10px; }
 
   /* ────────────────────────────────────────────────────────────────
      CORNER BORDER-RADIUS ZEROING
-     The corner where the nub image butts up against the panel gets
-     its radius zeroed so the nub image and panel edge are seamless.
   ──────────────────────────────────────────────────────────────── */
-
-  /* Vertical below: nub at top edge */
-  &.vertical.below.left.corner  { border-top-right-radius: 0; } /* nub at top-right */
-  &.vertical.below.right.corner { border-top-left-radius:  0; } /* nub at top-left  */
-
-  /* Vertical above: nub at bottom edge */
-  &.vertical.above.left.corner  { border-bottom-right-radius: 0; } /* nub at bottom-right */
-  &.vertical.above.right.corner { border-bottom-left-radius:  0; } /* nub at bottom-left  */
-
-  /* Horizontal high (top-aligned): nub at top edge */
-  &.horizontal.left.high.corner  { border-top-left-radius:  0; } /* nub at top-left  */
-  &.horizontal.right.high.corner { border-top-right-radius: 0; } /* nub at top-right */
-
-  /* Horizontal low (bottom-aligned): nub at bottom edge */
-  &.horizontal.left.low.corner  { border-bottom-left-radius:  0; } /* nub at bottom-left  */
-  &.horizontal.right.low.corner { border-bottom-right-radius: 0; } /* nub at bottom-right */
+  &.vertical.below.left.corner  { border-top-right-radius: 0; }
+  &.vertical.below.right.corner { border-top-left-radius:  0; }
+  &.vertical.above.left.corner  { border-bottom-right-radius: 0; }
+  &.vertical.above.right.corner { border-bottom-left-radius:  0; }
+  &.horizontal.left.high.corner  { border-top-left-radius:  0; }
+  &.horizontal.right.high.corner { border-top-right-radius: 0; }
+  &.horizontal.left.low.corner  { border-bottom-left-radius:  0; }
+  &.horizontal.right.low.corner { border-bottom-right-radius: 0; }
 
   /* ────────────────────────────────────────────────────────────────
      NUBBIN ::after rules
-     Class semantics (matching Enyo originals):
-       left/right on vertical  = direction TO the anchor
-       left/right on horizontal = which side of the popup the nub is on
-       --nubbin-h-offset = JS-computed px so straight nubbins track anchor center
-       --nubbin-v-offset = same for horizontal nubbins
   ──────────────────────────────────────────────────────────────── */
   &::after {
     content: '';
@@ -108,9 +99,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     display: block;
   }
 
-  /* ── VERTICAL: popup BELOW anchor → nub points UP ──
-     Base rule covers all .vertical.below cases;
-     .left/.right overrides are handled by the same dynamic offset */
   &.vertical.below::after {
     top: 0;
     margin-top: -20px;
@@ -120,7 +108,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${up}) no-repeat;
   }
 
-  /* ── VERTICAL: popup ABOVE anchor → nub points DOWN ── */
   &.vertical.above::after {
     top: 100%;
     left: var(--nubbin-h-offset, 34%);
@@ -129,11 +116,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${down}) no-repeat;
   }
 
-  /* ── VERTICAL CORNER NUBBINS ──
-     Fixed pixel offsets matching original Enyo CSS exactly.
-     These override the base vertical rules above. */
-
-  /* Below + left corner: nub at top-right of panel */
   &.vertical.below.left.corner::after {
     top: 0%;
     left: 100%;
@@ -144,7 +126,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${topRightCornerUp}) no-repeat;
   }
 
-  /* Below + right corner: nub at top-left of panel */
   &.vertical.below.right.corner::after {
     top: 0%;
     left: 0%;
@@ -155,7 +136,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${topLeftCornerUp}) no-repeat;
   }
 
-  /* Above + left corner: nub at bottom-right of panel */
   &.vertical.above.left.corner::after {
     top: 100%;
     left: 100%;
@@ -165,7 +145,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${bottomRightCornerDown}) no-repeat;
   }
 
-  /* Above + right corner: nub at bottom-left of panel */
   &.vertical.above.right.corner::after {
     top: 100%;
     left: 0%;
@@ -175,8 +154,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${bottomLeftCornerDown}) no-repeat;
   }
 
-  /* ── HORIZONTAL: popup to the RIGHT of anchor → nub points LEFT ──
-     class 'left' = nub is on the left side of the panel */
   &.horizontal.left::after {
     left: 0%;
     margin-left: -20px;
@@ -186,8 +163,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${left}) no-repeat;
   }
 
-  /* ── HORIZONTAL: popup to the LEFT of anchor → nub points RIGHT ──
-     class 'right' = nub is on the right side of the panel */
   &.horizontal.right::after {
     left: 100%;
     top: var(--nubbin-v-offset, 35%);
@@ -196,10 +171,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${right}) no-repeat;
   }
 
-  /* ── HORIZONTAL CORNER NUBBINS ──
-     Fixed pixel offsets matching original Enyo CSS exactly. */
-
-  /* Left + high corner: nub at top-left of panel */
   &.horizontal.left.high.corner::after {
     top: 0%;
     left: 0%;
@@ -210,7 +181,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${topLeftCornerLeft}) no-repeat;
   }
 
-  /* Right + high corner: nub at top-right of panel */
   &.horizontal.right.high.corner::after {
     top: 0%;
     left: 100%;
@@ -220,7 +190,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${topRightCornerRight}) no-repeat;
   }
 
-  /* Left + low corner: nub at bottom-left of panel */
   &.horizontal.left.low.corner::after {
     top: 100%;
     left: 0%;
@@ -231,7 +200,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
     background: transparent url(${bottomLeftCornerLeft}) no-repeat;
   }
 
-  /* Right + low corner: nub at bottom-right of panel */
   &.horizontal.right.low.corner::after {
     top: 100%;
     left: 100%;
