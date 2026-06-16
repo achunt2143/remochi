@@ -138,16 +138,13 @@
     --mochi-text-faint:   var(--color-text-muted);
     --mochi-primary:      var(--color-primary);
     --mochi-primary-hover: var(--color-primary-hover);
-    // Text color on primary background (e.g. filled button label, active page badge)
     --mochi-primary-text: #ffffff;
-    // Subtle tint of primary for selected/active backgrounds
     --mochi-primary-soft: rgba(91, 157, 217, 0.18);
-    // Hover surface: very slight lightening
     --mochi-hover:  rgba(255, 255, 255, 0.06);
-    // Active/pressed surface
     --mochi-active: rgba(255, 255, 255, 0.1);
-    // Striped table row tint
     --mochi-stripe: rgba(255, 255, 255, 0.03);
+    // Contextual popup border — always solid #646464 regardless of theme
+    --mochi-popup-border: #646464;
 
     background-color: var(--color-background);
     color: var(--color-text);
@@ -196,16 +193,13 @@
     --mochi-text-faint:   var(--color-text-muted);
     --mochi-primary:      var(--color-primary);
     --mochi-primary-hover: var(--color-primary-hover);
-    // In light mode primary is dark enough that white text works
     --mochi-primary-text: #ffffff;
-    // Subtle tint of primary for selected/active backgrounds
     --mochi-primary-soft: rgba(74, 139, 194, 0.12);
-    // Hover surface: very slight darkening
     --mochi-hover:  rgba(0, 0, 0, 0.04);
-    // Active/pressed surface
     --mochi-active: rgba(0, 0, 0, 0.08);
-    // Striped table row tint
     --mochi-stripe: rgba(0, 0, 0, 0.02);
+    // Contextual popup border — always solid #646464 regardless of theme
+    --mochi-popup-border: #646464;
 
     background-color: var(--color-background);
     color: var(--color-text);
