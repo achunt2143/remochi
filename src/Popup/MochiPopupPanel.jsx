@@ -35,8 +35,6 @@ export function MochiPopupPanel({
   const computePosition = useCallback(() => {
     if (!panelRef.current) return;
 
-    // Prefer pre-captured snapshot so the rect reflects scroll position at
-    // click time, before any re-renders or side-effects have run.
     const a = anchorRectProp ?? anchorEl?.current?.getBoundingClientRect();
     if (!a) return;
 
@@ -94,12 +92,14 @@ export function MochiPopupPanel({
     const inTopBottom = (a.bottom < topFlushPt) || (a.top > bottomFlushPt);
     const inLeftRight = (a.right  < leftFlushPt) || (a.left > rightFlushPt);
 
+    // setPos only stores the CSS class string + nubbin offsets.
+    // top/left positioning is intentionally NOT stored here — it is handled
+    // entirely by the CSS classes on the Panel element.
     function resolveVertical(corner = false) {
       const v = tryVertical();
       if (!v) return false;
-      const { left, dirClass } = centerHoriz();
+      const { dirClass } = centerHoriz();
       setPos({
-        top: v.top, left,
         classes: `vertical ${v.above ? "above" : "below"}${dirClass ? " " + dirClass : ""}${corner ? " corner" : ""}`,
         nubHOff, nubVOff,
       });
@@ -109,10 +109,9 @@ export function MochiPopupPanel({
     function resolveHorizontal(corner = false) {
       const h = tryHorizontal();
       if (!h) return false;
-      const { top: ct, mod } = centerVert();
+      const { mod } = centerVert();
       const dirClass = h.toRight ? "left" : "right";
       setPos({
-        top: ct, left: h.left,
         classes: `horizontal ${dirClass}${mod ? " " + mod : ""}${corner ? " corner" : ""}`,
         nubHOff, nubVOff,
       });
@@ -122,9 +121,9 @@ export function MochiPopupPanel({
     if (inTopBottom) {
       const v = tryVertical();
       if (v) {
-        const { left, dirClass } = centerHoriz();
+        const { dirClass } = centerHoriz();
         if (dirClass) {
-          setPos({ top: v.top, left, classes: `vertical ${v.above ? "above" : "below"} ${dirClass} corner`, nubHOff, nubVOff });
+          setPos({ classes: `vertical ${v.above ? "above" : "below"} ${dirClass} corner`, nubHOff, nubVOff });
           return;
         }
       }
@@ -140,10 +139,9 @@ export function MochiPopupPanel({
     if (resolveVertical())   return;
     if (resolveHorizontal()) return;
 
-    const { left, dirClass } = centerHoriz();
+    // Ultimate fallback
+    const { dirClass } = centerHoriz();
     setPos({
-      top:    Math.min(a.bottom + MARGIN, viewH - ph - MARGIN),
-      left,
       classes: `vertical below${dirClass ? " " + dirClass : ""}`,
       nubHOff, nubVOff,
     });
@@ -172,22 +170,16 @@ export function MochiPopupPanel({
     if (pos) panelRef.current?.focus();
   }, [pos]);
 
-  // Always render — never return null.
-  // Mounting/unmounting a position:fixed element triggers a browser reflow
-  // that can snap the page scroll to 0. Instead we keep the Overlay in the
-  // DOM at all times and hide it with CSS when closed so no reflow occurs.
   const overlayHidden = !isOpen;
 
-  const panelStyle = isOpen
-    ? pos
-      ? {
-          top:  pos.top,
-          left: pos.left,
-          "--nubbin-h-offset": `${pos.nubHOff}px`,
-          "--nubbin-v-offset": `${pos.nubVOff}px`,
-        }
-      : { visibility: "hidden" }  // measuring pass — not yet positioned
-    : { visibility: "hidden" };   // closed
+  // Only pass nubbin CSS custom properties — no top/left.
+  // All spatial positioning is handled by the CSS classes on Panel.
+  const panelStyle = isOpen && pos
+    ? {
+        "--nubbin-h-offset": `${pos.nubHOff}px`,
+        "--nubbin-v-offset": `${pos.nubVOff}px`,
+      }
+    : { visibility: "hidden" };
 
   return (
     <Overlay
