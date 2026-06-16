@@ -46,14 +46,8 @@
 }
 
 // ── MochiButton overrides inside the controls bar ────────────────────────────
-// The controls sit on a dark overlay, so we override the button text colour
-// to white without fighting styled-components specificity.
 .mochi-video-btn {
-  // Force white label / bracket colour on the dark video background
   color: #fff !important;
-
-  // Trim the default MochiButton internal top-padding that accommodates the
-  // label text — icon-only buttons look better flush.
   padding: 0 4px;
 
   svg {
@@ -63,15 +57,36 @@
   }
 }
 
-// ── Seek timeline (flex-grow) ─────────────────────────────────────────────────
+// ── Seek timeline (progress bar, flex-grow, clickable/draggable) ──────────────
 .mochi-video-timeline {
   flex: 1 1 0;
   min-width: 0;
+  cursor: pointer;
+  // Vertically centre the thin bar in the controls row
+  display: flex;
+  align-items: center;
 
-  // Trim the generous MochiSlider top/bottom margins down for the compact bar
-  .mochi-slider-root,
-  [role="slider"] {
-    margin: 0 !important;
+  // Expand the hit area so small bar is easy to click
+  padding: 8px 0;
+
+  // MochiProgressBar fills the flex container
+  > * {
+    width: 100%;
+    // Override the default 12px height — thinner suits a video timeline
+    height: 4px !important;
+    // Slightly brightened track on dark background
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: none !important;
+  }
+
+  &.seeking > * {
+    height: 6px !important;
+  }
+
+  // Hover: grow slightly so the user knows it's interactive
+  &:hover > * {
+    height: 6px !important;
+    transition: height 0.15s ease;
   }
 }
 

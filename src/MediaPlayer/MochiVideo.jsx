@@ -1,7 +1,8 @@
 // MochiVideo.jsx
-import React, { useState, useRef, useEffect } from 'react';
-import { MochiButton } from '../Button/MochiButton';
-import { MochiSlider } from '../Slider/MochiSlider';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { MochiButton }      from '../Button/MochiButton';
+import { MochiSlider }      from '../Slider/MochiSlider';
+import { MochiProgressBar } from '../ProgressBar/MochiProgressBar';
 import {
   FaPlay, FaPause,
   FaVolumeUp, FaVolumeDown, FaVolumeMute,
@@ -28,28 +29,30 @@ const MochiVideo = ({
   onEnded,
   onTimeUpdate,
 }) => {
-  const videoRef          = useRef(null);
-  const controlsTimeout  = useRef(null);
+  const videoRef         = useRef(null);
+  const timelineRef      = useRef(null);
+  const controlsTimeout = useRef(null);
 
-  const [isPlaying,     setIsPlaying]     = useState(false);
-  const [currentTime,   setCurrentTime]   = useState(0);
-  const [duration,      setDuration]      = useState(0);
-  const [volume,        setVolume]        = useState(1);
-  const [isMuted,       setIsMuted]       = useState(muted);
-  const [showControls,  setShowControls]  = useState(false);
-  const [isFullscreen,  setIsFullscreen]  = useState(false);
+  const [isPlaying,    setIsPlaying]    = useState(false);
+  const [currentTime,  setCurrentTime]  = useState(0);
+  const [duration,     setDuration]     = useState(0);
+  const [volume,       setVolume]       = useState(1);
+  const [isMuted,      setIsMuted]      = useState(muted);
+  const [showControls, setShowControls] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSeeking,    setIsSeeking]    = useState(false);
 
   // ── video event wiring ───────────────────────────────────────────────────
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
 
-    const onMeta    = () => setDuration(v.duration);
-    const onTime    = () => { setCurrentTime(v.currentTime); onTimeUpdate?.(v.currentTime); };
-    const onPlayEvt = () => { setIsPlaying(true);  onPlay?.(); };
-    const onPauseEvt= () => { setIsPlaying(false); onPause?.(); };
-    const onEndEvt  = () => { setIsPlaying(false); onEnded?.(); };
-    const onFS      = () => setIsFullscreen(!!document.fullscreenElement);
+    const onMeta     = () => setDuration(v.duration);
+    const onTime     = () => { setCurrentTime(v.currentTime); onTimeUpdate?.(v.currentTime); };
+    const onPlayEvt  = () => { setIsPlaying(true);  onPlay?.(); };
+    const onPauseEvt = () => { setIsPlaying(false); onPause?.(); };
+    const onEndEvt   = () => { setIsPlaying(false); onEnded?.(); };
+    const onFS       = () => setIsFullscreen(!!document.fullscreenElement);
 
     v.addEventListener('loadedmetadata', onMeta);
     v.addEventListener('timeupdate',     onTime);
@@ -68,6 +71,48 @@ const MochiVideo = ({
     };
   }, [onPlay, onPause, onEnded, onTimeUpdate]);
 
+  // ── seek helpers (used by both click and drag on the progress bar) ────────
+  const seekFromClientX = useCallback((clientX) => {
+    const bar = timelineRef.current;
+    const v   = videoRef.current;
+    if (!bar || !v || !duration) return;
+    const rect    = bar.getBoundingClientRect();
+    const ratio   = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+    const newTime = ratio * duration;
+    v.currentTime = newTime;
+    setCurrentTime(newTime);
+  }, [duration]);
+
+  const handleTimelineMouseDown = useCallback((e) => {
+    e.preventDefault();
+    setIsSeeking(true);
+    seekFromClientX(e.clientX);
+
+    const onMove = (mv) => seekFromClientX(mv.clientX);
+    const onUp   = () => {
+      setIsSeeking(false);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup',   onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup',   onUp);
+  }, [seekFromClientX]);
+
+  const handleTimelineTouchStart = useCallback((e) => {
+    e.stopPropagation();
+    setIsSeeking(true);
+    seekFromClientX(e.touches[0].clientX);
+
+    const onMove = (mv) => seekFromClientX(mv.touches[0].clientX);
+    const onEnd  = () => {
+      setIsSeeking(false);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend',  onEnd);
+    };
+    window.addEventListener('touchmove', onMove);
+    window.addEventListener('touchend',  onEnd);
+  }, [seekFromClientX]);
+
   // ── control handlers ─────────────────────────────────────────────────────
   const handlePlayPause = () => {
     const v = videoRef.current;
@@ -75,19 +120,10 @@ const MochiVideo = ({
     isPlaying ? v.pause() : v.play();
   };
 
-  // MochiSlider reports value in the same units as min/max, so for the
-  // timeline slider that means seconds directly.
-  const handleSeek = (val) => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.currentTime = val;
-    setCurrentTime(val);
-  };
-
   const handleVolumeChange = (val) => {
     const v = videoRef.current;
     if (!v) return;
-    const norm = val / 100;        // MochiSlider default range is 0-100
+    const norm = val / 100;
     setVolume(norm);
     v.volume = norm;
     setIsMuted(norm === 0);
@@ -105,7 +141,7 @@ const MochiVideo = ({
     const container = videoRef.current?.parentElement;
     if (!container) return;
     if (!isFullscreen) container.requestFullscreen?.();
-    else              document.exitFullscreen?.();
+    else               document.exitFullscreen?.();
   };
 
   const revealControls = () => {
@@ -116,12 +152,14 @@ const MochiVideo = ({
     }, 3000);
   };
 
-  // Volume icon selection
   const VolumeIcon = isMuted || volume === 0
     ? FaVolumeMute
     : volume < 0.5
       ? FaVolumeDown
       : FaVolumeUp;
+
+  // Progress as 0-100 percentage for MochiProgressBar
+  const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div
@@ -153,16 +191,19 @@ const MochiVideo = ({
             {isPlaying ? <FaPause /> : <FaPlay />}
           </MochiButton>
 
-          {/* ── Seek timeline ── */}
-          <div className="mochi-video-timeline">
-            <MochiSlider
-              value={currentTime}
-              min={0}
-              max={duration || 1}
-              step={0.5}
-              width="100%"
-              onChange={handleSeek}
-            />
+          {/* ── Seek timeline (progress bar + pointer events) ── */}
+          <div
+            ref={timelineRef}
+            className={`mochi-video-timeline${isSeeking ? ' seeking' : ''}`}
+            onMouseDown={handleTimelineMouseDown}
+            onTouchStart={handleTimelineTouchStart}
+            role="slider"
+            aria-label="Seek"
+            aria-valuenow={Math.round(progressPct)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <MochiProgressBar value={progressPct} />
           </div>
 
           {/* ── Time readout ── */}
