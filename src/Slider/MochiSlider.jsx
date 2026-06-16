@@ -6,12 +6,6 @@ const trackHeight = "5px";
 const thumbDefault = 28;
 const thumbPressed = 40;
 
-// Canvas bubble is 62x37px. We want the text centred over it.
-// BubbleCanvas sits at left:100%, transform: translate(-10%, 0), top:-45px
-// relative to the Thumb. The popup text needs to match that position.
-// Bubble width = 62px. Its left edge is at ~(thumbWidth - 62*0.1) from thumb left.
-// Simplest: make PopupText absolute, same anchor as the canvas, then centre.
-
 const BUBBLE_W = 62;
 const BUBBLE_H = 37;
 
@@ -45,48 +39,46 @@ const Thumb = styled.div`
   height: ${thumbDefault}px;
   background: ${({ $color }) => $color || "var(--mochi-primary, #04B2F9)"};
   border-radius: 50%;
-  box-shadow: 0 2px 10px var(--mochi-primary-soft, rgba(4, 178, 249, 0.4));
+  /*
+   * When a custom color is provided we can't derive a soft shadow from it
+   * via CSS vars, so we use a low-opacity black shadow as a safe universal
+   * fallback. The CSS-var path uses --mochi-primary-soft when available.
+   */
+  box-shadow: ${({ $color }) =>
+    $color
+      ? `0 2px 10px color-mix(in srgb, ${$color} 40%, transparent)`
+      : "0 2px 10px var(--mochi-primary-soft, rgba(0,0,0,0.25))"};
   z-index: 2;
   transition:
     width 0.18s cubic-bezier(0.43, 0.59, 0.39, 0.88),
     height 0.18s cubic-bezier(0.43, 0.59, 0.39, 0.88),
     box-shadow 0.19s;
-  ${({ $active }) =>
+  ${({ $active, $color }) =>
     $active &&
     css`
       width: ${thumbPressed}px;
       height: ${thumbPressed}px;
-      box-shadow: 0 8px 28px var(--mochi-primary-soft, rgba(4, 178, 249, 0.5));
+      box-shadow: ${$color
+        ? `0 8px 28px color-mix(in srgb, ${$color} 50%, transparent)`
+        : "0 8px 28px var(--mochi-primary-soft, rgba(0,0,0,0.3))"};
     `}
   cursor: grab;
 `;
 
-// Sits in the same stacking context as BubbleCanvas (both children of Thumb).
-// BubbleCanvas: left:100%, translateX(-10%), top:-45px, width:62px
-// We mirror that anchor then shift right by half the bubble width to centre.
 const PopupText = styled.div`
   position: absolute;
-  /* Match BubbleCanvas anchor exactly */
   left: 100%;
   top: -45px;
-  /* BubbleCanvas translateX is -10% of its own width = -6.2px.
-     Centre of bubble from its left edge = 62/2 = 31px.
-     So centre from our left:100% = -6.2 + 31 = 24.8px.
-     We then shift back by 50% of our own width via translateX(-50%)
-     but since we're text we use a fixed offset instead. */
   transform: translate(calc(-10% + ${BUBBLE_W / 2}px - 50%), 0);
   width: max-content;
-
-  /* Typography */
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
-  line-height: ${BUBBLE_H}px;   /* vertically centre in the 37px tall bubble */
+  line-height: ${BUBBLE_H}px;
   text-align: center;
   white-space: nowrap;
   pointer-events: none;
-  z-index: 101;                  /* above the canvas (z-index: 100) */
-
+  z-index: 101;
   opacity: ${({ $shown }) => ($shown ? 1 : 0)};
   transition: opacity 0.18s;
 `;
@@ -114,9 +106,10 @@ export const MochiSlider = ({
   const [internalVal, setInternalVal] = useState(value);
   const trackRef = useRef();
 
-  // Resolved color: explicit prop → CSS variable fallback string
-  // BubbleCanvas receives this same value so canvas fill always matches.
-  const resolvedColor = color || "var(--mochi-primary, #04B2F9)";
+  // When no color prop is given, pass undefined so styled-components falls
+  // through to the CSS variable path (var(--mochi-primary, #04B2F9)).
+  // BubbleCanvas handles var() strings itself via getComputedStyle.
+  const resolvedColor = color || undefined;
 
   const percent = ((internalVal - min) * 100) / (max - min);
 
@@ -152,6 +145,10 @@ export const MochiSlider = ({
     handleDrag(e.clientX);
   };
 
+  // BubbleCanvas color: pass the explicit color string when provided, otherwise
+  // pass the var() string so resolveColor() can compute it from the DOM.
+  const bubbleColor = color || "var(--mochi-primary, #04B2F9)";
+
   return (
     <SliderRoot
       style={{ width }}
@@ -176,9 +173,7 @@ export const MochiSlider = ({
         >
           {active && (
             <>
-              {/* Canvas draws the bubble shape in the correct color */}
-              <BubbleCanvas color={resolvedColor} />
-              {/* Text layered on top, centred over the bubble */}
+              <BubbleCanvas color={bubbleColor} />
               <PopupText $shown={active}>
                 {internalVal}{min === 0 && max === 100 ? '%' : ''}
               </PopupText>

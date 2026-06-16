@@ -1,5 +1,17 @@
 import React, { useEffect, useRef } from "react";
 
+// Resolves a color string that may be a CSS variable (e.g. "var(--mochi-primary, #04B2F9)")
+// into an actual color value the Canvas 2D API can use.
+function resolveColor(el, color) {
+  if (!color || !color.trim().startsWith("var(")) return color || "#04B2F9";
+  // Apply it temporarily to the element and read back the computed value
+  const prev = el.style.color;
+  el.style.color = color;
+  const resolved = getComputedStyle(el).color;
+  el.style.color = prev;
+  return resolved || "#04B2F9";
+}
+
 // This draws the legacy Mochi bubble from Enyo
 function drawMochiBubble(ctx, color) {
   ctx.clearRect(0, 0, 62, 37);
@@ -19,12 +31,14 @@ function drawMochiBubble(ctx, color) {
   ctx.restore();
 }
 
-// Usage inside your slider popup
-const BubbleCanvas = ({ color = "#04B2F9", style }) => {
+const BubbleCanvas = ({ color = "var(--mochi-primary, #04B2F9)", style }) => {
   const canvasRef = useRef();
 
   useEffect(() => {
-    drawMochiBubble(canvasRef.current.getContext("2d"), color);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const resolved = resolveColor(canvas, color);
+    drawMochiBubble(canvas.getContext("2d"), resolved);
   }, [color]);
 
   return (
