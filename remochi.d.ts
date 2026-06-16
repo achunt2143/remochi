@@ -292,6 +292,73 @@ export interface VideoProps {
 export const Video: React.FC<VideoProps>;
 
 // ---------------------------------------------------------------------------
+// Menu
+// ---------------------------------------------------------------------------
+export interface MochiSlidingMenuProps {
+  children?: React.ReactNode;
+  /** Which edge the menu slides in from. @default 'left' */
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  /** Controlled open state. Omit to use internal state. */
+  isOpen?: boolean;
+  /** Called when the menu requests an open/close transition. */
+  onOpenChange?: (open: boolean) => void;
+  className?: string;
+  style?: React.CSSProperties;
+  /** Slide animation duration in ms. @default 300 */
+  duration?: number;
+  /** Close on Escape key. @default true */
+  closeOnEscape?: boolean;
+  /** Close when backdrop is clicked. @default true */
+  closeOnBackdropClick?: boolean;
+  /** Override the backdrop CSS color. Defaults to a theme-aware value. */
+  backdropColor?: string;
+  /** Show the backdrop overlay. @default true */
+  showBackdrop?: boolean;
+}
+/** MochiSlidingMenu.ContentShifter props */
+export interface MochiSlidingMenuContentShifterProps {
+  children?: React.ReactNode;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  isMenuOpen?: boolean;
+  /** Width of the left/right menu (CSS value). @default '280px' */
+  menuWidth?: string;
+  /** Height of the top/bottom menu (CSS value). @default 'auto' */
+  menuHeight?: string;
+  duration?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}
+export const MochiSlidingMenu: React.FC<MochiSlidingMenuProps> & {
+  ContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
+};
+export const MochiSlidingMenuContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
+
+export interface MochiSlidingMenuItemProps {
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+  href?: string;
+  isActive?: boolean;
+  badge?: string | number;
+  className?: string;
+  style?: React.CSSProperties;
+  disabled?: boolean;
+  variant?: 'default' | 'danger' | 'success';
+}
+export const MochiSlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
+
+export interface MochiSlidingMenuItemGroupProps {
+  children?: React.ReactNode;
+  /** Section heading rendered in uppercase muted text. */
+  label?: string;
+  /** Show a divider border below the group. @default false */
+  divider?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}
+export const MochiSlidingMenuItemGroup: React.FC<MochiSlidingMenuItemGroupProps>;
+
+// ---------------------------------------------------------------------------
 // NumberInput
 // ---------------------------------------------------------------------------
 export interface NumberInputProps {

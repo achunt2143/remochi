@@ -1,0 +1,58 @@
+// ============================================================
+// MochiSlidingMenuItemGroup — Remochi Design System
+// ============================================================
+
+.mochi-sliding-menu-item-group {
+  --group-label-color:   var(--color-text-secondary, #666666);
+  --group-divider-color: var(--color-border, #e5e7eb);
+
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+// Dark overrides
+[data-mochi-theme='dark'] .mochi-sliding-menu-item-group,
+.mochi-theme-dark .mochi-sliding-menu-item-group {
+  --group-label-color:   #999999;
+  --group-divider-color: #444444;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mochi-sliding-menu-item-group {
+    --group-label-color:   #999999;
+    --group-divider-color: #444444;
+  }
+}
+
+.mochi-sliding-menu-item-group-label {
+  padding: 16px 16px 8px;
+  color: var(--group-label-color);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+  pointer-events: none;
+}
+
+.mochi-sliding-menu-item-group-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.mochi-sliding-menu-item-group--divider {
+  border-bottom: 1px solid var(--group-divider-color);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .mochi-sliding-menu-item-group       { padding: 8px 0; }
+  .mochi-sliding-menu-item-group-label { padding: 12px 16px 6px; font-size: 11px; }
+}
+
+// Accessibility
+@media (prefers-contrast: more) {
+  .mochi-sliding-menu-item-group--divider { border-bottom-width: 2px; }
+  .mochi-sliding-menu-item-group-label    { font-weight: 700; }
+}

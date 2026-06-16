@@ -11,6 +11,7 @@ export * from './Input';
 export * from './Item';
 export * from './Lists';
 export * from './MediaPlayer';
+export * from './Menu';
 export * from './NumberInput';
 export * from './Pagination';
 export * from './Panels';

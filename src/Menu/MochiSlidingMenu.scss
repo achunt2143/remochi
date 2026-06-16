@@ -1,0 +1,189 @@
+// ============================================================
+// MochiSlidingMenu — Remochi Design System
+// Light + dark mode via [data-mochi-theme] attribute set by
+// MochiThemeWrapper on <html>.
+// ============================================================
+
+// --- Token defaults (light) ----------------------------------
+.mochi-sliding-menu {
+  --sliding-menu-duration:  var(--animation-duration, 300ms);
+  --sliding-menu-ease:      cubic-bezier(0.16, 1, 0.3, 1);
+  --sliding-menu-width:     280px;
+
+  // Light tokens
+  --sliding-menu-bg:        var(--color-surface, #ffffff);
+  --sliding-menu-text:      var(--color-text,    #333333);
+  --sliding-menu-border:    var(--color-border,  #e5e7eb);
+  --sliding-menu-shadow:    0 10px 25px rgba(0, 0, 0, 0.15);
+  --sliding-menu-scrollbar: rgba(0, 0, 0, 0.2);
+  --backdrop-color:         rgba(0, 0, 0, 0.40);
+}
+
+// Dark overrides applied when MochiThemeWrapper sets data-mochi-theme="dark"
+[data-mochi-theme='dark'] .mochi-sliding-menu,
+.mochi-theme-dark .mochi-sliding-menu {
+  --sliding-menu-bg:        var(--color-surface, #1a1a1a);
+  --sliding-menu-text:      var(--color-text,    #f0f0f0);
+  --sliding-menu-border:    var(--color-border,  #444444);
+  --sliding-menu-shadow:    0 10px 25px rgba(0, 0, 0, 0.5);
+  --sliding-menu-scrollbar: rgba(255, 255, 255, 0.2);
+  --backdrop-color:         rgba(0, 0, 0, 0.60);
+}
+
+// Light overrides (explicit)
+[data-mochi-theme='light'] .mochi-sliding-menu,
+.mochi-theme-light .mochi-sliding-menu {
+  --sliding-menu-bg:        #ffffff;
+  --sliding-menu-text:      #333333;
+  --sliding-menu-border:    #e5e7eb;
+  --sliding-menu-shadow:    0 10px 25px rgba(0, 0, 0, 0.15);
+  --sliding-menu-scrollbar: rgba(0, 0, 0, 0.2);
+  --backdrop-color:         rgba(0, 0, 0, 0.40);
+}
+
+// System dark-mode fallback (when not wrapped)
+@media (prefers-color-scheme: dark) {
+  .mochi-sliding-menu {
+    --sliding-menu-bg:        #1a1a1a;
+    --sliding-menu-text:      #f0f0f0;
+    --sliding-menu-border:    #444444;
+    --sliding-menu-shadow:    0 10px 25px rgba(0, 0, 0, 0.5);
+    --sliding-menu-scrollbar: rgba(255, 255, 255, 0.2);
+    --backdrop-color:         rgba(0, 0, 0, 0.60);
+  }
+}
+
+// --- Base panel ----------------------------------------------
+.mochi-sliding-menu {
+  position: fixed;
+  z-index: 1000;
+  background-color: var(--sliding-menu-bg);
+  color: var(--sliding-menu-text);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: var(--sliding-menu-shadow);
+  transition:
+    transform var(--sliding-menu-duration) var(--sliding-menu-ease),
+    opacity   var(--sliding-menu-duration) var(--sliding-menu-ease);
+  -webkit-overflow-scrolling: touch;
+
+  // Scrollbar
+  scrollbar-width: thin;
+  scrollbar-color: var(--sliding-menu-scrollbar) transparent;
+
+  &::-webkit-scrollbar        { width: 6px; }
+  &::-webkit-scrollbar-track  { background: transparent; }
+  &::-webkit-scrollbar-thumb  {
+    background-color: var(--sliding-menu-scrollbar);
+    border-radius: 3px;
+    &:hover { filter: brightness(1.2); }
+  }
+}
+
+.mochi-sliding-menu-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+// --- Positions -----------------------------------------------
+.mochi-sliding-menu--left {
+  top: 0; left: 0;
+  height: 100vh;
+  width: var(--sliding-menu-width);
+  border-right: 1px solid var(--sliding-menu-border);
+  transform: translateX(-100%);
+  &.mochi-sliding-menu--open { transform: translateX(0); }
+}
+
+.mochi-sliding-menu--right {
+  top: 0; right: 0;
+  height: 100vh;
+  width: var(--sliding-menu-width);
+  border-left: 1px solid var(--sliding-menu-border);
+  transform: translateX(100%);
+  &.mochi-sliding-menu--open { transform: translateX(0); }
+}
+
+.mochi-sliding-menu--top {
+  top: 0; left: 0; right: 0;
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  border-bottom: 1px solid var(--sliding-menu-border);
+  transform: translateY(-100%);
+  &.mochi-sliding-menu--open { transform: translateY(0); }
+  .mochi-sliding-menu-inner {
+    flex-direction: row;
+    align-items: center;
+    padding: 16px 24px;
+  }
+}
+
+.mochi-sliding-menu--bottom {
+  bottom: 0; left: 0; right: 0;
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  border-top: 1px solid var(--sliding-menu-border);
+  transform: translateY(100%);
+  &.mochi-sliding-menu--open { transform: translateY(0); }
+  .mochi-sliding-menu-inner {
+    flex-direction: row;
+    align-items: center;
+    padding: 16px 24px;
+  }
+}
+
+// --- Backdrop ------------------------------------------------
+.mochi-sliding-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background-color: var(--backdrop-color, rgba(0, 0, 0, 0.4));
+  cursor: pointer;
+  animation: mochiBackdropFadeIn var(--sliding-menu-duration, 300ms)
+             cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes mochiBackdropFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
+// --- ContentShifter ------------------------------------------
+.mochi-sliding-menu-content-shifter {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+// --- Responsive ----------------------------------------------
+@media (max-width: 768px) {
+  .mochi-sliding-menu--left,
+  .mochi-sliding-menu--right  { --sliding-menu-width: 75vw; }
+  .mochi-sliding-menu--top,
+  .mochi-sliding-menu--bottom { max-height: 70vh; }
+}
+
+// --- Accessibility -------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+  .mochi-sliding-menu,
+  .mochi-sliding-menu-backdrop {
+    transition: none;
+    animation: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .mochi-sliding-menu {
+    border-width: 2px;
+    box-shadow: 0 0 0 1px var(--sliding-menu-text);
+  }
+}
+
+@media print {
+  .mochi-sliding-menu,
+  .mochi-sliding-menu-backdrop { display: none; }
+}
