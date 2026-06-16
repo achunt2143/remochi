@@ -1,5 +1,5 @@
 // MochiDateInput.jsx
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { MochiInput }      from '../Input/MochiInput';
 import { MochiButton }     from '../Button/MochiButton';
 import { MochiPopupPanel } from '../Popup/MochiPopupPanel';
@@ -132,10 +132,10 @@ const MochiDateInput = ({
 }) => {
   const [isOpen,   setIsOpen]   = useState(false);
   const [selected, setSelected] = useState(value ? new Date(value) : null);
-  // Pass the DOM ref directly — PopupPanel reads a fresh getBoundingClientRect()
-  // each time it computes position, so there's no stale-snapshot problem.
+  // triggerRef is passed directly to MochiPopupPanel as anchorEl.
+  // PopupPanel calls getBoundingClientRect() fresh on every open,
+  // so the popup always positions relative to the current scroll position.
   const triggerRef = useRef(null);
-  const [anchorRect, setAnchorRect] = useState(null);
 
   const open  = useCallback(() => { if (!disabled) setIsOpen(true);  }, [disabled]);
   const close = useCallback(() => setIsOpen(false), []);
@@ -145,12 +145,6 @@ const MochiDateInput = ({
     onChange?.(date);
     close();
   };
-
-  useEffect(() => {
-    if (triggerRef.current) {
-      setAnchorRect(triggerRef.current.getBoundingClientRect());
-    }
-  }, []);
 
   const displayValue = selected ? formatDisplay(selected) : '';
 
@@ -174,11 +168,12 @@ const MochiDateInput = ({
         aria-expanded={isOpen}
       />
 
-      {/* anchorEl receives the live ref so PopupPanel always gets a fresh rect */}
+      {/* anchorEl passes the live ref — PopupPanel reads getBoundingClientRect()
+          at open time so the calendar always appears next to the input,
+          regardless of how far the user has scrolled. */}
       <MochiPopupPanel
         isOpen={isOpen}
         anchorEl={triggerRef}
-        anchorRect={anchorRect}
         onClose={close}
         title="Select a date"
       >
