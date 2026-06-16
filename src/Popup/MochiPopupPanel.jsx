@@ -48,38 +48,72 @@ export function MochiPopupPanel({
     const topFlushPt    = VERT_FLUSH_MARGIN;
     const bottomFlushPt = viewH - VERT_FLUSH_MARGIN;
     const leftFlushPt   = HORIZ_FLUSH_MARGIN;
-    const rightFlushPt  = viewW - HORIZ_FLUSH_MARGIN;
 
     let nubHOff = 0;
     let nubVOff = 0;
 
+    // ── Axis helpers ────────────────────────────────────────────────────────
+
     function tryVertical() {
-      let t, above;
-      if (a.top < viewH / 2) { t = a.bottom + MARGIN; above = false; }
-      else                   { t = a.top - ph - MARGIN; above = true; }
+      let above;
+      if (a.top < viewH / 2) { above = false; }
+      else                   { above = true;  }
+      // Verify it actually fits
+      const t = above ? a.top - ph : a.bottom;
       if (t + ph > viewH || t < 0) return null;
-      return { top: t, above };
+      return { above };
     }
 
     function tryHorizontal() {
-      let l, toRight;
-      if (a.left + a.width < viewW / 2) { l = a.right  + MARGIN; toRight = true;  }
-      else                              { l = a.left - pw - MARGIN; toRight = false; }
+      let toRight;
+      if (a.left + a.width < viewW / 2) { toRight = true;  }
+      else                              { toRight = false; }
+      const l = toRight ? a.right : a.left - pw;
       if (l < 0 || l + pw > viewW) return null;
-      return { left: l, toRight };
+      return { toRight };
     }
 
+    // ── top/left derivation ─────────────────────────────────────────────────
+    //
+    // The Panel is position:absolute inside PanelWrapper (fixed, top:0 left:0,
+    // full viewport). So top/left are viewport-relative px.
+    //
+    // Vertical placement (below / above):
+    //   below  → top  = a.bottom   (panel sits just under the anchor)
+    //   above  → top  = a.top - ph (panel sits just above the anchor)
+    //
+    // Horizontal placement (left-of / right-of anchor):
+    //   right-of anchor (nub on left side)  → left = a.right
+    //   left-of  anchor (nub on right side) → left = a.left - pw
+    //
+    // Centering on the opposite axis:
+    //   centerHoriz: horizontally centres the popup on the anchor's mid-point,
+    //                clamped to viewport margins.
+    //   centerVert:  vertically   centres the popup on the anchor's mid-point,
+    //                clamped to viewport margins.
+    //
+    // Corner nubbins mix both: e.g. vertical-below-right-corner means the
+    // popup is BELOW the anchor and the nub is at the top-LEFT corner of the
+    // panel → left aligns to a.left (anchor's left edge).
+
+    function topForBelow()  { return a.bottom; }
+    function topForAbove()  { return a.top - ph; }
+    function leftForRight() { return a.right; }          // popup right-of anchor
+    function leftForLeft()  { return a.left - pw; }      // popup left-of anchor
+
     function centerHoriz() {
+      // Centre popup on anchor's horizontal midpoint, clamp to viewport.
       const anchorCX = a.left + a.width / 2;
       let l = anchorCX - pw / 2;
       let dirClass = "";
-      if      (l < MARGIN)              { l = MARGIN;             dirClass = "right"; }
+      if      (l < MARGIN)              { l = MARGIN;              dirClass = "right"; }
       else if (l + pw > viewW - MARGIN) { l = viewW - pw - MARGIN; dirClass = "left";  }
       nubHOff = Math.round(anchorCX - l - NUB_W / 2);
       return { left: l, dirClass };
     }
 
     function centerVert() {
+      // Centre popup on anchor's vertical midpoint, clamp to viewport.
       const anchorCY = a.top + a.height / 2;
       let t = anchorCY - ph / 2;
       let mod = "";
@@ -90,16 +124,33 @@ export function MochiPopupPanel({
     }
 
     const inTopBottom = (a.bottom < topFlushPt) || (a.top > bottomFlushPt);
-    const inLeftRight = (a.right  < leftFlushPt) || (a.left > rightFlushPt);
+    const inLeftRight = (a.right  < leftFlushPt) || (a.left > viewW - leftFlushPt);
 
-    // setPos only stores the CSS class string + nubbin offsets.
-    // top/left positioning is intentionally NOT stored here — it is handled
-    // entirely by the CSS classes on the Panel element.
+    // ── Resolve helpers ──────────────────────────────────────────────────────
+
     function resolveVertical(corner = false) {
       const v = tryVertical();
       if (!v) return false;
-      const { dirClass } = centerHoriz();
+      const { left, dirClass } = centerHoriz();
+
+      // top: below anchor or above anchor
+      const top = v.above ? topForAbove() : topForBelow();
+
+      // Corner case: left/right dirClass means the centred popup has been
+      // clamped to a viewport edge — the nub moves to that corner.
+      // In that case, snap the horizontal position to the anchor edge instead
+      // of the clamped-centre value so the corner nub lines up perfectly.
+      let resolvedLeft = left;
+      if (corner && dirClass === "left") {
+        // nub at top/bottom-RIGHT corner → popup's right edge near anchor's right
+        resolvedLeft = a.right - pw;
+      } else if (corner && dirClass === "right") {
+        // nub at top/bottom-LEFT corner → popup's left edge near anchor's left
+        resolvedLeft = a.left;
+      }
+
       setPos({
+        top, left: resolvedLeft,
         classes: `vertical ${v.above ? "above" : "below"}${dirClass ? " " + dirClass : ""}${corner ? " corner" : ""}`,
         nubHOff, nubVOff,
       });
@@ -109,21 +160,42 @@ export function MochiPopupPanel({
     function resolveHorizontal(corner = false) {
       const h = tryHorizontal();
       if (!h) return false;
-      const { mod } = centerVert();
+      const { top, mod } = centerVert();
       const dirClass = h.toRight ? "left" : "right";
+
+      // left: right-of anchor or left-of anchor
+      const left = h.toRight ? leftForRight() : leftForLeft();
+
+      // Corner: snap vertical position to anchor edge
+      let resolvedTop = top;
+      if (corner && mod === "high") {
+        resolvedTop = a.top;
+      } else if (corner && mod === "low") {
+        resolvedTop = a.bottom - ph;
+      }
+
       setPos({
+        top: resolvedTop, left,
         classes: `horizontal ${dirClass}${mod ? " " + mod : ""}${corner ? " corner" : ""}`,
         nubHOff, nubVOff,
       });
       return true;
     }
 
+    // ── Decision tree (unchanged logic, new top/left values) ────────────────
+
     if (inTopBottom) {
       const v = tryVertical();
       if (v) {
-        const { dirClass } = centerHoriz();
+        const { left, dirClass } = centerHoriz();
         if (dirClass) {
-          setPos({ classes: `vertical ${v.above ? "above" : "below"} ${dirClass} corner`, nubHOff, nubVOff });
+          const top = v.above ? topForAbove() : topForBelow();
+          const resolvedLeft = dirClass === "left" ? a.right - pw : a.left;
+          setPos({
+            top, left: resolvedLeft,
+            classes: `vertical ${v.above ? "above" : "below"} ${dirClass} corner`,
+            nubHOff, nubVOff,
+          });
           return;
         }
       }
@@ -139,9 +211,11 @@ export function MochiPopupPanel({
     if (resolveVertical())   return;
     if (resolveHorizontal()) return;
 
-    // Ultimate fallback
-    const { dirClass } = centerHoriz();
+    // Ultimate fallback: below, centred
+    const { left, dirClass } = centerHoriz();
     setPos({
+      top:    topForBelow(),
+      left,
       classes: `vertical below${dirClass ? " " + dirClass : ""}`,
       nubHOff, nubVOff,
     });
@@ -172,10 +246,10 @@ export function MochiPopupPanel({
 
   const overlayHidden = !isOpen;
 
-  // Only pass nubbin CSS custom properties — no top/left.
-  // All spatial positioning is handled by the CSS classes on Panel.
   const panelStyle = isOpen && pos
     ? {
+        top:  pos.top,
+        left: pos.left,
         "--nubbin-h-offset": `${pos.nubHOff}px`,
         "--nubbin-v-offset": `${pos.nubVOff}px`,
       }
