@@ -36,189 +36,249 @@ $mochi-handle-size: 48px;
   background: var(--mochi-bg);
   -webkit-user-select: none;
   user-select: none;
-}
 
-// ========================================
-// Panel Wrapper (Positioning & Stacking)
-// ========================================
+  // ========================================
+  // Panel Wrapper (Positioning & Stacking)
+  // All .mochi-panel-wrapper and .mochi-panel rules are scoped here
+  // so they never bleed onto the standalone Panel / FloatingPanel components.
+  // ========================================
 
-.mochi-panel-wrapper {
-  position: absolute;
-  top: 0;
-  bottom: 0;
+  .mochi-panel-wrapper {
+    position: absolute;
+    top: 0;
+    bottom: 0;
 
-  transition:
-    left $mochi-transition-duration $mochi-transition-easing,
-    width $mochi-transition-duration $mochi-transition-easing,
-    box-shadow $mochi-transition-duration $mochi-transition-easing;
+    transition:
+      left $mochi-transition-duration $mochi-transition-easing,
+      width $mochi-transition-duration $mochi-transition-easing,
+      box-shadow $mochi-transition-duration $mochi-transition-easing;
 
-  cursor: pointer;
+    cursor: pointer;
 
-  &.mochi-panel--dragging {
-    transition: none;
-    z-index: 9999 !important;
-  }
+    &.mochi-panel--dragging {
+      transition: none;
+      z-index: 9999 !important;
+    }
 
-  &.mochi-panel--active .mochi-panel {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-    transform: translateY(-2px);
-  }
-}
-
-// ========================================
-// Panel Card
-// ========================================
-
-.mochi-panel {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-
-  border-radius: $mochi-panel-radius 0 0 $mochi-panel-radius;
-  background: var(--mochi-surface);
-  border: 1px solid var(--mochi-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  overflow: hidden;
-
-  transition:
-    box-shadow $mochi-transition-duration $mochi-transition-easing,
-    transform $mochi-transition-duration $mochi-transition-easing,
-    background-color 150ms ease-out;
-
-  &:hover:not(.mochi-panel-wrapper.mochi-panel--dragging *) {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  }
-}
-
-// ========================================
-// Content Area
-// ========================================
-
-.mochi-panel-content {
-  flex: 1;
-  overflow: auto;
-  padding: 24px;
-  color: var(--mochi-text);
-  font-size: 14px;
-  line-height: 1.5;
-
-  scrollbar-width: thin;
-  scrollbar-color: var(--mochi-border) var(--mochi-hover);
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--mochi-hover);
-    border-radius: 6px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--mochi-border);
-    border-radius: 6px;
-
-    &:hover {
-      background: var(--mochi-text-muted);
+    &.mochi-panel--active .mochi-panel {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+      transform: translateY(-2px);
     }
   }
-}
 
-// ========================================
-// Drag Handle
-// ========================================
+  // ========================================
+  // Panel Card
+  // ========================================
 
-.mochi-panel-handle {
-  position: absolute;
-  left: 16px;
-  bottom: 16px;
-  width: $mochi-handle-size;
-  height: $mochi-handle-size;
+  .mochi-panel {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    border-radius: $mochi-panel-radius 0 0 $mochi-panel-radius;
+    background: var(--mochi-surface);
+    border: 1px solid var(--mochi-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
 
-  border: none;
-  padding: 0;
-  background: var(--mochi-hover);
-  border-radius: 10px;
+    transition:
+      box-shadow $mochi-transition-duration $mochi-transition-easing,
+      transform $mochi-transition-duration $mochi-transition-easing,
+      background-color 150ms ease-out;
 
-  cursor: grab;
-  outline: none;
-  z-index: 10;
-
-  transition:
-    background-color 150ms $mochi-transition-easing,
-    transform 150ms $mochi-transition-easing,
-    box-shadow 150ms $mochi-transition-easing;
-
-  will-change: background-color, transform;
-
-  &:hover {
-    background: var(--mochi-active);
-    transform: scale(1.08) translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+    &:hover:not(.mochi-panel-wrapper.mochi-panel--dragging *) {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    }
   }
 
-  &:active {
-    cursor: grabbing;
-    background: var(--mochi-active);
-    transform: scale(0.96);
+  // ========================================
+  // Content Area
+  // ========================================
+
+  .mochi-panel-content {
+    flex: 1;
+    overflow: auto;
+    padding: 24px;
+    color: var(--mochi-text);
+    font-size: 14px;
+    line-height: 1.5;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--mochi-border) var(--mochi-hover);
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--mochi-hover);
+      border-radius: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--mochi-border);
+      border-radius: 6px;
+
+      &:hover {
+        background: var(--mochi-text-muted);
+      }
+    }
   }
-}
 
-.mochi-panel-wrapper.mochi-panel--dragging .mochi-panel-handle {
-  pointer-events: none;
-}
+  // ========================================
+  // Drag Handle
+  // ========================================
 
-// ========================================
-// Handle Grip Lines
-// ========================================
+  .mochi-panel-handle {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    width: $mochi-handle-size;
+    height: $mochi-handle-size;
 
-.mochi-panel-handle-lines {
-  position: relative;
-  width: 18px;
-  height: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  &::before,
-  &::after {
-    content: '';
-    display: block;
+    border: none;
+    padding: 0;
+    background: var(--mochi-hover);
+    border-radius: 10px;
+
+    cursor: grab;
+    outline: none;
+    z-index: 10;
+
+    transition:
+      background-color 150ms $mochi-transition-easing,
+      transform 150ms $mochi-transition-easing,
+      box-shadow 150ms $mochi-transition-easing;
+
+    will-change: background-color, transform;
+
+    &:hover {
+      background: var(--mochi-active);
+      transform: scale(1.08) translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    &:active {
+      cursor: grabbing;
+      background: var(--mochi-active);
+      transform: scale(0.96);
+    }
+  }
+
+  .mochi-panel-wrapper.mochi-panel--dragging .mochi-panel-handle {
+    pointer-events: none;
+  }
+
+  // ========================================
+  // Handle Grip Lines
+  // ========================================
+
+  .mochi-panel-handle-lines {
+    position: relative;
     width: 18px;
-    height: 2px;
-    border-radius: 1px;
-    background: var(--mochi-text-muted);
-    transition: all 150ms $mochi-transition-easing;
+    height: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    &::before,
+    &::after {
+      content: '';
+      display: block;
+      width: 18px;
+      height: 2px;
+      border-radius: 1px;
+      background: var(--mochi-text-muted);
+      transition: all 150ms $mochi-transition-easing;
+    }
+
+    &::after {
+      width: 12px;
+      margin-left: 4px;
+    }
   }
 
-  &::after {
-    width: 12px;
-    margin-left: 4px;
-  }
-}
+  .mochi-panel-handle:hover .mochi-panel-handle-lines {
+    &::before {
+      box-shadow: 0 5px 0 var(--mochi-text);
+    }
 
-.mochi-panel-handle:hover .mochi-panel-handle-lines {
-  &::before {
-    box-shadow: 0 5px 0 var(--mochi-text);
+    &::after {
+      width: 18px;
+      margin-left: 0;
+      background: var(--mochi-text);
+    }
   }
 
-  &::after {
-    width: 18px;
-    margin-left: 0;
-    background: var(--mochi-text);
+  // ========================================
+  // Responsive
+  // ========================================
+
+  @media (max-width: 768px) {
+    height: 320px;
+
+    .mochi-panel-content {
+      padding: 20px;
+    }
+
+    .mochi-panel-handle {
+      left: 12px;
+      bottom: 12px;
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    height: 280px;
+
+    .mochi-panel-content {
+      padding: 16px;
+      font-size: 12px;
+    }
+
+    .mochi-panel-handle {
+      left: 10px;
+      bottom: 10px;
+      width: 36px;
+      height: 36px;
+    }
+
+    .mochi-panel-handle-lines {
+      width: 16px;
+      height: 10px;
+
+      &::before,
+      &::after {
+        width: 16px;
+      }
+
+      &::after {
+        width: 10px;
+      }
+    }
+  }
+
+  // ========================================
+  // Accessibility
+  // ========================================
+
+  .mochi-panel-handle:focus-visible {
+    outline: 2px solid var(--mochi-primary);
+    outline-offset: 2px;
   }
 }
 
 // ========================================
-// Drag Hint Overlay
+// Drag Hint Overlay (fixed-position, outside root scope)
 // ========================================
 
 .mochi-drag-hint {
@@ -242,7 +302,7 @@ $mochi-handle-size: 48px;
 
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
 
-  animation: mochi-hint-in 150ms $mochi-transition-easing forwards;
+  animation: mochi-hint-in 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes mochi-hint-in {
@@ -256,78 +316,13 @@ $mochi-handle-size: 48px;
   }
 }
 
-// ========================================
-// Responsive
-// ========================================
-
-@media (max-width: 768px) {
-  .mochi-panels-root {
-    height: 320px;
-  }
-
-  .mochi-panel-content {
-    padding: 20px;
-  }
-
-  .mochi-panel-handle {
-    left: 12px;
-    bottom: 12px;
-    width: 40px;
-    height: 40px;
-  }
-}
-
-@media (max-width: 480px) {
-  .mochi-panels-root {
-    height: 280px;
-  }
-
-  .mochi-panel-content {
-    padding: 16px;
-    font-size: 12px;
-  }
-
-  .mochi-panel-handle {
-    left: 10px;
-    bottom: 10px;
-    width: 36px;
-    height: 36px;
-  }
-
-  .mochi-panel-handle-lines {
-    width: 16px;
-    height: 10px;
-
-    &::before,
-    &::after {
-      width: 16px;
-    }
-
-    &::after {
-      width: 10px;
-    }
-  }
-
-  .mochi-drag-hint {
-    padding: 10px 20px;
-    font-size: 11px;
-  }
-}
-
-// ========================================
-// Accessibility
-// ========================================
-
-.mochi-panel-handle:focus-visible {
-  outline: 2px solid var(--mochi-primary);
-  outline-offset: 2px;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .mochi-panel-wrapper,
-  .mochi-panel,
-  .mochi-panel-handle {
-    transition: none;
+  .mochi-panels-root {
+    .mochi-panel-wrapper,
+    .mochi-panel,
+    .mochi-panel-handle {
+      transition: none;
+    }
   }
 
   .mochi-drag-hint {
