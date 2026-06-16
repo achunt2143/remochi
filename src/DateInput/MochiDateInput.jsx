@@ -3,6 +3,8 @@ import React, { useState, useRef, useCallback } from 'react';
 import { MochiInput }      from '../Input/MochiInput';
 import { MochiButton }     from '../Button/MochiButton';
 import { MochiPopupPanel } from '../Popup/MochiPopupPanel';
+import { MochiItem }       from '../Item/MochiItem';
+import './MochiDateInput.scss';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 const DAYS  = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -59,59 +61,47 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
     return false;
   };
 
-  const cellBase = {
-    width: '32px', height: '32px',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    borderRadius: '50%',
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-    border: 'none',
-    background: 'none',
-    fontFamily: 'inherit',
-    transition: 'background 0.15s',
-  };
-
   return (
-    <div style={{ width: '252px', userSelect: 'none' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+    <div className="mochi-date-calendar">
+      {/* Month navigation header */}
+      <div className="mochi-date-calendar-header">
         <MochiButton type="normal" onClick={() => setView(new Date(year, month - 1, 1))} aria-label="Previous month">‹</MochiButton>
-        <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--mochi-text, #333)' }}>
-          {MONTHS[month]} {year}
-        </span>
+        <span className="mochi-date-calendar-title">{MONTHS[month]} {year}</span>
         <MochiButton type="normal" onClick={() => setView(new Date(year, month + 1, 1))} aria-label="Next month">›</MochiButton>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '4px' }}>
+      {/* Day-of-week labels */}
+      <div className="mochi-date-calendar-dow">
         {DAYS.map(d => (
-          <div key={d} style={{ textAlign: 'center', fontSize: '0.75rem',
-            color: 'var(--mochi-text-faint, #aaa)', fontWeight: 600, padding: '2px 0' }}>
-            {d}
-          </div>
+          <div key={d} className="mochi-date-calendar-dow-cell">{d}</div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+      {/* Day grid */}
+      <div className="mochi-date-calendar-grid">
         {cells.map((cell, idx) => {
           const sel      = sameDay(cell.date, selected);
           const disabled = isDisabled(cell.date);
+
           return (
-            <button
+            <MochiItem
               key={idx}
-              style={{
-                ...cellBase,
-                color: sel ? '#fff' : !cell.cur || disabled ? 'var(--mochi-text-faint, #bbb)' : 'var(--mochi-text, #333)',
-                background: sel ? 'var(--mochi-primary, #43aae4)' : 'none',
-                fontWeight: sel ? 700 : 400,
-                cursor: disabled ? 'not-allowed' : 'pointer',
-                opacity: disabled ? 0.4 : 1,
-              }}
-              onClick={() => !disabled && onSelect(cell.date)}
+              hoverable={!disabled}
+              selected={sel}
               disabled={disabled}
+              variant="compact"
+              onClick={() => !disabled && onSelect(cell.date)}
               aria-label={isoDate(cell.date)}
               aria-pressed={sel}
+              className={[
+                'mochi-date-day',
+                !cell.cur  ? 'mochi-date-day--other-month' : '',
+                sel        ? 'mochi-date-day--selected'     : '',
+                disabled   ? 'mochi-date-day--disabled'     : '',
+              ].filter(Boolean).join(' ')}
             >
               {cell.day}
-            </button>
+            </MochiItem>
           );
         })}
       </div>
@@ -133,18 +123,12 @@ const MochiDateInput = ({
   const [isOpen,   setIsOpen]   = useState(false);
   const [selected, setSelected] = useState(value ? new Date(value) : null);
   const triggerRef  = useRef(null);
-  // anchorRectRef holds the DOMRect captured synchronously at click time,
-  // before React re-renders or any side effects (like overflow:hidden) can
-  // shift the scroll position and invalidate the coordinates.
   const anchorRectRef = useRef(null);
 
   const open = useCallback(() => {
     if (disabled) return;
-    // Capture the rect NOW — synchronously inside the click handler,
-    // before setIsOpen triggers a re-render or anything else moves the page.
     if (triggerRef.current) {
       const r = triggerRef.current.getBoundingClientRect();
-      // Convert to a plain object so it stays stable across renders.
       anchorRectRef.current = {
         top: r.top, bottom: r.bottom,
         left: r.left, right: r.right,
@@ -187,8 +171,6 @@ const MochiDateInput = ({
         aria-expanded={isOpen}
       />
 
-      {/* anchorRect is the rect captured synchronously at click time so the
-          popup positions correctly regardless of scroll position. */}
       <MochiPopupPanel
         isOpen={isOpen}
         anchorRect={anchorRectRef.current}
