@@ -1,13 +1,21 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useLayoutEffect, useRef, useCallback, useEffect } from "react";
+import ReactDOM from "react-dom";
 import {
   Overlay,
-  PanelWrapper,
   Panel,
   PanelTitle,
   ContentArea,
   ButtonBar,
 } from "./MochiPopupPanel.styles";
-import { MochiButton } from "../Button/MochiButton";
+import { Button as MochiButton } from "../Button";
+
+const VERT_FLUSH_MARGIN  = 100;
+const HORIZ_FLUSH_MARGIN = 100;
+const WIDE_POPUP         = 200;
+const LONG_POPUP         = 200;
+const MARGIN             = 8;
+const NUB_W              = 71;
+const NUB_SIDE           = 71;
 
 export function MochiPopupPanel({
   isOpen,
@@ -15,98 +23,208 @@ export function MochiPopupPanel({
   children,
   actions = [],
   onClose,
-  anchorRect,
+  anchorEl,
+  anchorRect: anchorRectProp,
 }) {
   const panelRef = useRef(null);
-  const [position, setPosition] = useState({
-    top: 0,
-    left: 0,
-    positionClass: "vertical below", // default class string
-  });
+  const [pos, setPos] = useState(null);
 
-  const updatePosition = useCallback(() => {
-    if (!anchorRect || !panelRef.current) return;
+  const getViewW = () => window.innerWidth  ?? document.documentElement.clientWidth;
+  const getViewH = () => window.innerHeight ?? document.documentElement.clientHeight;
 
-    const viewportW = window.innerWidth;
-    const viewportH = window.innerHeight;
-    const margin = 8;
+  const computePosition = useCallback(() => {
+    if (!panelRef.current) return;
 
-    const popupWidth = panelRef.current.offsetWidth;
-    const popupHeight = panelRef.current.offsetHeight;
+    const a = anchorRectProp ?? anchorEl?.current?.getBoundingClientRect();
+    if (!a) return;
 
-    const activatorCenterX = anchorRect.left + anchorRect.width / 2;
-    const activatorCenterY = anchorRect.top + anchorRect.height / 2;
+    const pw    = panelRef.current.offsetWidth;
+    const ph    = panelRef.current.offsetHeight;
+    const viewW = getViewW();
+    const viewH = getViewH();
 
-    // Determine vertical position
-    let below = true;
-    let top = anchorRect.bottom + margin;
-    if (top + popupHeight > viewportH) {
-      below = false;
-      top = anchorRect.top - popupHeight - margin;
+    if (pw === 0 || ph === 0) return;
+
+    const topFlushPt    = VERT_FLUSH_MARGIN;
+    const bottomFlushPt = viewH - VERT_FLUSH_MARGIN;
+
+    let nubHOff = 0;
+    let nubVOff = 0;
+
+    function tryVertical() {
+      const above = a.top >= viewH / 2;
+      const t     = above ? a.top - ph : a.bottom;
+      if (t < 0 || t + ph > viewH) return null;
+      return { above };
     }
 
-    // Horizontal centered
-    let left = activatorCenterX - popupWidth / 2;
+    function tryHorizontal() {
+      const toRight = (a.left + a.width / 2) < viewW / 2;
+      const l       = toRight ? a.right : a.left - pw;
+      if (l < 0 || l + pw > viewW) return null;
+      return { toRight };
+    }
 
-    // Clamp horizontally within viewport
-    if (left < margin) left = margin;
-    if (left + popupWidth > viewportW - margin) left = viewportW - popupWidth - margin;
+    function centerHoriz() {
+      const cx = a.left + a.width / 2;
+      let l = cx - pw / 2;
+      let dirClass = "";
+      if (l < MARGIN)              { l = MARGIN;              dirClass = "right"; }
+      if (l + pw > viewW - MARGIN) { l = viewW - pw - MARGIN; dirClass = "left";  }
+      nubHOff = Math.round(cx - l - NUB_W / 2);
+      return { left: l, dirClass };
+    }
 
-    // Decide corner flush classes
-    let positionClass = below ? "vertical below" : "vertical above";
-    // Add corner classes if needed
-    if (left <= margin) positionClass += " left corner";
-    else if (left + popupWidth >= viewportW - margin) positionClass += " right corner";
+    function centerVert() {
+      const cy = a.top + a.height / 2;
+      let t = cy - ph / 2;
+      let mod = "";
+      if (t < MARGIN)              { t = MARGIN;              mod = "high"; }
+      if (t + ph > viewH - MARGIN) { t = viewH - ph - MARGIN; mod = "low";  }
+      nubVOff = Math.round(cy - t - NUB_SIDE / 2);
+      return { top: t, mod };
+    }
 
-    setPosition({ top, left, positionClass });
-  }, [anchorRect]);
+    function resolveVertical(corner = false) {
+      const v = tryVertical();
+      if (!v) return false;
+
+      const top = v.above ? a.top - ph : a.bottom;
+      const { left: centredLeft, dirClass } = centerHoriz();
+
+      let left = centredLeft;
+      if (corner) {
+        if (dirClass === "left")  left = a.right - pw;
+        if (dirClass === "right") left = a.left;
+      }
+
+      setPos({
+        top, left,
+        classes: `vertical ${v.above ? "above" : "below"}${
+          dirClass ? " " + dirClass : ""}${corner ? " corner" : ""}`,
+        nubHOff, nubVOff,
+      });
+      return true;
+    }
+
+    function resolveHorizontal(corner = false) {
+      const h = tryHorizontal();
+      if (!h) return false;
+
+      const left = h.toRight ? a.right : a.left - pw;
+      const { top: centredTop, mod } = centerVert();
+
+      let top = centredTop;
+      if (corner) {
+        if (mod === "high") top = a.top;
+        if (mod === "low")  top = a.bottom - ph;
+      }
+
+      setPos({
+        top, left,
+        classes: `horizontal ${h.toRight ? "left" : "right"}${
+          mod ? " " + mod : ""}${corner ? " corner" : ""}`,
+        nubHOff, nubVOff,
+      });
+      return true;
+    }
+
+    const inTopBottom = a.bottom < topFlushPt || a.top > bottomFlushPt;
+    const inLeftRight = a.right  < HORIZ_FLUSH_MARGIN || a.left > viewW - HORIZ_FLUSH_MARGIN;
+
+    if (inTopBottom) {
+      const v = tryVertical();
+      if (v) {
+        const { dirClass } = centerHoriz();
+        if (dirClass) {
+          if (resolveVertical(true)) return;
+        }
+      }
+      if (resolveHorizontal(true)) return;
+      if (resolveVertical())       return;
+    } else if (inLeftRight) {
+      if (resolveHorizontal()) return;
+    }
+
+    if (pw > WIDE_POPUP)      { if (resolveVertical())   return; }
+    else if (ph > LONG_POPUP) { if (resolveHorizontal()) return; }
+
+    if (resolveVertical())   return;
+    if (resolveHorizontal()) return;
+
+    // Ultimate fallback — below, centred
+    const { left, dirClass } = centerHoriz();
+    setPos({
+      top:  a.bottom,
+      left,
+      classes: `vertical below${dirClass ? " " + dirClass : ""}`,
+      nubHOff, nubVOff,
+    });
+  }, [anchorEl, anchorRectProp]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) { setPos(null); return; }
+    computePosition();
+  }, [isOpen, computePosition]);
 
   useEffect(() => {
     if (!isOpen) return;
-
-    updatePosition();
-    panelRef.current?.focus();
-    document.body.style.overflow = "hidden";
-
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition);
-
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") onClose?.();
-    };
-
+    window.addEventListener("resize", computePosition);
+    const onKeyDown = (e) => { if (e.key === "Escape") onClose?.(); };
     window.addEventListener("keydown", onKeyDown);
-
     return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition);
+      window.removeEventListener("resize", computePosition);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [isOpen, onClose, updatePosition]);
+  }, [isOpen, onClose, computePosition]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (pos) panelRef.current?.focus();
+  }, [pos]);
 
-  return (
-    <Overlay onClick={(e) => e.target === e.currentTarget && onClose()} aria-modal="true" role="dialog">
-      <PanelWrapper>
-        <Panel
-          tabIndex={-1}
-          ref={panelRef}
-          style={{ top: position.top, left: position.left }}
-          className={position.positionClass}
-        >
-          {title && <PanelTitle>{title}</PanelTitle>}
-          <ContentArea>{children}</ContentArea>
+  // During the measurement pass (isOpen but pos not yet computed) we render
+  // the panel invisible so useLayoutEffect can read its dimensions.
+  const panelStyle = pos
+    ? {
+        top:  pos.top,
+        left: pos.left,
+        "--nubbin-h-offset": `${pos.nubHOff}px`,
+        "--nubbin-v-offset": `${pos.nubVOff}px`,
+      }
+    : { visibility: "hidden", top: 0, left: 0 };
+
+  // Always render into a portal on document.body so position:fixed coords
+  // are always relative to the viewport — no parent stacking context,
+  // overflow, or transform can interfere.
+  if (!isOpen && !pos) return null;
+
+  return ReactDOM.createPortal(
+    <Overlay
+      $hidden={!isOpen}
+      onClick={(e) => isOpen && e.target === e.currentTarget && onClose?.()}
+      aria-modal={isOpen ? "true" : undefined}
+      aria-hidden={!isOpen ? "true" : undefined}
+      role="dialog"
+    >
+      <Panel
+        tabIndex={isOpen ? -1 : undefined}
+        ref={panelRef}
+        style={panelStyle}
+        className={isOpen && pos ? pos.classes : ""}
+      >
+        {title && <PanelTitle>{title}</PanelTitle>}
+        <ContentArea>{children}</ContentArea>
+        {actions.length > 0 && (
           <ButtonBar>
             {actions.map(({ label, onClick, type }, idx) => (
-              <MochiButton key={idx} onClick={onClick} type={type}>
+              <MochiButton key={idx} onClick={onClick} $type={type}>
                 {label}
               </MochiButton>
             ))}
           </ButtonBar>
-        </Panel>
-      </PanelWrapper>
-    </Overlay>
+        )}
+      </Panel>
+    </Overlay>,
+    document.body
   );
 }

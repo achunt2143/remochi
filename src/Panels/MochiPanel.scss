@@ -1,0 +1,46 @@
+// ── Shared base ────────────────────────────────────────────────────────────
+// Both Panel and FloatingPanel share these rules; the only difference is
+// border-radius, which is overridden by .mochi-floating-panel below.
+
+.mochi-panel {
+  box-sizing: border-box;
+  height: 100%;
+  position: relative;
+
+  // ── Default style (Overlay Base from Figma) ────────────────────────────
+  &.mochi-panel--default {
+    background: #f5f5f5;
+
+    // 0.5px top + left border only, matching Figma spec
+    border-width: 0.5px 0px 0px 0.5px;
+    border-style: solid;
+    border-color: #cccccc;
+
+    // Top-left radius only for Panel (side panel pattern)
+    border-radius: 16px 0px 0px 0px;
+  }
+
+  // ── Shadow style (Overlay Inset Shadow from Figma) ─────────────────────
+  &.mochi-panel--shadow {
+    background: #f5f5f5;
+
+    border-width: 0.5px 0px 0px 0.5px;
+    border-style: solid;
+    border-color: #cccccc;
+
+    border-radius: 16px 0px 0px 0px;
+
+    box-shadow: inset 0px 4px 50px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// ── FloatingPanel overrides ────────────────────────────────────────────────
+// Full radius on all corners; fills its container completely.
+.mochi-floating-panel {
+  width: 100%;
+
+  &.mochi-panel--default,
+  &.mochi-panel--shadow {
+    border-radius: 16px;
+  }
+}

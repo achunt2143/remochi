@@ -1,0 +1,56 @@
+// MochiPagination.scss — all colors from ThemeWrapper CSS variables
+// Note: page buttons are now rendered using the Button component from ../Button;
+// this SCSS only styles the container, ellipsis, and info text.
+.mochi-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  flex-wrap: wrap;
+
+  // Active page button override — Button component renders .mochi-button;
+  // we layer an active background on top via a wrapper class.
+  .mochi-pagination-active .mochi-button {
+    color: var(--mochi-primary-text);
+    background-color: var(--mochi-primary);
+    border-radius: 8px;
+
+    .mochi-button-bar {
+      background-color: transparent;
+    }
+  }
+
+  &-pages {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &-ellipsis {
+    color: var(--mochi-text-muted);
+    font-size: 14px;
+    padding: 0 4px;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  &-info {
+    margin-left: auto;
+    color: var(--mochi-text-muted);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .mochi-pagination {
+    justify-content: center;
+
+    &-info {
+      width: 100%;
+      text-align: center;
+      margin-left: 0;
+      margin-top: 8px;
+    }
+  }
+}

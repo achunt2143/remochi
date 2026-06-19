@@ -1,0 +1,158 @@
+// ============================================================
+// MochiSlidingMenuItem — Remochi Design System
+// ============================================================
+
+.mochi-sliding-menu-item {
+  // Light token defaults
+  --item-text:        var(--color-text,    #333333);
+  --item-hover-bg:    var(--color-secondary, rgba(94, 82, 64, 0.12));
+  --item-active-bg:   var(--color-primary, #218080);
+  --item-active-text: var(--color-surface,  #ffffff);
+  --item-accent:      var(--color-primary, #218080);
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  min-height: 44px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--item-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+  transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+              color            150ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform        150ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+
+  &:hover:not(.mochi-sliding-menu-item--disabled) {
+    background-color: var(--item-hover-bg);
+  }
+
+  &:active:not(.mochi-sliding-menu-item--disabled) {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--item-accent);
+    outline-offset: -2px;
+  }
+}
+
+// Dark overrides
+[data-mochi-theme='dark'] .mochi-sliding-menu-item,
+.mochi-theme-dark .mochi-sliding-menu-item {
+  --item-text:      #f0f0f0;
+  --item-hover-bg:  rgba(255, 255, 255, 0.10);
+  --item-active-bg: var(--color-primary, #5b9dd9);
+}
+
+@media (prefers-color-scheme: dark) {
+  .mochi-sliding-menu-item {
+    --item-text:      #f0f0f0;
+    --item-hover-bg:  rgba(255, 255, 255, 0.10);
+  }
+}
+
+// Sub-elements
+.mochi-sliding-menu-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.mochi-sliding-menu-item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mochi-sliding-menu-item-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: var(--item-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+// Active state
+.mochi-sliding-menu-item--active {
+  background-color: var(--item-active-bg);
+  color: var(--item-active-text);
+  font-weight: 600;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background-color: var(--item-accent);
+  }
+}
+
+// Disabled state
+.mochi-sliding-menu-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// Variants
+.mochi-sliding-menu-item--danger {
+  --item-text:        var(--color-error, #c0152f);
+  --item-hover-bg:    rgba(192, 21, 47, 0.1);
+  --item-active-bg:   var(--color-error, #c0152f);
+  --item-active-text: #ffffff;
+  --item-accent:      var(--color-error, #c0152f);
+}
+
+.mochi-sliding-menu-item--success {
+  --item-text:        var(--color-success, #208085);
+  --item-hover-bg:    rgba(33, 128, 141, 0.1);
+  --item-active-bg:   var(--color-success, #208085);
+  --item-active-text: #ffffff;
+  --item-accent:      var(--color-success, #208085);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .mochi-sliding-menu-item {
+    padding: 12px 16px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  .mochi-sliding-menu-item {
+    transition: none;
+    &:active:not(.mochi-sliding-menu-item--disabled) { transform: none; }
+  }
+}
+
+@media (prefers-contrast: more) {
+  .mochi-sliding-menu-item {
+    border-bottom: 1px solid var(--item-text);
+    &:focus-visible { outline-width: 3px; }
+  }
+  .mochi-sliding-menu-item--active::before { width: 4px; }
+}

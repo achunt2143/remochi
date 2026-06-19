@@ -1,0 +1,171 @@
+// MochiDialog.scss
+// webOS-inspired bottom-sheet dialog
+// - Slides up from the bottom on open, slides down on close
+// - Rounded top corners only, flush bottom
+// - Full width on narrow screens (<768px), 50% centered on wide screens
+// - Fully theme-aware via CSS variables from ThemeWrapper
+
+.mochi-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: transparent;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 9999;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    background-color 0.32s ease,
+    visibility 0s linear 0.32s;
+
+  &.open {
+    // Scrim uses a dedicated token so themes can adjust opacity
+    background-color: var(--mochi-overlay, rgba(0, 0, 0, 0.55));
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      background-color 0.32s ease,
+      visibility 0s linear 0s;
+
+    .mochi-dialog {
+      transform: translateY(0);
+    }
+  }
+}
+
+.mochi-dialog {
+  background-color: var(--mochi-surface, #2a2a2a);
+  color: var(--mochi-text, #ffffff);
+
+  // Rounded top only, flush bottom
+  border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+
+  // Shadow on the top edge only
+  box-shadow:
+    0 -4px 24px var(--mochi-shadow, rgba(0, 0, 0, 0.22)),
+    0 -1px 0 var(--mochi-border, rgba(255, 255, 255, 0.08));
+
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+
+  // Slide-up / slide-down animation
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+
+  // Narrow screens: full width
+  width: 100%;
+
+  // Wide screens: 50% centered
+  @media (min-width: 768px) {
+    width: 50%;
+    min-width: 420px;
+  }
+
+  // Size modifiers
+  &-small  { @media (min-width: 768px) { max-height: 40vh; } }
+  &-medium { @media (min-width: 768px) { max-height: 60vh; } }
+  &-large  { @media (min-width: 768px) { max-height: 82vh; } }
+
+  // Drag handle pill
+  &::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: var(--radius-full, 9999px);
+    background: var(--mochi-border);
+    margin: 12px auto 0;
+    flex-shrink: 0;
+  }
+
+  // Header
+  &-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3, 12px) var(--space-6, 24px) var(--space-3, 12px);
+    border-bottom: 1px solid var(--mochi-border);
+    flex-shrink: 0;
+  }
+
+  &-title {
+    margin: 0;
+    font-size: var(--text-lg, 18px);
+    font-weight: 600;
+    color: var(--mochi-text);
+    line-height: 1.2;
+  }
+
+  &-close {
+    background: none;
+    border: none;
+    color: var(--mochi-text-muted);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm, 6px);
+    transition: background-color var(--transition-interactive, 150ms ease),
+                color var(--transition-interactive, 150ms ease);
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: var(--mochi-hover);
+      color: var(--mochi-text);
+    }
+  }
+
+  // Body
+  &-content {
+    padding: var(--space-6, 24px);
+    overflow-y: auto;
+    flex: 1;
+    line-height: 1.5;
+    font-size: var(--text-sm, 14px);
+    color: var(--mochi-text);
+  }
+
+  &-message {
+    margin-bottom: var(--space-4, 16px);
+    color: var(--mochi-text);
+  }
+
+  &-prompt-input {
+    width: 100%;
+    padding: 10px var(--space-3, 12px);
+    background: var(--mochi-surface-2, #333333);
+    border: 1px solid var(--mochi-border);
+    border-radius: var(--radius-md, 8px);
+    color: var(--mochi-text);
+    font-size: var(--text-sm, 14px);
+    outline: none;
+    transition: border-color var(--transition-interactive, 150ms ease),
+                background-color var(--transition-interactive, 150ms ease);
+
+    &:focus {
+      border-color: var(--mochi-primary);
+      background: var(--mochi-surface-2, #333333);
+    }
+
+    &::placeholder {
+      color: var(--mochi-text-faint);
+    }
+  }
+
+  // Actions footer
+  &-actions {
+    display: flex;
+    gap: var(--space-3, 12px);
+    justify-content: flex-end;
+    padding: var(--space-3, 12px) var(--space-6, 24px) var(--space-6, 24px);
+    border-top: 1px solid var(--mochi-border);
+    flex-shrink: 0;
+  }
+}

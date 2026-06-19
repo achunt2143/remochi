@@ -1,0 +1,87 @@
+/* ToggleButton.css — ported from mochi.ToggleButton (Enyo) */
+
+.mochi-toggle-button {
+  display: inline-block;
+  height: 24px;
+  line-height: 24px;
+  min-width: 60px;
+  vertical-align: middle;
+  border-radius: 12px;
+  background-size: auto 100%;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  touch-action: pan-y;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 184, 13, 0.45);
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+/* Background-color animation — only when canAnimate is true */
+.mochi-toggle-animate {
+  -webkit-transition: background-color 0.1s linear;
+  -moz-transition: background-color 0.1s linear;
+  -o-transition: background-color 0.1s linear;
+  transition: background-color 0.1s linear;
+}
+
+/* White sliding knob */
+/* Original: 20x20px, margin 2px, border-radius 10px, float: left */
+/* We use position: absolute + translateX instead of float so transform works cleanly */
+.mochi-toggle-button-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: white;
+  overflow: hidden;
+  transition: transform 0.1s linear;
+  pointer-events: none;
+}
+
+/* Label text */
+.mochi-toggle-content {
+  position: absolute;
+  top: 0;
+  line-height: 24px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* On label: left side, with padding matching original margin: 0 24px -24px 0; padding: 0 2px 0 4px */
+.mochi-toggle-content-on {
+  left: 4px;
+  right: 26px;
+  padding: 0 2px 0 4px;
+  text-align: left;
+  overflow: hidden;
+}
+
+/* Off label: right side, padding matching original margin: 0 0 -24px 24px; padding: 0 4px 0 2px */
+.mochi-toggle-content-off {
+  right: 4px;
+  left: 26px;
+  padding: 0 4px 0 2px;
+  text-align: right;
+  overflow: hidden;
+}

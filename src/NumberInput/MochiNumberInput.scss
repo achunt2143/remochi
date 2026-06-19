@@ -1,0 +1,3 @@
+/* intentionally empty — MochiNumberInput composes MochiButton + MochiInput;
+   all styling comes from those components. This file is kept as a no-op
+   to avoid breaking any import that may reference it. */

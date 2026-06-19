@@ -1,0 +1,75 @@
+/* Mochi RichText Component */
+
+.mochi-richtext {
+  font-family: "Mochi Medium", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: var(--font-size-base, 14px);
+  color: var(--mochi-text, #4b4b4b);
+  font-style: italic;
+  line-height: 1.6;
+  min-height: 50px;
+  padding: 8px;
+  border-radius: var(--radius-md, 4px);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  background: var(--mochi-surface, #fff);
+  border: 1px solid var(--mochi-border, rgba(0,0,0,0.12));
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    background-color: var(--mochi-primary-soft, rgba(105,205,255,0.05));
+    border-color: var(--mochi-primary, #5b9dd9);
+  }
+
+  .mochi-richtext-placeholder {
+    color: var(--mochi-text-faint, rgba(75,75,75,0.5));
+    font-style: italic;
+    pointer-events: none;
+  }
+
+  /* Webkit scrollbar */
+  &::-webkit-scrollbar       { width: 4px; }
+  &::-webkit-scrollbar-track { margin: 4px 0; background: transparent; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb {
+    height: 10px;
+    background-color: var(--mochi-text-muted, #7d7d7d);
+    border-radius: 10px;
+    transition: background-color 0.2s ease;
+    &:hover { background-color: var(--mochi-text, #5d5d5d); }
+  }
+
+  strong, b   { font-weight: bold; }
+  em, i       { font-style: italic; }
+  u           { text-decoration: underline; }
+  del, s      { text-decoration: line-through; }
+
+  code {
+    font-family: "Courier New", monospace;
+    background-color: var(--mochi-hover, rgba(0,0,0,0.05));
+    padding: 2px 4px;
+    border-radius: 2px;
+  }
+
+  blockquote {
+    margin: 8px 0;
+    padding-left: 12px;
+    border-left: 3px solid var(--mochi-border, #ccc);
+  }
+
+  ul, ol { margin: 8px 0; padding-left: 24px; }
+  li     { margin: 4px 0; }
+  p      { margin: 0; }
+}
+
+/* When nested inside InputDecorator */
+.mochi-input-decorator > .mochi-richtext {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mochi-input-decorator.mochi-focused > .mochi-richtext { cursor: text; }
+.mochi-input-decorator.mochi-disabled > .mochi-richtext { cursor: default; opacity: 0.4; }

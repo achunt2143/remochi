@@ -1,0 +1,53 @@
+/* Mochi ListItem Component */
+
+.mochi-list-item {
+  font-family: "Mochi Medium", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  color: var(--mochi-text, #4b4b4b);
+  padding: 0 0 48px 32px;
+  position: relative;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--mochi-hover);
+  }
+
+  &.mochi-highlight {
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      var(--mochi-hover, rgba(255,255,255,0.06)) 50%,
+      transparent
+    );
+  }
+
+  .mochi-list-item-content {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+.mochi-highlight-border {
+  position: absolute;
+  height: 4px;
+  width: 100%;
+  line-height: 4px;
+  left: 0;
+  right: 0;
+  background: var(--mochi-border, rgba(100, 100, 100, 0.2));
+
+  &.top {
+    top: 0;
+    border-top: 1px solid var(--mochi-border, rgba(100, 100, 100, 0.15));
+  }
+
+  &.bottom {
+    bottom: 0;
+    border-bottom: 1px solid var(--mochi-border, rgba(100, 100, 100, 0.15));
+  }
+}

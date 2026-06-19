@@ -1,0 +1,47 @@
+// NubbinDivider — [left cap] [nubbin] [right cap]
+//
+// The nubbin image (e.g. up.png) is 71×20px. The divider line sits in the
+// bottom 2px of that image. The caps (div-left/right.png) are 4px tall.
+// align-items: flex-end flushes the cap bottoms to the nubbin bottom so
+// the line exits the nubbin seamlessly without a gap or step.
+
+.mochi-nubbin-divider {
+  display: flex;
+  align-items: flex-end;  // caps flush to nubbin bottom where the line exits
+  width: 100%;
+  overflow: visible;      // let the nubbin overhang above the line
+
+  // ── Caps ──────────────────────────────────────────────────
+  &__cap {
+    flex: 1 1 0;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+
+    .mochi-nubbin-divider--horizontal & {
+      height: 3px;   // match the divider line thickness
+    }
+
+    .mochi-nubbin-divider--vertical & {
+      width: 3px;
+    }
+  }
+
+  // ── Nubbin image ────────────────────────────────────────────
+  &__nub {
+    flex: 0 0 auto;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  // ── Vertical orientation ──────────────────────────────────────
+  &--vertical {
+    flex-direction: column;
+    align-items: flex-end;  // caps flush to nubbin right edge where line exits
+    height: 100%;
+    width: auto;
+    overflow: visible;
+  }
+}

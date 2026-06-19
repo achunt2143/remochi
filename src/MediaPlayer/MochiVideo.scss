@@ -1,0 +1,109 @@
+// MochiVideo — video player with Mochi component-based controls
+
+.mochi-video-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  background: #000;
+  border-radius: var(--mochi-radius, 8px);
+  overflow: hidden;
+
+  &.fullscreen {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+.mochi-video-player {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+// ── Controls bar ─────────────────────────────────────────────────────────────
+.mochi-video-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 10px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+
+  // hidden by default; shown on hover / when paused
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+
+  &.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// ── MochiButton overrides inside the controls bar ────────────────────────────
+.mochi-video-btn {
+  color: #fff !important;
+  padding: 0 4px;
+
+  svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── Seek timeline (progress bar, flex-grow, clickable/draggable) ──────────────
+.mochi-video-timeline {
+  flex: 1 1 0;
+  min-width: 0;
+  cursor: pointer;
+  // Vertically centre the thin bar in the controls row
+  display: flex;
+  align-items: center;
+
+  // Expand the hit area so small bar is easy to click
+  padding: 8px 0;
+
+  // MochiProgressBar fills the flex container
+  > * {
+    width: 100%;
+    // Override the default 12px height — thinner suits a video timeline
+    height: 4px !important;
+    // Slightly brightened track on dark background
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: none !important;
+  }
+
+  &.seeking > * {
+    height: 6px !important;
+  }
+
+  // Hover: grow slightly so the user knows it's interactive
+  &:hover > * {
+    height: 6px !important;
+    transition: height 0.15s ease;
+  }
+}
+
+// ── Time readout ──────────────────────────────────────────────────────────────
+.mochi-video-time {
+  font-size: 0.78rem;
+  color: #fff;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+// ── Volume slider (fixed narrow width) ───────────────────────────────────────
+.mochi-video-volume {
+  flex-shrink: 0;
+
+  [role="slider"] {
+    margin: 0 !important;
+  }
+}

@@ -1,0 +1,145 @@
+// MochiDropdown.scss — all colors from ThemeWrapper CSS variables
+.mochi-dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+
+  &-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--mochi-text-muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  &-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--mochi-surface);
+    border: 1px solid var(--mochi-border);
+    border-radius: 32px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(.disabled) {
+      border-color: var(--mochi-primary);
+      background: var(--mochi-hover);
+    }
+
+    &.open {
+      border-color: var(--mochi-primary);
+      background: var(--mochi-hover);
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &-value {
+    color: var(--mochi-text);
+    font-size: 14px;
+  }
+
+  &-arrow {
+    color: var(--mochi-text-muted);
+    font-size: 10px;
+    transition: transform 0.2s ease;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--mochi-surface);
+    border: 1px solid var(--mochi-border);
+    border-radius: 32px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  &-search {
+    padding: 8px;
+    border-bottom: 1px solid var(--mochi-border);
+  }
+
+  &-search-input {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--mochi-bg);
+    border: 1px solid var(--mochi-border);
+    border-radius: 32px;
+    color: var(--mochi-text);
+    font-size: 14px;
+    outline: none;
+
+    &:focus {
+      border-color: var(--mochi-primary);
+    }
+  }
+
+  &-options {
+    max-height: 240px;
+    overflow-y: auto;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--mochi-border) transparent;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--mochi-border);
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--mochi-text-muted);
+      }
+    }
+  }
+
+  &-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    color: var(--mochi-text);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: var(--mochi-hover);
+    }
+
+    &.selected {
+      background: var(--mochi-primary-soft);
+      color: var(--mochi-primary);
+    }
+  }
+
+  &-check {
+    color: var(--mochi-primary);
+    font-weight: 600;
+  }
+
+  &-empty {
+    padding: 16px 12px;
+    color: var(--mochi-text-muted);
+    text-align: center;
+    font-size: 14px;
+  }
+}

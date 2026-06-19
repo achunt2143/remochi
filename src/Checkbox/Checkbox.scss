@@ -1,0 +1,51 @@
+/* Checkbox.css — ported from mochi.Checkbox (Enyo) */
+
+.mochi-checkbox {
+  cursor: pointer;
+  height: 22px;
+  width: 22px;
+  margin: 0;
+  display: inline-block;
+  vertical-align: middle;
+
+  // Original uses 13px — creates the distinctive pill/rounded-square shape
+  border-radius: 13px;
+  border: 2px solid #646464;
+
+  // No transition by default; added via .mochi-checkbox-animate
+  background-color: var(--mochi-checkbox-inactive, #fff);
+  box-sizing: border-box;
+  position: relative;
+}
+
+// Checked state: image covers the box, border removed, 2px inset padding
+// mirrors `.mochi-checkbox[checked]` from original
+.mochi-checkbox.checked {
+  // Inline SVG replicates the visual of checkbox.png (white tick on transparent)
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='5,12 9,16 17,7'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+  padding: 2px;
+  border-width: 0;
+}
+
+// Animation class — only animates background-color as per original spec
+.mochi-checkbox-animate {
+  -webkit-transition: background-color 0.1s linear;
+  -moz-transition: background-color 0.1s linear;
+  -o-transition: background-color 0.1s linear;
+  transition: background-color 0.1s linear;
+}
+
+.mochi-checkbox.disabled {
+  opacity: 0.4;
+  // Original uses default cursor when disabled (not not-allowed)
+  cursor: default;
+}
+
+// Focus ring — amber to match the active color family
+.mochi-checkbox:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 184, 13, 0.4);
+}

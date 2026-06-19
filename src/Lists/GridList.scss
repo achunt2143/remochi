@@ -1,0 +1,66 @@
+/* Mochi GridList Component */
+
+.mochi-gridlist {
+  background: var(--mochi-surface);
+  font-family: "Mochi Light", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  width: 100%;
+}
+
+.mochi-gridlist-imageitem {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-family: "Mochi Light", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: bold;
+    text-align: center;
+    font-size: 10pt;
+    text-transform: uppercase;
+    padding: 10px;
+    /* #fff on a dark gradient is intentional — image caption always sits on a dark overlay */
+    color: #fff;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  &.selected {
+    background: var(--mochi-primary);
+    padding: 3px;
+    box-shadow: 0 0 0 3px var(--mochi-primary);
+    box-shadow:
+      0 0 0 3px var(--mochi-primary),
+      0 2px 8px var(--mochi-shadow, rgba(0, 0, 0, 0.15));
+
+    img {
+      opacity: 0.95;
+    }
+  }
+
+  &:focus {
+    outline: 2px solid var(--mochi-primary);
+    outline-offset: 2px;
+  }
+
+  &:hover:not(.selected) {
+    background: var(--mochi-hover);
+  }
+}

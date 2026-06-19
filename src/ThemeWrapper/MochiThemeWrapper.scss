@@ -1,0 +1,262 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Prelude';
+  src: local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), local('Arial');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Prelude';
+  src: local('Segoe UI Semibold'), local('Roboto Medium'), local('Helvetica Neue Medium');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Prelude';
+  src: local('Segoe UI Bold'), local('Roboto Bold'), local('Helvetica Neue Bold');
+  font-weight: 600;
+  font-style: normal;
+}
+
+.mochi-theme-wrapper {
+  min-height: 100vh;
+  font-family: 'Prelude', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  &[data-font-family='Lato'] {
+    font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  &[data-font-family='Prelude'] {
+    font-family: 'Prelude', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  // ============================================
+  // Typography scale
+  // ============================================
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  // ============================================
+  // Spacing
+  // ============================================
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+
+  // ============================================
+  // Border radius
+  // ============================================
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  // ============================================
+  // Shadows
+  // ============================================
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.25);
+
+  // ============================================
+  // Transitions
+  // ============================================
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  // ============================================
+  // DARK THEME (default)
+  // ============================================
+  &.mochi-theme-dark {
+    --color-primary:        #5b9dd9;
+    --color-primary-hover:  #6ba5db;
+    --color-primary-active: #4a8bc2;
+
+    --color-secondary:        #7ab8e8;
+    --color-secondary-hover:  #8ac2ed;
+    --color-secondary-active: #6aaedb;
+
+    --color-background:       #1a1a1a;
+    --color-surface:          #2a2a2a;
+    --color-surface-elevated: #333333;
+
+    --color-text:           #ffffff;
+    --color-text-secondary: #999999;
+    --color-text-muted:     #666666;
+
+    --color-border:       #646464;
+    --color-border-light: rgba(255, 255, 255, 0.1);
+
+    --color-success:    #4caf50;
+    --color-success-bg: rgba(76, 175, 80, 0.15);
+    --color-warning:    #ff9800;
+    --color-warning-bg: rgba(255, 152, 0, 0.15);
+    --color-error:      #f44336;
+    --color-error-bg:   rgba(244, 67, 54, 0.15);
+    --color-info:       #2196f3;
+    --color-info-bg:    rgba(33, 150, 243, 0.15);
+
+    // --------------------------------------------------
+    // --mochi-* aliases — consumed by all component SCSS
+    // --------------------------------------------------
+    --mochi-bg:           var(--color-background);
+    --mochi-surface:      var(--color-surface);
+    --mochi-border:       var(--color-border);
+    --mochi-text:         var(--color-text);
+    --mochi-text-muted:   var(--color-text-secondary);
+    --mochi-text-faint:   var(--color-text-muted);
+    --mochi-primary:      var(--color-primary);
+    --mochi-primary-hover: var(--color-primary-hover);
+    --mochi-primary-text: #ffffff;
+    --mochi-primary-soft: rgba(91, 157, 217, 0.18);
+    --mochi-hover:  rgba(255, 255, 255, 0.06);
+    --mochi-active: rgba(255, 255, 255, 0.1);
+    --mochi-stripe: rgba(255, 255, 255, 0.03);
+    // Contextual popup border — always solid #646464 regardless of theme
+    --mochi-popup-border: #646464;
+
+    background-color: var(--color-background);
+    color: var(--color-text);
+  }
+
+  // ============================================
+  // LIGHT THEME
+  // ============================================
+  &.mochi-theme-light {
+    --color-primary:        #4a8bc2;
+    --color-primary-hover:  #5b9dd9;
+    --color-primary-active: #3a7bb2;
+
+    --color-secondary:        #6aaedb;
+    --color-secondary-hover:  #7ab8e8;
+    --color-secondary-active: #5a9ecb;
+
+    --color-background:       #f5f5f5;
+    --color-surface:          #ffffff;
+    --color-surface-elevated: #fafafa;
+
+    --color-text:           #1a1a1a;
+    --color-text-secondary: #555555;
+    --color-text-muted:     #888888;
+
+    --color-border:       rgba(0, 0, 0, 0.12);
+    --color-border-light: rgba(0, 0, 0, 0.06);
+
+    --color-success:    #388e3c;
+    --color-success-bg: rgba(56, 142, 60, 0.1);
+    --color-warning:    #e65100;
+    --color-warning-bg: rgba(230, 81, 0, 0.1);
+    --color-error:      #c62828;
+    --color-error-bg:   rgba(198, 40, 40, 0.1);
+    --color-info:       #1565c0;
+    --color-info-bg:    rgba(21, 101, 192, 0.1);
+
+    // --------------------------------------------------
+    // --mochi-* aliases — consumed by all component SCSS
+    // --------------------------------------------------
+    --mochi-bg:           var(--color-background);
+    --mochi-surface:      var(--color-surface);
+    --mochi-border:       var(--color-border);
+    --mochi-text:         var(--color-text);
+    --mochi-text-muted:   var(--color-text-secondary);
+    --mochi-text-faint:   var(--color-text-muted);
+    --mochi-primary:      var(--color-primary);
+    --mochi-primary-hover: var(--color-primary-hover);
+    --mochi-primary-text: #ffffff;
+    --mochi-primary-soft: rgba(74, 139, 194, 0.12);
+    --mochi-hover:  rgba(0, 0, 0, 0.04);
+    --mochi-active: rgba(0, 0, 0, 0.08);
+    --mochi-stripe: rgba(0, 0, 0, 0.02);
+    // Contextual popup border — always solid #646464 regardless of theme
+    --mochi-popup-border: #646464;
+
+    background-color: var(--color-background);
+    color: var(--color-text);
+  }
+
+  // ============================================
+  // Global typography utilities
+  // ============================================
+  .text-xs        { font-size: var(--font-size-xs); }
+  .text-sm        { font-size: var(--font-size-sm); }
+  .text-base      { font-size: var(--font-size-base); }
+  .text-md        { font-size: var(--font-size-md); }
+  .text-lg        { font-size: var(--font-size-lg); }
+  .text-xl        { font-size: var(--font-size-xl); }
+  .text-2xl       { font-size: var(--font-size-2xl); }
+  .text-3xl       { font-size: var(--font-size-3xl); }
+  .text-4xl       { font-size: var(--font-size-4xl); }
+
+  .font-light     { font-weight: var(--font-weight-light); }
+  .font-normal    { font-weight: var(--font-weight-normal); }
+  .font-medium    { font-weight: var(--font-weight-medium); }
+  .font-semibold  { font-weight: var(--font-weight-semibold); }
+  .font-bold      { font-weight: var(--font-weight-bold); }
+
+  .leading-tight    { line-height: var(--line-height-tight); }
+  .leading-normal   { line-height: var(--line-height-normal); }
+  .leading-relaxed  { line-height: var(--line-height-relaxed); }
+}
+
+// ============================================
+// Global reset for Mochi components
+// ============================================
+* {
+  box-sizing: border-box;
+}
+
+[data-mochi-theme] {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--color-text-muted);
+    }
+  }
+}

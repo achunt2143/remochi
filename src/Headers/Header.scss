@@ -1,0 +1,38 @@
+/* MochiHeader — color from ThemeWrapper CSS variables */
+
+.mochi-header {
+  height: 64px;
+  padding: 0px 32px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .mochi-header-content {
+    font-size: 36px;
+    line-height: 32px;
+    color: var(--mochi-text);
+    padding-top: 30px;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: text-bottom;
+  }
+
+  .mochi-header-controls {
+    display: inline-block;
+    vertical-align: bottom;
+    padding-top: 2px;
+
+    &.mochi-header-controls-first {
+      padding-left: 56px;
+    }
+
+    & > * {
+      display: inline-block;
+      white-space: nowrap;
+    }
+  }
+}
