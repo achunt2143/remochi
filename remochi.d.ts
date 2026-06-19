@@ -578,8 +578,3 @@ export interface WizardProps {
   className?: string;
 }
 export const Wizard: React.FC<WizardProps>;
-
-// ---------------------------------------------------------------------------
-// CSS side-effect module
-// ---------------------------------------------------------------------------
-declare module 'remochi/css';
