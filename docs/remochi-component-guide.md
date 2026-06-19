@@ -1,6 +1,6 @@
 # Remochi Component Guide
 
-This guide shows the core Remochi components in practical use, based on the `remochi-demo` app. The demo imports the main component set from `remochi`, applies global styles with `remochi/css`, and wraps the app in `ThemeWrapper` so components can respond to the current theme through `useTheme()` [cite:20].
+This guide shows the core Remochi components in practical use, based on the `remochi-demo` app. The demo imports the main component set from `remochi`, applies global styles with `remochi/css`, and wraps the app in `ThemeWrapper` so components can respond to the current theme through `useTheme()`.
 
 ## Getting started
 
@@ -50,17 +50,17 @@ import {
 } from 'remochi';
 ```
 
-The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme` from `useTheme()` for a light/dark switch [cite:20].
+The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme` from `useTheme()` for a light/dark switch.
 
 ## Recommended app structure
 
-A simple pattern is to keep a themed inner app and mount shared overlays outside layout shifters when needed. The demo does this by rendering `SlidingMenu.ContentShifter` around the main page content, then rendering `PopupPanel` outside that shifter so the popup stays fixed while the rest of the layout moves [cite:20].
+A simple pattern is to keep a themed inner app and mount shared overlays outside layout shifters when needed. The demo does this by rendering `SlidingMenu.ContentShifter` around the main page content, then rendering `PopupPanel` outside that shifter so the popup stays fixed while the rest of the layout moves.
 
 ## Buttons and selection controls
 
 ### Button
 
-`Button` is the primary clickable action surface. The demo uses the default button for regular actions, `type="warning"` for destructive or cautionary actions, and `type="disabled"` for non-interactive states [cite:20].
+`Button` is the primary clickable action surface. The demo uses the default button for regular actions, `type="warning"` for destructive or cautionary actions, and `type="disabled"` for non-interactive states.
 
 Props used in the demo:
 - `type`: visual intent, including normal, warning, disabled, dropdown
@@ -78,7 +78,7 @@ Example:
 
 ### Radio
 
-`Radio` renders a single radio option; group by sharing the same `name`. The demo binds `checked` to a local state value and calls `onChange` to update that state and log the selection [cite:20].
+`Radio` renders a single radio option; group by sharing the same `name`. The demo binds `checked` to a local state value and calls `onChange` to update that state and log the selection.
 
 Example:
 
@@ -98,7 +98,7 @@ Example:
 
 ### ViewSelectButton
 
-`ViewSelectButton` is a compact segmented control for switching between named views. It accepts a `value`, an `options` array, and an `onChange` callback [cite:20].
+`ViewSelectButton` is a compact segmented control for switching between named views. It accepts a `value`, an `options` array, and an `onChange` callback.
 
 Example:
 
@@ -115,7 +115,7 @@ Example:
 
 ### Toggle and Checkbox
 
-`Toggle` is a switch-style boolean control, while `Checkbox` is a box-style boolean. Both bind `checked` to a boolean state and use `onChange` to flip it [cite:20].
+`Toggle` is a switch-style boolean control, while `Checkbox` is a box-style boolean. Both bind `checked` to a boolean state and use `onChange` to flip it.
 
 Example:
 
@@ -136,7 +136,7 @@ Example:
 
 ### Input, TextArea, RichText
 
-`Input` is a single-line text field with support for `type`, `placeholder`, and `disabled`. `TextArea` provides multiline editing. `RichText` is a formatted rich text editor in the same visual family [cite:20].
+`Input` is a single-line text field with support for `type`, `placeholder`, and `disabled`. `TextArea` provides multiline editing. `RichText` is a formatted rich text editor in the same visual family.
 
 Example:
 
@@ -155,7 +155,7 @@ Example:
 
 ### NumberInput and DateInput
 
-`NumberInput` and `DateInput` provide structured input with consistent Mochi styling. Both take `value` and `onChange` props; the demo stores these values in `useState()` and logs updates to an activity log [cite:20].
+`NumberInput` and `DateInput` provide structured input with consistent Mochi styling. Both take `value` and `onChange` props; the demo stores these values in `useState()` and logs updates to an activity log.
 
 Example:
 
@@ -172,7 +172,7 @@ Example:
 
 ### Dropdown
 
-`Dropdown` renders a styled select input. It receives an `options` array of `{ label, value }`, the current `value`, an optional `placeholder`, and `onChange` for selection changes [cite:20].
+`Dropdown` renders a styled select input. It receives an `options` array of `{ label, value }`, the current `value`, an optional `placeholder`, and `onChange` for selection changes.
 
 Example:
 
@@ -195,7 +195,7 @@ const dropdownOptions = [
 
 ### Badge
 
-`Badge` displays small status tags and optional counts. The demo shows semantic `variant` values like `success`, `warning`, `error`, and `info`, plus a `count` variant for notification pills [cite:20].
+`Badge` displays small status tags and optional counts. The demo shows semantic `variant` values like `success`, `warning`, `error`, and `info`, plus a `count` variant for notification pills.
 
 Example:
 
@@ -210,7 +210,7 @@ Example:
 
 ### Header and Subheader
 
-`Header` and `Subheader` provide consistent section titles. The demo uses them at the top of the page to introduce the sampler and section-level content [cite:20].
+`Header` and `Subheader` provide consistent section titles. The demo uses them at the top of the page to introduce the sampler and section-level content.
 
 Example:
 
@@ -221,11 +221,11 @@ Example:
 
 ### Divider and NubbinDivider
 
-`Divider` separates sections with a straight rule, while `NubbinDivider` adds a visual “nubbin” accent between larger blocks [cite:20]. Use them to break up long forms and component groups.
+`Divider` separates sections with a straight rule, while `NubbinDivider` adds a visual “nubbin” accent between larger blocks. Use them to break up long forms and component groups.
 
 ### Item
 
-`Item` is a simple label/value display row for read-only fields [cite:20].
+`Item` is a simple label/value display row for read-only fields.
 
 Example:
 
@@ -237,7 +237,7 @@ Example:
 
 ### List, ListItem, ListHeader, GridList
 
-These components render vertical or grid lists in the Mochi style. `List` wraps a group of `ListItem` elements, optionally with a `ListHeader`. `GridList` renders a uniform grid of items with click handling [cite:20].
+These components render vertical or grid lists in the Mochi style. `List` wraps a group of `ListItem` elements, optionally with a `ListHeader`. `GridList` renders a uniform grid of items with click handling.
 
 Example:
 
@@ -257,7 +257,7 @@ Example:
 
 ### Table
 
-`Table` renders a simple data table from a `columns` array and `rows` of values. The demo uses `onRowClick` to log which row was activated [cite:20].
+`Table` renders a simple data table from a `columns` array and `rows` of values. The demo uses `onRowClick` to log which row was activated.
 
 Example:
 
@@ -279,7 +279,7 @@ const rows = [
 
 ### Panel and FloatingPanel
 
-`Panel` divides a row into width-percentage segments. The `width` prop is a percentage of the row, and `style` can be `default` or `shadow` for a raised look [cite:20]. `FloatingPanel` fills its container with a rounded-corner surface and optional `style` variants [cite:20].
+`Panel` divides a row into width-percentage segments. The `width` prop is a percentage of the row, and `style` can be `default` or `shadow` for a raised look. `FloatingPanel` fills its container with a rounded-corner surface and optional `style` variants.
 
 Example:
 
@@ -297,7 +297,7 @@ Example:
 
 ### StackedPanels and StackedPanel
 
-`StackedPanels` manages a stack of `StackedPanel` children, each with a `title`. The demo uses three panels to show simple stacked content; more advanced apps can drive the active panel via state and navigation [cite:20].
+`StackedPanels` manages a stack of `StackedPanel` children, each with a `title`. The demo uses three panels to show simple stacked content; more advanced apps can drive the active panel via state and navigation.
 
 Example:
 
@@ -311,7 +311,7 @@ Example:
 
 ### PopupPanel
 
-`PopupPanel` is an anchored popup for quick actions. It receives `isOpen`, `onClose`, an `anchorRect` (from `getBoundingClientRect()`), an optional `title`, and an `actions` array with button definitions [cite:20]. Render it near the root so it stays fixed on screen.
+`PopupPanel` is an anchored popup for quick actions. It receives `isOpen`, `onClose`, an `anchorRect` (from `getBoundingClientRect()`), an optional `title`, and an `actions` array with button definitions. Render it near the root so it stays fixed on screen.
 
 Example:
 
@@ -345,7 +345,7 @@ const openPopup = () => {
 
 ### Dialog
 
-`Dialog` is a centered modal with a `title`, `isOpen` flag, `onClose` callback, and an `actions` array describing footer buttons. The demo wires these actions to log and close the dialog [cite:20].
+`Dialog` is a centered modal with a `title`, `isOpen` flag, `onClose` callback, and an `actions` array describing footer buttons. The demo wires these actions to log and close the dialog.
 
 Example:
 
@@ -367,7 +367,7 @@ Example:
 
 ### ProgressBar and Slider
 
-`ProgressBar` visualizes completion, taking `value` and optional `color`, `width`, and `height`. `Slider` lets users set numeric values interactively and can also be styled with `color` and `width` [cite:20]. The demo keeps `Slider` and a live `ProgressBar` in sync via shared state.
+`ProgressBar` visualizes completion, taking `value` and optional `color`, `width`, and `height`. `Slider` lets users set numeric values interactively and can also be styled with `color` and `width`. The demo keeps `Slider` and a live `ProgressBar` in sync via shared state.
 
 Example:
 
@@ -383,7 +383,7 @@ const [sliderVal, setSliderVal] = useState(50);
 
 ### Spinner
 
-`Spinner` shows transient loading indicators. The demo uses `active`, `styleType` (light/dark), and `size` (normal/large) combinations [cite:20].
+`Spinner` shows transient loading indicators. The demo uses `active`, `styleType` (light/dark), and `size` (normal/large) combinations.
 
 Example:
 
@@ -396,11 +396,11 @@ Example:
 
 ### SlidingMenu
 
-The demo’s `SlidingMenu` component is local to `remochi-demo` but illustrates how Remochi buttons and badges behave in a sliding navigation tray [cite:20]. Items support `icon`, `badge`, `isActive`, and `onClick` props, and the menu can appear from any side.
+The demo’s `SlidingMenu` component is local to `remochi-demo` but illustrates how Remochi buttons and badges behave in a sliding navigation tray. Items support `icon`, `badge`, `isActive`, and `onClick` props, and the menu can appear from any side.
 
 ### Wizard
 
-`Wizard` renders step indicators for multi-step flows. It accepts a `steps` array and `currentStep` index, and renders children as the step content [cite:20].
+`Wizard` renders step indicators for multi-step flows. It accepts a `steps` array and `currentStep` index, and renders children as the step content.
 
 Example:
 
@@ -414,7 +414,7 @@ const steps = [{ label: 'Account' }, { label: 'Profile' }, { label: 'Review' }];
 
 ### Video
 
-`Video` is a simple media player wrapper that takes `src`, optional `poster`, and layout props like `width` [cite:20].
+`Video` is a simple media player wrapper that takes `src`, optional `poster`, and layout props like `width`.
 
 Example:
 
@@ -425,11 +425,3 @@ Example:
   width="100%"
 />
 ```
-
-## Practical usage tips
-
-- Keep overlay state and anchor measurements local to the component that opens them, as the demo does with `useRef` and `getBoundingClientRect()` for popup anchoring [cite:20].
-- Use the global `log` pattern from the demo to verify component events while building new screens [cite:20].
-- Wrap every screen in `ThemeWrapper` early so theme-sensitive styling stays consistent across components [cite:20].
-
-If you want, this guide can be further expanded with full prop tables per component directly from the type definitions.
