@@ -392,6 +392,26 @@ export const Pagination: React.FC<PaginationProps>;
 // ---------------------------------------------------------------------------
 // Panels
 // ---------------------------------------------------------------------------
+export interface PanelProps {
+  children?: React.ReactNode;
+  /** Percentage width of the panel within its row, e.g. 25, 33, 50. */
+  width?: number;
+  /** Visual style variant. */
+  style?: 'default' | 'shadow';
+  className?: string;
+  [key: string]: any;
+}
+export const Panel: React.FC<PanelProps>;
+
+export interface FloatingPanelProps {
+  children?: React.ReactNode;
+  /** Visual style variant. */
+  style?: 'default' | 'shadow';
+  className?: string;
+  [key: string]: any;
+}
+export const FloatingPanel: React.FC<FloatingPanelProps>;
+
 export interface StackedPanelProps {
   children?: React.ReactNode;
   [key: string]: any;
@@ -558,3 +578,8 @@ export interface WizardProps {
   className?: string;
 }
 export const Wizard: React.FC<WizardProps>;
+
+// ---------------------------------------------------------------------------
+// CSS side-effect module
+// ---------------------------------------------------------------------------
+declare module 'remochi/css';
