@@ -58,47 +58,277 @@ A simple pattern is to keep a themed inner app and mount shared overlays outside
 
 ## Buttons and selection controls
 
-Use `Button` for standard actions, and reserve `type="warning"` or `type="disabled"` for stateful variants. The demo also shows `Radio` groups for mutually exclusive choices and `ViewSelectButton` for compact view switching between values like grid and list [cite:20].
+### Button
+
+`Button` is the primary clickable action surface. The demo uses the default button for regular actions, `type="warning"` for destructive or cautionary actions, and `type="disabled"` for non-interactive states [cite:20].
+
+Props used in the demo:
+- `type`: visual intent, including normal, warning, disabled, dropdown
+- `onClick`: handler for click events
+- `ref`: used when anchoring a `PopupPanel` to this button
 
 Example:
 
 ```jsx
-<Button onClick={handleOpen}>Open</Button>
-<Button type="warning" onClick={handleDelete}>Delete</Button>
+<Button onClick={() => addLog('Button: normal')}>Normal</Button>
+<Button type="warning" onClick={() => addLog('Button: warning')}>Warning</Button>
+<Button type="disabled">Disabled</Button>
+<Button ref={dropdownBtnRef} type="dropdown" onClick={openPopup}>Open Popup ▾</Button>
+```
+
+### Radio
+
+`Radio` renders a single radio option; group by sharing the same `name`. The demo binds `checked` to a local state value and calls `onChange` to update that state and log the selection [cite:20].
+
+Example:
+
+```jsx
+{['alpha', 'beta', 'gamma'].map((v) => (
+  <Radio
+    key={v}
+    name="demo"
+    value={v}
+    checked={radioVal === v}
+    onChange={() => setRadioVal(v)}
+  >
+    {v}
+  </Radio>
+))}
+```
+
+### ViewSelectButton
+
+`ViewSelectButton` is a compact segmented control for switching between named views. It accepts a `value`, an `options` array, and an `onChange` callback [cite:20].
+
+Example:
+
+```jsx
 <ViewSelectButton
   value={viewMode}
   options={[
-    { value: 'grid', label: 'Grid' },
-    { value: 'list', label: 'List' },
+    { value: 'grid', label: '⊞ Grid' },
+    { value: 'list', label: '☰ List' },
   ]}
   onChange={setViewMode}
 />
 ```
 
-## Inputs and forms
+### Toggle and Checkbox
 
-For text entry, the demo uses `Input`, `TextArea`, and `RichText`, plus specialized controls like `NumberInput` and `DateInput` for structured data [cite:20]. `Dropdown` works well for option lists, while `Checkbox`, `Toggle`, and `Radio` cover boolean and exclusive states [cite:20].
+`Toggle` is a switch-style boolean control, while `Checkbox` is a box-style boolean. Both bind `checked` to a boolean state and use `onChange` to flip it [cite:20].
 
 Example:
 
 ```jsx
-<Input placeholder="Search..." />
-<TextArea rows={3} />
-<DateInput value={dateVal} onChange={setDateVal} />
-<NumberInput value={numVal} onChange={setNumVal} />
+<Toggle
+  checked={toggleOn}
+  onChange={() => setToggleOn((v) => !v)}
+/>
+<Checkbox
+  checked={checked}
+  onChange={() => setChecked((v) => !v)}
+>
+  Checkbox {checked ? '☑' : '☐'}
+</Checkbox>
+```
+
+## Inputs and forms
+
+### Input, TextArea, RichText
+
+`Input` is a single-line text field with support for `type`, `placeholder`, and `disabled`. `TextArea` provides multiline editing. `RichText` is a formatted rich text editor in the same visual family [cite:20].
+
+Example:
+
+```jsx
+<Input placeholder="Text input" />
+<Input placeholder="Search…" type="search" />
+<Input placeholder="Password" type="password" />
+<Input placeholder="Disabled" disabled />
+<TextArea
+  placeholder="TextArea — multiline input"
+  rows={3}
+  style={{ marginTop: 8, width: '100%' }}
+/>
+<RichText placeholder="RichText editor" />
+```
+
+### NumberInput and DateInput
+
+`NumberInput` and `DateInput` provide structured input with consistent Mochi styling. Both take `value` and `onChange` props; the demo stores these values in `useState()` and logs updates to an activity log [cite:20].
+
+Example:
+
+```jsx
+<NumberInput
+  value={numVal}
+  onChange={(v) => setNumVal(v)}
+/>
+<DateInput
+  value={dateVal}
+  onChange={(v) => setDateVal(v)}
+/>
+```
+
+### Dropdown
+
+`Dropdown` renders a styled select input. It receives an `options` array of `{ label, value }`, the current `value`, an optional `placeholder`, and `onChange` for selection changes [cite:20].
+
+Example:
+
+```jsx
+const dropdownOptions = [
+  { label: 'Option A', value: 'a' },
+  { label: 'Option B', value: 'b' },
+  { label: 'Option C', value: 'c' },
+];
+
+<Dropdown
+  options={dropdownOptions}
+  value={dropdownVal}
+  placeholder="Select an option…"
+  onChange={setDropdownVal}
+/>
 ```
 
 ## Status, layout, and content
 
-Use `Badge` for compact status markers, `Header` and `Subheader` for hierarchy, and `Divider` or `NubbinDivider` to separate sections [cite:20]. For content display, the demo uses `Item`, `List`, `ListHeader`, `ListItem`, `GridList`, and `Table` to present structured data consistently [cite:20].
+### Badge
 
-## Panels, popups, and dialogs
-
-The demo shows several ways to build screen structure: `Panel` for width-based panel layouts, `FloatingPanel` for inset surfaces, and `StackedPanels` with `StackedPanel` for navigable panel stacks [cite:20]. For overlays, `PopupPanel` handles anchored quick actions, and `Dialog` handles confirm/cancel flows with explicit action buttons [cite:20].
+`Badge` displays small status tags and optional counts. The demo shows semantic `variant` values like `success`, `warning`, `error`, and `info`, plus a `count` variant for notification pills [cite:20].
 
 Example:
 
 ```jsx
+<Badge>Default</Badge>
+<Badge variant="success">Success</Badge>
+<Badge variant="warning">Warning</Badge>
+<Badge variant="error">Error</Badge>
+<Badge variant="info">Info</Badge>
+<Badge count={7}>Notifications</Badge>
+```
+
+### Header and Subheader
+
+`Header` and `Subheader` provide consistent section titles. The demo uses them at the top of the page to introduce the sampler and section-level content [cite:20].
+
+Example:
+
+```jsx
+<Header>Header Component</Header>
+<Subheader>Subheader Component — sits below a Header</Subheader>
+```
+
+### Divider and NubbinDivider
+
+`Divider` separates sections with a straight rule, while `NubbinDivider` adds a visual “nubbin” accent between larger blocks [cite:20]. Use them to break up long forms and component groups.
+
+### Item
+
+`Item` is a simple label/value display row for read-only fields [cite:20].
+
+Example:
+
+```jsx
+<Item label="Full Name" value="Alice Johnson" />
+<Item label="Role" value="Senior Engineer" />
+<Item label="Status" value="Active" />
+```
+
+### List, ListItem, ListHeader, GridList
+
+These components render vertical or grid lists in the Mochi style. `List` wraps a group of `ListItem` elements, optionally with a `ListHeader`. `GridList` renders a uniform grid of items with click handling [cite:20].
+
+Example:
+
+```jsx
+<List>
+  <ListHeader>Team Members</ListHeader>
+  <ListItem>Alice — Engineer</ListItem>
+  <ListItem>Bob — Designer</ListItem>
+  <ListItem>Carol — PM</ListItem>
+</List>
+
+<GridList
+  items={['React', 'Rust', 'TypeScript']}
+  onItemClick={(item) => addLog(`GridList: ${item}`)}
+/>
+```
+
+### Table
+
+`Table` renders a simple data table from a `columns` array and `rows` of values. The demo uses `onRowClick` to log which row was activated [cite:20].
+
+Example:
+
+```jsx
+const columns = ['Name', 'Role', 'Status'];
+const rows = [
+  ['Alice', 'Engineer', 'Active'],
+  ['Bob', 'Designer', 'Away'],
+];
+
+<Table
+  columns={columns}
+  rows={rows}
+  onRowClick={(row) => addLog(`Row: ${row[0]}`)}
+/>
+```
+
+## Panels, popups, and dialogs
+
+### Panel and FloatingPanel
+
+`Panel` divides a row into width-percentage segments. The `width` prop is a percentage of the row, and `style` can be `default` or `shadow` for a raised look [cite:20]. `FloatingPanel` fills its container with a rounded-corner surface and optional `style` variants [cite:20].
+
+Example:
+
+```jsx
+<div style={{ display: 'flex', height: 120 }}>
+  <Panel width={25} style="default">Sidebar</Panel>
+  <Panel width={50} style="default">Main</Panel>
+  <Panel width={25} style="default">Detail</Panel>
+</div>
+
+<FloatingPanel style="shadow">
+  <div style={{ padding: 16 }}>Shadowed content</div>
+</FloatingPanel>
+```
+
+### StackedPanels and StackedPanel
+
+`StackedPanels` manages a stack of `StackedPanel` children, each with a `title`. The demo uses three panels to show simple stacked content; more advanced apps can drive the active panel via state and navigation [cite:20].
+
+Example:
+
+```jsx
+<StackedPanels>
+  <StackedPanel title="Panel One">Content inside panel one.</StackedPanel>
+  <StackedPanel title="Panel Two">Content inside panel two.</StackedPanel>
+  <StackedPanel title="Panel Three">Content inside panel three.</StackedPanel>
+</StackedPanels>
+```
+
+### PopupPanel
+
+`PopupPanel` is an anchored popup for quick actions. It receives `isOpen`, `onClose`, an `anchorRect` (from `getBoundingClientRect()`), an optional `title`, and an `actions` array with button definitions [cite:20]. Render it near the root so it stays fixed on screen.
+
+Example:
+
+```jsx
+const dropdownBtnRef = useRef(null);
+const [popupOpen, setPopupOpen] = useState(false);
+const [anchorRect, setAnchorRect] = useState(null);
+
+const openPopup = () => {
+  if (dropdownBtnRef.current) {
+    setAnchorRect(dropdownBtnRef.current.getBoundingClientRect());
+    setPopupOpen(true);
+  }
+};
+
+<Button ref={dropdownBtnRef} type="dropdown" onClick={openPopup}>Open Popup ▾</Button>
+
 <PopupPanel
   isOpen={popupOpen}
   onClose={() => setPopupOpen(false)}
@@ -113,13 +343,88 @@ Example:
 </PopupPanel>
 ```
 
+### Dialog
+
+`Dialog` is a centered modal with a `title`, `isOpen` flag, `onClose` callback, and an `actions` array describing footer buttons. The demo wires these actions to log and close the dialog [cite:20].
+
+Example:
+
+```jsx
+<Dialog
+  isOpen={dialogOpen}
+  title="Confirm Action"
+  onClose={() => setDialogOpen(false)}
+  actions={[
+    { label: 'Cancel', onClick: handleCancel, type: 'warning' },
+    { label: 'Confirm', onClick: handleConfirm },
+  ]}
+>
+  <p>Are you sure you want to proceed with this action?</p>
+</Dialog>
+```
+
 ## Progress, motion, and feedback
 
-Use `ProgressBar` to show task completion and `Slider` for interactive numeric input. The demo pairs those with `Spinner` for loading states so the UI can show both steady progress and transient activity [cite:20].
+### ProgressBar and Slider
+
+`ProgressBar` visualizes completion, taking `value` and optional `color`, `width`, and `height`. `Slider` lets users set numeric values interactively and can also be styled with `color` and `width` [cite:20]. The demo keeps `Slider` and a live `ProgressBar` in sync via shared state.
+
+Example:
+
+```jsx
+const [sliderVal, setSliderVal] = useState(50);
+
+<ProgressBar value={sliderVal} />
+<Slider
+  value={sliderVal}
+  onChange={setSliderVal}
+/>
+```
+
+### Spinner
+
+`Spinner` shows transient loading indicators. The demo uses `active`, `styleType` (light/dark), and `size` (normal/large) combinations [cite:20].
+
+Example:
+
+```jsx
+<Spinner active={true} styleType="light" size="normal" />
+<Spinner active={true} styleType="dark" size="large" />
+```
 
 ## Menus, wizards, and media
 
-The demo’s `SlidingMenu` example shows a side menu with grouped items, badges, and position switching across left, right, top, and bottom placements [cite:20]. It also includes `Wizard` for step-based flows and `Video` for simple embedded media playback [cite:20].
+### SlidingMenu
+
+The demo’s `SlidingMenu` component is local to `remochi-demo` but illustrates how Remochi buttons and badges behave in a sliding navigation tray [cite:20]. Items support `icon`, `badge`, `isActive`, and `onClick` props, and the menu can appear from any side.
+
+### Wizard
+
+`Wizard` renders step indicators for multi-step flows. It accepts a `steps` array and `currentStep` index, and renders children as the step content [cite:20].
+
+Example:
+
+```jsx
+const steps = [{ label: 'Account' }, { label: 'Profile' }, { label: 'Review' }];
+
+<Wizard steps={steps} currentStep={wizardStep}>
+  <div>Step {wizardStep + 1} of {steps.length}</div>
+</Wizard>
+```
+
+### Video
+
+`Video` is a simple media player wrapper that takes `src`, optional `poster`, and layout props like `width` [cite:20].
+
+Example:
+
+```jsx
+<Video
+  src="https://www.w3schools.com/html/mov_bbb.mp4"
+  poster="https://www.w3schools.com/html/pic_trulli.jpg"
+  width="100%"
+/>
+```
 
 ## Practical usage tips
 
@@ -127,4 +432,4 @@ The demo’s `SlidingMenu` example shows a side menu with grouped items, badges,
 - Use the global `log` pattern from the demo to verify component events while building new screens [cite:20].
 - Wrap every screen in `ThemeWrapper` early so theme-sensitive styling stays consistent across components [cite:20].
 
-If you want, this guide can be expanded into a fuller README-style manual with per-component props and copy-paste examples.
+If you want, this guide can be further expanded with full prop tables per component directly from the type definitions.
