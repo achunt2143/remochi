@@ -292,6 +292,73 @@ interface VideoProps {
 declare const Video: React.FC<VideoProps>;
 
 // ---------------------------------------------------------------------------
+// Menu
+// ---------------------------------------------------------------------------
+interface MochiSlidingMenuProps {
+  children?: React.ReactNode;
+  /** Which edge the menu slides in from. @default 'left' */
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  /** Controlled open state. Omit to use internal state. */
+  isOpen?: boolean;
+  /** Called when the menu requests an open/close transition. */
+  onOpenChange?: (open: boolean) => void;
+  className?: string;
+  style?: React.CSSProperties;
+  /** Slide animation duration in ms. @default 300 */
+  duration?: number;
+  /** Close on Escape key. @default true */
+  closeOnEscape?: boolean;
+  /** Close when backdrop is clicked. @default true */
+  closeOnBackdropClick?: boolean;
+  /** Override the backdrop CSS color. Defaults to a theme-aware value. */
+  backdropColor?: string;
+  /** Show the backdrop overlay. @default true */
+  showBackdrop?: boolean;
+}
+/** MochiSlidingMenu.ContentShifter props */
+interface MochiSlidingMenuContentShifterProps {
+  children?: React.ReactNode;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  isMenuOpen?: boolean;
+  /** Width of the left/right menu (CSS value). @default '280px' */
+  menuWidth?: string;
+  /** Height of the top/bottom menu (CSS value). @default 'auto' */
+  menuHeight?: string;
+  duration?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}
+declare const MochiSlidingMenu: React.FC<MochiSlidingMenuProps> & {
+  ContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
+};
+declare const MochiSlidingMenuContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
+
+interface MochiSlidingMenuItemProps {
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+  href?: string;
+  isActive?: boolean;
+  badge?: string | number;
+  className?: string;
+  style?: React.CSSProperties;
+  disabled?: boolean;
+  variant?: 'default' | 'danger' | 'success';
+}
+declare const MochiSlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
+
+interface MochiSlidingMenuItemGroupProps {
+  children?: React.ReactNode;
+  /** Section heading rendered in uppercase muted text. */
+  label?: string;
+  /** Show a divider border below the group. @default false */
+  divider?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}
+declare const MochiSlidingMenuItemGroup: React.FC<MochiSlidingMenuItemGroupProps>;
+
+// ---------------------------------------------------------------------------
 // NumberInput
 // ---------------------------------------------------------------------------
 interface NumberInputProps {
@@ -492,5 +559,5 @@ interface WizardProps {
 }
 declare const Wizard: React.FC<WizardProps>;
 
-export { Badge, Button, Checkbox, Collapsable, CollapsableFooter, CollapsableHeader, CollapsableItem, DateInput, Dialog, Divider, Dropdown, GridList, GridListImageItem, Header, Input, Item, List, ListHeader, ListItem, NubbinDivider, NumberInput, Pagination, PopupPanel, ProgressBar, Radio, RichText, Slider, Spinner, StackedPanel, StackedPanels, Subheader, Table, TextArea, ThemeWrapper, Toggle, Video, ViewSelectButton, Wizard, useTheme };
-export type { BadgeProps, ButtonProps, CheckboxChangeEvent, CheckboxProps, CollapsableProps, DateInputProps, DialogProps, DividerProps, DropdownOption, DropdownProps, GridListImageItemProps, GridListProps, HeaderProps, InputProps, ItemProps, ListHeaderProps, ListItemProps, ListProps, NubbinDividerProps, NumberInputProps, PaginationProps, PopupAction, PopupPanelProps, ProgressBarProps, RadioProps, RichTextProps, SliderProps, SpinnerProps, StackedPanelProps, StackedPanelsMethods, StackedPanelsProps, SubheaderProps, TableColumn, TableProps, TextAreaProps, ThemeColors, ThemeContextValue, ThemeWrapperProps, ToggleProps, VideoProps, ViewSelectButtonItem, ViewSelectButtonProps, WizardProps, WizardStep };
+export { Badge, Button, Checkbox, Collapsable, CollapsableFooter, CollapsableHeader, CollapsableItem, DateInput, Dialog, Divider, Dropdown, GridList, GridListImageItem, Header, Input, Item, List, ListHeader, ListItem, MochiSlidingMenu, MochiSlidingMenuContentShifter, MochiSlidingMenuItem, MochiSlidingMenuItemGroup, NubbinDivider, NumberInput, Pagination, PopupPanel, ProgressBar, Radio, RichText, Slider, Spinner, StackedPanel, StackedPanels, Subheader, Table, TextArea, ThemeWrapper, Toggle, Video, ViewSelectButton, Wizard, useTheme };
+export type { BadgeProps, ButtonProps, CheckboxChangeEvent, CheckboxProps, CollapsableProps, DateInputProps, DialogProps, DividerProps, DropdownOption, DropdownProps, GridListImageItemProps, GridListProps, HeaderProps, InputProps, ItemProps, ListHeaderProps, ListItemProps, ListProps, MochiSlidingMenuContentShifterProps, MochiSlidingMenuItemGroupProps, MochiSlidingMenuItemProps, MochiSlidingMenuProps, NubbinDividerProps, NumberInputProps, PaginationProps, PopupAction, PopupPanelProps, ProgressBarProps, RadioProps, RichTextProps, SliderProps, SpinnerProps, StackedPanelProps, StackedPanelsMethods, StackedPanelsProps, SubheaderProps, TableColumn, TableProps, TextAreaProps, ThemeColors, ThemeContextValue, ThemeWrapperProps, ToggleProps, VideoProps, ViewSelectButtonItem, ViewSelectButtonProps, WizardProps, WizardStep };
