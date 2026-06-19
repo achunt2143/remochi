@@ -60,25 +60,25 @@ A simple pattern is to keep a themed inner app and mount shared overlays outside
 
 ### Button
 
-`Button` is the primary clickable action surface. The demo uses the default button for regular actions, `type="warning"` for destructive or cautionary actions, and `type="disabled"` for non-interactive states.
+`Button` is the primary clickable action surface. At the type level it uses the `variant` prop (`'normal' | 'warning' | 'affirmative' | 'blue'`) and supports children for the label, but the demo is still using the older `type` prop at runtime (`"warning"`, `"disabled"`, `"dropdown"`) [cite:20][cite:28]. When writing new code, prefer `variant` over `type` so you stay aligned with the typings.
 
-Props used in the demo:
-- `type`: visual intent, including normal, warning, disabled, dropdown
-- `onClick`: handler for click events
-- `ref`: used when anchoring a `PopupPanel` to this button
-
-Example:
+Example (aligned with typings):
 
 ```jsx
-<Button onClick={() => addLog('Button: normal')}>Normal</Button>
-<Button type="warning" onClick={() => addLog('Button: warning')}>Warning</Button>
-<Button type="disabled">Disabled</Button>
-<Button ref={dropdownBtnRef} type="dropdown" onClick={openPopup}>Open Popup ▾</Button>
+<Button onClick={() => addLog('Button: normal')}>
+  Normal
+</Button>
+<Button variant="warning" onClick={() => addLog('Button: warning')}>
+  Warning
+</Button>
+<Button disabled>
+  Disabled
+</Button>
 ```
 
 ### Radio
 
-`Radio` renders a single radio option; group by sharing the same `name`. The demo binds `checked` to a local state value and calls `onChange` to update that state and log the selection.
+`Radio` renders a single radio option; group by sharing the same `name`. It matches the typings (`name`, `value`, `checked`, `onChange`, `disabled`) and the demo usage [cite:20][cite:28].
 
 Example:
 
@@ -91,90 +91,118 @@ Example:
     checked={radioVal === v}
     onChange={() => setRadioVal(v)}
   >
-    {v}
+    {v.charAt(0).toUpperCase() + v.slice(1)}
   </Radio>
 ))}
 ```
 
 ### ViewSelectButton
 
-`ViewSelectButton` is a compact segmented control for switching between named views. It accepts a `value`, an `options` array, and an `onChange` callback.
-
-Example:
+`ViewSelectButton` takes an `items` array, not `value`/`options`. Each item is `{ content, active?, disabled? }`, and `onSelect` receives the item plus its index [cite:28]. The demo expresses view state via `value` and `options`; for new code, wire it like this:
 
 ```jsx
+const viewItems = [
+  { content: '⊞ Grid', active: viewMode === 'grid' },
+  { content: '☰ List', active: viewMode === 'list' },
+];
+
 <ViewSelectButton
-  value={viewMode}
-  options={[
-    { value: 'grid', label: '⊞ Grid' },
-    { value: 'list', label: '☰ List' },
-  ]}
-  onChange={setViewMode}
+  items={viewItems}
+  onSelect={(item, index) => {
+    const mode = index === 0 ? 'grid' : 'list';
+    setViewMode(mode);
+    addLog(`View: ${mode}`);
+  }}
 />
 ```
 
 ### Toggle and Checkbox
 
-`Toggle` is a switch-style boolean control, while `Checkbox` is a box-style boolean. Both bind `checked` to a boolean state and use `onChange` to flip it.
+`Toggle` uses the standard HTML `onChange` event signature (`React.ChangeEventHandler<HTMLInputElement>`), while `Checkbox` receives a custom `{ checked, value }` object in its `onChange` handler [cite:28].
 
-Example:
+Examples:
 
 ```jsx
+// Toggle: event-style onChange
 <Toggle
   checked={toggleOn}
-  onChange={() => setToggleOn((v) => !v)}
+  onChange={(e) => {
+    const next = !toggleOn;
+    setToggleOn(next);
+    addLog(`Toggle: ${next ? 'on' : 'off'}`);
+  }}
 />
+
+// Checkbox: custom event payload
 <Checkbox
   checked={checked}
-  onChange={() => setChecked((v) => !v)}
->
-  Checkbox {checked ? '☑' : '☐'}
-</Checkbox>
+  onChange={({ checked: next }) => {
+    setChecked(next);
+    addLog(`Checkbox: ${next}`);
+  }}
+/>
 ```
 
 ## Inputs and forms
 
 ### Input, TextArea, RichText
 
-`Input` is a single-line text field with support for `type`, `placeholder`, and `disabled`. `TextArea` provides multiline editing. `RichText` is a formatted rich text editor in the same visual family.
+`Input` is typed as `React.InputHTMLAttributes<HTMLInputElement>`, so all standard HTML input props are valid. `TextArea` and `RichText` follow their respective prop interfaces with `value`/`onChange` pairs and optional layout props like `rows`, `width`, and `minHeight` [cite:28].
 
-Example:
+Examples:
 
 ```jsx
 <Input placeholder="Text input" />
 <Input placeholder="Search…" type="search" />
 <Input placeholder="Password" type="password" />
 <Input placeholder="Disabled" disabled />
+
 <TextArea
   placeholder="TextArea — multiline input"
   rows={3}
-  style={{ marginTop: 8, width: '100%' }}
+  className="mochi-textarea"
 />
-<RichText placeholder="RichText editor" />
+
+<RichText
+  placeholder="RichText editor"
+  allowFormatting
+  minHeight={120}
+/>
 ```
 
 ### NumberInput and DateInput
 
-`NumberInput` and `DateInput` provide structured input with consistent Mochi styling. Both take `value` and `onChange` props; the demo stores these values in `useState()` and logs updates to an activity log.
+`NumberInput` exposes `value`, `onChange(value)`, `min`, `max`, `step`, and optional `label`/`unit` props [cite:28]. `DateInput` uses `value?: string | Date` and `onChange(date: Date)` with optional label/placeholder/minDate/maxDate [cite:28].
 
-Example:
+Examples:
 
 ```jsx
 <NumberInput
   value={numVal}
-  onChange={(v) => setNumVal(v)}
+  min={0}
+  max={100}
+  step={1}
+  label="Volume"
+  unit="%"
+  onChange={(value) => {
+    setNumVal(value);
+    addLog(`Number: ${value}`);
+  }}
 />
+
 <DateInput
   value={dateVal}
-  onChange={(v) => setDateVal(v)}
+  placeholder="Select a date"
+  onChange={(date) => {
+    setDateVal(date.toISOString());
+    addLog(`Date: ${date.toDateString()}`);
+  }}
 />
 ```
 
 ### Dropdown
 
-`Dropdown` renders a styled select input. It receives an `options` array of `{ label, value }`, the current `value`, an optional `placeholder`, and `onChange` for selection changes.
-
-Example:
+`Dropdown` takes `options: { value, label }[]`, `value`, and `onChange(value)` as declared in `DropdownProps` [cite:28].
 
 ```jsx
 const dropdownOptions = [
@@ -187,7 +215,10 @@ const dropdownOptions = [
   options={dropdownOptions}
   value={dropdownVal}
   placeholder="Select an option…"
-  onChange={setDropdownVal}
+  onChange={(value) => {
+    setDropdownVal(value);
+    addLog(`Dropdown: ${value}`);
+  }}
 />
 ```
 
@@ -195,83 +226,85 @@ const dropdownOptions = [
 
 ### Badge
 
-`Badge` displays small status tags and optional counts. The demo shows semantic `variant` values like `success`, `warning`, `error`, and `info`, plus a `count` variant for notification pills.
-
-Example:
+`Badge` typings expose `content`, `background`, and `color`; there is no `variant` or `count` anymore [cite:28]. To show a status, pass the text via `content` or children and use `background`/`color` to style.
 
 ```jsx
-<Badge>Default</Badge>
-<Badge variant="success">Success</Badge>
-<Badge variant="warning">Warning</Badge>
-<Badge variant="error">Error</Badge>
-<Badge variant="info">Info</Badge>
-<Badge count={7}>Notifications</Badge>
+<Badge content="Default" />
+<Badge content="Success" background="#2e7d32" color="#fff" />
+<Badge content="Warning" background="#ffb300" color="#000" />
+<Badge content="Error" background="#c62828" color="#fff" />
 ```
 
 ### Header and Subheader
 
-`Header` and `Subheader` provide consistent section titles. The demo uses them at the top of the page to introduce the sampler and section-level content.
-
-Example:
+`Header` supports `content` and `children`; `Subheader` uses `content` only in the current typings [cite:28]. Using children keeps JSX readable and is consistent with the demo.
 
 ```jsx
 <Header>Header Component</Header>
-<Subheader>Subheader Component — sits below a Header</Subheader>
+<Subheader content="Subheader Component — sits below a Header" />
 ```
 
 ### Divider and NubbinDivider
 
-`Divider` separates sections with a straight rule, while `NubbinDivider` adds a visual “nubbin” accent between larger blocks. Use them to break up long forms and component groups.
+`Divider` and `NubbinDivider` props match their interfaces (`orientation`, `width`/`height`, `thickness`, etc.) and can be used without extra props for defaults [cite:28].
+
+```jsx
+<Divider />
+<NubbinDivider orientation="horizontal" side="top" />
+```
 
 ### Item
 
-`Item` is a simple label/value display row for read-only fields.
-
-Example:
+`Item` typings do not include `label`/`value`; instead they expose `title`, `subtitle`, `icon`, and `rightContent` [cite:28]. To express label/value, use `title` and `rightContent`:
 
 ```jsx
-<Item label="Full Name" value="Alice Johnson" />
-<Item label="Role" value="Senior Engineer" />
-<Item label="Status" value="Active" />
+<Item title="Full Name" rightContent="Alice Johnson" />
+<Item title="Role" rightContent="Senior Engineer" />
+<Item title="Status" rightContent="Active" />
 ```
 
 ### List, ListItem, ListHeader, GridList
 
-These components render vertical or grid lists in the Mochi style. `List` wraps a group of `ListItem` elements, optionally with a `ListHeader`. `GridList` renders a uniform grid of items with click handling.
-
-Example:
+`List`/`ListItem`/`ListHeader` all take `children` (with optional `content` on `ListHeader`), and `GridList` uses `children`, not `items`/`onItemClick`, at the type level [cite:28]. A type-safe pattern is:
 
 ```jsx
 <List>
-  <ListHeader>Team Members</ListHeader>
-  <ListItem>Alice — Engineer</ListItem>
-  <ListItem>Bob — Designer</ListItem>
-  <ListItem>Carol — PM</ListItem>
+  <ListHeader content="Team Members" />
+  <ListItem onSelect={() => addLog('List: Alice')}>
+    Alice — Engineer
+  </ListItem>
+  <ListItem onSelect={() => addLog('List: Bob')}>
+    Bob — Designer
+  </ListItem>
 </List>
 
-<GridList
-  items={['React', 'Rust', 'TypeScript']}
-  onItemClick={(item) => addLog(`GridList: ${item}`)}
-/>
+<GridList columns={3} gap={12}>
+  <GridListImageItem src="/img/react.png" caption="React" />
+  <GridListImageItem src="/img/rust.png" caption="Rust" />
+</GridList>
 ```
 
 ### Table
 
-`Table` renders a simple data table from a `columns` array and `rows` of values. The demo uses `onRowClick` to log which row was activated.
-
-Example:
+`Table` uses `columns` and `data` rather than `columns`/`rows`. Each `TableColumn` has a `key` and `label`, and `data` is an array of rows keyed by those column keys [cite:28].
 
 ```jsx
-const columns = ['Name', 'Role', 'Status'];
-const rows = [
-  ['Alice', 'Engineer', 'Active'],
-  ['Bob', 'Designer', 'Away'],
+type UserRow = { name: string; role: string; status: string };
+
+const columns: TableColumn<UserRow>[] = [
+  { key: 'name', label: 'Name' },
+  { key: 'role', label: 'Role' },
+  { key: 'status', label: 'Status' },
 ];
 
-<Table
+const data: UserRow[] = [
+  { name: 'Alice', role: 'Engineer', status: 'Active' },
+  { name: 'Bob', role: 'Designer', status: 'Away' },
+];
+
+<Table<UserRow>
   columns={columns}
-  rows={rows}
-  onRowClick={(row) => addLog(`Row: ${row[0]}`)}
+  data={data}
 />
 ```
 
@@ -279,15 +312,19 @@ const rows = [
 
 ### Panel and FloatingPanel
 
-`Panel` divides a row into width-percentage segments. The `width` prop is a percentage of the row, and `style` can be `default` or `shadow` for a raised look. `FloatingPanel` fills its container with a rounded-corner surface and optional `style` variants.
-
-Example:
+`Panel`/`FloatingPanel` use the `PanelProps` and `FloatingPanelProps` types: `width?: number` and `style?: 'default' | 'shadow'` plus `children` and `className` [cite:28].
 
 ```jsx
 <div style={{ display: 'flex', height: 120 }}>
-  <Panel width={25} style="default">Sidebar</Panel>
-  <Panel width={50} style="default">Main</Panel>
-  <Panel width={25} style="default">Detail</Panel>
+  <Panel width={25} style="default">
+    <div>25% Sidebar</div>
+  </Panel>
+  <Panel width={50} style="default">
+    <div>50% Main</div>
+  </Panel>
+  <Panel width={25} style="default">
+    <div>25% Detail</div>
+  </Panel>
 </div>
 
 <FloatingPanel style="shadow">
@@ -297,9 +334,7 @@ Example:
 
 ### StackedPanels and StackedPanel
 
-`StackedPanels` manages a stack of `StackedPanel` children, each with a `title`. The demo uses three panels to show simple stacked content; more advanced apps can drive the active panel via state and navigation.
-
-Example:
+`StackedPanels` typings expose an optional controlled `index` plus callbacks and control methods; `StackedPanel` itself is just a shell for `children` and extra props [cite:28]. A simple uncontrolled stack looks like:
 
 ```jsx
 <StackedPanels>
@@ -311,24 +346,9 @@ Example:
 
 ### PopupPanel
 
-`PopupPanel` is an anchored popup for quick actions. It receives `isOpen`, `onClose`, an `anchorRect` (from `getBoundingClientRect()`), an optional `title`, and an `actions` array with button definitions. Render it near the root so it stays fixed on screen.
-
-Example:
+`PopupPanelProps` are `isOpen`, `title`, `children`, `actions`, `onClose`, and `anchorRect` (DOMRect-like) [cite:28]. The example remains valid, but `actions` entries should match `PopupAction` (`label`, `onClick`, optional `type`).
 
 ```jsx
-const dropdownBtnRef = useRef(null);
-const [popupOpen, setPopupOpen] = useState(false);
-const [anchorRect, setAnchorRect] = useState(null);
-
-const openPopup = () => {
-  if (dropdownBtnRef.current) {
-    setAnchorRect(dropdownBtnRef.current.getBoundingClientRect());
-    setPopupOpen(true);
-  }
-};
-
-<Button ref={dropdownBtnRef} type="dropdown" onClick={openPopup}>Open Popup ▾</Button>
-
 <PopupPanel
   isOpen={popupOpen}
   onClose={() => setPopupOpen(false)}
@@ -345,19 +365,23 @@ const openPopup = () => {
 
 ### Dialog
 
-`Dialog` is a centered modal with a `title`, `isOpen` flag, `onClose` callback, and an `actions` array describing footer buttons. The demo wires these actions to log and close the dialog.
-
-Example:
+`Dialog` typings use `type`, `onConfirm`, `onCancel`, `confirmText`, and `cancelText` rather than an `actions` array [cite:28]. A type-safe confirm dialog would be:
 
 ```jsx
 <Dialog
   isOpen={dialogOpen}
   title="Confirm Action"
-  onClose={() => setDialogOpen(false)}
-  actions={[
-    { label: 'Cancel', onClick: handleCancel, type: 'warning' },
-    { label: 'Confirm', onClick: handleConfirm },
-  ]}
+  type="confirm"
+  confirmText="Confirm"
+  cancelText="Cancel"
+  onConfirm={() => {
+    addLog('Dialog: confirmed');
+    setDialogOpen(false);
+  }}
+  onCancel={() => {
+    addLog('Dialog: cancelled');
+    setDialogOpen(false);
+  }}
 >
   <p>Are you sure you want to proceed with this action?</p>
 </Dialog>
@@ -367,9 +391,7 @@ Example:
 
 ### ProgressBar and Slider
 
-`ProgressBar` visualizes completion, taking `value` and optional `color`, `width`, and `height`. `Slider` lets users set numeric values interactively and can also be styled with `color` and `width`. The demo keeps `Slider` and a live `ProgressBar` in sync via shared state.
-
-Example:
+`ProgressBarProps` and `SliderProps` in the types match the sampler pattern: `value`, optional `color`/`width`/`height`, and `onChange(value)` for `Slider` [cite:28].
 
 ```jsx
 const [sliderVal, setSliderVal] = useState(50);
@@ -377,51 +399,48 @@ const [sliderVal, setSliderVal] = useState(50);
 <ProgressBar value={sliderVal} />
 <Slider
   value={sliderVal}
-  onChange={setSliderVal}
+  onChange={(value) => {
+    setSliderVal(value);
+    addLog(`Slider: ${value}`);
+  }}
 />
 ```
 
 ### Spinner
 
-`Spinner` shows transient loading indicators. The demo uses `active`, `styleType` (light/dark), and `size` (normal/large) combinations.
-
-Example:
+`Spinner` props are `active`, `styleType: 'light' | 'dark'`, and `size: 'normal' | 'large'` with an optional `alt` text [cite:28].
 
 ```jsx
-<Spinner active={true} styleType="light" size="normal" />
-<Spinner active={true} styleType="dark" size="large" />
+<Spinner active styleType="light" size="normal" />
+<Spinner active styleType="dark" size="large" />
 ```
 
 ## Menus, wizards, and media
 
-### SlidingMenu
-
-The demo’s `SlidingMenu` component is local to `remochi-demo` but illustrates how Remochi buttons and badges behave in a sliding navigation tray. Items support `icon`, `badge`, `isActive`, and `onClick` props, and the menu can appear from any side.
-
 ### Wizard
 
-`Wizard` renders step indicators for multi-step flows. It accepts a `steps` array and `currentStep` index, and renders children as the step content.
-
-Example:
+`Wizard` typings expect a `steps` array of `WizardStep` objects (`label`, optional `title`/`description`/`content`/`skippable`/`onNext`) and optional callbacks for `onComplete`/`onCancel` [cite:28]. A minimal usage just needs `label` and delegates the actual content to children.
 
 ```jsx
-const steps = [{ label: 'Account' }, { label: 'Profile' }, { label: 'Review' }];
+const steps: WizardStep[] = [
+  { label: 'Account' },
+  { label: 'Profile' },
+  { label: 'Review' },
+];
 
-<Wizard steps={steps} currentStep={wizardStep}>
-  <div>Step {wizardStep + 1} of {steps.length}</div>
+<Wizard steps={steps}>
+  <div>Step content goes here.</div>
 </Wizard>
 ```
 
 ### Video
 
-`Video` is a simple media player wrapper that takes `src`, optional `poster`, and layout props like `width`.
-
-Example:
+`Video` consumes `VideoProps` (`src`, `poster`, `autoPlay`, `loop`, `muted`, `controls`, etc.) [cite:28].
 
 ```jsx
 <Video
   src="https://www.w3schools.com/html/mov_bbb.mp4"
   poster="https://www.w3schools.com/html/pic_trulli.jpg"
-  width="100%"
+  controls
 />
 ```
