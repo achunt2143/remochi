@@ -1,36 +1,62 @@
 // ── Shared base ────────────────────────────────────────────────────────────
-// Both Panel and FloatingPanel share these rules; the only difference is
-// border-radius, which is overridden by .mochi-floating-panel below.
+// Panel, FloatingPanel — border-radius is overridden per variant class below.
 
 .mochi-panel {
   box-sizing: border-box;
   height: 100%;
   position: relative;
 
+  // ── direction modifiers ───────────────────────────────────────────────
+  &.mochi-panel--flip-x  { transform: scaleX(-1); }
+  &.mochi-panel--flip-y  { transform: scaleY(-1); }
+
+  // ── overlay modifier ─────────────────────────────────────────────────
+  // Shifts the panel -1rem on the X axis to produce the layered/overlay look.
+  &.mochi-panel--overlay { transform: translateX(-1rem); }
+
+  // Combine overlay + flip-x
+  &.mochi-panel--overlay.mochi-panel--flip-x {
+    transform: translateX(-1rem) scaleX(-1);
+  }
+  // Combine overlay + flip-y
+  &.mochi-panel--overlay.mochi-panel--flip-y {
+    transform: translateX(-1rem) scaleY(-1);
+  }
+
   // ── Default style (Overlay Base from Figma) ────────────────────────────
   &.mochi-panel--default {
     background: #f5f5f5;
-
-    // 0.5px top + left border only, matching Figma spec
     border-width: 0.5px 0px 0px 0.5px;
     border-style: solid;
     border-color: #cccccc;
-
-    // Top-left radius only for Panel (side panel pattern)
     border-radius: 16px 0px 0px 0px;
   }
 
   // ── Shadow style (Overlay Inset Shadow from Figma) ─────────────────────
   &.mochi-panel--shadow {
     background: #f5f5f5;
-
     border-width: 0.5px 0px 0px 0.5px;
     border-style: solid;
     border-color: #cccccc;
-
     border-radius: 16px 0px 0px 0px;
-
     box-shadow: inset 0px 4px 50px rgba(0, 0, 0, 0.3);
+  }
+
+  // ── Dark style ────────────────────────────────────────────────────────
+  &.mochi-panel--dark {
+    background: #404040;
+    border-width: 0.5px 0px 0px 0.5px;
+    border-style: solid;
+    border-color: #333333;
+    border-radius: 16px 0px 0px 0px;
+  }
+
+  // ── Shadow-dark style ─────────────────────────────────────────────────
+  &.mochi-panel--shadow-dark {
+    background: #1a1a1a;
+    border: 0.5px solid #333333;
+    border-radius: 16px 0px 0px 0px;
+    box-shadow: inset 0px 4px 50px #606060;
   }
 }
 
@@ -40,7 +66,9 @@
   width: 100%;
 
   &.mochi-panel--default,
-  &.mochi-panel--shadow {
+  &.mochi-panel--shadow,
+  &.mochi-panel--dark,
+  &.mochi-panel--shadow-dark {
     border-radius: 16px;
   }
 }
