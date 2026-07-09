@@ -23,6 +23,17 @@
     transform: translateX(-1rem) scaleY(-1);
   }
 
+  // ── fullLength edge modifiers ─────────────────────────────────────────
+  // Rounds both corners on the specified edge, overriding the variant radius.
+  // top    → top-left  + top-right  rounded
+  // bottom → bot-left  + bot-right  rounded
+  // left   → top-left  + bot-left   rounded
+  // right  → top-right + bot-right  rounded
+  &.mochi-panel--full-top    { border-radius: 16px 16px 0px 0px !important; }
+  &.mochi-panel--full-bottom { border-radius: 0px 0px 16px 16px !important; }
+  &.mochi-panel--full-left   { border-radius: 16px 0px 0px 16px !important; }
+  &.mochi-panel--full-right  { border-radius: 0px 16px 16px 0px !important; }
+
   // ── Default style (Overlay Base from Figma) ────────────────────────────
   &.mochi-panel--default {
     background: #f5f5f5;
