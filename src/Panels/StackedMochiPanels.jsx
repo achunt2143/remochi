@@ -1,505 +1,419 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import './StackedMochiPanels.scss';
+import {
+  DEFAULT_SNAP_POINTS,
+  DEFAULT_MAX_VISIBLE_PANELS,
+  DEFAULT_PEEK,
+  DEFAULT_OVERLAP,
+  resolveLayoutConfig,
+  revealBounds,
+  clampReveal,
+  snapReveal,
+  stepSnap,
+  clampIndex,
+  getPanelDescriptor,
+} from './stackedPanelsLayout';
 
 /**
- * StackedMochiPanels - Enyo-inspired panel management with enhanced controls
- * 
- * Features:
- * - Navigation buttons (left/right) on active panel
- * - Expand button with single-click and long-press support
- * - Touch gestures (swipe left/right)
- * - Fullscreen mode (long-press expand)
- * - Drag-to-navigate with momentum
- * - Responsive narrow-fit behavior
+ * Repanel — a webOS/Mochi stacked panel workspace.
+ *
+ * Renders dynamic child panels as an overlapping stack. The active (front)
+ * panel is prominent; earlier panels fan out to the left as overlapping
+ * spines. A header-only horizontal swipe changes which panel is at the front,
+ * and a bottom grabber on the active panel drags the reveal depth, snapping to
+ * fixed `snapPoints` (default 1, 2, 3) on release.
+ *
+ * `Panel` and `FloatingPanel` remain plain presentational surfaces — this
+ * wrapper owns all layout, gestures and stacking. Children are read
+ * dynamically via `React.Children.toArray`, so there is no fixed panel count.
  */
 
-const StackedMochiPanels = React.forwardRef(
-  (
-    {
-      children,
-      index = 0,
-      onIndexChange,
-      animate = true,
-      draggable = true,
-      narrowFit = true,
-      narrowFitWidth = 800,
-      wrap = false,
-      arrangement = 'mostly',
-      onTransitionStart,
-      onTransitionFinish,
-      className = '',
-      showControls = true,
-      ...props
+const SWIPE_DISTANCE = 60; // px — header swipe distance threshold
+const SWIPE_VELOCITY = 0.4; // px/ms — header swipe velocity threshold
+const GESTURE_SLOP = 6; // px — movement before a header gesture is claimed
+
+const Repanel = React.forwardRef(function Repanel(props, ref) {
+  const {
+    children,
+    activeIndex: activeIndexProp,
+    defaultActiveIndex,
+    onActiveIndexChange,
+    reveal: revealProp,
+    defaultReveal,
+    onRevealChange,
+    snapPoints = DEFAULT_SNAP_POINTS,
+    maxVisiblePanels = DEFAULT_MAX_VISIBLE_PANELS,
+    overlap = DEFAULT_OVERLAP,
+    peek = DEFAULT_PEEK,
+    headerSwipe = true,
+    grabber = true,
+    wrap = false,
+    animate = true,
+    narrowFit = true,
+    narrowFitWidth = 768,
+    narrowBehavior = 'single',
+    className = '',
+    ...rest
+  } = props;
+
+  const panels = useMemo(() => React.Children.toArray(children), [children]);
+  const panelCount = panels.length;
+
+  const config = useMemo(
+    () => resolveLayoutConfig({ snapPoints, maxVisiblePanels, peek, overlap }),
+    [snapPoints, maxVisiblePanels, peek, overlap]
+  );
+  const bounds = useMemo(() => revealBounds(config.snapPoints), [config.snapPoints]);
+
+  // ---- Active index (controlled / uncontrolled) --------------------------
+  const isIndexControlled = activeIndexProp != null;
+  const [indexState, setIndexState] = useState(() =>
+    clampIndex(defaultActiveIndex != null ? defaultActiveIndex : panelCount - 1, panelCount, wrap)
+  );
+  const activeIndex = clampIndex(isIndexControlled ? activeIndexProp : indexState, panelCount, wrap);
+
+  // ---- Reveal (controlled / uncontrolled) --------------------------------
+  const isRevealControlled = revealProp != null;
+  const [revealState, setRevealState] = useState(() =>
+    snapReveal(
+      defaultReveal != null ? defaultReveal : Math.min(config.maxVisiblePanels, bounds.max),
+      config.snapPoints
+    )
+  );
+  const committedReveal = snapReveal(isRevealControlled ? revealProp : revealState, config.snapPoints);
+
+  // Continuous reveal while dragging the grabber; overrides the committed value.
+  const [dragReveal, setDragReveal] = useState(null);
+  const reveal = dragReveal != null ? dragReveal : committedReveal;
+
+  // ---- Transient gesture state -------------------------------------------
+  const [isNarrow, setIsNarrow] = useState(false);
+  const [swipeDX, setSwipeDX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [isRevealDragging, setIsRevealDragging] = useState(false);
+
+  const rootRef = useRef(null);
+  const swipeRef = useRef(null);
+  const grabRef = useRef(null);
+
+  // ---- Narrow detection (observe the root width) -------------------------
+  useEffect(() => {
+    if (!narrowFit) {
+      setIsNarrow(false);
+      return undefined;
+    }
+    const el = rootRef.current;
+    if (!el) return undefined;
+
+    const check = () => setIsNarrow(el.getBoundingClientRect().width <= narrowFitWidth);
+    check();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(check);
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', check);
+      return () => window.removeEventListener('resize', check);
+    }
+    return undefined;
+  }, [narrowFit, narrowFitWidth]);
+
+  // ---- Commit helpers ----------------------------------------------------
+  const commitActiveIndex = useCallback(
+    (next, reason) => {
+      const clamped = clampIndex(next, panelCount, wrap);
+      if (clamped === activeIndex) return;
+      if (!isIndexControlled) setIndexState(clamped);
+      onActiveIndexChange?.(clamped, {
+        previousIndex: activeIndex,
+        reason,
+        panelCount,
+        isNarrow,
+      });
     },
-    ref
-  ) => {
-    const [activeIndex, setActiveIndex] = useState(index);
-    const [isNarrow, setIsNarrow] = useState(false);
-    const [isTransitioning, setIsTransitioning] = useState(false);
-    const [dragOffset, setDragOffset] = useState(0);
-    const [isDragging, setIsDragging] = useState(false);
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    const [expandState, setExpandState] = useState('collapsed');
+    [activeIndex, panelCount, wrap, isNarrow, isIndexControlled, onActiveIndexChange]
+  );
 
-    const rootRef = useRef(null);
-    const dragStartRef = useRef({ x: 0, y: 0, time: 0 });
-    const velocityRef = useRef(0);
-    const expandButtonRef = useRef(null);
-    const longPressTimeoutRef = useRef(null);
-    const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
-
-    const panelCount = React.Children.count(children);
-
-    // ========================================
-    // Responsive Behavior
-    // ========================================
-
-    useEffect(() => {
-      const checkNarrow = () => {
-        if (!narrowFit) return;
-        const isNarrowNow = window.innerWidth <= narrowFitWidth;
-        setIsNarrow(isNarrowNow);
-      };
-
-      checkNarrow();
-      window.addEventListener('resize', checkNarrow);
-      return () => window.removeEventListener('resize', checkNarrow);
-    }, [narrowFit, narrowFitWidth]);
-
-    // ========================================
-    // Core Navigation
-    // ========================================
-
-    const setIndex = useCallback(
-      (newIndex) => {
-        let validIndex = newIndex;
-        if (wrap) {
-          validIndex = ((newIndex % panelCount) + panelCount) % panelCount;
-        } else {
-          validIndex = Math.max(0, Math.min(newIndex, panelCount - 1));
-        }
-
-        if (validIndex === activeIndex) return;
-
-        onTransitionStart?.({
-          from: activeIndex,
-          to: validIndex,
+  const commitReveal = useCallback(
+    (value, reason) => {
+      const snapped = snapReveal(value, config.snapPoints);
+      if (!isRevealControlled) setRevealState(snapped);
+      if (snapped !== committedReveal) {
+        onRevealChange?.(snapped, {
+          previousReveal: committedReveal,
+          reason,
+          snapPoints: config.snapPoints,
           isNarrow,
         });
+      }
+      return snapped;
+    },
+    [committedReveal, config.snapPoints, isRevealControlled, isNarrow, onRevealChange]
+  );
 
-        setIsTransitioning(true);
-        setActiveIndex(validIndex);
-        onIndexChange?.(validIndex);
+  // ---- Imperative API ----------------------------------------------------
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      setActiveIndex: (index) => commitActiveIndex(index, 'method'),
+      next: () => commitActiveIndex(activeIndex + 1, 'method'),
+      prev: () => commitActiveIndex(activeIndex - 1, 'method'),
+      setReveal: (value) => commitReveal(value, 'method'),
+      expand: () => commitReveal(bounds.max, 'method'),
+      collapse: () => commitReveal(bounds.min, 'method'),
+      getState: () => ({ activeIndex, reveal: committedReveal, panelCount, isNarrow }),
+    }),
+    [commitActiveIndex, commitReveal, activeIndex, committedReveal, panelCount, isNarrow, bounds]
+  );
 
-        const duration = animate ? 250 : 0;
-        setTimeout(() => {
-          setIsTransitioning(false);
-          onTransitionFinish?.({
-            from: activeIndex,
-            to: validIndex,
+  // ---- Header swipe (active panel only) ----------------------------------
+  const onHeaderPointerDown = useCallback(
+    (idx) => (e) => {
+      // Parent spines are selected by click; only the active header swipes.
+      if (!headerSwipe || idx !== activeIndex) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      swipeRef.current = {
+        idx,
+        startX: e.clientX,
+        startY: e.clientY,
+        startTime: e.timeStamp || Date.now(),
+        active: false,
+      };
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch (_) {
+        /* pointer capture unsupported — window listeners not needed here */
+      }
+    },
+    [headerSwipe, activeIndex]
+  );
+
+  const onHeaderPointerMove = useCallback(
+    (idx) => (e) => {
+      const s = swipeRef.current;
+      if (!s || s.idx !== idx) return;
+      const dx = e.clientX - s.startX;
+      const dy = e.clientY - s.startY;
+      if (!s.active) {
+        if (Math.abs(dx) < GESTURE_SLOP && Math.abs(dy) < GESTURE_SLOP) return;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          s.active = true;
+          setIsSwiping(true);
+        } else {
+          // Vertical intent — bail out, let the surface scroll.
+          swipeRef.current = null;
+          return;
+        }
+      }
+      setSwipeDX(dx);
+    },
+    []
+  );
+
+  const onHeaderPointerUp = useCallback(
+    (idx) => (e) => {
+      const s = swipeRef.current;
+      if (!s || s.idx !== idx) return;
+      swipeRef.current = null;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch (_) {
+        /* no-op */
+      }
+      if (!s.active) return;
+
+      const dx = e.clientX - s.startX;
+      const dt = Math.max(1, (e.timeStamp || Date.now()) - s.startTime);
+      const velocity = dx / dt;
+      setIsSwiping(false);
+      setSwipeDX(0);
+
+      if (dx <= -SWIPE_DISTANCE || velocity <= -SWIPE_VELOCITY) {
+        commitActiveIndex(activeIndex + 1, 'swipe');
+      } else if (dx >= SWIPE_DISTANCE || velocity >= SWIPE_VELOCITY) {
+        commitActiveIndex(activeIndex - 1, 'swipe');
+      }
+    },
+    [activeIndex, commitActiveIndex]
+  );
+
+  // ---- Grabber reveal drag (active panel) --------------------------------
+  const onGrabberPointerDown = useCallback(
+    (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      e.stopPropagation();
+      grabRef.current = { startX: e.clientX, startReveal: committedReveal };
+      setIsRevealDragging(true);
+      setDragReveal(committedReveal);
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch (_) {
+        /* no-op */
+      }
+    },
+    [committedReveal]
+  );
+
+  const onGrabberPointerMove = useCallback(
+    (e) => {
+      const g = grabRef.current;
+      if (!g) return;
+      // Dragging right pushes the active panel over, revealing more parents.
+      const raw = g.startReveal + (e.clientX - g.startX) / Math.max(1, config.peek);
+      setDragReveal(clampReveal(raw, config.snapPoints));
+    },
+    [config.peek, config.snapPoints]
+  );
+
+  const onGrabberPointerUp = useCallback(
+    (e) => {
+      const g = grabRef.current;
+      if (!g) return;
+      grabRef.current = null;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch (_) {
+        /* no-op */
+      }
+      const raw = g.startReveal + (e.clientX - g.startX) / Math.max(1, config.peek);
+      setIsRevealDragging(false);
+      setDragReveal(null);
+      commitReveal(raw, 'grabber');
+    },
+    [config.peek, config.snapPoints, commitReveal]
+  );
+
+  const onGrabberKeyDown = useCallback(
+    (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        commitReveal(stepSnap(committedReveal, config.snapPoints, +1), 'method');
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        commitReveal(stepSnap(committedReveal, config.snapPoints, -1), 'method');
+      }
+    },
+    [committedReveal, config.snapPoints, commitReveal]
+  );
+
+  // ---- Root keyboard navigation (panels) ---------------------------------
+  const onRootKeyDown = useCallback(
+    (e) => {
+      // Ignore keys typed inside panel content or handled by the grabber.
+      if (e.target.closest('.repanel__surface') || e.target.closest('.repanel__grabber')) return;
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        commitActiveIndex(activeIndex + 1, 'method');
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        commitActiveIndex(activeIndex - 1, 'method');
+      }
+    },
+    [activeIndex, commitActiveIndex]
+  );
+
+  // ---- Render ------------------------------------------------------------
+  return (
+    <div
+      ref={rootRef}
+      className={`repanel ${className}`.trim()}
+      data-animate={animate ? 'true' : 'false'}
+      data-narrow={isNarrow ? 'true' : undefined}
+      data-narrow-behavior={isNarrow ? narrowBehavior : undefined}
+      data-dragging={isSwiping || isRevealDragging ? 'true' : undefined}
+      role="group"
+      aria-roledescription="stacked panels"
+      onKeyDown={onRootKeyDown}
+      {...rest}
+    >
+      <div className="repanel__viewport">
+        {panels.map((child, idx) => {
+          const d = getPanelDescriptor({
+            index: idx,
+            activeIndex,
+            panelCount,
+            reveal,
+            config,
             isNarrow,
+            narrowBehavior,
           });
-        }, duration);
-      },
-      [activeIndex, panelCount, animate, wrap, onTransitionStart, onTransitionFinish, isNarrow]
-    );
+          const isActive = idx === activeIndex;
+          const extraX = isActive && isSwiping ? swipeDX : 0;
+          const noTransition = (isActive && isSwiping) || isRevealDragging;
 
-    // ========================================
-    // Expand/Fullscreen Controls
-    // ========================================
+          const style = {
+            left: typeof d.left === 'number' ? `${d.left}px` : d.left,
+            width: d.width,
+            transform: `translate3d(${d.translateX + extraX}px, 0, 0) scale(${d.scale})`,
+            opacity: d.opacity,
+            zIndex: d.zIndex,
+            pointerEvents: d.interactive ? 'auto' : 'none',
+            '--repanel-dim': d.dim,
+          };
 
-    const toggleExpand = useCallback(() => {
-      setExpandState((prev) => {
-        if (prev === 'collapsed') {
-          return 'expanded';
-        } else if (prev === 'expanded') {
-          return 'collapsed';
-        }
-        return prev;
-      });
-      setIsFullscreen(false);
-    }, []);
+          const showGrabber = isActive && grabber && !isNarrow && panelCount > 0;
 
-    const handleExpandMouseDown = useCallback((e) => {
-      e.preventDefault();
-      e.stopPropagation();
+          return (
+            <div
+              key={child.key != null ? child.key : idx}
+              className="repanel__panel"
+              data-role={d.role}
+              data-active={isActive ? 'true' : undefined}
+              data-no-transition={noTransition ? 'true' : undefined}
+              style={style}
+              aria-hidden={!d.visible && !isActive ? true : undefined}
+              onClick={!isActive && d.interactive ? () => commitActiveIndex(idx, 'select') : undefined}
+            >
+              <div className="repanel__surface">{child}</div>
 
-      longPressTimeoutRef.current = setTimeout(() => {
-        setExpandState('fullscreen');
-        setIsFullscreen(true);
-      }, 500);
-    }, []);
+              <div className="repanel__scrim" aria-hidden="true" />
 
-    const handleExpandMouseUp = useCallback((e) => {
-      e.preventDefault();
-      e.stopPropagation();
+              <div
+                className="repanel__header"
+                onPointerDown={onHeaderPointerDown(idx)}
+                onPointerMove={onHeaderPointerMove(idx)}
+                onPointerUp={onHeaderPointerUp(idx)}
+                onPointerCancel={onHeaderPointerUp(idx)}
+                role={isActive ? undefined : 'button'}
+                aria-label={isActive ? undefined : `Bring panel ${idx + 1} forward`}
+              >
+                <span className="repanel__grip" aria-hidden="true" />
+              </div>
 
-      if (longPressTimeoutRef.current) {
-        clearTimeout(longPressTimeoutRef.current);
-        longPressTimeoutRef.current = null;
-        toggleExpand();
-      }
-    }, [toggleExpand]);
-
-    const handleExpandMouseLeave = useCallback((e) => {
-      if (longPressTimeoutRef.current) {
-        clearTimeout(longPressTimeoutRef.current);
-        longPressTimeoutRef.current = null;
-      }
-    }, []);
-
-    // NEW: Exit fullscreen properly
-    const exitFullscreen = useCallback(() => {
-      setIsFullscreen(false);
-      setExpandState('expanded');
-    }, []);
-
-    // ========================================
-    // Touch gesture detection
-    // ========================================
-
-    const handleTouchStart = useCallback((e) => {
-      // Only detect if not on a button
-      if (e.target.closest('button')) return;
-
-      touchStartRef.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-        time: Date.now(),
-      };
-    }, []);
-
-    const handleTouchEnd = useCallback((e) => {
-      if (!touchStartRef.current.x) return;
-
-      const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
-      const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
-      const dt = (Date.now() - touchStartRef.current.time) / 1000;
-
-      // Only detect horizontal swipes (not vertical)
-      if (Math.abs(dy) > Math.abs(dx)) {
-        touchStartRef.current = { x: 0, y: 0, time: 0 };
-        return;
-      }
-
-      const threshold = window.innerWidth * 0.2;
-      const minVelocity = 500;
-      const velocity = dt > 0 ? dx / dt : 0;
-
-      if (Math.abs(velocity) > minVelocity || Math.abs(dx) > threshold) {
-        if (velocity > 0) {
-          setIndex(activeIndex - 1);
-        } else {
-          setIndex(activeIndex + 1);
-        }
-      }
-
-      touchStartRef.current = { x: 0, y: 0, time: 0 };
-    }, [activeIndex, setIndex]);
-
-    // ========================================
-    // Drag Navigation (mouse-based)
-    // ========================================
-
-    const handleMouseDown = useCallback(
-      (e) => {
-        // Don't drag on buttons or in fullscreen
-        if (e.target.closest('button') || isFullscreen) return;
-        if (!draggable || isTransitioning) return;
-
-        dragStartRef.current = {
-          x: e.clientX,
-          y: e.clientY,
-          time: Date.now(),
-        };
-        setIsDragging(true);
-      },
-      [draggable, isTransitioning, isFullscreen]
-    );
-
-    const handleMouseMove = useCallback(
-      (e) => {
-        if (!isDragging) return;
-
-        const dx = e.clientX - dragStartRef.current.x;
-        const dt = (Date.now() - dragStartRef.current.time) / 1000;
-
-        velocityRef.current = dt > 0 ? dx / dt : 0;
-        setDragOffset(dx);
-      },
-      [isDragging]
-    );
-
-    const handleMouseUp = useCallback(() => {
-      if (!isDragging) return;
-
-      setIsDragging(false);
-
-      const threshold = window.innerWidth * 0.2;
-      const minVelocity = 500;
-
-      let nextIndex = activeIndex;
-
-      if (Math.abs(velocityRef.current) > minVelocity) {
-        nextIndex = velocityRef.current > 0 ? activeIndex - 1 : activeIndex + 1;
-      } else if (Math.abs(dragOffset) > threshold) {
-        nextIndex = dragOffset > 0 ? activeIndex - 1 : activeIndex + 1;
-      }
-
-      setDragOffset(0);
-      velocityRef.current = 0;
-
-      if (nextIndex !== activeIndex) {
-        setIndex(nextIndex);
-      }
-    }, [isDragging, activeIndex, dragOffset, setIndex]);
-
-    // ========================================
-    // Keyboard Navigation
-    // ========================================
-
-    useEffect(() => {
-      const handleKeyDown = (e) => {
-        if (isTransitioning) return;
-
-        switch (e.key) {
-          case 'ArrowLeft':
-            e.preventDefault();
-            setIndex(activeIndex - 1);
-            break;
-          case 'ArrowRight':
-            e.preventDefault();
-            setIndex(activeIndex + 1);
-            break;
-          case 'Home':
-            e.preventDefault();
-            setIndex(0);
-            break;
-          case 'End':
-            e.preventDefault();
-            setIndex(panelCount - 1);
-            break;
-          case 'Escape':
-            if (isFullscreen) {
-              e.preventDefault();
-              exitFullscreen();
-            }
-            break;
-          default:
-            break;
-        }
-      };
-
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [activeIndex, isTransitioning, setIndex, panelCount, isFullscreen, exitFullscreen]);
-
-    // ========================================
-    // Expose methods via ref
-    // ========================================
-
-    React.useImperativeHandle(ref, () => ({
-      setIndex,
-      getIndex: () => activeIndex,
-      getIsNarrow: () => isNarrow,
-      toggleExpand,
-      setFullscreen: (fullscreen) => {
-        if (fullscreen) {
-          setIsFullscreen(true);
-          setExpandState('fullscreen');
-        } else {
-          exitFullscreen();
-        }
-      },
-      next: () => setIndex(activeIndex + 1),
-      prev: () => setIndex(activeIndex - 1),
-    }));
-
-    // ========================================
-    // Calculate panel positions
-    // ========================================
-
-    const getPanelStyle = (panelIndex) => {
-      const isActive = panelIndex === activeIndex;
-
-      let width = '100%';
-      let left = '0%';
-      let opacity = 1;
-      let zIndex = panelIndex;
-
-      if (isFullscreen) {
-        // FULLSCREEN MODE: Active panel only
-        width = isActive ? '100%' : '100%';
-        left = '0%';
-        opacity = isActive ? 1 : 0;
-        zIndex = isActive ? 10 : 0;
-        // FIX: No backdrop blur in fullscreen
-      } else if (isNarrow) {
-        // NARROW MODE: Full-width stack
-        width = '100%';
-        left = '0%';
-        opacity = isActive ? 1 : 0;
-        zIndex = isActive ? 10 : 0;
-      } else if (expandState === 'expanded') {
-        // EXPANDED MODE: 70% dominant + peeking
-        if (isActive) {
-          width = '80%';
-          left = '10%';
-          opacity = 1;
-          zIndex = panelCount + 1;
-        } else if (panelIndex < activeIndex) {
-          // FIX: Previous panels should be left, not behind
-          // Calculate offset: each panel shifts 15% to the left
-          const offset = activeIndex - panelIndex;
-          const leftPos = 10 - (offset * 15);
-          width = '80%';
-          left = `${leftPos}%`;
-          opacity = 0.5;
-          zIndex = panelCount - offset;
-        } else {
-          // FIX: Next panels should be right, not behind
-          const offset = panelIndex - activeIndex;
-          const rightPos = 85 + (offset * 6);
-          width = '15%';
-          left = `${rightPos}%`;
-          opacity = 0.4;
-          zIndex = panelCount - offset;
-        }
-      } else {
-        // COLLAPSED MODE: All minimal preview
-        width = `${100 / panelCount}%`;
-        left = `${(panelIndex * 100) / panelCount}%`;
-        opacity = 1;
-        zIndex = panelIndex;
-      }
-
-      return {
-        width,
-        left,
-        opacity,
-        zIndex,
-        transform: isDragging && panelIndex === activeIndex ? `translateX(${dragOffset}px)` : undefined,
-        transition: isTransitioning ? `all 250ms cubic-bezier(0.16, 1, 0.3, 1)` : undefined,
-        position: 'absolute',
-        top: '0',
-        bottom: '0',
-        height: '100%',
-      };
-    };
-
-    // ========================================
-    // Render
-    // ========================================
-
-    return (
-      <div
-        ref={rootRef}
-        className={`mochi-panels-root ${className}`}
-        data-narrow={isNarrow}
-        data-expand-state={expandState}
-        data-fullscreen={isFullscreen}
-        data-dragging={isDragging}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        {...props}
-      >
-        {/* Panel Grid */}
-        {React.Children.map(children, (child, idx) => (
-          <div
-            key={idx}
-            className={`mochi-panel-wrapper ${idx === activeIndex ? 'mochi-panel--active' : ''} ${
-              isDragging && idx === activeIndex ? 'mochi-panel--dragging' : ''
-            }`}
-            style={getPanelStyle(idx)}
-            onClick={() => !isDragging && setIndex(idx)}
-            role="tabpanel"
-            aria-label={`Panel ${idx + 1}`}
-            tabIndex={idx === activeIndex ? 0 : -1}
-          >
-            <div className="mochi-panel">
-              <div className="mochi-panel-content">{child}</div>
-
-              {/* FIX: Controls only on active panel */}
-              {idx === activeIndex && showControls && !isFullscreen && (
-                <div className="mochi-panel-controls">
-                  {/* Left Navigation Button */}
-                  <button
-                    className="mochi-btn mochi-btn-nav mochi-btn-prev"
-                    onClick={() => setIndex(activeIndex - 1)}
-                    disabled={!wrap && activeIndex === 0}
-                    aria-label="Previous panel"
-                    title="Previous (← arrow key)"
-                  >
-                    <span className="mochi-btn-icon">‹</span>
-                  </button>
-
-                  {/* Expand/Collapse/Fullscreen Button */}
-                  <button
-                    ref={expandButtonRef}
-                    className={`mochi-btn mochi-btn-expand ${expandState}`}
-                    onMouseDown={handleExpandMouseDown}
-                    onMouseUp={handleExpandMouseUp}
-                    onMouseLeave={handleExpandMouseLeave}
-                    aria-label={
-                      expandState === 'fullscreen'
-                        ? 'Exit fullscreen'
-                        : expandState === 'expanded'
-                          ? 'Collapse'
-                          : 'Expand (long press for fullscreen)'
-                    }
-                    title="Click: Expand/Collapse | Long press: Fullscreen"
-                  >
-                    <span className="mochi-btn-icon">
-                      {expandState === 'fullscreen' ? '⊡' : expandState === 'expanded' ? '⊟' : '⊞'}
-                    </span>
-                  </button>
-
-                  {/* Right Navigation Button */}
-                  <button
-                    className="mochi-btn mochi-btn-nav mochi-btn-next"
-                    onClick={() => setIndex(activeIndex + 1)}
-                    disabled={!wrap && activeIndex === panelCount - 1}
-                    aria-label="Next panel"
-                    title="Next (→ arrow key)"
-                  >
-                    <span className="mochi-btn-icon">›</span>
-                  </button>
+              {showGrabber && (
+                <div
+                  className="repanel__grabber"
+                  role="slider"
+                  aria-label="Reveal depth"
+                  aria-orientation="horizontal"
+                  aria-valuemin={bounds.min}
+                  aria-valuemax={bounds.max}
+                  aria-valuenow={committedReveal}
+                  tabIndex={0}
+                  onPointerDown={onGrabberPointerDown}
+                  onPointerMove={onGrabberPointerMove}
+                  onPointerUp={onGrabberPointerUp}
+                  onPointerCancel={onGrabberPointerUp}
+                  onKeyDown={onGrabberKeyDown}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <span className="repanel__grabber-bar" aria-hidden="true" />
                 </div>
               )}
-
-              {isDragging && idx === activeIndex && <div className="mochi-drag-hint">Drag to navigate</div>}
             </div>
-          </div>
-        ))}
-
-        {/* FIX: Fullscreen Overlay with Close Button - prevent blur, pointer-events */}
-        {isFullscreen && (
-          <div className="mochi-fullscreen-overlay" onClick={exitFullscreen}>
-            <button
-              className="mochi-btn mochi-btn-close"
-              onClick={(e) => {
-                e.stopPropagation();
-                exitFullscreen();
-              }}
-              aria-label="Close fullscreen"
-              title="Press ESC to exit"
-            >
-              ✕
-            </button>
-          </div>
-        )}
+          );
+        })}
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
-StackedMochiPanels.displayName = 'StackedMochiPanels';
+Repanel.displayName = 'Repanel';
 
-const StackedMochiPanel = ({ children, ...props }) => <div {...props}>{children}</div>;
-StackedMochiPanel.displayName = 'StackedMochiPanel';
+// Public aliases — same component under the Mochi / legacy-friendly names.
+const MochiStackedPanels = Repanel;
+const StackedMochiPanels = Repanel;
 
-export { StackedMochiPanels, StackedMochiPanel };
+export { Repanel, MochiStackedPanels, StackedMochiPanels };

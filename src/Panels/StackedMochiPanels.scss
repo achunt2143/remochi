@@ -1,331 +1,242 @@
-// StackedMochiPanels.scss
+// StackedMochiPanels.scss — Repanel webOS/Mochi stacked panel system
+//
+// DOM structure (see StackedMochiPanels.jsx):
+//   .repanel                       root / viewport clip
+//     .repanel__viewport           absolute fill
+//       .repanel__panel            one positioned shell per child
+//         .repanel__surface        clips + hosts the child Panel/FloatingPanel
+//         .repanel__scrim          depth dimming overlay (var --repanel-dim)
+//         .repanel__header         top gesture zone (swipe / select)
+//           .repanel__grip         header affordance pill
+//         .repanel__grabber        active-only reveal-depth handle (bottom)
+//           .repanel__grabber-bar  grabber affordance pill
+//
+// Layout/geometry (left, width, transform, opacity, z-index, --repanel-dim)
+// is driven by inline styles from stackedPanelsLayout.js. This file owns the
+// look: overlapping shells, rounded left corners, stacked depth and the
+// prominent active/front panel.
+//
+// Colors reference ThemeWrapper CSS variables (with light-surface fallbacks so
+// the component still reads correctly outside a ThemeWrapper). No :root
+// overrides live here.
+
+$repanel-radius: 16px;
+$repanel-header-h: 40px;
+$repanel-duration: 260ms;
+$repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
 
 // ========================================
-// Local SCSS constants (layout/motion only — no colors)
+// Root / viewport
 // ========================================
 
-$mochi-panel-radius: 12px;
-$mochi-transition-duration: 250ms;
-$mochi-transition-easing: cubic-bezier(0.16, 1, 0.3, 1);
-$mochi-handle-size: 48px;
-
-// ========================================
-// All colors reference ThemeWrapper CSS variables.
-// No :root overrides — those belong in ThemeWrapper only.
-// Mapping:
-//   --mochi-bg          → page/root background
-//   --mochi-surface     → card / panel surface
-//   --mochi-border      → subtle border
-//   --mochi-text        → primary text
-//   --mochi-text-muted  → secondary / label text
-//   --mochi-primary     → accent / interactive color
-//   --mochi-primary-text→ text on primary bg (btn label)
-//   --mochi-hover       → hover surface tint
-//   --mochi-active      → active/pressed surface tint
-// ========================================
-
-// ========================================
-// Root Container
-// ========================================
-
-.mochi-panels-root {
+.repanel {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 100%;
+  min-height: 320px;
   overflow: hidden;
-  background: var(--mochi-bg);
+  background: var(--mochi-bg, transparent);
   -webkit-user-select: none;
   user-select: none;
 
-  // ========================================
-  // Panel Wrapper (Positioning & Stacking)
-  // All .mochi-panel-wrapper and .mochi-panel rules are scoped here
-  // so they never bleed onto the standalone Panel / FloatingPanel components.
-  // ========================================
+  &__viewport {
+    position: absolute;
+    // Reserve room at the bottom so the active panel's grabber can extend
+    // "forward" past the lower edge without being clipped by the root.
+    inset: 0 0 18px 0;
+  }
 
-  .mochi-panel-wrapper {
+  // ======================================
+  // Panel shell — positioned, overlapping
+  // ======================================
+
+  &__panel {
     position: absolute;
     top: 0;
     bottom: 0;
+    // overflow visible so the bottom grabber can extend past the lower edge;
+    // the rounded clip lives on __surface / __scrim instead.
+    overflow: visible;
+    transform-origin: left center;
+    will-change: transform, left, width, opacity;
 
-    transition:
-      left $mochi-transition-duration $mochi-transition-easing,
-      width $mochi-transition-duration $mochi-transition-easing,
-      box-shadow $mochi-transition-duration $mochi-transition-easing;
+    // Soft shadow that reads as separation between overlapping shells.
+    filter: drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14));
 
-    cursor: pointer;
-
-    &.mochi-panel--dragging {
-      transition: none;
-      z-index: 9999 !important;
+    &[data-active='true'] {
+      // The front panel sits proud of the stack.
+      filter: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22));
     }
 
-    &.mochi-panel--active .mochi-panel {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-      transform: translateY(-2px);
-    }
-  }
-
-  // ========================================
-  // Panel Card
-  // ========================================
-
-  .mochi-panel {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-
-    border-radius: $mochi-panel-radius 0 0 $mochi-panel-radius;
-    background: var(--mochi-surface);
-    border: 1px solid var(--mochi-border);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-    overflow: hidden;
-
-    transition:
-      box-shadow $mochi-transition-duration $mochi-transition-easing,
-      transform $mochi-transition-duration $mochi-transition-easing,
-      background-color 150ms ease-out;
-
-    &:hover:not(.mochi-panel-wrapper.mochi-panel--dragging *) {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    &:not([data-active='true']) {
+      cursor: pointer;
     }
   }
 
-  // ========================================
-  // Content Area
-  // ========================================
+  // Animate everything except while actively dragging.
+  &[data-animate='true'] &__panel:not([data-no-transition='true']) {
+    transition:
+      transform $repanel-duration $repanel-easing,
+      left $repanel-duration $repanel-easing,
+      width $repanel-duration $repanel-easing,
+      opacity $repanel-duration $repanel-easing;
 
-  .mochi-panel-content {
-    flex: 1;
+    .repanel__scrim {
+      transition: opacity $repanel-duration $repanel-easing;
+    }
+  }
+
+  // ======================================
+  // Surface — clips + hosts the child
+  // ======================================
+
+  &__surface {
+    position: absolute;
+    inset: 0;
     overflow: auto;
-    padding: 24px;
-    color: var(--mochi-text);
-    font-size: 14px;
-    line-height: 1.5;
+    // Rounded on the left (webOS side-panel), flush on the right stack edge.
+    border-radius: $repanel-radius 0 0 $repanel-radius;
+    background: var(--mochi-surface, #f5f5f5);
 
+    // Let a child Panel/FloatingPanel fill the shell without imposing its own
+    // fixed height, so tall content scrolls the surface rather than clipping.
+    > * {
+      box-sizing: border-box;
+      min-height: 100%;
+    }
+
+    > .mochi-panel {
+      height: auto;
+      min-height: 100%;
+      width: 100%;
+      // Child provides its own surface; drop its standalone border-radius so
+      // the shell's rounded-left clip is the single source of shape.
+      border-radius: 0;
+    }
+
+    // Thin, theme-aware scrollbar.
     scrollbar-width: thin;
-    scrollbar-color: var(--mochi-border) var(--mochi-hover);
+    scrollbar-color: var(--mochi-border, #cccccc) transparent;
 
     &::-webkit-scrollbar {
       width: 8px;
     }
-
-    &::-webkit-scrollbar-track {
-      background: var(--mochi-hover);
-      border-radius: 6px;
-    }
-
     &::-webkit-scrollbar-thumb {
-      background: var(--mochi-border);
+      background: var(--mochi-border, #cccccc);
       border-radius: 6px;
-
-      &:hover {
-        background: var(--mochi-text-muted);
-      }
     }
   }
 
-  // ========================================
-  // Drag Handle
-  // ========================================
+  // ======================================
+  // Depth scrim (recedes non-active panels)
+  // ======================================
 
-  .mochi-panel-handle {
+  &__scrim {
     position: absolute;
-    left: 16px;
-    bottom: 16px;
-    width: $mochi-handle-size;
-    height: $mochi-handle-size;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: none;
-    padding: 0;
-    background: var(--mochi-hover);
-    border-radius: 10px;
-
-    cursor: grab;
-    outline: none;
-    z-index: 10;
-
-    transition:
-      background-color 150ms $mochi-transition-easing,
-      transform 150ms $mochi-transition-easing,
-      box-shadow 150ms $mochi-transition-easing;
-
-    will-change: background-color, transform;
-
-    &:hover {
-      background: var(--mochi-active);
-      transform: scale(1.08) translateY(-2px);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    &:active {
-      cursor: grabbing;
-      background: var(--mochi-active);
-      transform: scale(0.96);
-    }
-  }
-
-  .mochi-panel-wrapper.mochi-panel--dragging .mochi-panel-handle {
+    inset: 0;
+    border-radius: $repanel-radius 0 0 $repanel-radius;
+    background: #000;
+    opacity: var(--repanel-dim, 0);
     pointer-events: none;
   }
 
-  // ========================================
-  // Handle Grip Lines
-  // ========================================
+  // ======================================
+  // Header — interaction zone
+  // ======================================
 
-  .mochi-panel-handle-lines {
-    position: relative;
-    width: 18px;
-    height: 12px;
+  &__header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: $repanel-header-h;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    z-index: 2;
+    cursor: grab;
+    // Allow vertical scrolling to pass through; we only claim horizontal swipes.
+    touch-action: pan-y;
 
-    &::before,
-    &::after {
-      content: '';
-      display: block;
-      width: 18px;
-      height: 2px;
-      border-radius: 1px;
-      background: var(--mochi-text-muted);
-      transition: all 150ms $mochi-transition-easing;
-    }
-
-    &::after {
-      width: 12px;
-      margin-left: 4px;
+    &:active {
+      cursor: grabbing;
     }
   }
 
-  .mochi-panel-handle:hover .mochi-panel-handle-lines {
-    &::before {
-      box-shadow: 0 5px 0 var(--mochi-text);
-    }
+  &__panel:not([data-active='true']) &__header {
+    cursor: pointer;
+  }
 
-    &::after {
-      width: 18px;
-      margin-left: 0;
-      background: var(--mochi-text);
+  &__grip {
+    width: 40px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--mochi-border, #cccccc);
+    transition: background-color 150ms $repanel-easing;
+  }
+
+  &__panel[data-active='true'] &__grip {
+    background: var(--mochi-text-muted, #8a8a8a);
+  }
+
+  // ======================================
+  // Grabber — reveal-depth handle (active)
+  // ======================================
+
+  &__grabber {
+    position: absolute;
+    left: 50%;
+    bottom: -14px; // extends forward past the active panel's lower edge
+    transform: translateX(-50%);
+    width: 64px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6;
+
+    background: var(--mochi-surface, #f5f5f5);
+    border: 0.5px solid var(--mochi-border, #cccccc);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.3);
+
+    cursor: ew-resize;
+    touch-action: none;
+    outline: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--mochi-primary, #2f6fed);
+      outline-offset: 2px;
     }
   }
 
-  // ========================================
-  // Responsive
-  // ========================================
-
-  @media (max-width: 768px) {
-    height: 320px;
-
-    .mochi-panel-content {
-      padding: 20px;
-    }
-
-    .mochi-panel-handle {
-      left: 12px;
-      bottom: 12px;
-      width: 40px;
-      height: 40px;
-    }
+  &__grabber-bar {
+    width: 28px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--mochi-text-muted, #8a8a8a);
   }
 
-  @media (max-width: 480px) {
-    height: 280px;
+  // ======================================
+  // Narrow mode
+  // ======================================
 
-    .mochi-panel-content {
-      padding: 16px;
-      font-size: 12px;
-    }
-
-    .mochi-panel-handle {
-      left: 10px;
-      bottom: 10px;
-      width: 36px;
-      height: 36px;
-    }
-
-    .mochi-panel-handle-lines {
-      width: 16px;
-      height: 10px;
-
-      &::before,
-      &::after {
-        width: 16px;
-      }
-
-      &::after {
-        width: 10px;
-      }
-    }
-  }
-
-  // ========================================
-  // Accessibility
-  // ========================================
-
-  .mochi-panel-handle:focus-visible {
-    outline: 2px solid var(--mochi-primary);
-    outline-offset: 2px;
+  &[data-narrow='true'] &__grabber {
+    display: none;
   }
 }
 
 // ========================================
-// Drag Hint Overlay (fixed-position, outside root scope)
+// Reduced motion
 // ========================================
-
-.mochi-drag-hint {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  padding: 12px 24px;
-  background: var(--mochi-primary);
-  color: var(--mochi-primary-text);
-  border-radius: 10px;
-
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-
-  pointer-events: none;
-  z-index: 10000;
-
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-
-  animation: mochi-hint-in 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes mochi-hint-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .mochi-panels-root {
-    .mochi-panel-wrapper,
-    .mochi-panel,
-    .mochi-panel-handle {
+  .repanel[data-animate='true'] .repanel__panel:not([data-no-transition='true']) {
+    transition: none;
+
+    .repanel__scrim {
       transition: none;
     }
-  }
-
-  .mochi-drag-hint {
-    animation: none;
   }
 }

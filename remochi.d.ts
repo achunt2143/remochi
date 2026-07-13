@@ -412,37 +412,114 @@ export interface FloatingPanelProps {
 }
 export const FloatingPanel: React.FC<FloatingPanelProps>;
 
-export interface StackedPanelProps {
-  children?: React.ReactNode;
-  [key: string]: any;
-}
-export const StackedPanel: React.FC<StackedPanelProps>;
+/**
+ * Repanel — webOS/Mochi stacked panel workspace.
+ *
+ * The active panel is the front of the stack; earlier panels fan out to the
+ * left as overlapping spines. A header-only horizontal swipe changes the front
+ * panel, and a bottom grabber drags the reveal depth, snapping to `snapPoints`.
+ */
 
-export interface StackedPanelsMethods {
-  setIndex: (index: number) => void;
-  getIndex: () => number;
-  getIsNarrow: () => boolean;
-  toggleExpand: () => void;
-  setFullscreen: (fullscreen: boolean) => void;
-  next: () => void;
-  prev: () => void;
+/** Reason an active-index change was committed. */
+export type ActiveIndexChangeReason = 'swipe' | 'select' | 'method';
+
+/** Reason a reveal change was committed. */
+export type RevealChangeReason = 'grabber' | 'method';
+
+/** How narrow mode collapses the stack. */
+export type NarrowBehavior = 'single' | 'stack' | 'overlay';
+
+/** Detail payload for `onActiveIndexChange`. */
+export interface ActiveIndexChangeDetail {
+  previousIndex: number;
+  reason: ActiveIndexChangeReason;
+  panelCount: number;
+  isNarrow: boolean;
 }
+
+/** Detail payload for `onRevealChange`. */
+export interface RevealChangeDetail {
+  previousReveal: number;
+  reason: RevealChangeReason;
+  snapPoints: number[];
+  isNarrow: boolean;
+}
+
+/** Imperative handle exposed via `ref`. */
+export interface StackedPanelsMethods {
+  /** Bring the panel at `index` to the front of the stack. */
+  setActiveIndex: (index: number) => void;
+  /** Advance the front panel by one. */
+  next: () => void;
+  /** Move the front panel back by one. */
+  prev: () => void;
+  /** Set the reveal depth; the value is snapped to the nearest snap point. */
+  setReveal: (value: number) => void;
+  /** Reveal the deepest allowed stack depth (max snap point). */
+  expand: () => void;
+  /** Collapse to the shallowest stack depth (min snap point). */
+  collapse: () => void;
+  /** Read the current state snapshot. */
+  getState: () => {
+    activeIndex: number;
+    reveal: number;
+    panelCount: number;
+    isNarrow: boolean;
+  };
+}
+
 export interface StackedPanelsProps {
   children?: React.ReactNode;
-  index?: number;
-  onIndexChange?: (index: number) => void;
-  animate?: boolean;
-  draggable?: boolean;
-  narrowFit?: boolean;
-  narrowFitWidth?: number;
+
+  /** Controlled front/top panel index. */
+  activeIndex?: number;
+  /** Initial front panel index when uncontrolled. Defaults to the last panel. */
+  defaultActiveIndex?: number;
+  /** Called when the front panel changes. */
+  onActiveIndexChange?: (index: number, detail: ActiveIndexChangeDetail) => void;
+
+  /** Controlled reveal depth (snapped to `snapPoints`). */
+  reveal?: number;
+  /** Initial reveal depth when uncontrolled. */
+  defaultReveal?: number;
+  /** Called when the reveal depth snaps to a new value. */
+  onRevealChange?: (reveal: number, detail: RevealChangeDetail) => void;
+
+  /** Allowed reveal depths. @default [1, 2, 3] */
+  snapPoints?: number[];
+  /** Maximum panels drawn in the stack at once. @default 3 */
+  maxVisiblePanels?: number;
+  /** Depth recession strength (0..1) for stacked panels. */
+  overlap?: number;
+  /** Visible strip width (px) of each stacked parent spine. */
+  peek?: number;
+
+  /** Enable header-only horizontal swipe to change the front panel. @default true */
+  headerSwipe?: boolean;
+  /** Show the active panel's reveal-depth grabber. @default true */
+  grabber?: boolean;
+  /** Wrap around at the ends when changing the front panel. */
   wrap?: boolean;
-  arrangement?: string;
-  onTransitionStart?: (event: { from: number; to: number; isNarrow: boolean }) => void;
-  onTransitionFinish?: (event: { from: number; to: number; isNarrow: boolean }) => void;
+  /** Animate layout transitions. @default true */
+  animate?: boolean;
+
+  /** Collapse to a narrow layout below `narrowFitWidth`. @default true */
+  narrowFit?: boolean;
+  /** Root width (px) at/below which narrow mode activates. @default 768 */
+  narrowFitWidth?: number;
+  /** Narrow-mode layout. @default 'single' */
+  narrowBehavior?: NarrowBehavior;
+
   className?: string;
-  showControls?: boolean;
 }
-export const StackedPanels: React.ForwardRefExoticComponent<
+
+export const Repanel: React.ForwardRefExoticComponent<
+  StackedPanelsProps & React.RefAttributes<StackedPanelsMethods>
+>;
+export const MochiStackedPanels: React.ForwardRefExoticComponent<
+  StackedPanelsProps & React.RefAttributes<StackedPanelsMethods>
+>;
+export const StackedMochiPanels: React.ForwardRefExoticComponent<
   StackedPanelsProps & React.RefAttributes<StackedPanelsMethods>
 >;
 
