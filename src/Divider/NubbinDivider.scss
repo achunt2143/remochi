@@ -1,30 +1,30 @@
 // NubbinDivider — [left cap] [nubbin] [right cap]
 //
-// The nubbin image (e.g. up.png) is 71×20px. The divider line sits in the
-// bottom 2px of that image. The caps (div-left/right.png) are 4px tall.
-// align-items: flex-end flushes the cap bottoms to the nubbin bottom so
-// the line exits the nubbin seamlessly without a gap or step.
+// The nubbin image (e.g. up.png) is 71×20px with a crisp, fully-opaque ~2px
+// baseline stroke sitting flush against one edge (bottom for 'up', top for
+// 'down', etc. — see NUB_INFO's `align` in NubbinDivider.jsx). The caps are
+// NOT the div-left/right.png images the plain Divider uses — those are a
+// much lighter, softer gray, and stretching that tiny 4px-tall PNG to any
+// other size blurs it further, so next to the nubbin's bold solid stroke
+// they always read as washed out. Instead each cap is a flat `CAP_COLOR`
+// fill (matching the nubbin's own stroke color exactly) faded in via
+// `mask-image` — see NubbinDivider.jsx — which stays crisp at any
+// thickness and has no color mismatch where it meets the nubbin. Size and
+// alignment (`align-self`, per NUB_INFO's `align`) are set inline per
+// nubbin since which edge is "flush" isn't the same for every one.
 
 .mochi-nubbin-divider {
   display: flex;
-  align-items: flex-end;  // caps flush to nubbin bottom where the line exits
   width: 100%;
   overflow: visible;      // let the nubbin overhang above the line
 
   // ── Caps ──────────────────────────────────────────────────
   &__cap {
     flex: 1 1 0;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    background-position: center;
-
-    .mochi-nubbin-divider--horizontal & {
-      height: 3px;   // match the divider line thickness
-    }
-
-    .mochi-nubbin-divider--vertical & {
-      width: 3px;
-    }
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
   }
 
   // ── Nubbin image ────────────────────────────────────────────
@@ -39,7 +39,6 @@
   // ── Vertical orientation ──────────────────────────────────────
   &--vertical {
     flex-direction: column;
-    align-items: flex-end;  // caps flush to nubbin right edge where line exits
     height: 100%;
     width: auto;
     overflow: visible;

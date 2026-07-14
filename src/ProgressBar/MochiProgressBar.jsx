@@ -1,12 +1,18 @@
 import React from "react";
 import styled from "styled-components";
 
-// Semantic color map — falls back to CSS variables, then hardcoded defaults
+// Semantic color map — falls back to CSS variables, then hardcoded defaults.
+// yellow reads --mochi-selected (not --color-warning): --color-warning is
+// a genuinely different orange, while the fallback here (#ffb80d) was
+// clearly written for the same amber "selected" accent Radio/Toggle/
+// Checkbox use — same mismatch as those components had. red/green use the
+// --mochi-* aliases (not the underlying --color-* vars directly) to match
+// the convention the rest of the theme follows, e.g. the warning Button.
 const colorMap = {
   blue:   "var(--mochi-primary, #5b9dd9)",
-  yellow: "var(--color-warning, #ffb80d)",
-  red:    "var(--color-error, #d32f2f)",
-  green:  "var(--color-success, #4caf50)",
+  yellow: "var(--mochi-selected, #ffb80d)",
+  red:    "var(--mochi-error, #d32f2f)",
+  green:  "var(--mochi-success, #4caf50)",
 };
 
 const Container = styled.div`

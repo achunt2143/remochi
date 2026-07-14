@@ -1,14 +1,19 @@
 import React from 'react';
 import './Badge.scss';
 
-// Variant → background color map
+// Variant → background color map. Themed via the same --mochi-* tokens
+// MochiButton/Radio/Toggle/Checkbox use, rather than hardcoded hex, so a
+// badge's color stays consistent with the rest of the theme instead of a
+// fixed value that doesn't adjust in dark mode — warning matches the
+// amber --mochi-selected accent (same as Radio/Toggle/Checkbox's checked
+// state), error/danger match --mochi-error (same as the warning Button).
 const VARIANT_COLORS = {
-  default: '#69cdff',
-  success: '#4caf50',
-  warning: '#ff9800',
-  error:   '#f44336',
-  danger:  '#f44336',
-  info:    '#2196f3',
+  default: 'var(--mochi-primary, #69cdff)',
+  success: 'var(--mochi-success, #4caf50)',
+  warning: 'var(--mochi-selected, #ffb80d)',
+  error:   'var(--mochi-error, #f44336)',
+  danger:  'var(--mochi-error, #f44336)',
+  info:    'var(--mochi-info, #2196f3)',
 };
 
 /**

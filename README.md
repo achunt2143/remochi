@@ -2,6 +2,8 @@
 
 A modern React component library that brings the charming, nostalgic **Mochi** UI style into your React projects. Remochi recreates classic Mochi components like buttons, radios, sliders, popups, and more — all rebuilt with React and styled-components for modern development workflows and accessibility.
 
+See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for what's new in the latest release, and [docs/remochi-component-guide.md](./docs/remochi-component-guide.md) for usage examples of every component.
+
 ## Features
 
 - Authentic **Mochi visual style**: Rounded shapes, smooth animations, bright blues and warm yellows

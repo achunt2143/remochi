@@ -12,8 +12,8 @@ import './MochiToggle.scss';
  *   onChange       {Function} Called with { value } on toggle
  *   disabled       {boolean}  Disables interaction (default: false)
  *   canAnimate     {boolean}  Animate background-color transition (default: true)
- *   colorActive    {string}   Pill bg when on (default: '#ffb80d')
- *   colorInactive  {string}   Pill bg when off (default: '#646464')
+ *   colorActive    {string}   Pill bg when on (default: var(--mochi-selected, '#ffb80d'))
+ *   colorInactive  {string}   Pill bg when off (default: var(--mochi-toggle-track, '#646464'))
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
  */
@@ -22,8 +22,10 @@ const MochiToggle = ({
   onChange = () => {},
   disabled = false,
   canAnimate = true,
-  colorActive = '#ffb80d',
-  colorInactive = '#646464',
+  colorActive = 'var(--mochi-selected, #ffb80d)',
+  // Radio/Checkbox's own unchecked fill matches this same token, so all
+  // three controls share one neutral "off state" grey.
+  colorInactive = 'var(--mochi-toggle-track, #646464)',
   onContent = 'On',
   offContent = 'Off',
 }) => {

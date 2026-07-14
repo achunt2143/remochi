@@ -125,26 +125,37 @@ export const Dialog: React.FC<DialogProps>;
 // Divider
 // ---------------------------------------------------------------------------
 export interface DividerProps {
+  /** @default 'horizontal' */
   orientation?: 'horizontal' | 'vertical';
-  width?: string | number;
-  height?: string | number;
+  /** Px height (horizontal) or width (vertical) of the line. @default 4 */
   thickness?: number;
   className?: string;
   style?: React.CSSProperties;
 }
+/** Two-cap divider: a left cap and a right cap meeting seamlessly at the centre, each fading in from its outer edge. */
 export const Divider: React.FC<DividerProps>;
 
+/** Which nubbin image to show — straight (`up`/`down`/`left`/`right`) or a Popup-style corner variant. */
+export type NubbinDividerNubbin =
+  | 'up' | 'down' | 'left' | 'right'
+  | 'top-left-up' | 'top-right-up'
+  | 'top-left-left' | 'top-right-right'
+  | 'bottom-left-down' | 'bottom-right-down'
+  | 'bottom-left-left' | 'bottom-right-right';
+
 export interface NubbinDividerProps {
+  /** @default 'up' */
+  nubbin?: NubbinDividerNubbin;
+  /** CSS left value shifting the nubbin from centre, e.g. '50%' (default), '120px', 'calc(...)'. */
+  nubbinOffset?: string;
+  /** @default 'horizontal' */
   orientation?: 'horizontal' | 'vertical';
-  side?: 'top' | 'bottom' | 'left' | 'right';
-  color?: string;
+  /** Px thickness of the cap lines flanking the nubbin. The nubbin image itself is a fixed-size asset and doesn't scale with this. @default 2 (matches the nubbin's own stroke weight) */
   thickness?: number;
-  notchRadius?: number;
-  fadeSize?: number;
-  length?: string | number;
-  crossSize?: number;
   className?: string;
+  style?: React.CSSProperties;
 }
+/** Three-part divider — [left cap][nubbin image][right cap] — the caps stretch to fill their half and the nubbin sits fixed-size, flush against them. The 8 corner variants (borrowed from Popup) are the exception: a corner nubbin is the end of the line rather than a bump in the middle of it, so only one cap is drawn, on whichever side it trails off toward. */
 export const NubbinDivider: React.FC<NubbinDividerProps>;
 
 // ---------------------------------------------------------------------------
@@ -392,16 +403,19 @@ export const Pagination: React.FC<PaginationProps>;
 // ---------------------------------------------------------------------------
 // Panels
 // ---------------------------------------------------------------------------
-export interface PanelProps {
+export interface RepanelProps {
   children?: React.ReactNode;
   /** Percentage width of the panel within its row, e.g. 25, 33, 50. */
   width?: number;
   /** Visual style variant. */
   style?: 'default' | 'shadow';
+  /** Draws a nubbin grabber accent at the bottom-left edge. `RepanelStack` sets this on every child but the first. */
+  handle?: boolean;
   className?: string;
   [key: string]: any;
 }
-export const Panel: React.FC<PanelProps>;
+/** A full-height, rounded-left panel — the stackable card surface used standalone or inside `RepanelStack`. */
+export const Repanel: React.FC<RepanelProps>;
 
 export interface FloatingPanelProps {
   children?: React.ReactNode;
@@ -412,37 +426,133 @@ export interface FloatingPanelProps {
 }
 export const FloatingPanel: React.FC<FloatingPanelProps>;
 
-export interface StackedPanelProps {
-  children?: React.ReactNode;
-  [key: string]: any;
-}
-export const StackedPanel: React.FC<StackedPanelProps>;
+/**
+ * RepanelStack — webOS/Mochi stacked panel workspace.
+ *
+ * A multi-column master-detail layout: the active panel is the front
+ * (rightmost) column and takes the remaining width, while earlier panels
+ * stay revealed to its left as real, fully interactive columns (not dimmed
+ * peeking slivers) — every visible panel is simultaneously active and
+ * navigable. Every panel but the first (the base of the stack, with nothing
+ * behind it to reveal) has its own nubbin grabber at its bottom-left edge,
+ * with different behavior depending on which panel it's on:
+ *   - A parent panel's grabber adjusts reveal — grows/shrinks how many
+ *     parents are shown, all the way back to panel 0. Never changes which
+ *     panel is active.
+ *   - The active panel's own grabber does the same reveal-adjust when
+ *     dragged left (so a stack collapsed all the way down to just the
+ *     active panel can always be reopened — every parent's own grabber
+ *     goes non-interactive once its panel collapses to 0 width) or when
+ *     dragged right while there's still more of the stack left to reveal.
+ *     Only once nothing is left to reveal does dragging it right become a
+ *     swipe-to-close gesture instead: it continuously shrinks while the
+ *     panel behind grows to fill the space; release past ~45% dragged,
+ *     with a fast flick, or double-click it, and the close commits —
+ *     otherwise it springs back open. A closed panel doesn't return on its
+ *     own; only an explicit forward action (`next`/`setActiveIndex`)
+ *     reopens it.
+ * There is no separate header gesture zone — the nubbin is the only
+ * interactive surface a panel adds on top of its own content.
+ */
 
-export interface StackedPanelsMethods {
-  setIndex: (index: number) => void;
-  getIndex: () => number;
-  getIsNarrow: () => boolean;
-  toggleExpand: () => void;
-  setFullscreen: (fullscreen: boolean) => void;
-  next: () => void;
-  prev: () => void;
+/** Reason an active-index change was committed. */
+export type ActiveIndexChangeReason = 'grabber' | 'method';
+
+/** Reason a reveal change was committed. */
+export type RevealChangeReason = 'grabber' | 'method';
+
+/** How narrow mode collapses the stack. */
+export type NarrowBehavior = 'single' | 'stack' | 'overlay';
+
+/** Detail payload for `onActiveIndexChange`. */
+export interface ActiveIndexChangeDetail {
+  previousIndex: number;
+  reason: ActiveIndexChangeReason;
+  panelCount: number;
+  isNarrow: boolean;
 }
+
+/** Detail payload for `onRevealChange`. */
+export interface RevealChangeDetail {
+  previousReveal: number;
+  reason: RevealChangeReason;
+  snapPoints: number[];
+  isNarrow: boolean;
+}
+
+/** Imperative handle exposed via `ref`. */
+export interface StackedPanelsMethods {
+  /** Bring the panel at `index` to the front of the stack. */
+  setActiveIndex: (index: number) => void;
+  /** Advance the front panel by one. */
+  next: () => void;
+  /** Move the front panel back by one. */
+  prev: () => void;
+  /** Set the reveal depth. Within the configured `snapPoints` range the value snaps to the nearest point; beyond it (revealing more of the stack than the defaults cover) it snaps to the nearest whole parent instead. */
+  setReveal: (value: number) => void;
+  /** Reveal the deepest allowed stack depth (max snap point). */
+  expand: () => void;
+  /** Collapse to the shallowest stack depth (min snap point). */
+  collapse: () => void;
+  /** Read the current state snapshot. */
+  getState: () => {
+    activeIndex: number;
+    reveal: number;
+    panelCount: number;
+    isNarrow: boolean;
+  };
+}
+
 export interface StackedPanelsProps {
   children?: React.ReactNode;
-  index?: number;
-  onIndexChange?: (index: number) => void;
-  animate?: boolean;
-  draggable?: boolean;
-  narrowFit?: boolean;
-  narrowFitWidth?: number;
+
+  /** Controlled front/top panel index. */
+  activeIndex?: number;
+  /** Initial front panel index when uncontrolled. Defaults to the last panel. */
+  defaultActiveIndex?: number;
+  /** Called when the front panel changes. */
+  onActiveIndexChange?: (index: number, detail: ActiveIndexChangeDetail) => void;
+
+  /** Controlled reveal depth (snapped to `snapPoints`, or to the nearest whole parent if it exceeds that range). */
+  reveal?: number;
+  /** Initial reveal depth when uncontrolled. */
+  defaultReveal?: number;
+  /** Called when the reveal depth snaps to a new value. */
+  onRevealChange?: (reveal: number, detail: RevealChangeDetail) => void;
+
+  /** Allowed reveal depths for discrete controls (Expand/Collapse, keyboard stepping). A grabber drag isn't limited to this list — it can reveal every parent back to panel 0. @default [1, 2, 3] */
+  snapPoints?: number[];
+  /** Default number of panels shown at once on mount. Not a hard cap — a grabber drag can reveal more of the stack. @default 3 */
+  maxVisiblePanels?: number;
+  /** Shadow-seam overlap strength (0..1) between adjacent stacked columns. */
+  overlap?: number;
+  /** Width (px) of each revealed, non-active parent column. @default 240 */
+  peek?: number;
+
+  /** Show each panel's (but the first's) nubbin grabber — reveal-adjust on parents, reveal-adjust or swipe-to-close on the active panel. @default true */
+  grabber?: boolean;
+  /** Wrap around at the ends when changing the front panel. */
   wrap?: boolean;
-  arrangement?: string;
-  onTransitionStart?: (event: { from: number; to: number; isNarrow: boolean }) => void;
-  onTransitionFinish?: (event: { from: number; to: number; isNarrow: boolean }) => void;
+  /** Animate layout transitions. @default true */
+  animate?: boolean;
+
+  /** Collapse to a narrow layout below `narrowFitWidth`. @default true */
+  narrowFit?: boolean;
+  /** Root width (px) at/below which narrow mode activates. @default 768 */
+  narrowFitWidth?: number;
+  /** Narrow-mode layout. @default 'single' */
+  narrowBehavior?: NarrowBehavior;
+
   className?: string;
-  showControls?: boolean;
 }
-export const StackedPanels: React.ForwardRefExoticComponent<
+
+export const RepanelStack: React.ForwardRefExoticComponent<
+  StackedPanelsProps & React.RefAttributes<StackedPanelsMethods>
+>;
+export const MochiStackedPanels: React.ForwardRefExoticComponent<
+  StackedPanelsProps & React.RefAttributes<StackedPanelsMethods>
+>;
+export const StackedMochiPanels: React.ForwardRefExoticComponent<
   StackedPanelsProps & React.RefAttributes<StackedPanelsMethods>
 >;
 

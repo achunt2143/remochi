@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap');
+// The Lato Google Font is loaded via a <link> tag injected in
+// MochiThemeWrapper.jsx, not a CSS @import here. Rollup concatenates every
+// component's SCSS into one bundled stylesheet, and @import is only valid
+// as the literal first statement of that FINAL file — since which
+// component's styles happen to land first in the bundle isn't something
+// this file controls, an @import here reliably ends up preceded by other
+// rules and gets dropped (with a build warning) regardless of its
+// position in this source file.
 
 @font-face {
   font-family: 'Prelude';
@@ -95,112 +102,20 @@
   --transition-base: 250ms ease;
   --transition-slow: 350ms ease;
 
-  // ============================================
-  // DARK THEME (default)
-  // ============================================
-  &.mochi-theme-dark {
-    --color-primary:        #5b9dd9;
-    --color-primary-hover:  #6ba5db;
-    --color-primary-active: #4a8bc2;
-
-    --color-secondary:        #7ab8e8;
-    --color-secondary-hover:  #8ac2ed;
-    --color-secondary-active: #6aaedb;
-
-    --color-background:       #1a1a1a;
-    --color-surface:          #2a2a2a;
-    --color-surface-elevated: #333333;
-
-    --color-text:           #ffffff;
-    --color-text-secondary: #999999;
-    --color-text-muted:     #666666;
-
-    --color-border:       #646464;
-    --color-border-light: rgba(255, 255, 255, 0.1);
-
-    --color-success:    #4caf50;
-    --color-success-bg: rgba(76, 175, 80, 0.15);
-    --color-warning:    #ff9800;
-    --color-warning-bg: rgba(255, 152, 0, 0.15);
-    --color-error:      #f44336;
-    --color-error-bg:   rgba(244, 67, 54, 0.15);
-    --color-info:       #2196f3;
-    --color-info-bg:    rgba(33, 150, 243, 0.15);
-
-    // --------------------------------------------------
-    // --mochi-* aliases — consumed by all component SCSS
-    // --------------------------------------------------
-    --mochi-bg:           var(--color-background);
-    --mochi-surface:      var(--color-surface);
-    --mochi-border:       var(--color-border);
-    --mochi-text:         var(--color-text);
-    --mochi-text-muted:   var(--color-text-secondary);
-    --mochi-text-faint:   var(--color-text-muted);
-    --mochi-primary:      var(--color-primary);
-    --mochi-primary-hover: var(--color-primary-hover);
-    --mochi-primary-text: #ffffff;
-    --mochi-primary-soft: rgba(91, 157, 217, 0.18);
-    --mochi-hover:  rgba(255, 255, 255, 0.06);
-    --mochi-active: rgba(255, 255, 255, 0.1);
-    --mochi-stripe: rgba(255, 255, 255, 0.03);
-    // Contextual popup border — always solid #646464 regardless of theme
-    --mochi-popup-border: #646464;
-
-    background-color: var(--color-background);
-    color: var(--color-text);
-  }
-
-  // ============================================
-  // LIGHT THEME
-  // ============================================
+  // Theme colors themselves are NOT defined here (see the top-level
+  // :root[data-mochi-theme] blocks below this .mochi-theme-wrapper rule) —
+  // they need to reach components that render via createPortal(el,
+  // document.body) (Dialog, Dropdown's menu, Popup), which places them
+  // outside this wrapper in the DOM. A custom property is only inherited
+  // by actual descendants, so scoping color vars to a class on this
+  // wrapper div left every portaled component permanently stuck on
+  // whatever fallback color its own CSS happened to declare, regardless
+  // of the selected theme. Defining them on :root (matching the
+  // `data-mochi-theme` attribute this component already keeps in sync on
+  // <html> — see the useEffect in MochiThemeWrapper.jsx) makes them
+  // reachable from anywhere in the document, portals included.
+  &.mochi-theme-dark,
   &.mochi-theme-light {
-    --color-primary:        #4a8bc2;
-    --color-primary-hover:  #5b9dd9;
-    --color-primary-active: #3a7bb2;
-
-    --color-secondary:        #6aaedb;
-    --color-secondary-hover:  #7ab8e8;
-    --color-secondary-active: #5a9ecb;
-
-    --color-background:       #f5f5f5;
-    --color-surface:          #ffffff;
-    --color-surface-elevated: #fafafa;
-
-    --color-text:           #1a1a1a;
-    --color-text-secondary: #555555;
-    --color-text-muted:     #888888;
-
-    --color-border:       rgba(0, 0, 0, 0.12);
-    --color-border-light: rgba(0, 0, 0, 0.06);
-
-    --color-success:    #388e3c;
-    --color-success-bg: rgba(56, 142, 60, 0.1);
-    --color-warning:    #e65100;
-    --color-warning-bg: rgba(230, 81, 0, 0.1);
-    --color-error:      #c62828;
-    --color-error-bg:   rgba(198, 40, 40, 0.1);
-    --color-info:       #1565c0;
-    --color-info-bg:    rgba(21, 101, 192, 0.1);
-
-    // --------------------------------------------------
-    // --mochi-* aliases — consumed by all component SCSS
-    // --------------------------------------------------
-    --mochi-bg:           var(--color-background);
-    --mochi-surface:      var(--color-surface);
-    --mochi-border:       var(--color-border);
-    --mochi-text:         var(--color-text);
-    --mochi-text-muted:   var(--color-text-secondary);
-    --mochi-text-faint:   var(--color-text-muted);
-    --mochi-primary:      var(--color-primary);
-    --mochi-primary-hover: var(--color-primary-hover);
-    --mochi-primary-text: #ffffff;
-    --mochi-primary-soft: rgba(74, 139, 194, 0.12);
-    --mochi-hover:  rgba(0, 0, 0, 0.04);
-    --mochi-active: rgba(0, 0, 0, 0.08);
-    --mochi-stripe: rgba(0, 0, 0, 0.02);
-    // Contextual popup border — always solid #646464 regardless of theme
-    --mochi-popup-border: #646464;
-
     background-color: var(--color-background);
     color: var(--color-text);
   }
@@ -227,6 +142,221 @@
   .leading-tight    { line-height: var(--line-height-tight); }
   .leading-normal   { line-height: var(--line-height-normal); }
   .leading-relaxed  { line-height: var(--line-height-relaxed); }
+}
+
+// ============================================
+// Theme colors — defined on :root, not .mochi-theme-wrapper
+// ============================================
+// Scoped to the `data-mochi-theme` attribute MochiThemeWrapper's
+// useEffect keeps in sync on <html>, rather than to a class on the
+// wrapper div, so these custom properties reach components that render
+// via createPortal(el, document.body) — Dialog, Dropdown's menu, Popup —
+// which sit outside the wrapper in the actual DOM and would otherwise
+// never inherit them (see the comment on .mochi-theme-wrapper above).
+
+:root[data-mochi-theme='dark'] {
+  // Primary/secondary/error refined to the exact values from the Figma
+  // dark-mode spec (previously close-but-approximated guesses).
+  --color-primary:        #5ab8f5;
+  --color-primary-hover:  #6ba5db;
+  --color-primary-active: #4a8bc2;
+
+  --color-secondary:        #7ab8e8;
+  --color-secondary-hover:  #8ac2ed;
+  --color-secondary-active: #6aaedb;
+
+  --color-background:       #1a1a1a;
+  --color-surface:          #2a2a2a;
+  --color-surface-elevated: #333333;
+
+  --color-text:           #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted:     #666666;
+
+  --color-border:       #646464;
+  --color-border-light: rgba(255, 255, 255, 0.1);
+
+  --color-success:    #4caf50;
+  --color-success-bg: rgba(76, 175, 80, 0.15);
+  --color-warning:    #ff9800;
+  --color-warning-bg: rgba(255, 152, 0, 0.15);
+  --color-error:      #ef5350;
+  --color-error-bg:   rgba(239, 83, 80, 0.15);
+  --color-info:       #2196f3;
+  --color-info-bg:    rgba(33, 150, 243, 0.15);
+  --mochi-success:    var(--color-success);
+  --mochi-info:       var(--color-info);
+
+  // --------------------------------------------------
+  // --mochi-* aliases — consumed by all component SCSS
+  // --------------------------------------------------
+  --mochi-bg:           var(--color-background);
+  --mochi-surface:      var(--color-surface);
+  --mochi-border:       var(--color-border);
+  --mochi-text:         var(--color-text);
+  --mochi-text-muted:   var(--color-text-secondary);
+  --mochi-text-faint:   var(--color-text-muted);
+  --mochi-primary:      var(--color-primary);
+  --mochi-primary-hover: var(--color-primary-hover);
+  --mochi-primary-text: #ffffff;
+  --mochi-primary-soft: rgba(91, 157, 217, 0.18);
+  --mochi-error:        var(--color-error);
+  --mochi-hover:  rgba(255, 255, 255, 0.06);
+  --mochi-active: rgba(255, 255, 255, 0.1);
+  --mochi-stripe: rgba(255, 255, 255, 0.03);
+  // Contextual popup border — always solid #646464 regardless of theme
+  --mochi-popup-border: #646464;
+
+  // Text-entry fields (Input/TextArea/RichText) get a distinct, lighter
+  // "raised control" surface in dark mode per the Figma spec, rather than
+  // reusing --mochi-surface (which is the same tone as ordinary cards).
+  --mochi-field-bg:     #606060;
+  --mochi-field-border: #404040;
+  --mochi-field-text:   #eeeeee;
+  // --mochi-text-faint (#a0a0a0) reads fine on the darker --mochi-surface/
+  // --mochi-bg it was tuned against, but only ~2.4:1 contrast against this
+  // lighter field background — below the ~3:1 floor for legible UI text.
+  // Dedicated token, contrast-checked at ~3.6:1 against --mochi-field-bg.
+  --mochi-field-placeholder: #c4c4c4;
+
+  // Repanel — solid card vs. inset-shadow variant, per the Figma spec.
+  --mochi-panel-bg:          #404040;
+  --mochi-panel-border:      #333333;
+  --mochi-panel-shadow-bg:   #1a1a1a;
+  --mochi-panel-shadow-tint: #606060;
+
+  // MochiButton's "normal" decorator/label text. A dedicated token rather
+  // than reusing --mochi-text-muted: this button was previously hardcoded
+  // to #333 regardless of theme, and #333 is a real color choice on a
+  // light background but far too dark to read on a dark one — while
+  // --mochi-text-muted's own light-mode value (#555555) is tuned for a
+  // different purpose and would have quietly shifted the button's light
+  // appearance as a side effect of fixing dark mode.
+  --mochi-button-text: #a0a0a0;
+
+  // Toggle's sliding knob — also reused as the "active" accent for
+  // anything else shown against the amber --mochi-selected fill (Radio/
+  // Checkbox's checked-state tick, Toggle's own "on" label text): a dark
+  // grey (matching --mochi-panel-bg/--mochi-field-border's existing
+  // dark-mode tone) rather than a light shade, since light greys like
+  // --mochi-mark below don't contrast well against amber.
+  --mochi-toggle-knob: #404040;
+
+  // Radio/Checkbox's unchecked fill only — a light-grey accent shown
+  // against the dark --mochi-toggle-track border, distinct from
+  // --mochi-toggle-knob above (used once something sits on the amber
+  // "active" fill instead). Plain white (the light-mode value) reads as
+  // too stark in dark mode.
+  --mochi-mark: #c4c4c4;
+
+  // Item/Dropdown-trigger hover. These elements paint their own opaque
+  // --mochi-panel-bg — swapping straight to the translucent --mochi-hover
+  // token (meant for elements with a transparent/inherited backdrop, like
+  // MochiMenu's items) replaces that opaque color outright and lets the
+  // much darker page background show through, reading as a jarring flash
+  // rather than a subtle highlight. This is a solid, slightly lighter
+  // shade of --mochi-panel-bg (#404040) instead.
+  --mochi-panel-hover: #4d4d4d;
+}
+
+:root[data-mochi-theme='light'] {
+  --color-primary:        #4a8bc2;
+  --color-primary-hover:  #5b9dd9;
+  --color-primary-active: #3a7bb2;
+
+  --color-secondary:        #6aaedb;
+  --color-secondary-hover:  #7ab8e8;
+  --color-secondary-active: #5a9ecb;
+
+  --color-background:       #f5f5f5;
+  --color-surface:          #ffffff;
+  --color-surface-elevated: #fafafa;
+
+  --color-text:           #1a1a1a;
+  --color-text-secondary: #555555;
+  --color-text-muted:     #888888;
+
+  --color-border:       rgba(0, 0, 0, 0.12);
+  --color-border-light: rgba(0, 0, 0, 0.06);
+
+  --color-success:    #388e3c;
+  --color-success-bg: rgba(56, 142, 60, 0.1);
+  --color-warning:    #e65100;
+  --color-warning-bg: rgba(230, 81, 0, 0.1);
+  --color-error:      #c62828;
+  --color-error-bg:   rgba(198, 40, 40, 0.1);
+  --color-info:       #1565c0;
+  --color-info-bg:    rgba(21, 101, 192, 0.1);
+  --mochi-success:    var(--color-success);
+  --mochi-info:       var(--color-info);
+
+  // --------------------------------------------------
+  // --mochi-* aliases — consumed by all component SCSS
+  // --------------------------------------------------
+  --mochi-bg:           var(--color-background);
+  --mochi-surface:      var(--color-surface);
+  --mochi-border:       var(--color-border);
+  --mochi-text:         var(--color-text);
+  --mochi-text-muted:   var(--color-text-secondary);
+  --mochi-text-faint:   var(--color-text-muted);
+  --mochi-primary:      var(--color-primary);
+  --mochi-primary-hover: var(--color-primary-hover);
+  --mochi-primary-text: #ffffff;
+  --mochi-primary-soft: rgba(74, 139, 194, 0.12);
+  --mochi-error:        var(--color-error);
+  --mochi-hover:  rgba(0, 0, 0, 0.04);
+  --mochi-active: rgba(0, 0, 0, 0.08);
+  --mochi-stripe: rgba(0, 0, 0, 0.02);
+  // Contextual popup border — always solid #646464 regardless of theme
+  --mochi-popup-border: #646464;
+
+  // No Figma light-mode spec was given for these — kept identical to what
+  // each component already hardcoded, just promoted to theme tokens so
+  // dark mode (above) can differ without a per-component light/dark branch.
+  --mochi-field-bg:     var(--mochi-surface);
+  --mochi-field-border: var(--mochi-border);
+  --mochi-field-text:   var(--mochi-text);
+  // Light mode's placeholder contrast against a white field was already
+  // fine (~3.5:1) — no dark-mode-style mismatch here, so this just keeps
+  // pointing at the same token placeholders used before.
+  --mochi-field-placeholder: var(--mochi-text-faint);
+
+  --mochi-panel-bg:          #f5f5f5;
+  --mochi-panel-border:      #666666;
+  --mochi-panel-shadow-bg:   #f5f5f5;
+  --mochi-panel-shadow-tint: rgba(0, 0, 0, 0.3);
+
+  // MochiButton's original hardcoded light-mode value, preserved exactly
+  // (see the dark block's comment on this same token).
+  --mochi-button-text: #333333;
+
+  // --mochi-toggle-knob/--mochi-mark/--mochi-panel-hover: light mode keeps
+  // the original plain-white/no-op look (see the dark block's comments for
+  // why dark mode needs dedicated values instead).
+  --mochi-toggle-knob:  #ffffff;
+  --mochi-mark:         #ffffff;
+  --mochi-panel-hover:  #ececec;
+}
+
+// ============================================
+// "Selected" accent — constant across both themes
+// ============================================
+// The amber "on/checked" indicator (Radio checked fill, Toggle/Checkbox
+// active fill) is a fixed brand accent, not something that should shift
+// with theme — unlike --mochi-primary, which several of these components
+// were incorrectly reusing for this (its blue fallback values were
+// artifacts of that mistake, not the intended color). Defined on :root
+// unconditionally so it's available before/without a theme attribute too.
+:root {
+  --mochi-selected:      #ffb80d;
+  --mochi-selected-soft: rgba(255, 184, 13, 0.35);
+
+  // Toggle's own "off" track color (see MochiToggle.jsx's colorInactive
+  // default) — also used as Radio/Checkbox's unselected/unchecked fill so
+  // all three controls share one neutral "off state" grey instead of each
+  // having its own (Radio/Checkbox previously used a plain white fill).
+  // Constant across both themes, same as --mochi-selected above.
+  --mochi-toggle-track: #646464;
 }
 
 // ============================================

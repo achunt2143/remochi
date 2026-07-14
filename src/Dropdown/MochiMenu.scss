@@ -13,6 +13,16 @@
   display: none;
 }
 
+// Override Panel's own background (--mochi-surface, shared with plain
+// Popup) — in dark mode that's too close to the page background to read
+// as a distinct surface. --mochi-panel-bg matches the trigger it opens
+// from (.mochi-dropdown-trigger) and the rest of dark mode's cards.
+// Double-class selector to out-specificity the styled-component's own
+// generated class, same pattern as the ::after rule above.
+.mochi-contextual-popup.mochi-menu {
+  background: var(--mochi-panel-bg, var(--mochi-surface));
+}
+
 // Scrollable inner container
 .mochi-menu-scroller {
   overflow-y: auto;
@@ -39,8 +49,12 @@
 
   &:hover:not(.disabled) { background: var(--mochi-hover, #f5f5f5); border-radius: 32px; }
   &.selected {
-    background: var(--mochi-primary-soft, #fff5d6);
-    color: var(--mochi-primary, #ffb80d);
+    // --mochi-selected (not --mochi-primary): the fallback colors here
+    // (#fff5d6/#ffb80d) were clearly written for the amber "selected"
+    // accent, but --mochi-primary itself resolves to blue — same mismatch
+    // as MochiRadio's checked fill (see the comment there).
+    background: var(--mochi-selected-soft, #fff5d6);
+    color: var(--mochi-selected, #ffb80d);
     border-radius: 32px;
   }
   &.disabled { opacity: 0.4; cursor: default; }

@@ -12,9 +12,9 @@ import './Checkbox.scss';
  *   onChange           {Function} Called with { checked, value } on toggle
  *   disabled           {boolean}  Disables interaction (default: false)
  *   canAnimate         {boolean}  Animate background-color transition (default: true)
- *   colorActive        {string}   Background when checked (default: '#ffb80d')
- *   colorInactive      {string}   Background when unchecked (default: '#fff')
- *   colorActiveDisabled   {string}   Background when checked + disabled (default: '#ffb80d')
+ *   colorActive        {string}   Background when checked (default: var(--mochi-selected, '#ffb80d'))
+ *   colorInactive      {string}   Background when unchecked (default: var(--mochi-mark, '#fff'))
+ *   colorActiveDisabled   {string}   Background when checked + disabled (default: var(--mochi-selected, '#ffb80d'))
  *   colorInactiveDisabled {string}   Background when unchecked + disabled (default: '#fff')
  */
 const Checkbox = ({
@@ -22,9 +22,13 @@ const Checkbox = ({
   onChange = () => {},
   disabled = false,
   canAnimate = true,
-  colorActive = '#ffb80d',
-  colorInactive = '#fff',
-  colorActiveDisabled = '#ffb80d',
+  colorActive = 'var(--mochi-selected, #ffb80d)',
+  // Light-grey accent (--mochi-mark) — the border below (.mochi-checkbox
+  // in Checkbox.scss) is the dark --mochi-toggle-track instead, so
+  // unchecked reads as a dark ring around a light-grey fill, same pairing
+  // Radio uses.
+  colorInactive = 'var(--mochi-mark, #fff)',
+  colorActiveDisabled = 'var(--mochi-selected, #ffb80d)',
   colorInactiveDisabled = '#fff',
 }) => {
   const [isChecked, setIsChecked] = useState(checked);

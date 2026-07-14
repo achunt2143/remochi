@@ -5,11 +5,11 @@
   width: 100%;
   font-family: "Mochi Medium", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: var(--font-size-base, 14px);
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-field-text, #4b4b4b);
   font-style: italic;
   line-height: 1.6;
-  background: var(--mochi-surface, #fff);
-  border: 1px solid var(--mochi-border, rgba(0,0,0,0.12));
+  background: var(--mochi-field-bg, #fff);
+  border: 1px solid var(--mochi-field-border, rgba(0,0,0,0.12));
   border-radius: var(--radius-md, 6px);
   padding: 8px 12px;
   resize: vertical;
@@ -18,12 +18,12 @@
 
   &:focus {
     border-color: var(--mochi-primary, #5b9dd9);
-    background: var(--mochi-surface, #fff);
+    background: var(--mochi-field-bg, #fff);
     box-shadow: 0 0 0 3px var(--mochi-primary-soft, rgba(91,157,217,0.18));
   }
 
   &::placeholder {
-    color: var(--mochi-text-faint, rgba(75,75,75,0.4));
+    color: var(--mochi-field-placeholder, rgba(75,75,75,0.4));
     font-style: italic;
   }
 

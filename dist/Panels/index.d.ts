@@ -1,3 +1,3 @@
-export { StackedMochiPanels as StackedPanels, StackedMochiPanel as StackedPanel } from './StackedMochiPanels';
-export { Panel, MochiPanel } from './Panel';
+export { RepanelStack, MochiStackedPanels, StackedMochiPanels } from './StackedMochiPanels';
+export { Repanel } from './Repanel';
 export { FloatingPanel, MochiFloatingPanel } from './FloatingPanel';

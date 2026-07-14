@@ -17,20 +17,28 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 12px;
-    background: var(--mochi-surface);
+    // --mochi-panel-bg (not --mochi-surface) — see the matching comment in
+    // MochiItem.scss; keeps the trigger visually consistent with the menu
+    // it opens (see .mochi-contextual-popup.mochi-menu in MochiMenu.scss).
+    background: var(--mochi-panel-bg, var(--mochi-surface));
     border: 1px solid var(--mochi-border);
     border-radius: 32px;
     cursor: pointer;
     transition: all 0.2s ease;
 
+    // --mochi-panel-hover (not --mochi-hover) — same reasoning as
+    // MochiItem.scss's .hoverable:hover: this trigger already paints its
+    // own opaque --mochi-panel-bg, so swapping to a translucent overlay
+    // token here would let the darker page background show through
+    // instead of just lightening the trigger's own surface.
     &:hover:not(.disabled) {
       border-color: var(--mochi-primary);
-      background: var(--mochi-hover);
+      background: var(--mochi-panel-hover, var(--mochi-hover));
     }
 
     &.open {
       border-color: var(--mochi-primary);
-      background: var(--mochi-hover);
+      background: var(--mochi-panel-hover, var(--mochi-hover));
     }
 
     &.disabled {
