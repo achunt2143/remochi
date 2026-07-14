@@ -2,6 +2,8 @@
 
 This guide shows the core Remochi components in practical use, based on the `remochi-demo` app. The demo imports the main component set from `remochi`, applies global styles with `remochi/css`, and wraps the app in `ThemeWrapper` so components can respond to the current theme through `useTheme()`.
 
+Every component in the library supports both light and dark mode out of the box — just render your app inside `ThemeWrapper` and call `toggleTheme()` (from `useTheme()`) to switch. No per-component theme props are needed. See [RELEASE_NOTES.md](../RELEASE_NOTES.md) for details on the color tokens this uses under the hood if you want to customize the palette.
+
 ## Getting started
 
 Start by importing the pieces you need from the library and the global CSS bundle:
@@ -35,10 +37,9 @@ import {
   GridList,
   Table,
   Pagination,
-  Panel,
+  Repanel,
+  RepanelStack,
   FloatingPanel,
-  StackedPanels,
-  StackedPanel,
   Wizard,
   Video,
   DateInput,
@@ -98,18 +99,19 @@ Example:
 
 ### ViewSelectButton
 
-`ViewSelectButton` is a compact segmented control for switching between named views. It accepts a `value`, an `options` array, and an `onChange` callback.
+`ViewSelectButton` is a compact segmented control for switching between named views — a group of buttons with decorative brackets and an animated underline bar marking the active one. It accepts an `items` array (`{ content, active?, disabled? }`) and an `onSelect(item, index)` callback; only one item can be active at a time.
+
+`items` is used to derive the *initial* active item (whichever has `active: true`, or the first item if none do) — after that, the component tracks selection internally and calls `onSelect` on every click, so a controlled parent should update whichever item's `active` flag it passes in on the next render (see the demo pattern below, which keys `active` off its own `viewMode` state).
 
 Example:
 
 ```jsx
 <ViewSelectButton
-  value={viewMode}
-  options={[
-    { value: 'grid', label: '⊞ Grid' },
-    { value: 'list', label: '☰ List' },
+  items={[
+    { content: '⊞ Grid', value: 'grid', active: viewMode === 'grid' },
+    { content: '☰ List', value: 'list', active: viewMode === 'list' },
   ]}
-  onChange={setViewMode}
+  onSelect={(item) => setViewMode(item.value)}
 />
 ```
 
@@ -277,17 +279,17 @@ const rows = [
 
 ## Panels, popups, and dialogs
 
-### Panel and FloatingPanel
+### Repanel and FloatingPanel
 
-`Panel` divides a row into width-percentage segments. The `width` prop is a percentage of the row, and `style` can be `default` or `shadow` for a raised look. `FloatingPanel` fills its container with a rounded-corner surface and optional `style` variants.
+`Repanel` is a full-height panel with a rounded left edge and flush right edge — used standalone as a percentage-width layout column (`width` is a percentage of its row, e.g. `25`), or as the stackable card surface rendered inside `RepanelStack` below. `style` can be `"default"` or `"shadow"` for a raised, inset-shadow look. `FloatingPanel` is the same surface but fills its container with rounded corners on all sides, for use outside a row layout.
 
 Example:
 
 ```jsx
 <div style={{ display: 'flex', height: 120 }}>
-  <Panel width={25} style="default">Sidebar</Panel>
-  <Panel width={50} style="default">Main</Panel>
-  <Panel width={25} style="default">Detail</Panel>
+  <Repanel width={25} style="default">Sidebar</Repanel>
+  <Repanel width={50} style="default">Main</Repanel>
+  <Repanel width={25} style="default">Detail</Repanel>
 </div>
 
 <FloatingPanel style="shadow">
@@ -295,18 +297,42 @@ Example:
 </FloatingPanel>
 ```
 
-### StackedPanels and StackedPanel
+### RepanelStack
 
-`StackedPanels` manages a stack of `StackedPanel` children, each with a `title`. The demo uses three panels to show simple stacked content; more advanced apps can drive the active panel via state and navigation.
+`RepanelStack` is a webOS/Mochi master-detail workspace: the active (front) panel takes the remaining width, while earlier panels stay revealed to its left as real, independently-scrollable columns — not dimmed peeking slivers. Children are plain `Repanel`s read dynamically via `React.Children`, so there's no fixed panel count.
+
+Every panel but the first gets a nubbin **grabber** at its bottom-left edge:
+- On a parent panel, dragging it reveal-adjusts — grows or shrinks how many panels are shown behind the active one, all the way back to panel 0 if dragged far enough.
+- The active panel's own grabber does the same reveal-adjust in either direction, as long as there's more of the stack left to reveal — that's the only way back once the stack has been collapsed all the way down to just the front panel.
+- Once nothing is left to reveal, dragging the active grabber right instead becomes **swipe-to-close**: release past ~45% dragged, a fast flick, or a double-click commits it, handing the front to whatever panel was behind it. Release short of that and it springs back open.
+
+Useful props: `defaultActiveIndex`/`activeIndex` (controlled), `defaultReveal`/`reveal` (controlled), `onActiveIndexChange(index, detail)`, `onRevealChange(reveal, detail)`, `snapPoints`, `maxVisiblePanels`. An imperative ref exposes `next()`, `prev()`, `expand()`, `collapse()`, `setActiveIndex()`, and `setReveal()`.
 
 Example:
 
 ```jsx
-<StackedPanels>
-  <StackedPanel title="Panel One">Content inside panel one.</StackedPanel>
-  <StackedPanel title="Panel Two">Content inside panel two.</StackedPanel>
-  <StackedPanel title="Panel Three">Content inside panel three.</StackedPanel>
-</StackedPanels>
+const repanelRef = useRef(null);
+
+<div style={{ display: 'flex', gap: 8 }}>
+  <Button onClick={() => repanelRef.current?.prev()}>◀ Prev</Button>
+  <Button onClick={() => repanelRef.current?.next()}>Next ▶</Button>
+  <Button onClick={() => repanelRef.current?.expand()}>Expand</Button>
+  <Button onClick={() => repanelRef.current?.collapse()}>Collapse</Button>
+</div>
+
+<div style={{ height: 380 }}>
+  <RepanelStack
+    ref={repanelRef}
+    defaultActiveIndex={3}
+    defaultReveal={3}
+    onActiveIndexChange={(index, detail) => addLog(`front → ${index} (${detail.reason})`)}
+  >
+    <Repanel><div style={{ padding: 20 }}>Library</div></Repanel>
+    <Repanel><div style={{ padding: 20 }}>Albums</div></Repanel>
+    <Repanel><div style={{ padding: 20 }}>Tracks</div></Repanel>
+    <Repanel><div style={{ padding: 20 }}>Now Playing</div></Repanel>
+  </RepanelStack>
+</div>
 ```
 
 ### PopupPanel

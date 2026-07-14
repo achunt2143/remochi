@@ -10,8 +10,8 @@ export default MochiToggle;
  *   onChange       {Function} Called with { value } on toggle
  *   disabled       {boolean}  Disables interaction (default: false)
  *   canAnimate     {boolean}  Animate background-color transition (default: true)
- *   colorActive    {string}   Pill bg when on (default: '#ffb80d')
- *   colorInactive  {string}   Pill bg when off (default: '#646464')
+ *   colorActive    {string}   Pill bg when on (default: var(--mochi-selected, '#ffb80d'))
+ *   colorInactive  {string}   Pill bg when off (default: var(--mochi-toggle-track, '#646464'))
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
  */

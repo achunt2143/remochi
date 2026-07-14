@@ -1,6 +1,6 @@
 {
   "name": "remochi",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A React component library - Mochi style components",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -21,6 +21,7 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build:lib": "rollup -c",
     "build": "rollup -c && npm pack"
   },
   "keywords": [

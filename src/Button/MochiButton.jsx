@@ -2,12 +2,21 @@ import React, { useRef, useLayoutEffect, useState } from 'react';
 import styled, { css, keyframes } from "styled-components";
 import { FaChevronDown } from "react-icons/fa";
 
+// Theme-aware: normal/dropdown read theme tokens (see MochiThemeWrapper.scss's
+// :root[data-mochi-theme] blocks) so this button follows the selected theme
+// instead of a fixed color; the var() fallbacks preserve this component's
+// original look if it's ever rendered outside a ThemeWrapper. "normal" uses
+// its own dedicated --mochi-button-text rather than the shared
+// --mochi-text-muted — this button was previously hardcoded to #333
+// regardless of theme, and --mochi-text-muted's light-mode value differs
+// from that, which would have shifted the light appearance as a side
+// effect of fixing dark mode.
 const colors = {
-  normal:   "#333",
-  warning:  "#d34431",
+  normal:   "var(--mochi-button-text, #333)",
+  warning:  "var(--mochi-error, #d34431)",
   disabled: "#adadad",
-  dropdown: "#6e9ebd",
-  default:  "#6e9ebd",
+  dropdown: "var(--mochi-primary, #6e9ebd)",
+  default:  "var(--mochi-primary, #6e9ebd)",
 };
 
 const bounce = keyframes`

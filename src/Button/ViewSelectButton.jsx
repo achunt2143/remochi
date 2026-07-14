@@ -4,60 +4,41 @@ import './ViewSelectButton.scss';
 
 /**
  * Mochi ViewSelectButtonItem Component
- * 
+ *
  * Individual button item within a ViewSelectButton group.
- * Used internally by ViewSelectButton.
+ * Used internally by ViewSelectButton. Forwards its ref to the root div —
+ * the parent needs the real DOM node to measure/position the sliding
+ * underline bar (see ViewSelectButton's updateBarPosition). Sizing is left
+ * to plain CSS (inline-block + padding) rather than a JS-measured width:
+ * measuring this element's own offsetWidth and then feeding that back in
+ * as its own explicit width is circular — the first measurement always
+ * reads back whatever width was just set (0 on first render), so the box
+ * never grows to fit its content.
  */
-const ViewSelectButtonItem = ({ 
-  content, 
+const ViewSelectButtonItem = React.forwardRef(({
+  content,
   active = false,
   disabled = false,
   onClick = () => {},
-  variant = 'normal'
-}) => {
-  const itemRef = useRef(null);
-  const [contentWidth, setContentWidth] = useState(0);
-  const [isPadded, setIsPadded] = useState(false);
-
-  useEffect(() => {
-    recalcContentWidth();
-    window.addEventListener('resize', recalcContentWidth);
-    return () => window.removeEventListener('resize', recalcContentWidth);
-  }, [content]);
-
-  const recalcContentWidth = () => {
-    if (itemRef.current) {
-      const width = itemRef.current.offsetWidth;
-      setContentWidth(width);
-      setIsPadded(width !== 0);
-    }
-  };
-
-  const itemWidth = isPadded 
-    ? contentWidth + (content.length + 2) * 2
-    : contentWidth;
-
-  return (
-    <div
-      ref={itemRef}
-      className={`mochi-view-select-button-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
-      style={{ width: `${itemWidth}px` }}
-      onClick={onClick}
-      role="radio"
-      aria-checked={active}
-      aria-disabled={disabled}
-      tabIndex={disabled ? -1 : 0}
-      onKeyDown={(e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-    >
-      <span className="mochi-button-base">{content}</span>
-    </div>
-  );
-};
+}, ref) => (
+  <div
+    ref={ref}
+    className={`mochi-view-select-button-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
+    onClick={onClick}
+    role="radio"
+    aria-checked={active}
+    aria-disabled={disabled}
+    tabIndex={disabled ? -1 : 0}
+    onKeyDown={(e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+        e.preventDefault();
+        onClick();
+      }
+    }}
+  >
+    <span className="mochi-button-base">{content}</span>
+  </div>
+));
 
 /**
  * Mochi ViewSelectButton React Component
@@ -83,12 +64,22 @@ const ViewSelectButton = ({
   decoratorClasses = '',
   variant = 'normal'
 }) => {
-  const [activeIndex, setActiveIndex] = useState(
-    items.findIndex(item => item.active) || 0
-  );
+  // findIndex returns -1 when no item is active, and `-1 || 0` evaluates
+  // to -1 (a truthy value in JS) rather than falling through to the 0
+  // default — so an explicit check is needed instead.
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const initialIndex = items.findIndex(item => item.active);
+    return initialIndex === -1 ? 0 : initialIndex;
+  });
   const [barStyle, setBarStyle] = useState({ width: 0, left: 0 });
-  const containerRef = useRef(null);
-  const barRef = useRef(null);
+  // The bar is positioned absolutely inside .mochi-view-select-button-items
+  // (its nearest `position: relative` ancestor — see the CSS), not the
+  // outer .mochi-view-select-button container, which also includes the
+  // left decorator bracket before it. Measuring against containerRef would
+  // include that bracket's width/margin in the offset, pushing the bar too
+  // far right of where the active item actually sits within its own
+  // positioning context.
+  const itemsWrapperRef = useRef(null);
   const itemsRef = useRef([]);
 
   useEffect(() => {
@@ -100,11 +91,11 @@ const ViewSelectButton = ({
   const updateBarPosition = () => {
     if (itemsRef.current[activeIndex]) {
       const activeElement = itemsRef.current[activeIndex];
-      const containerRect = containerRef.current?.getBoundingClientRect();
+      const wrapperRect = itemsWrapperRef.current?.getBoundingClientRect();
       const activeRect = activeElement.getBoundingClientRect();
 
-      if (containerRect) {
-        const left = activeRect.left - containerRect.left;
+      if (wrapperRect) {
+        const left = activeRect.left - wrapperRect.left;
         const width = activeRect.width;
 
         setBarStyle({
@@ -124,31 +115,24 @@ const ViewSelectButton = ({
   };
 
   return (
-    <div
-      ref={containerRef}
-      className={`mochi-view-select-button mochi-button-${variant}`}
-    >
+    <div className={`mochi-view-select-button mochi-button-${variant}`}>
       <span className={`mochi-button-decorator mochi-button-decorator-left ${decoratorClasses}`}>
         {decoratorLeft}
       </span>
 
-      <div className="mochi-view-select-button-items">
+      <div ref={itemsWrapperRef} className="mochi-view-select-button-items">
         {items.map((item, index) => (
           <ViewSelectButtonItem
             key={index}
-            ref={(el) => {
-              if (el) itemsRef.current[index] = el;
-            }}
+            ref={(el) => { itemsRef.current[index] = el; }}
             content={item.content}
             active={activeIndex === index}
             disabled={item.disabled}
-            variant={variant}
             onClick={() => handleItemClick(index)}
           />
         ))}
 
         <div
-          ref={barRef}
           className={`mochi-button-bar ${barClasses}`}
           style={barStyle}
         />

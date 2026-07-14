@@ -10,9 +10,9 @@ export default Checkbox;
  *   onChange           {Function} Called with { checked, value } on toggle
  *   disabled           {boolean}  Disables interaction (default: false)
  *   canAnimate         {boolean}  Animate background-color transition (default: true)
- *   colorActive        {string}   Background when checked (default: '#ffb80d')
- *   colorInactive      {string}   Background when unchecked (default: '#fff')
- *   colorActiveDisabled   {string}   Background when checked + disabled (default: '#ffb80d')
+ *   colorActive        {string}   Background when checked (default: var(--mochi-selected, '#ffb80d'))
+ *   colorInactive      {string}   Background when unchecked (default: var(--mochi-mark, '#fff'))
+ *   colorActiveDisabled   {string}   Background when checked + disabled (default: var(--mochi-selected, '#ffb80d'))
  *   colorInactiveDisabled {string}   Background when unchecked + disabled (default: '#fff')
  */
 declare function Checkbox({ checked, onChange, disabled, canAnimate, colorActive, colorInactive, colorActiveDisabled, colorInactiveDisabled, }: {

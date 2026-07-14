@@ -27,12 +27,13 @@ declare function ViewSelectButton({ items, onSelect, decoratorLeft, decoratorRig
  * Mochi ViewSelectButtonItem Component
  *
  * Individual button item within a ViewSelectButton group.
- * Used internally by ViewSelectButton.
+ * Used internally by ViewSelectButton. Forwards its ref to the root div —
+ * the parent needs the real DOM node to measure/position the sliding
+ * underline bar (see ViewSelectButton's updateBarPosition). Sizing is left
+ * to plain CSS (inline-block + padding) rather than a JS-measured width:
+ * measuring this element's own offsetWidth and then feeding that back in
+ * as its own explicit width is circular — the first measurement always
+ * reads back whatever width was just set (0 on first render), so the box
+ * never grows to fit its content.
  */
-export function ViewSelectButtonItem({ content, active, disabled, onClick, variant }: {
-    content: any;
-    active?: boolean | undefined;
-    disabled?: boolean | undefined;
-    onClick?: (() => void) | undefined;
-    variant?: string | undefined;
-}): any;
+export const ViewSelectButtonItem: any;

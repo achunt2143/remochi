@@ -1,27 +1,30 @@
-// StackedMochiPanels.scss — Repanel webOS/Mochi stacked panel system
+// StackedMochiPanels.scss — RepanelStack webOS/Mochi stacked panel system
 //
 // DOM structure (see StackedMochiPanels.jsx):
 //   .repanel                       root / viewport clip
 //     .repanel__viewport           absolute fill
 //       .repanel__panel            one positioned shell per child
-//         .repanel__surface        clips + hosts the child Panel/FloatingPanel
-//         .repanel__scrim          depth dimming overlay (var --repanel-dim)
-//         .repanel__header         top gesture zone (swipe / select)
-//           .repanel__grip         header affordance pill
-//         .repanel__grabber        active-only reveal-depth handle (bottom)
-//           .repanel__grabber-bar  grabber affordance pill
+//         .repanel__surface        hosts the child Repanel/FloatingPanel
+//         .repanel__grabber        reveal-depth hitbox (every panel but the first)
 //
-// Layout/geometry (left, width, transform, opacity, z-index, --repanel-dim)
-// is driven by inline styles from stackedPanelsLayout.js. This file owns the
-// look: overlapping shells, rounded left corners, stacked depth and the
-// prominent active/front panel.
+// Layout/geometry (left, width, transform, opacity, z-index) is driven by
+// inline styles from stackedPanelsLayout.js. Every revealed panel — active
+// or parent — is fully opaque and interactive; there is no dimming/scrim.
+// There is no header gesture zone — the nubbin grabber is the only
+// interactive surface a panel adds on top of its own content.
+//
+// The handle nubbin is NOT drawn here — it's the Repanel child's own
+// `handle` variant (see Repanel.jsx / MochiPanel.scss), which RepanelStack
+// clones onto every child but the first (the base of the stack has nothing
+// behind it to reveal). This file's &__grabber is purely an invisible
+// pointer/keyboard hitbox positioned over each nubbin; the visual stays
+// decoupled from the switcher. This file owns: overlapping card shells and
+// a shadow seam between adjacent columns.
 //
 // Colors reference ThemeWrapper CSS variables (with light-surface fallbacks so
 // the component still reads correctly outside a ThemeWrapper). No :root
 // overrides live here.
 
-$repanel-radius: 16px;
-$repanel-header-h: 40px;
 $repanel-duration: 260ms;
 $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -41,24 +44,29 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
 
   &__viewport {
     position: absolute;
-    // Reserve room at the bottom so the active panel's grabber can extend
-    // "forward" past the lower edge without being clipped by the root.
-    inset: 0 0 18px 0;
+    inset: 0;
+  }
+
+  // Reserve room on the left so the leftmost visible panel's handle nubbin
+  // — every panel but the wholly first child has one — is fully visible
+  // even when that panel sits flush at left:0 (e.g. reveal collapsed to
+  // the fewest columns), without being clipped by root. Only needed when
+  // the wholly first child (which never has a nubbin) isn't itself the
+  // leftmost visible panel — see RepanelStack's isFirstChildVisible.
+  &[data-first-child-visible='false'] &__viewport {
+    inset: 0 0 0 20px;
   }
 
   // ======================================
-  // Panel shell — positioned, overlapping
+  // Panel shell — positioned column
   // ======================================
 
   &__panel {
     position: absolute;
     top: 0;
     bottom: 0;
-    // overflow visible so the bottom grabber can extend past the lower edge;
-    // the rounded clip lives on __surface / __scrim instead.
     overflow: visible;
-    transform-origin: left center;
-    will-change: transform, left, width, opacity;
+    will-change: left, width, opacity, transform;
 
     // Soft shadow that reads as separation between overlapping shells.
     filter: drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14));
@@ -67,39 +75,33 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
       // The front panel sits proud of the stack.
       filter: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22));
     }
-
-    &:not([data-active='true']) {
-      cursor: pointer;
-    }
   }
 
   // Animate everything except while actively dragging.
   &[data-animate='true'] &__panel:not([data-no-transition='true']) {
     transition:
-      transform $repanel-duration $repanel-easing,
       left $repanel-duration $repanel-easing,
       width $repanel-duration $repanel-easing,
       opacity $repanel-duration $repanel-easing;
-
-    .repanel__scrim {
-      transition: opacity $repanel-duration $repanel-easing;
-    }
   }
 
   // ======================================
-  // Surface — clips + hosts the child
+  // Surface — clips + hosts the child (always fully interactive)
   // ======================================
 
   &__surface {
     position: absolute;
     inset: 0;
-    overflow: auto;
-    // Rounded on the left (webOS side-panel), flush on the right stack edge.
-    border-radius: $repanel-radius 0 0 $repanel-radius;
-    background: var(--mochi-surface, #f5f5f5);
+    // overflow: auto;
+    // No radius/background of its own — the child (Repanel/FloatingPanel)
+    // supplies its own shape and background, including the handle nubbin.
+    // Arbitrary (non-Repanel/FloatingPanel) children are expected to bring
+    // their own background if they want one.
+    background: transparent;
 
-    // Let a child Panel/FloatingPanel fill the shell without imposing its own
-    // fixed height, so tall content scrolls the surface rather than clipping.
+    // Let a child Repanel/FloatingPanel fill the shell without imposing its
+    // own fixed height, so tall content scrolls the surface rather than
+    // clipping.
     > * {
       box-sizing: border-box;
       min-height: 100%;
@@ -109,9 +111,6 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
       height: auto;
       min-height: 100%;
       width: 100%;
-      // Child provides its own surface; drop its standalone border-radius so
-      // the shell's rounded-left clip is the single source of shape.
-      border-radius: 0;
     }
 
     // Thin, theme-aware scrollbar.
@@ -128,79 +127,28 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   // ======================================
-  // Depth scrim (recedes non-active panels)
+  // Grabber — reveal/close hitbox (every panel but the first)
   // ======================================
 
-  &__scrim {
-    position: absolute;
-    inset: 0;
-    border-radius: $repanel-radius 0 0 $repanel-radius;
-    background: #000;
-    opacity: var(--repanel-dim, 0);
-    pointer-events: none;
-  }
-
-  // ======================================
-  // Header — interaction zone
-  // ======================================
-
-  &__header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: $repanel-header-h;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-    cursor: grab;
-    // Allow vertical scrolling to pass through; we only claim horizontal swipes.
-    touch-action: pan-y;
-
-    &:active {
-      cursor: grabbing;
-    }
-  }
-
-  &__panel:not([data-active='true']) &__header {
-    cursor: pointer;
-  }
-
-  &__grip {
-    width: 40px;
-    height: 5px;
-    border-radius: 3px;
-    background: var(--mochi-border, #cccccc);
-    transition: background-color 150ms $repanel-easing;
-  }
-
-  &__panel[data-active='true'] &__grip {
-    background: var(--mochi-text-muted, #8a8a8a);
-  }
-
-  // ======================================
-  // Grabber — reveal-depth handle (active)
-  // ======================================
-
+  // Purely a pointer/keyboard target — no paint of its own. The visible
+  // nubbin accent is drawn by the Repanel child itself (its `handle` prop,
+  // see Repanel.jsx / MochiPanel.scss), which RepanelStack clones onto
+  // every child but the first; this hitbox sits in the panel container over
+  // that same footprint so it's draggable and focusable. On a parent panel
+  // it's always a reveal-adjust drag. On the active panel's own grabber
+  // it's reveal-adjust too (both directions, while there's more to reveal)
+  // until the stack is fully expanded, at which point dragging right
+  // becomes a swipe-to-close gesture instead (see
+  // onGrabberPointerDown/Move/Up in StackedMochiPanels.jsx).
   &__grabber {
     position: absolute;
-    left: 50%;
-    bottom: -14px; // extends forward past the active panel's lower edge
-    transform: translateX(-50%);
-    width: 64px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    left: -14px;
+    bottom: -8px;
+    width: 20px;
+    height: 43px;
     z-index: 6;
 
-    background: var(--mochi-surface, #f5f5f5);
-    border: 0.5px solid var(--mochi-border, #cccccc);
-    border-top: none;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.3);
-
+    background: transparent;
     cursor: ew-resize;
     touch-action: none;
     outline: none;
@@ -208,14 +156,8 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
     &:focus-visible {
       outline: 2px solid var(--mochi-primary, #2f6fed);
       outline-offset: 2px;
+      border-radius: 10px;
     }
-  }
-
-  &__grabber-bar {
-    width: 28px;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--mochi-text-muted, #8a8a8a);
   }
 
   // ======================================
@@ -234,9 +176,5 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
 @media (prefers-reduced-motion: reduce) {
   .repanel[data-animate='true'] .repanel__panel:not([data-no-transition='true']) {
     transition: none;
-
-    .repanel__scrim {
-      transition: none;
-    }
   }
 }
