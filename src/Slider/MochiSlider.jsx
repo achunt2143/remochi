@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import styled, { css } from "styled-components";
 import BubbleCanvas from "./BubbleCanvas";
 
@@ -39,11 +39,6 @@ const Thumb = styled.div`
   height: ${thumbDefault}px;
   background: ${({ $color }) => $color || "var(--mochi-primary, #04B2F9)"};
   border-radius: 50%;
-  /*
-   * When a custom color is provided we can't derive a soft shadow from it
-   * via CSS vars, so we use a low-opacity black shadow as a safe universal
-   * fallback. The CSS-var path uses --mochi-primary-soft when available.
-   */
   box-shadow: ${({ $color }) =>
     $color
       ? `0 2px 10px color-mix(in srgb, ${$color} 40%, transparent)`
@@ -105,12 +100,19 @@ export const MochiSlider = ({
   const [active, setActive] = useState(false);
   const [internalVal, setInternalVal] = useState(value);
   const trackRef = useRef();
+  // isDragging ref prevents external value updates from clobbering a live drag
+  const isDragging = useRef(false);
 
-  // When no color prop is given, pass undefined so styled-components falls
-  // through to the CSS variable path (var(--mochi-primary, #04B2F9)).
-  // BubbleCanvas handles var() strings itself via getComputedStyle.
+  // Sync internalVal from value prop whenever it changes and we are NOT dragging.
+  // This is what makes the slider controlled — progress ticks from the rAF loop
+  // (or any other external update) are reflected in the track fill and thumb.
+  useEffect(() => {
+    if (!isDragging.current) {
+      setInternalVal(value);
+    }
+  }, [value]);
+
   const resolvedColor = color || undefined;
-
   const percent = ((internalVal - min) * 100) / (max - min);
 
   const handleDrag = (clientX) => {
@@ -122,12 +124,25 @@ export const MochiSlider = ({
   };
 
   const startDrag = () => {
+    isDragging.current = true;
     setActive(true);
     document.body.style.cursor = "grabbing";
+
     const move = (ev) => {
       handleDrag(ev.touches ? ev.touches[0].clientX : ev.clientX);
     };
-    const up = () => {
+
+    const up = (ev) => {
+      // Compute and emit the final committed value on release
+      const rect = trackRef.current?.getBoundingClientRect();
+      if (rect) {
+        const clientX = ev.touches ? ev.changedTouches[0].clientX : ev.clientX;
+        const rel = clamp((clientX - rect.left) / rect.width, 0, 1);
+        const finalVal = Math.round((rel * (max - min)) / step) * step + min;
+        setInternalVal(finalVal);
+        onChange && onChange(finalVal);
+      }
+      isDragging.current = false;
       setActive(false);
       document.body.style.cursor = "";
       window.removeEventListener("mousemove", move);
@@ -135,6 +150,7 @@ export const MochiSlider = ({
       window.removeEventListener("touchmove", move);
       window.removeEventListener("touchend", up);
     };
+
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
     window.addEventListener("touchmove", move);
@@ -145,8 +161,6 @@ export const MochiSlider = ({
     handleDrag(e.clientX);
   };
 
-  // BubbleCanvas color: pass the explicit color string when provided, otherwise
-  // pass the var() string so resolveColor() can compute it from the DOM.
   const bubbleColor = color || "var(--mochi-primary, #04B2F9)";
 
   return (
