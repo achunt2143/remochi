@@ -1,10 +1,12 @@
 // MochiDialog.jsx
-// webOS-inspired bottom-sheet dialog.
+// Mochi modal dialog: a centered card over a scrim (see MochiDialog.scss).
 // Renders via React portal into document.body so no parent context can clip it.
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useId } from 'react';
 import { createPortal } from 'react-dom';
 import './MochiDialog.scss';
 import { Button as MochiButton } from '../Button';
+import { Input as MochiInput } from '../Input';
+import { Divider } from '../Divider';
 
 const MochiDialog = ({
   isOpen = false,
@@ -16,7 +18,12 @@ const MochiDialog = ({
   onCancel,
   confirmText = 'OK',
   cancelText = 'Cancel',
-  showCloseButton = true,
+  // webOS HIG: green marks the positive choice in a yes/no decision; pass
+  // 'warning' when confirming a destructive action (e.g. Delete).
+  confirmType = 'affirmative',
+  // Mochi/webOS dialogs close through their buttons, the scrim or Escape;
+  // the × is opt-in.
+  showCloseButton = false,
   size = 'medium',        // 'small' | 'medium' | 'large'
   className = '',
   promptValue = '',
@@ -25,6 +32,7 @@ const MochiDialog = ({
   actions,
 }) => {
   const dialogRef = useRef(null);
+  const titleId = useId();
 
   // Keyboard + scroll-lock management
   useEffect(() => {
@@ -96,8 +104,8 @@ const MochiDialog = ({
     if (type === 'confirm' || type === 'prompt') {
       return (
         <div className="mochi-dialog-actions">
-          <MochiButton type="warning" onClick={handleCancel}>{cancelText}</MochiButton>
-          <MochiButton onClick={handleConfirm}>{confirmText}</MochiButton>
+          <MochiButton onClick={handleCancel}>{cancelText}</MochiButton>
+          <MochiButton type={confirmType} onClick={handleConfirm}>{confirmText}</MochiButton>
         </div>
       );
     }
@@ -116,12 +124,12 @@ const MochiDialog = ({
         className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type}${className ? ` ${className}` : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? 'mochi-dialog-title' : undefined}
+        aria-labelledby={title ? titleId : undefined}
         tabIndex={-1}
       >
         {title && (
           <div className="mochi-dialog-header">
-            <h2 id="mochi-dialog-title" className="mochi-dialog-title">{title}</h2>
+            <h2 id={titleId} className="mochi-dialog-title">{title}</h2>
             {showCloseButton && (
               <button
                 className="mochi-dialog-close"
@@ -133,17 +141,20 @@ const MochiDialog = ({
             )}
           </div>
         )}
+        {title && <Divider />}
 
         <div className="mochi-dialog-content">
           {type === 'prompt' ? (
             <>
               <div className="mochi-dialog-message">{children}</div>
-              <input
+              <MochiInput
                 type="text"
-                className="mochi-dialog-prompt-input"
                 value={promptValue}
                 onChange={(e) => onPromptChange?.(e.target.value)}
                 autoFocus
+                // Inline so it beats the Input's own margin-right regardless
+                // of stylesheet order.
+                style={{ width: '100%', marginRight: 0, boxSizing: 'border-box' }}
               />
             </>
           ) : (
