@@ -4,52 +4,29 @@
 // MochiThemeWrapper on <html>.
 // ============================================================
 
-// --- Token defaults (light) ----------------------------------
+// --- Tokens -------------------------------------------------
+// Same chrome as the phone Dialog / PopupPanel: theme surface, the
+// Mochi popup border (#646464 in both themes) and its drop shadow. The
+// --mochi-* tokens already follow the theme, so no per-theme blocks.
 .mochi-sliding-menu {
   --sliding-menu-duration:  var(--animation-duration, 300ms);
   --sliding-menu-ease:      cubic-bezier(0.16, 1, 0.3, 1);
   --sliding-menu-width:     280px;
+  --sliding-menu-radius:    24px;
 
-  // Light tokens
-  --sliding-menu-bg:        var(--color-surface, #ffffff);
-  --sliding-menu-text:      var(--color-text,    #333333);
-  --sliding-menu-border:    var(--color-border,  #e5e7eb);
-  --sliding-menu-shadow:    0 10px 25px rgba(0, 0, 0, 0.15);
-  --sliding-menu-scrollbar: rgba(0, 0, 0, 0.2);
-  --backdrop-color:         rgba(0, 0, 0, 0.40);
+  --sliding-menu-bg:        var(--mochi-surface, #ffffff);
+  --sliding-menu-text:      var(--mochi-text, #333333);
+  --sliding-menu-border:    var(--mochi-popup-border, #646464);
+  --sliding-menu-scrollbar: var(--mochi-border, rgba(0, 0, 0, 0.2));
+  --backdrop-color:         var(--mochi-overlay, rgba(0, 0, 0, 0.5));
 }
 
-// Dark overrides applied when MochiThemeWrapper sets data-mochi-theme="dark"
-[data-mochi-theme='dark'] .mochi-sliding-menu,
-.mochi-theme-dark .mochi-sliding-menu {
-  --sliding-menu-bg:        var(--color-surface, #1a1a1a);
-  --sliding-menu-text:      var(--color-text,    #f0f0f0);
-  --sliding-menu-border:    var(--color-border,  #444444);
-  --sliding-menu-shadow:    0 10px 25px rgba(0, 0, 0, 0.5);
-  --sliding-menu-scrollbar: rgba(255, 255, 255, 0.2);
-  --backdrop-color:         rgba(0, 0, 0, 0.60);
-}
-
-// Light overrides (explicit)
-[data-mochi-theme='light'] .mochi-sliding-menu,
-.mochi-theme-light .mochi-sliding-menu {
-  --sliding-menu-bg:        #ffffff;
-  --sliding-menu-text:      #333333;
-  --sliding-menu-border:    #e5e7eb;
-  --sliding-menu-shadow:    0 10px 25px rgba(0, 0, 0, 0.15);
-  --sliding-menu-scrollbar: rgba(0, 0, 0, 0.2);
-  --backdrop-color:         rgba(0, 0, 0, 0.40);
-}
-
-// System dark-mode fallback (when not wrapped)
+// System dark-mode fallback — only when no ThemeWrapper has set a theme
 @media (prefers-color-scheme: dark) {
-  .mochi-sliding-menu {
-    --sliding-menu-bg:        #1a1a1a;
-    --sliding-menu-text:      #f0f0f0;
-    --sliding-menu-border:    #444444;
-    --sliding-menu-shadow:    0 10px 25px rgba(0, 0, 0, 0.5);
+  :root:not([data-mochi-theme]) .mochi-sliding-menu {
+    --sliding-menu-bg:        #2a2a2a;
+    --sliding-menu-text:      #ffffff;
     --sliding-menu-scrollbar: rgba(255, 255, 255, 0.2);
-    --backdrop-color:         rgba(0, 0, 0, 0.60);
   }
 }
 
@@ -61,7 +38,6 @@
   color: var(--sliding-menu-text);
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: var(--sliding-menu-shadow);
   transition:
     transform var(--sliding-menu-duration) var(--sliding-menu-ease),
     opacity   var(--sliding-menu-duration) var(--sliding-menu-ease);
@@ -88,11 +64,15 @@
 }
 
 // --- Positions -----------------------------------------------
+// Docked to one screen edge: border only on the edge facing the page,
+// rounded corners on that side, shadow cast away from the docked edge.
 .mochi-sliding-menu--left {
   top: 0; left: 0;
   height: 100vh;
   width: var(--sliding-menu-width);
-  border-right: 1px solid var(--sliding-menu-border);
+  border-right: 2px solid var(--sliding-menu-border);
+  border-radius: 0 var(--sliding-menu-radius) var(--sliding-menu-radius) 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.44);
   transform: translateX(-100%);
   &.mochi-sliding-menu--open { transform: translateX(0); }
 }
@@ -101,7 +81,9 @@
   top: 0; right: 0;
   height: 100vh;
   width: var(--sliding-menu-width);
-  border-left: 1px solid var(--sliding-menu-border);
+  border-left: 2px solid var(--sliding-menu-border);
+  border-radius: var(--sliding-menu-radius) 0 0 var(--sliding-menu-radius);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.44);
   transform: translateX(100%);
   &.mochi-sliding-menu--open { transform: translateX(0); }
 }
@@ -111,7 +93,9 @@
   width: 100%;
   height: auto;
   max-height: 80vh;
-  border-bottom: 1px solid var(--sliding-menu-border);
+  border-bottom: 2px solid var(--sliding-menu-border);
+  border-radius: 0 0 var(--sliding-menu-radius) var(--sliding-menu-radius);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
   transform: translateY(-100%);
   &.mochi-sliding-menu--open { transform: translateY(0); }
   .mochi-sliding-menu-inner {
@@ -121,18 +105,21 @@
   }
 }
 
+// Matches the phone Dialog sheet exactly.
 .mochi-sliding-menu--bottom {
   bottom: 0; left: 0; right: 0;
   width: 100%;
   height: auto;
   max-height: 80vh;
-  border-top: 1px solid var(--sliding-menu-border);
+  border-top: 2px solid var(--sliding-menu-border);
+  border-radius: var(--sliding-menu-radius) var(--sliding-menu-radius) 0 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.44);
   transform: translateY(100%);
   &.mochi-sliding-menu--open { transform: translateY(0); }
   .mochi-sliding-menu-inner {
     flex-direction: row;
     align-items: center;
-    padding: 16px 24px;
+    padding: 16px 24px max(16px, env(safe-area-inset-bottom));
   }
 }
 

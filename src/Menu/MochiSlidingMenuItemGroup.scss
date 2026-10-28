@@ -18,8 +18,9 @@
   --group-divider-color: #444444;
 }
 
+// OS dark mode only when no ThemeWrapper has set a theme
 @media (prefers-color-scheme: dark) {
-  .mochi-sliding-menu-item-group {
+  :root:not([data-mochi-theme]) .mochi-sliding-menu-item-group {
     --group-label-color:   #999999;
     --group-divider-color: #444444;
   }

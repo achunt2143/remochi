@@ -5,7 +5,7 @@
 .mochi-sliding-menu-item {
   // Light token defaults
   --item-text:        var(--color-text,    #333333);
-  --item-hover-bg:    var(--color-secondary, rgba(94, 82, 64, 0.12));
+  --item-hover-bg:    var(--mochi-hover, rgba(0, 0, 0, 0.04));
   --item-active-bg:   var(--color-primary, #218080);
   --item-active-text: var(--color-surface,  #ffffff);
   --item-accent:      var(--color-primary, #218080);
@@ -53,8 +53,9 @@
   --item-active-bg: var(--color-primary, #5b9dd9);
 }
 
+// OS dark mode only when no ThemeWrapper has set a theme
 @media (prefers-color-scheme: dark) {
-  .mochi-sliding-menu-item {
+  :root:not([data-mochi-theme]) .mochi-sliding-menu-item {
     --item-text:      #f0f0f0;
     --item-hover-bg:  rgba(255, 255, 255, 0.10);
   }
@@ -110,7 +111,7 @@
 
 // Disabled state
 .mochi-sliding-menu-item--disabled {
-  opacity: 0.5;
+  opacity: var(--mochi-disabled-opacity, 0.4);
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -134,7 +135,7 @@
 
 // Responsive
 @media (max-width: 768px) {
-  .mochi-sliding-menu-item {
+  :root:not([data-mochi-theme]) .mochi-sliding-menu-item {
     padding: 12px 16px;
     min-height: 40px;
     font-size: 13px;
@@ -143,14 +144,14 @@
 
 // Accessibility
 @media (prefers-reduced-motion: reduce) {
-  .mochi-sliding-menu-item {
+  :root:not([data-mochi-theme]) .mochi-sliding-menu-item {
     transition: none;
     &:active:not(.mochi-sliding-menu-item--disabled) { transform: none; }
   }
 }
 
 @media (prefers-contrast: more) {
-  .mochi-sliding-menu-item {
+  :root:not([data-mochi-theme]) .mochi-sliding-menu-item {
     border-bottom: 1px solid var(--item-text);
     &:focus-visible { outline-width: 3px; }
   }

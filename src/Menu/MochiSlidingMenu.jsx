@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import './MochiSlidingMenu.scss';
-import MochiThemeWrapper from '../ThemeWrapper/MochiThemeWrapper';
+import MochiThemeWrapper, { ThemeContext } from '../ThemeWrapper/MochiThemeWrapper';
 
 /**
  * MochiSlidingMenu
@@ -148,12 +148,18 @@ const ContentShifter = ({
   );
 };
 
-// Wrap the menu in a ThemeWrapper so it always picks up the mochi theme
-const MochiSlidingMenu = (props) => (
-  <MochiThemeWrapper>
-    <MochiSlidingMenuInner {...props} />
-  </MochiThemeWrapper>
-);
+// Wrap the menu in a ThemeWrapper only if not already inside an active theme context
+const MochiSlidingMenu = (props) => {
+  const existingTheme = useContext(ThemeContext);
+  if (existingTheme && existingTheme._isThemeContext) {
+    return <MochiSlidingMenuInner {...props} />;
+  }
+  return (
+    <MochiThemeWrapper>
+      <MochiSlidingMenuInner {...props} />
+    </MochiThemeWrapper>
+  );
+};
 
 MochiSlidingMenu.ContentShifter = ContentShifter;
 
