@@ -9,19 +9,24 @@ export interface BadgeProps {
   color?: string;
 }
 export const Badge: React.FC<BadgeProps>;
+export const MochiBadge: React.FC<BadgeProps>;
 
 // ---------------------------------------------------------------------------
 // Button
 // ---------------------------------------------------------------------------
-export interface ButtonProps {
-  content?: string;
+export interface ButtonProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
+  /**
+   * Visual variant — not the native `<button type>` (see `htmlType`). Default: 'normal'.
+   * 'warning' (red) is for destructive choices, 'affirmative' (green) for the
+   * positive choice, 'blue' for sparing emphasis — Mochi's ButtonColors.
+   */
+  type?: 'normal' | 'warning' | 'affirmative' | 'blue' | 'disabled' | 'dropdown';
+  /** Native `<button type>`. Default: 'button', so a Button inside a `<form>` doesn't submit it. */
+  htmlType?: 'button' | 'submit' | 'reset';
+  /** Disables the button and shows the disabled look; same as `type="disabled"`. */
   disabled?: boolean;
-  active?: boolean;
-  decoratorLeft?: string;
-  decoratorRight?: string;
-  barClasses?: string;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  variant?: 'normal' | 'warning' | 'affirmative' | 'blue';
+  /** Button label. Default: 'Button'. */
   children?: React.ReactNode;
 }
 export const Button: React.FC<ButtonProps>;
@@ -113,8 +118,18 @@ export interface DialogProps {
   onCancel?: () => void;
   confirmText?: string;
   cancelText?: string;
+  /**
+   * Button variant for the confirm button of 'confirm'/'prompt' dialogs.
+   * Default: 'affirmative' (green, the positive choice per the webOS HIG);
+   * use 'warning' when confirming a destructive action.
+   */
+  confirmType?: ButtonProps['type'];
+  /** Shows a × in the header. Default: false — Mochi/webOS dialogs close via their buttons, the scrim or Escape. */
   showCloseButton?: boolean;
+  /** Card width: 320px, 420px (default) or 600px, capped to the viewport. */
   size?: 'small' | 'medium' | 'large';
+  /** Custom footer buttons; replaces the type-based defaults. */
+  actions?: { label: React.ReactNode; onClick?: () => void; type?: ButtonProps['type'] }[];
   className?: string;
   promptValue?: string;
   onPromptChange?: (value: string) => void;
@@ -256,7 +271,8 @@ export interface ListProps {
 }
 export const List: React.FC<ListProps>;
 
-export interface ListItemProps {
+export interface ListItemProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   children?: React.ReactNode;
   tapHighlight?: boolean;
   onSelect?: (highlighted: boolean) => void;
@@ -342,7 +358,11 @@ export interface MochiSlidingMenuContentShifterProps {
 export const MochiSlidingMenu: React.FC<MochiSlidingMenuProps> & {
   ContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
 };
+export const SlidingMenu: React.FC<MochiSlidingMenuProps> & {
+  ContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
+};
 export const MochiSlidingMenuContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
+export const SlidingMenuContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
 
 export interface MochiSlidingMenuItemProps {
   children?: React.ReactNode;
@@ -357,6 +377,7 @@ export interface MochiSlidingMenuItemProps {
   variant?: 'default' | 'danger' | 'success';
 }
 export const MochiSlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
+export const SlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
 
 export interface MochiSlidingMenuItemGroupProps {
   children?: React.ReactNode;
@@ -368,6 +389,7 @@ export interface MochiSlidingMenuItemGroupProps {
   style?: React.CSSProperties;
 }
 export const MochiSlidingMenuItemGroup: React.FC<MochiSlidingMenuItemGroupProps>;
+export const SlidingMenuItemGroup: React.FC<MochiSlidingMenuItemGroupProps>;
 
 // ---------------------------------------------------------------------------
 // NumberInput
@@ -425,6 +447,7 @@ export interface FloatingPanelProps {
   [key: string]: any;
 }
 export const FloatingPanel: React.FC<FloatingPanelProps>;
+export const MochiFloatingPanel: React.FC<FloatingPanelProps>;
 
 /**
  * RepanelStack — webOS/Mochi stacked panel workspace.
@@ -524,9 +547,13 @@ export interface StackedPanelsProps {
   snapPoints?: number[];
   /** Default number of panels shown at once on mount. Not a hard cap — a grabber drag can reveal more of the stack. @default 3 */
   maxVisiblePanels?: number;
-  /** Shadow-seam overlap strength (0..1) between adjacent stacked columns. */
+  /**
+   * How far each parent column runs beneath the next one, as a fraction (0..1)
+   * of Mochi's 45px overlap. Parent Repanels get that much right padding so
+   * their content stays clear of it. @default 1
+   */
   overlap?: number;
-  /** Width (px) of each revealed, non-active parent column. @default 240 */
+  /** Visible width (px) of each revealed, non-active parent column — the webOS HIG pane width. @default 320 */
   peek?: number;
 
   /** Show each panel's (but the first's) nubbin grabber — reveal-adjust on parents, reveal-adjust or swipe-to-close on the active panel. @default true */
@@ -630,41 +657,111 @@ export interface TableProps<T = Record<string, any>> {
 export const Table: React.FC<TableProps>;
 
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // ThemeWrapper
 // ---------------------------------------------------------------------------
+export type ThemeMode = 'dark' | 'light' | 'system';
+export type ResolvedTheme = 'dark' | 'light';
+
 export interface ThemeColors {
   primary: string;
+  primaryHover?: string;
+  primaryActive?: string;
   secondary: string;
+  secondaryHover?: string;
+  secondaryActive?: string;
   background: string;
   surface: string;
+  surfaceElevated?: string;
   text: string;
   textSecondary: string;
+  textMuted?: string;
   border: string;
+  borderLight?: string;
   success: string;
   warning: string;
   error: string;
   info: string;
+  selected?: string;
+  selectedSoft?: string;
+  toggleTrack?: string;
+  toggleKnob?: string;
+  mark?: string;
+  panelBg?: string;
+  panelBorder?: string;
+  fieldBg?: string;
+  fieldBorder?: string;
+  fieldText?: string;
+  popupBorder?: string;
+  /** Mochi's interactive accent, #69cdff in both themes (`--mochi-accent`). */
+  accent?: string;
+  /** Slider's unfilled track (`--mochi-slider-track`). */
+  sliderTrack?: string;
 }
+
 export interface ThemeContextValue {
-  theme: 'dark' | 'light';
+  theme: ThemeMode;
+  resolvedTheme: ResolvedTheme;
+  setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
+  isDark: boolean;
+  isLight: boolean;
   colors: ThemeColors;
 }
+
 export interface ThemeWrapperProps {
   children?: React.ReactNode;
-  defaultTheme?: 'dark' | 'light';
+  /** Controlled theme. */
+  theme?: ThemeMode;
+  /**
+   * Initial theme when uncontrolled. Omit it on a nested wrapper to follow
+   * the parent wrapper's theme; a root wrapper without it starts 'dark'.
+   */
+  defaultTheme?: ThemeMode;
+  onThemeChange?: (theme: ThemeMode, resolvedTheme: ResolvedTheme) => void;
+  storageKey?: string | null;
+  /**
+   * Mirror the theme onto `<html data-mochi-theme>` (so portaled components
+   * pick it up) and fill the viewport. Default: true for the root wrapper,
+   * false for nested ones.
+   */
+  syncHtml?: boolean;
+  /**
+   * Body typeface: 'Prelude' (default — the local webOS Prelude when installed,
+   * else the bundled Lato) or 'Lato' (bundled Lato only). Default: 'Prelude'.
+   */
   fontFamily?: string;
   className?: string;
 }
+
 export const ThemeWrapper: React.FC<ThemeWrapperProps>;
+
+export const ThemeContext: React.Context<ThemeContextValue>;
 export function useTheme(): ThemeContextValue;
+export const DARK_THEME_COLORS: ThemeColors;
+export const LIGHT_THEME_COLORS: ThemeColors;
 
 // ---------------------------------------------------------------------------
 // Toggle
 // ---------------------------------------------------------------------------
+export interface ToggleChangeEvent {
+  value: boolean;
+  checked: boolean;
+  target?: {
+    value: boolean;
+    checked: boolean;
+  };
+}
 export interface ToggleProps {
+  value?: boolean;
   checked?: boolean;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  onChange?: (event: ToggleChangeEvent) => void;
+  disabled?: boolean;
+  canAnimate?: boolean;
+  colorActive?: string;
+  colorInactive?: string;
+  onContent?: string;
+  offContent?: string;
 }
 export const Toggle: React.FC<ToggleProps>;
 
@@ -679,10 +776,27 @@ export interface WizardStep {
   skippable?: boolean;
   onNext?: () => boolean | void | Promise<boolean | void>;
 }
+export interface WizardNavigationDetail {
+  /** What moved the wizard: Next, Finish (on the last step), Back, Skip, or tapping a step in the header. */
+  reason: 'next' | 'finish' | 'back' | 'skip' | 'jump';
+  from: number;
+  to: number;
+}
 export interface WizardProps {
   steps?: WizardStep[];
   onComplete?: () => void;
   onCancel?: () => void;
+  /** Fires whenever the shown step changes. */
+  onStepChange?: (step: number, detail: WizardNavigationDetail) => void;
+  /**
+   * Manage completion yourself: when set, exactly these step indices show as
+   * completed. When omitted, the wizard tracks completion like a stack —
+   * Next completes the step being left; going back un-completes the step
+   * returned to and everything after it.
+   */
+  completedSteps?: number[];
+  /** The completion list the default tracking would produce for this navigation. Fires whether or not `completedSteps` is set. */
+  onCompletedStepsChange?: (completedSteps: number[], detail: WizardNavigationDetail) => void;
   showStepNumbers?: boolean;
   allowSkip?: boolean;
   className?: string;
