@@ -144,9 +144,13 @@ export const MochiSlider = ({
   const trackRef = useRef();
   // Latest value, readable from the window drag listeners between renders.
   const valueRef = useRef(value);
+  // A live drag owns the value: external updates (e.g. a progress tick from
+  // a rAF loop) must not yank the thumb out from under the pointer.
+  const isDragging = useRef(false);
 
-  // Follow the `value` prop when the parent changes it.
+  // Follow the `value` prop when the parent changes it and we're not dragging.
   useEffect(() => {
+    if (isDragging.current) return;
     valueRef.current = value;
     setInternalVal(value);
   }, [value]);
@@ -155,7 +159,6 @@ export const MochiSlider = ({
   // through to the CSS variable path (ACCENT).
   // BubbleCanvas handles var() strings itself via getComputedStyle.
   const resolvedColor = color || undefined;
-
   const percent = ((internalVal - min) * 100) / (max - min);
 
   // Set a new value, reporting it only if it actually changed.
@@ -208,12 +211,19 @@ export const MochiSlider = ({
   };
 
   const startDrag = () => {
+    isDragging.current = true;
     setActive(true);
     document.body.style.cursor = "grabbing";
+
     const move = (ev) => {
       handleDrag(ev.touches ? ev.touches[0].clientX : ev.clientX);
     };
-    const up = () => {
+
+    const up = (ev) => {
+      // Commit the position at release (a no-op when it matches the last move)
+      const clientX = ev.touches ? ev.changedTouches[0].clientX : ev.clientX;
+      handleDrag(clientX);
+      isDragging.current = false;
       setActive(false);
       document.body.style.cursor = "";
       window.removeEventListener("mousemove", move);
@@ -221,6 +231,7 @@ export const MochiSlider = ({
       window.removeEventListener("touchmove", move);
       window.removeEventListener("touchend", up);
     };
+
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
     window.addEventListener("touchmove", move);
