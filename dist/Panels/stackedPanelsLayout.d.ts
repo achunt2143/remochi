@@ -1,3 +1,5 @@
+/** How far (px) each parent column extends beneath the next one. */
+export function getOverlapPx(config: any): number;
 /** Sort, de-dupe and validate a snap-point list, falling back to the default. */
 export function normalizeSnapPoints(snapPoints: any): any[];
 /** Lowest/highest allowed reveal value for a snap-point list. */
@@ -98,7 +100,7 @@ export function getPanelDescriptor({ index, activeIndex, panelCount, reveal, con
     narrowBehavior?: string | undefined;
 }): {
     role: string;
-    left: number;
+    left: string | number;
     width: string;
     opacity: number;
     zIndex: any;
@@ -108,14 +110,6 @@ export function getPanelDescriptor({ index, activeIndex, panelCount, reveal, con
     role: string;
     left: number;
     width: number;
-    opacity: number;
-    zIndex: number;
-    interactive: boolean;
-    visible: boolean;
-} | {
-    role: string;
-    left: string;
-    width: string;
     opacity: number;
     zIndex: number;
     interactive: boolean;
@@ -138,7 +132,38 @@ export function blendPanelDescriptors(dFrom: any, dTo: any, t: any, containerWid
     interactive: any;
     visible: any;
 };
+/**
+ * Live-preview descriptor for one panel during the active panel's "swipe
+ * to close" gesture: the panel's descriptor with `fromIndex` active and
+ * with `toIndex` (= fromIndex - 1) active, blended by `progress`.
+ *
+ * The narrow single-column layout has no parent columns to blend between,
+ * so there the closing panel's blend runs from left 0 to its 'ahead' slot
+ * at left 100% — it slides out to the right under the finger — and opacity
+ * is held at whichever endpoint shows the panel rather than interpolated.
+ * The closing panel stays solid while it slides, and the panel it closes
+ * into sits fully shown underneath it, like a webOS card swipe-back.
+ */
+export function getClosePreviewDescriptor({ index, fromIndex, toIndex, progress, containerWidth, panelCount, reveal, config, isNarrow, narrowBehavior, }: {
+    index: any;
+    fromIndex: any;
+    toIndex: any;
+    progress: any;
+    containerWidth: any;
+    panelCount: any;
+    reveal: any;
+    config: any;
+    isNarrow?: boolean | undefined;
+    narrowBehavior?: string | undefined;
+}): {
+    left: any;
+    width: any;
+    opacity: any;
+    zIndex: any;
+    interactive: any;
+    visible: any;
+};
 export const DEFAULT_SNAP_POINTS: number[];
 export const DEFAULT_MAX_VISIBLE_PANELS: 3;
-export const DEFAULT_PEEK: 240;
-export const DEFAULT_OVERLAP: 0.5;
+export const DEFAULT_PEEK: 320;
+export const DEFAULT_OVERLAP: 1;

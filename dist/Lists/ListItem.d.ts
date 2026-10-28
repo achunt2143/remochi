@@ -10,8 +10,10 @@ export default ListItem;
  *   - tapHighlight: Enable/disable tap highlight effect (default: true)
  *   - onSelect: Callback fired when item is selected/highlighted
  */
-declare function ListItem({ children, tapHighlight, onSelect }: {
+declare function ListItem({ children, tapHighlight, onSelect, className, ...rest }: {
+    [x: string]: any;
     children: any;
     tapHighlight?: boolean | undefined;
     onSelect?: (() => void) | undefined;
+    className?: string | undefined;
 }): any;

@@ -9,19 +9,24 @@ interface BadgeProps {
   color?: string;
 }
 declare const Badge: React.FC<BadgeProps>;
+declare const MochiBadge: React.FC<BadgeProps>;
 
 // ---------------------------------------------------------------------------
 // Button
 // ---------------------------------------------------------------------------
-interface ButtonProps {
-  content?: string;
+interface ButtonProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
+  /**
+   * Visual variant — not the native `<button type>` (see `htmlType`). Default: 'normal'.
+   * 'warning' (red) is for destructive choices, 'affirmative' (green) for the
+   * positive choice, 'blue' for sparing emphasis — Mochi's ButtonColors.
+   */
+  type?: 'normal' | 'warning' | 'affirmative' | 'blue' | 'disabled' | 'dropdown';
+  /** Native `<button type>`. Default: 'button', so a Button inside a `<form>` doesn't submit it. */
+  htmlType?: 'button' | 'submit' | 'reset';
+  /** Disables the button and shows the disabled look; same as `type="disabled"`. */
   disabled?: boolean;
-  active?: boolean;
-  decoratorLeft?: string;
-  decoratorRight?: string;
-  barClasses?: string;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  variant?: 'normal' | 'warning' | 'affirmative' | 'blue';
+  /** Button label. Default: 'Button'. */
   children?: React.ReactNode;
 }
 declare const Button: React.FC<ButtonProps>;
@@ -113,8 +118,18 @@ interface DialogProps {
   onCancel?: () => void;
   confirmText?: string;
   cancelText?: string;
+  /**
+   * Button variant for the confirm button of 'confirm'/'prompt' dialogs.
+   * Default: 'affirmative' (green, the positive choice per the webOS HIG);
+   * use 'warning' when confirming a destructive action.
+   */
+  confirmType?: ButtonProps['type'];
+  /** Shows a × in the header. Default: false — Mochi/webOS dialogs close via their buttons, the scrim or Escape. */
   showCloseButton?: boolean;
+  /** Card width: 320px, 420px (default) or 600px, capped to the viewport. */
   size?: 'small' | 'medium' | 'large';
+  /** Custom footer buttons; replaces the type-based defaults. */
+  actions?: { label: React.ReactNode; onClick?: () => void; type?: ButtonProps['type'] }[];
   className?: string;
   promptValue?: string;
   onPromptChange?: (value: string) => void;
@@ -256,7 +271,8 @@ interface ListProps {
 }
 declare const List: React.FC<ListProps>;
 
-interface ListItemProps {
+interface ListItemProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   children?: React.ReactNode;
   tapHighlight?: boolean;
   onSelect?: (highlighted: boolean) => void;
@@ -342,7 +358,11 @@ interface MochiSlidingMenuContentShifterProps {
 declare const MochiSlidingMenu: React.FC<MochiSlidingMenuProps> & {
   ContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
 };
+declare const SlidingMenu: React.FC<MochiSlidingMenuProps> & {
+  ContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
+};
 declare const MochiSlidingMenuContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
+declare const SlidingMenuContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
 
 interface MochiSlidingMenuItemProps {
   children?: React.ReactNode;
@@ -357,6 +377,7 @@ interface MochiSlidingMenuItemProps {
   variant?: 'default' | 'danger' | 'success';
 }
 declare const MochiSlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
+declare const SlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
 
 interface MochiSlidingMenuItemGroupProps {
   children?: React.ReactNode;
@@ -368,6 +389,7 @@ interface MochiSlidingMenuItemGroupProps {
   style?: React.CSSProperties;
 }
 declare const MochiSlidingMenuItemGroup: React.FC<MochiSlidingMenuItemGroupProps>;
+declare const SlidingMenuItemGroup: React.FC<MochiSlidingMenuItemGroupProps>;
 
 // ---------------------------------------------------------------------------
 // NumberInput
@@ -425,6 +447,7 @@ interface FloatingPanelProps {
   [key: string]: any;
 }
 declare const FloatingPanel: React.FC<FloatingPanelProps>;
+declare const MochiFloatingPanel: React.FC<FloatingPanelProps>;
 
 /**
  * RepanelStack — webOS/Mochi stacked panel workspace.
@@ -524,9 +547,13 @@ interface StackedPanelsProps {
   snapPoints?: number[];
   /** Default number of panels shown at once on mount. Not a hard cap — a grabber drag can reveal more of the stack. @default 3 */
   maxVisiblePanels?: number;
-  /** Shadow-seam overlap strength (0..1) between adjacent stacked columns. */
+  /**
+   * How far each parent column runs beneath the next one, as a fraction (0..1)
+   * of Mochi's 45px overlap. Parent Repanels get that much right padding so
+   * their content stays clear of it. @default 1
+   */
   overlap?: number;
-  /** Width (px) of each revealed, non-active parent column. @default 240 */
+  /** Visible width (px) of each revealed, non-active parent column — the webOS HIG pane width. @default 320 */
   peek?: number;
 
   /** Show each panel's (but the first's) nubbin grabber — reveal-adjust on parents, reveal-adjust or swipe-to-close on the active panel. @default true */
@@ -630,41 +657,111 @@ interface TableProps<T = Record<string, any>> {
 declare const Table: React.FC<TableProps>;
 
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // ThemeWrapper
 // ---------------------------------------------------------------------------
+type ThemeMode = 'dark' | 'light' | 'system';
+type ResolvedTheme = 'dark' | 'light';
+
 interface ThemeColors {
   primary: string;
+  primaryHover?: string;
+  primaryActive?: string;
   secondary: string;
+  secondaryHover?: string;
+  secondaryActive?: string;
   background: string;
   surface: string;
+  surfaceElevated?: string;
   text: string;
   textSecondary: string;
+  textMuted?: string;
   border: string;
+  borderLight?: string;
   success: string;
   warning: string;
   error: string;
   info: string;
+  selected?: string;
+  selectedSoft?: string;
+  toggleTrack?: string;
+  toggleKnob?: string;
+  mark?: string;
+  panelBg?: string;
+  panelBorder?: string;
+  fieldBg?: string;
+  fieldBorder?: string;
+  fieldText?: string;
+  popupBorder?: string;
+  /** Mochi's interactive accent, #69cdff in both themes (`--mochi-accent`). */
+  accent?: string;
+  /** Slider's unfilled track (`--mochi-slider-track`). */
+  sliderTrack?: string;
 }
+
 interface ThemeContextValue {
-  theme: 'dark' | 'light';
+  theme: ThemeMode;
+  resolvedTheme: ResolvedTheme;
+  setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
+  isDark: boolean;
+  isLight: boolean;
   colors: ThemeColors;
 }
+
 interface ThemeWrapperProps {
   children?: React.ReactNode;
-  defaultTheme?: 'dark' | 'light';
+  /** Controlled theme. */
+  theme?: ThemeMode;
+  /**
+   * Initial theme when uncontrolled. Omit it on a nested wrapper to follow
+   * the parent wrapper's theme; a root wrapper without it starts 'dark'.
+   */
+  defaultTheme?: ThemeMode;
+  onThemeChange?: (theme: ThemeMode, resolvedTheme: ResolvedTheme) => void;
+  storageKey?: string | null;
+  /**
+   * Mirror the theme onto `<html data-mochi-theme>` (so portaled components
+   * pick it up) and fill the viewport. Default: true for the root wrapper,
+   * false for nested ones.
+   */
+  syncHtml?: boolean;
+  /**
+   * Body typeface: 'Prelude' (default — the local webOS Prelude when installed,
+   * else the bundled Lato) or 'Lato' (bundled Lato only). Default: 'Prelude'.
+   */
   fontFamily?: string;
   className?: string;
 }
+
 declare const ThemeWrapper: React.FC<ThemeWrapperProps>;
+
+declare const ThemeContext: React.Context<ThemeContextValue>;
 declare function useTheme(): ThemeContextValue;
+declare const DARK_THEME_COLORS: ThemeColors;
+declare const LIGHT_THEME_COLORS: ThemeColors;
 
 // ---------------------------------------------------------------------------
 // Toggle
 // ---------------------------------------------------------------------------
+interface ToggleChangeEvent {
+  value: boolean;
+  checked: boolean;
+  target?: {
+    value: boolean;
+    checked: boolean;
+  };
+}
 interface ToggleProps {
+  value?: boolean;
   checked?: boolean;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  onChange?: (event: ToggleChangeEvent) => void;
+  disabled?: boolean;
+  canAnimate?: boolean;
+  colorActive?: string;
+  colorInactive?: string;
+  onContent?: string;
+  offContent?: string;
 }
 declare const Toggle: React.FC<ToggleProps>;
 
@@ -679,15 +776,32 @@ interface WizardStep {
   skippable?: boolean;
   onNext?: () => boolean | void | Promise<boolean | void>;
 }
+interface WizardNavigationDetail {
+  /** What moved the wizard: Next, Finish (on the last step), Back, Skip, or tapping a step in the header. */
+  reason: 'next' | 'finish' | 'back' | 'skip' | 'jump';
+  from: number;
+  to: number;
+}
 interface WizardProps {
   steps?: WizardStep[];
   onComplete?: () => void;
   onCancel?: () => void;
+  /** Fires whenever the shown step changes. */
+  onStepChange?: (step: number, detail: WizardNavigationDetail) => void;
+  /**
+   * Manage completion yourself: when set, exactly these step indices show as
+   * completed. When omitted, the wizard tracks completion like a stack —
+   * Next completes the step being left; going back un-completes the step
+   * returned to and everything after it.
+   */
+  completedSteps?: number[];
+  /** The completion list the default tracking would produce for this navigation. Fires whether or not `completedSteps` is set. */
+  onCompletedStepsChange?: (completedSteps: number[], detail: WizardNavigationDetail) => void;
   showStepNumbers?: boolean;
   allowSkip?: boolean;
   className?: string;
 }
 declare const Wizard: React.FC<WizardProps>;
 
-export { Badge, Button, Checkbox, Collapsable, CollapsableFooter, CollapsableHeader, CollapsableItem, DateInput, Dialog, Divider, Dropdown, FloatingPanel, GridList, GridListImageItem, Header, Input, Item, List, ListHeader, ListItem, MochiSlidingMenu, MochiSlidingMenuContentShifter, MochiSlidingMenuItem, MochiSlidingMenuItemGroup, MochiStackedPanels, NubbinDivider, NumberInput, Pagination, PopupPanel, ProgressBar, Radio, Repanel, RepanelStack, RichText, Slider, Spinner, StackedMochiPanels, Subheader, Table, TextArea, ThemeWrapper, Toggle, Video, ViewSelectButton, Wizard, useTheme };
-export type { ActiveIndexChangeDetail, ActiveIndexChangeReason, BadgeProps, ButtonProps, CheckboxChangeEvent, CheckboxProps, CollapsableProps, DateInputProps, DialogProps, DividerProps, DropdownOption, DropdownProps, FloatingPanelProps, GridListImageItemProps, GridListProps, HeaderProps, InputProps, ItemProps, ListHeaderProps, ListItemProps, ListProps, MochiSlidingMenuContentShifterProps, MochiSlidingMenuItemGroupProps, MochiSlidingMenuItemProps, MochiSlidingMenuProps, NarrowBehavior, NubbinDividerNubbin, NubbinDividerProps, NumberInputProps, PaginationProps, PopupAction, PopupPanelProps, ProgressBarProps, RadioProps, RepanelProps, RevealChangeDetail, RevealChangeReason, RichTextProps, SliderProps, SpinnerProps, StackedPanelsMethods, StackedPanelsProps, SubheaderProps, TableColumn, TableProps, TextAreaProps, ThemeColors, ThemeContextValue, ThemeWrapperProps, ToggleProps, VideoProps, ViewSelectButtonItem, ViewSelectButtonProps, WizardProps, WizardStep };
+export { Badge, Button, Checkbox, Collapsable, CollapsableFooter, CollapsableHeader, CollapsableItem, DARK_THEME_COLORS, DateInput, Dialog, Divider, Dropdown, FloatingPanel, GridList, GridListImageItem, Header, Input, Item, LIGHT_THEME_COLORS, List, ListHeader, ListItem, MochiBadge, MochiFloatingPanel, MochiSlidingMenu, MochiSlidingMenuContentShifter, MochiSlidingMenuItem, MochiSlidingMenuItemGroup, MochiStackedPanels, NubbinDivider, NumberInput, Pagination, PopupPanel, ProgressBar, Radio, Repanel, RepanelStack, RichText, Slider, SlidingMenu, SlidingMenuContentShifter, SlidingMenuItem, SlidingMenuItemGroup, Spinner, StackedMochiPanels, Subheader, Table, TextArea, ThemeContext, ThemeWrapper, Toggle, Video, ViewSelectButton, Wizard, useTheme };
+export type { ActiveIndexChangeDetail, ActiveIndexChangeReason, BadgeProps, ButtonProps, CheckboxChangeEvent, CheckboxProps, CollapsableProps, DateInputProps, DialogProps, DividerProps, DropdownOption, DropdownProps, FloatingPanelProps, GridListImageItemProps, GridListProps, HeaderProps, InputProps, ItemProps, ListHeaderProps, ListItemProps, ListProps, MochiSlidingMenuContentShifterProps, MochiSlidingMenuItemGroupProps, MochiSlidingMenuItemProps, MochiSlidingMenuProps, NarrowBehavior, NubbinDividerNubbin, NubbinDividerProps, NumberInputProps, PaginationProps, PopupAction, PopupPanelProps, ProgressBarProps, RadioProps, RepanelProps, ResolvedTheme, RevealChangeDetail, RevealChangeReason, RichTextProps, SliderProps, SpinnerProps, StackedPanelsMethods, StackedPanelsProps, SubheaderProps, TableColumn, TableProps, TextAreaProps, ThemeColors, ThemeContextValue, ThemeMode, ThemeWrapperProps, ToggleChangeEvent, ToggleProps, VideoProps, ViewSelectButtonItem, ViewSelectButtonProps, WizardNavigationDetail, WizardProps, WizardStep };

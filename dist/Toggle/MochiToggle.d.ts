@@ -7,7 +7,8 @@ export default MochiToggle;
  *
  * Props:
  *   value          {boolean}  Current on/off state (default: false)
- *   onChange       {Function} Called with { value } on toggle
+ *   checked        {boolean}  React-standard alias for value
+ *   onChange       {Function} Called with { value, checked, target } once per change
  *   disabled       {boolean}  Disables interaction (default: false)
  *   canAnimate     {boolean}  Animate background-color transition (default: true)
  *   colorActive    {string}   Pill bg when on (default: var(--mochi-selected, '#ffb80d'))
@@ -15,8 +16,9 @@ export default MochiToggle;
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
  */
-export function MochiToggle({ value, onChange, disabled, canAnimate, colorActive, colorInactive, onContent, offContent, }: {
+export function MochiToggle({ value, checked, onChange, disabled, canAnimate, colorActive, colorInactive, onContent, offContent, }: {
     value?: boolean | undefined;
+    checked: any;
     onChange?: (() => void) | undefined;
     disabled?: boolean | undefined;
     canAnimate?: boolean | undefined;
