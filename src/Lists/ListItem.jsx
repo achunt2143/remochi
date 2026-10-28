@@ -15,7 +15,9 @@ import './ListItem.scss';
 const ListItem = ({ 
   children, 
   tapHighlight = true,
-  onSelect = () => {} 
+  onSelect = () => {},
+  className = '',
+  ...rest
 }) => {
   const [isHighlighted, setIsHighlighted] = useState(false);
   const itemRef = useRef(null);
@@ -36,8 +38,9 @@ const ListItem = ({
 
   return (
     <div
+      {...rest}
       ref={itemRef}
-      className={`mochi-list-item ${isHighlighted ? 'mochi-highlight' : ''}`}
+      className={`mochi-list-item ${isHighlighted ? 'mochi-highlight' : ''} ${className}`.trim()}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
