@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import BubbleCanvas from "./BubbleCanvas";
 
@@ -9,13 +9,31 @@ const thumbPressed = 40;
 const BUBBLE_W = 62;
 const BUBBLE_H = 37;
 
+// webOS TouchPad tap targets are 54px square (HIG, "Laying Out Content
+// and Controls"); the track and knob get invisible hit areas that size.
+const TAP_TARGET = 54;
+
+// Mochi's slider knob/fill color (Slider.less: #69cdff).
+const ACCENT = "var(--mochi-accent, #69cdff)";
+const ACCENT_SOFT = "var(--mochi-accent-soft, rgba(105,205,255,0.3))";
+
 const Track = styled.div`
   width: ${({ width }) => width || "100%"};
   height: ${trackHeight};
-  background: var(--mochi-hover, #dbdbdb);
+  background: var(--mochi-slider-track, #a2a2a2);
   border-radius: 12px;
   position: relative;
   margin: 42px 0 36px 0;
+
+  /* Taller tap area for the 5px track, like Mochi's .mochi-slider-taparea. */
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: ${(5 - TAP_TARGET) / 2}px;
+    height: ${TAP_TARGET}px;
+  }
 `;
 
 const Fill = styled.div`
@@ -24,9 +42,9 @@ const Fill = styled.div`
   left: 0;
   height: ${trackHeight};
   border-radius: 12px;
-  background-color: ${({ $color }) => $color || "var(--mochi-primary, #04B2F9)"};
+  background-color: ${({ $color }) => $color || ACCENT};
   width: ${({ $percent }) => $percent}%;
-  transition: width 0.3s cubic-bezier(0.59, 0.11, 0.62, 1.49);
+  transition: ${({ $active }) => $active ? "none" : "width 0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0)"};
   z-index: 1;
 `;
 
@@ -37,19 +55,19 @@ const Thumb = styled.div`
   transform: translate(-50%, -50%);
   width: ${thumbDefault}px;
   height: ${thumbDefault}px;
-  background: ${({ $color }) => $color || "var(--mochi-primary, #04B2F9)"};
+  background: ${({ $color }) => $color || ACCENT};
   border-radius: 50%;
   /*
-   * When a custom color is provided we can't derive a soft shadow from it
-   * via CSS vars, so we use a low-opacity black shadow as a safe universal
-   * fallback. The CSS-var path uses --mochi-primary-soft when available.
+   * A custom color gets a shadow mixed from that color; the default path
+   * uses the accent's own soft tint (--mochi-accent-soft).
    */
   box-shadow: ${({ $color }) =>
     $color
       ? `0 2px 10px color-mix(in srgb, ${$color} 40%, transparent)`
-      : "0 2px 10px var(--mochi-primary-soft, rgba(0,0,0,0.25))"};
+      : `0 2px 10px ${ACCENT_SOFT}`};
   z-index: 2;
   transition:
+    left ${({ $active }) => $active ? "0s" : "0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0)"},
     width 0.18s cubic-bezier(0.43, 0.59, 0.39, 0.88),
     height 0.18s cubic-bezier(0.43, 0.59, 0.39, 0.88),
     box-shadow 0.19s;
@@ -60,9 +78,20 @@ const Thumb = styled.div`
       height: ${thumbPressed}px;
       box-shadow: ${$color
         ? `0 8px 28px color-mix(in srgb, ${$color} 50%, transparent)`
-        : "0 8px 28px var(--mochi-primary-soft, rgba(0,0,0,0.3))"};
+        : `0 8px 28px ${ACCENT_SOFT}`};
     `}
   cursor: grab;
+
+  /* Full-size tap target around the 28px knob. */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: ${TAP_TARGET}px;
+    height: ${TAP_TARGET}px;
+    transform: translate(-50%, -50%);
+  }
 `;
 
 const PopupText = styled.div`
@@ -93,6 +122,14 @@ function clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
 }
 
+// Snap to the step grid (anchored at min) and clamp to [min, max], rounding
+// off float noise for fractional steps (3 * 0.1 = 0.30000000000000004).
+function snapToStep(val, min, max, step) {
+  const decimals = (String(step).split(".")[1] || "").length;
+  const snapped = Math.round((val - min) / step) * step + min;
+  return clamp(Number(snapped.toFixed(decimals)), min, max);
+}
+
 export const MochiSlider = ({
   value = 50,
   color,
@@ -105,20 +142,69 @@ export const MochiSlider = ({
   const [active, setActive] = useState(false);
   const [internalVal, setInternalVal] = useState(value);
   const trackRef = useRef();
+  // Latest value, readable from the window drag listeners between renders.
+  const valueRef = useRef(value);
+
+  // Follow the `value` prop when the parent changes it.
+  useEffect(() => {
+    valueRef.current = value;
+    setInternalVal(value);
+  }, [value]);
 
   // When no color prop is given, pass undefined so styled-components falls
-  // through to the CSS variable path (var(--mochi-primary, #04B2F9)).
+  // through to the CSS variable path (ACCENT).
   // BubbleCanvas handles var() strings itself via getComputedStyle.
   const resolvedColor = color || undefined;
 
   const percent = ((internalVal - min) * 100) / (max - min);
 
+  // Set a new value, reporting it only if it actually changed.
+  const commit = (raw) => {
+    const next = snapToStep(raw, min, max, step);
+    if (next === valueRef.current) return;
+    valueRef.current = next;
+    setInternalVal(next);
+    onChange && onChange(next);
+  };
+
   const handleDrag = (clientX) => {
     const rect = trackRef.current.getBoundingClientRect();
     const rel = clamp((clientX - rect.left) / rect.width, 0, 1);
-    const newVal = Math.round((rel * (max - min)) / step) * step + min;
-    setInternalVal(newVal);
-    onChange && onChange(newVal);
+    commit(min + rel * (max - min));
+  };
+
+  // Standard slider keys: arrows step, PageUp/PageDown move a tenth of the
+  // range, Home/End jump to the ends.
+  const handleKeyDown = (e) => {
+    const current = valueRef.current;
+    const page = Math.max(step, (max - min) / 10);
+    let next;
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowUp":
+        next = current + step;
+        break;
+      case "ArrowLeft":
+      case "ArrowDown":
+        next = current - step;
+        break;
+      case "PageUp":
+        next = current + page;
+        break;
+      case "PageDown":
+        next = current - page;
+        break;
+      case "Home":
+        next = min;
+        break;
+      case "End":
+        next = max;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    commit(next);
   };
 
   const startDrag = () => {
@@ -147,7 +233,7 @@ export const MochiSlider = ({
 
   // BubbleCanvas color: pass the explicit color string when provided, otherwise
   // pass the var() string so resolveColor() can compute it from the DOM.
-  const bubbleColor = color || "var(--mochi-primary, #04B2F9)";
+  const bubbleColor = color || ACCENT;
 
   return (
     <SliderRoot
@@ -158,9 +244,10 @@ export const MochiSlider = ({
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuetext={`${internalVal}`}
+      onKeyDown={handleKeyDown}
     >
       <Track ref={trackRef} width={width} onClick={handleTrackClick}>
-        <Fill $percent={percent} $color={resolvedColor} />
+        <Fill $percent={percent} $color={resolvedColor} $active={active} />
         <Thumb
           $percent={percent}
           $active={active}

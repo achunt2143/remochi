@@ -16,8 +16,22 @@
   cursor: pointer;
   user-select: none;
   touch-action: pan-y;
-  overflow: hidden;
+  // No overflow: hidden — it would clip the tap-target ::before below out
+  // of hit-testing too. Nothing needs it: the knob and both labels are
+  // already positioned and clipped inside the pill on their own.
   box-sizing: border-box;
+
+  // Invisible tap target, 54px tall (webOS TouchPad standard, per the
+  // HIG's "Laying Out Content and Controls"); the pill is already at
+  // least 60px wide. Pointer events on it go to this element.
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(50% - 27px);
+    height: 54px;
+  }
 
   &:focus-visible {
     outline: none;
@@ -25,7 +39,7 @@
   }
 
   &.disabled {
-    opacity: 0.4;
+    opacity: var(--mochi-disabled-opacity, 0.4);
     pointer-events: none;
     cursor: default;
   }
@@ -56,6 +70,10 @@
   overflow: hidden;
   transition: transform 0.1s linear, background-color 0.1s linear;
   pointer-events: none;
+
+  .mochi-toggle-button:not(.mochi-toggle-animate) & {
+    transition: none;
+  }
 }
 
 /* Label text */

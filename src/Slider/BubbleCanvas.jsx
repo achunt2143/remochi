@@ -31,7 +31,7 @@ function drawMochiBubble(ctx, color) {
   ctx.restore();
 }
 
-const BubbleCanvas = ({ color = "var(--mochi-primary, #04B2F9)", style }) => {
+const BubbleCanvas = ({ color = "var(--mochi-accent, #69cdff)", style }) => {
   const canvasRef = useRef();
 
   useEffect(() => {

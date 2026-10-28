@@ -9,7 +9,8 @@ import './MochiToggle.scss';
  *
  * Props:
  *   value          {boolean}  Current on/off state (default: false)
- *   onChange       {Function} Called with { value } on toggle
+ *   checked        {boolean}  React-standard alias for value
+ *   onChange       {Function} Called with { value, checked, target } once per change
  *   disabled       {boolean}  Disables interaction (default: false)
  *   canAnimate     {boolean}  Animate background-color transition (default: true)
  *   colorActive    {string}   Pill bg when on (default: var(--mochi-selected, '#ffb80d'))
@@ -19,6 +20,7 @@ import './MochiToggle.scss';
  */
 const MochiToggle = ({
   value = false,
+  checked,
   onChange = () => {},
   disabled = false,
   canAnimate = true,
@@ -29,12 +31,15 @@ const MochiToggle = ({
   onContent = 'On',
   offContent = 'Off',
 }) => {
-  const [isOn, setIsOn] = useState(value);
+  const resolvedValue = checked !== undefined ? checked : value;
+  const [isOn, setIsOn] = useState(resolvedValue);
   const trackRef = useRef(null);
   const knobRef  = useRef(null);
 
-  // Sync controlled prop
-  useEffect(() => { setIsOn(value); }, [value]);
+  // Sync controlled prop (honors either checked or value)
+  useEffect(() => {
+    setIsOn(checked !== undefined ? checked : value);
+  }, [checked, value]);
 
   // Calculate knob travel and apply via translateX
   // Mirrors Enyo's calcKnob: onXPos = trackWidth - knobWidth - (marginLeft * 2)
@@ -57,10 +62,23 @@ const MochiToggle = ({
     return () => ro.disconnect();
   }, [isOn, applyKnobPosition]);
 
+  // Latest value, readable from pointer/key handlers between renders.
+  const isOnRef = useRef(isOn);
+  useEffect(() => { isOnRef.current = isOn; }, [isOn]);
+
+  // Only report actual changes: a drag passes the 10px threshold on every
+  // pointermove after the first, and ArrowRight/ArrowLeft can ask for the
+  // state the switch is already in. A consumer that flips on each call
+  // (`onChange={() => setOn(v => !v)}`) would otherwise flip repeatedly.
   const toggle = useCallback((next) => {
-    if (disabled) return;
+    if (disabled || next === isOnRef.current) return;
+    isOnRef.current = next;
     setIsOn(next);
-    onChange({ value: next });
+    onChange({
+      value: next,
+      checked: next,
+      target: { value: next, checked: next },
+    });
   }, [disabled, onChange]);
 
   // Drag support — horizontal drag > 10px threshold (mirrors Enyo drag handlers)
@@ -82,9 +100,10 @@ const MochiToggle = ({
   };
 
   const onPointerUp = () => {
-    const { dragged } = dragState.current;
+    const { dragging, dragged } = dragState.current;
+    if (!dragging) return; // press started elsewhere (or while disabled)
     dragState.current.dragging = false;
-    if (!dragged) toggle(!isOn);
+    if (!dragged) toggle(!isOnRef.current);
   };
 
   const classes = [
