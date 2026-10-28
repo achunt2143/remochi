@@ -19,7 +19,13 @@
   &:focus {
     outline: none;
     background-color: var(--mochi-primary-soft, rgba(105,205,255,0.05));
-    border-color: var(--mochi-primary, #5b9dd9);
+    // Mochi's focused-field border (InputDecorator.less: #69cdff).
+    border-color: var(--mochi-accent, #69cdff);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mochi-primary, #5b9dd9);
+    outline-offset: 1px;
   }
 
   .mochi-richtext-placeholder {
@@ -72,4 +78,4 @@
 }
 
 .mochi-input-decorator.mochi-focused > .mochi-richtext { cursor: text; }
-.mochi-input-decorator.mochi-disabled > .mochi-richtext { cursor: default; opacity: 0.4; }
+.mochi-input-decorator.mochi-disabled > .mochi-richtext { cursor: default; opacity: var(--mochi-disabled-opacity, 0.4); }

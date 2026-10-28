@@ -9,6 +9,9 @@
   justify-content: space-between;
 
   .mochi-header-content {
+    // Mochi's Header.less face: Prelude Light (bundled Lato Light fallback).
+    font-family: "Mochi Light", sans-serif;
+    font-weight: normal;
     font-size: 36px;
     line-height: 32px;
     color: var(--mochi-text);

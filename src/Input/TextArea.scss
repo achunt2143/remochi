@@ -16,10 +16,16 @@
   outline: none;
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 
+  // Mochi's focused-field border (InputDecorator.less: #69cdff).
   &:focus {
-    border-color: var(--mochi-primary, #5b9dd9);
+    border-color: var(--mochi-accent, #69cdff);
     background: var(--mochi-field-bg, #fff);
-    box-shadow: 0 0 0 3px var(--mochi-primary-soft, rgba(91,157,217,0.18));
+    box-shadow: 0 0 0 3px var(--mochi-accent-soft, rgba(105,205,255,0.3));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mochi-primary, #5b9dd9);
+    outline-offset: 1px;
   }
 
   &::placeholder {
@@ -29,8 +35,7 @@
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.5;
-    background: var(--mochi-bg, #f5f5f5);
+    opacity: var(--mochi-disabled-opacity, 0.4);
   }
 
   &::-webkit-scrollbar       { width: 4px; }
@@ -60,5 +65,5 @@
   transition: cursor 0.2s ease;
 
   &:focus  { cursor: text; outline: none; }
-  &:disabled { cursor: default; opacity: 0.5; }
+  &:disabled { cursor: default; opacity: var(--mochi-disabled-opacity, 0.4); }
 }

@@ -126,7 +126,8 @@ const RichText = ({
         dangerouslySetInnerHTML={{ __html: value }}
         style={{
           minHeight: `${minHeight}px`,
-          outline: 'none',
+          // No inline `outline` here: RichText.scss owns focus styling, and
+          // an inline value would override its :focus-visible ring.
           whiteSpace: 'pre-wrap',
           wordWrap: 'break-word',
         }}

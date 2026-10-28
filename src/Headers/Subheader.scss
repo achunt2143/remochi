@@ -8,6 +8,8 @@
   align-items: center;
 
   .mochi-subheader-content {
+    // Mochi's Subheader.less face: Prelude Medium Italic.
+    font-family: "Mochi Medium", sans-serif;
     font-size: 18px;
     font-style: italic;
     color: var(--mochi-text-muted);

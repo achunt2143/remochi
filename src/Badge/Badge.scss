@@ -9,8 +9,11 @@
 }
 
 .mochi-badge-inner {
-  font-family: "Segoe UI", Arial, sans-serif;
-  font-weight: 600;
+  // Mochi's Badge.less face. It's already a bold italic cut, declared at
+  // normal weight (see MochiThemeWrapper.scss), so asking for a heavier
+  // weight on top would only add synthetic bolding.
+  font-family: "Mochi Bold Italic", sans-serif;
+  font-weight: normal;
   font-size: 12px;
   height: 24px;
   line-height: 24px;
@@ -47,7 +50,7 @@
   height: 18px;
   padding: 0 5px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: normal;
   line-height: 1;
   vertical-align: middle;
 }

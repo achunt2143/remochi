@@ -8,8 +8,10 @@ import styled from "styled-components";
 // Checkbox use — same mismatch as those components had. red/green use the
 // --mochi-* aliases (not the underlying --color-* vars directly) to match
 // the convention the rest of the theme follows, e.g. the warning Button.
+// blue (the default) is Mochi's progress fill, #69cdff (ProgressBar.less),
+// via --mochi-accent.
 const colorMap = {
-  blue:   "var(--mochi-primary, #5b9dd9)",
+  blue:   "var(--mochi-accent, #69cdff)",
   yellow: "var(--mochi-selected, #ffb80d)",
   red:    "var(--mochi-error, #d32f2f)",
   green:  "var(--mochi-success, #4caf50)",

@@ -42,7 +42,7 @@
     }
 
     &.disabled {
-      opacity: 0.5;
+      opacity: var(--mochi-disabled-opacity, 0.4);
       cursor: not-allowed;
     }
   }
@@ -92,6 +92,11 @@
 
     &:focus {
       border-color: var(--mochi-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mochi-primary, #4a8bc2);
+      outline-offset: 1px;
     }
   }
 

@@ -103,7 +103,7 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
                 background: sel ? 'var(--mochi-primary, #43aae4)' : 'none',
                 fontWeight: sel ? 700 : 400,
                 cursor: disabled ? 'not-allowed' : 'pointer',
-                opacity: disabled ? 0.4 : 1,
+                opacity: disabled ? 'var(--mochi-disabled-opacity, 0.4)' : 1,
               }}
               onClick={() => !disabled && onSelect(cell.date)}
               disabled={disabled}

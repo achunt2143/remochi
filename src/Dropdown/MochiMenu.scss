@@ -57,7 +57,7 @@
     color: var(--mochi-selected, #ffb80d);
     border-radius: 32px;
   }
-  &.disabled { opacity: 0.4; cursor: default; }
+  &.disabled { opacity: var(--mochi-disabled-opacity, 0.4); cursor: default; }
 }
 
 // Divider
