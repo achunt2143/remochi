@@ -41,6 +41,21 @@ const ViewSelectButtonItem = React.forwardRef(({
 ));
 
 /**
+ * Width of an item at rest. The press effect widens the label with
+ * letter-spacing (see .mochi-button-base:active in the SCSS), so measuring
+ * the live box mid-press — or during its ease back — sizes the bar to the
+ * expanded label and it stays that wide. Mochi's own calcBarValue
+ * subtracted the same letter-spacing when sizing its bar.
+ */
+function restingWidth(itemEl) {
+  const width = itemEl.getBoundingClientRect().width;
+  const label = itemEl.querySelector('.mochi-button-base');
+  if (!label) return width;
+  const spacing = parseFloat(getComputedStyle(label).letterSpacing) || 0;
+  return width - spacing * [...label.textContent].length;
+}
+
+/**
  * Mochi ViewSelectButton React Component
  * 
  * A group of buttons laid out horizontally with decorative end-caps and animated selection bar.
@@ -84,6 +99,15 @@ const ViewSelectButton = ({
 
   useEffect(() => {
     updateBarPosition();
+    // Re-measure whenever an item or the group changes size: the press
+    // effect animating back, the bundled fonts finishing loading after the
+    // first measurement, or the responsive font-size below 640px.
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(updateBarPosition);
+      if (itemsWrapperRef.current) ro.observe(itemsWrapperRef.current);
+      itemsRef.current.slice(0, items.length).forEach((el) => el && ro.observe(el));
+      return () => ro.disconnect();
+    }
     window.addEventListener('resize', updateBarPosition);
     return () => window.removeEventListener('resize', updateBarPosition);
   }, [activeIndex, items]);
@@ -95,14 +119,16 @@ const ViewSelectButton = ({
       const activeRect = activeElement.getBoundingClientRect();
 
       if (wrapperRect) {
-        const left = activeRect.left - wrapperRect.left;
-        const width = activeRect.width;
+        const left = `${activeRect.left - wrapperRect.left}px`;
+        const width = `${restingWidth(activeElement)}px`;
 
-        setBarStyle({
-          width: `${width}px`,
-          left: `${left}px`,
-          transition: 'all 0.3s ease'
-        });
+        // Same values → keep the same object, so observer callbacks during
+        // a press don't re-render for nothing.
+        setBarStyle((prev) =>
+          prev.width === width && prev.left === left
+            ? prev
+            : { width, left, transition: 'all 0.3s ease' }
+        );
       }
     }
   };

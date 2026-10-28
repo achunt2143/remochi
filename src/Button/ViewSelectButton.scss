@@ -52,13 +52,20 @@
   }
 
   &[aria-disabled="true"] {
-    opacity: 0.4;
+    opacity: var(--mochi-disabled-opacity, 0.4);
     cursor: not-allowed;
   }
 
   &:focus {
     outline: none;
     box-shadow: inset 0 0 0 2px var(--mochi-primary-soft, rgba(105, 205, 255, 0.3));
+  }
+
+  // The soft :focus tint above is barely visible; keyboard focus gets a
+  // solid ring (inset, since items sit edge to edge).
+  &:focus-visible {
+    outline: 2px solid var(--mochi-primary, #69cdff);
+    outline-offset: -2px;
   }
 
   &:hover:not([aria-disabled="true"]) {
@@ -72,7 +79,8 @@
   bottom: 0;
   left: 0;
   height: 2px;
-  background-color: var(--mochi-primary, #69cdff);
+  // Mochi's button bar color (Button.less: #69cdff).
+  background-color: var(--mochi-accent, #69cdff);
   pointer-events: none;
 }
 

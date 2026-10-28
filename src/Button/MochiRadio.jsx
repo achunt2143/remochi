@@ -11,7 +11,7 @@ const MochiRadioLabel = styled.label`
   font-style: italic;
   color: var(--mochi-text, #4b4b4b);
   padding: 6px 10px;
-  opacity: ${({ disabled }) => (disabled ? 0.48 : 1)};
+  opacity: ${({ disabled }) => (disabled ? "var(--mochi-disabled-opacity, 0.4)" : 1)};
   user-select: none;
 `;
 
@@ -41,7 +41,20 @@ const MochiRadioOuter = styled.span`
       : "var(--mochi-mark, #fff)"};
   margin-right: 8px;
   box-sizing: border-box;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+
+  // Invisible 54px tap target (webOS TouchPad standard, per the HIG's
+  // "Laying Out Content and Controls") centered on the 30px circle; a tap
+  // on it bubbles to the label like a tap on the circle itself.
+  &::before {
+    content: "";
+    position: absolute;
+    top: calc(50% - 27px);
+    left: calc(50% - 27px);
+    width: 54px;
+    height: 54px;
+  }
 
   border: ${BORDER}px solid
     ${({ $checked, disabled }) =>
