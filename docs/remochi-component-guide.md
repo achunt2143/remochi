@@ -371,7 +371,9 @@ const openPopup = () => {
 
 ### Dialog
 
-`Dialog` is a centered modal with a `title`, `isOpen` flag, `onClose` callback, and an `actions` array describing footer buttons. The demo wires these actions to log and close the dialog.
+`Dialog` is a centered Mochi modal card over a scrim, with the same chrome as `PopupPanel`. It takes a `title`, an `isOpen` flag, an `onClose` callback, and either a `type` (`'alert'`, `'confirm'`, `'prompt'`) for built-in buttons or an `actions` array for custom ones. It closes via its buttons, the scrim, or Escape; pass `showCloseButton` for a ×.
+
+Follow the webOS button colors: green (`'affirmative'`) for the positive choice in a decision, red (`'warning'`) only for a destructive one, and a plain button for Cancel. Built-in confirm dialogs do this by default; set `confirmType="warning"` when the confirm action deletes something.
 
 Example:
 
@@ -381,8 +383,8 @@ Example:
   title="Confirm Action"
   onClose={() => setDialogOpen(false)}
   actions={[
-    { label: 'Cancel', onClick: handleCancel, type: 'warning' },
-    { label: 'Confirm', onClick: handleConfirm },
+    { label: 'Cancel', onClick: handleCancel },
+    { label: 'Confirm', onClick: handleConfirm, type: 'affirmative' },
   ]}
 >
   <p>Are you sure you want to proceed with this action?</p>
@@ -426,16 +428,32 @@ The demo’s `SlidingMenu` component is local to `remochi-demo` but illustrates 
 
 ### Wizard
 
-`Wizard` renders step indicators for multi-step flows. It accepts a `steps` array and `currentStep` index, and renders children as the step content.
+`Wizard` renders step indicators and Back / Next / Finish controls for multi-step flows. Each entry in `steps` supplies its own `label`, optional `title` and `description`, and the `content` shown while that step is active. A step's `onNext` can return `false` (or a promise of `false`) to block moving on.
+
+Completion is tracked like a stack: Next marks the step being left as completed, and going back (Back, or tapping an earlier step in the header) un-completes the step returned to and everything after it.
 
 Example:
 
 ```jsx
-const steps = [{ label: 'Account' }, { label: 'Profile' }, { label: 'Review' }];
+const steps = [
+  { label: 'Account', content: <AccountForm /> },
+  { label: 'Profile', content: <ProfileForm /> },
+  { label: 'Review', content: <Review /> },
+];
 
-<Wizard steps={steps} currentStep={wizardStep}>
-  <div>Step {wizardStep + 1} of {steps.length}</div>
-</Wizard>
+<Wizard steps={steps} onComplete={submit} onStepChange={(step) => setStep(step)} />
+```
+
+To manage completion yourself, pass `completedSteps`. The wizard then shows exactly that list, and `onCompletedStepsChange(next, { reason, from, to })` tells you what its default tracking would have done, so you can take it, adjust it, or ignore it:
+
+```jsx
+const [done, setDone] = useState([]);
+
+<Wizard
+  steps={steps}
+  completedSteps={done}
+  onCompletedStepsChange={(next) => setDone(next)}
+/>
 ```
 
 ### Video

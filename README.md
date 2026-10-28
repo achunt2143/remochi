@@ -35,31 +35,31 @@ Import and use the components as you would with any React library:
 ```
 import React, { useState } from "react";
 import {
-MochiButton,
-MochiRadio,
-MochiInput,
-MochiSlider,
-MochiProgressBar,
-MochiSpinner,
-MochiPopupPanel
+Button,
+Radio,
+Input,
+Slider,
+ProgressBar,
+Spinner,
+PopupPanel
 } from "remochi";
 
 function Example() {
 const [value, setValue] = useState(50);
 return (
 <>
-<MochiButton onClick={() => alert("Clicked!")}>Click me</MochiButton>
-  <MochiRadio name="choice" value="alpha" checked onChange={() => {}}>Alpha</MochiRadio>
+<Button onClick={() => alert("Clicked!")}>Click me</Button>
+  <Radio name="choice" value="alpha" checked onChange={() => {}}>Alpha</Radio>
 
-  <MochiInput placeholder="Enter text here" />
+  <Input placeholder="Enter text here" />
 
-  <MochiSlider value={value} onChange={setValue} />
+  <Slider value={value} onChange={setValue} />
 
-  <MochiProgressBar value={value} />
+  <ProgressBar value={value} />
 
-  <MochiSpinner active size="large" styleType="dark" />
+  <Spinner active size="large" styleType="dark" />
 
-  <MochiPopupPanel
+  <PopupPanel
     isOpen
     title="Example"
     actions={[
@@ -68,7 +68,7 @@ return (
     ]}
   >
     Popup content here
-  </MochiPopupPanel>
+  </PopupPanel>
 </>
 );
 }
