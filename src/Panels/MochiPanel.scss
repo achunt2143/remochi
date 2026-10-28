@@ -2,6 +2,11 @@
 // Both Panel and FloatingPanel share these rules; the only difference is
 // border-radius, which is overridden by .mochi-floating-panel below.
 
+// Mochi's pane corner (Panels.less: border-top-left-radius: 45px). In a
+// RepanelStack the column behind runs 45px beneath this one (see
+// stackedPanelsLayout.js), so the curve reveals that column's surface.
+$mochi-panel-radius: 45px;
+
 .mochi-panel {
   box-sizing: border-box;
   height: 100%;
@@ -28,7 +33,7 @@
 
     // Top-left only — the bottom is left to the nubbin accent (see
     // .mochi-panel-handle-nubbin) rather than a separate rounded corner.
-    border-radius: 16px 0px 0px 0px;
+    border-radius: $mochi-panel-radius 0px 0px 0px;
   }
 
   // ── Shadow style (Overlay Inset Shadow from Figma) ─────────────────────
@@ -39,7 +44,7 @@
     border-style: solid;
     border-color: var(--mochi-panel-border, #666666);
 
-    border-radius: 16px 0px 0px 0px;
+    border-radius: $mochi-panel-radius 0px 0px 0px;
 
     box-shadow: inset 0px 4px 50px var(--mochi-panel-shadow-tint, rgba(0, 0, 0, 0.3));
   }

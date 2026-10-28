@@ -13,7 +13,8 @@ import {
   getPanelDescriptor,
   resolveReveal,
   clampRevealExtended,
-  blendPanelDescriptors,
+  getClosePreviewDescriptor,
+  getOverlapPx,
 } from './stackedPanelsLayout';
 
 // Swiping the ACTIVE panel's own grabber closes it (goes back one panel).
@@ -86,6 +87,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
     narrowFitWidth = 768,
     narrowBehavior = 'single',
     className = '',
+    style: rootStyle,
     ...rest
   } = props;
 
@@ -172,15 +174,22 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
   // panels. It never carries a nubbin (see the map loop below), so when
   // it's the leftmost visible panel there's nothing to reserve room for and
   // the viewport can sit flush — see .repanel__viewport's
-  // data-first-child-visible rule. While narrow, no nubbins render at all
-  // (showGrabber below is unconditionally false), so there's likewise
-  // nothing to reserve room for.
+  // data-first-child-visible rule. When narrow, index 0 has no grabber (flush),
+  // but index > 0 has its own grabber and requires the 20px inset so the nubbin
+  // isn't clipped by root's overflow:hidden.
   const isFirstChildVisible = useMemo(() => {
-    if (isNarrow || panelCount === 0) return true;
+    if (panelCount === 0) return true;
     // Mid-close-drag, use whichever endpoint (before/after the close) the
     // gesture is currently closer to, so the inset doesn't jump ahead of
-    // the visual blend.
-    const forActiveIndex = closeDrag ? (closeDrag.progress < 0.5 ? closeDrag.fromIndex : closeDrag.toIndex) : activeIndex;
+    // the visual blend. Narrow single-column mode keeps the closing panel's
+    // endpoint for the whole drag: that panel stays in front, under the
+    // finger, so flipping the inset halfway would jerk it sideways.
+    const singleColumn = isNarrow && narrowBehavior !== 'stack';
+    const forActiveIndex = closeDrag
+      ? closeDrag.progress < 0.5 || singleColumn
+        ? closeDrag.fromIndex
+        : closeDrag.toIndex
+      : activeIndex;
     return getPanelDescriptor({
       index: 0,
       activeIndex: forActiveIndex,
@@ -300,9 +309,14 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           // reveal-adjust grabber too (same as any parent's) — there's
           // nothing further right to reveal from here (it's already the
           // front), but collapsing the stack behind it should still work.
-          setCloseDrag(null);
-          const deltaUnits = dx / Math.max(1, config.peek);
-          setDragReveal(clampRevealExtended(c.startReveal + deltaUnits, config.snapPoints, Math.max(0, activeIndex)));
+          if (isNarrow) {
+            setCloseDrag(null);
+            setDragReveal(null);
+          } else {
+            setCloseDrag(null);
+            const deltaUnits = dx / Math.max(1, config.peek);
+            setDragReveal(clampRevealExtended(c.startReveal + deltaUnits, config.snapPoints, Math.max(0, activeIndex)));
+          }
         }
         return;
       }
@@ -318,7 +332,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       const deltaUnits = (e.clientX - g.startX) / Math.max(1, config.peek);
       setDragReveal(clampRevealExtended(g.startReveal + deltaUnits, config.snapPoints, Math.max(0, activeIndex)));
     },
-    [config.peek, config.snapPoints, activeIndex]
+    [config.peek, config.snapPoints, activeIndex, isNarrow]
   );
 
   const onGrabberPointerUp = useCallback(
@@ -346,7 +360,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           if (progress >= CLOSE_COMMIT_THRESHOLD || isFlick) {
             commitActiveIndex(c.toIndex, 'grabber');
           }
-        } else {
+        } else if (!isNarrow) {
           const deltaUnits = dx / Math.max(1, config.peek);
           const next = resolveReveal(c.startReveal + deltaUnits, config.snapPoints, Math.max(0, activeIndex));
           commitReveal(next, 'grabber');
@@ -368,7 +382,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       setDragReveal(null);
       commitReveal(next, 'grabber');
     },
-    [config.peek, config.snapPoints, activeIndex, commitActiveIndex, commitReveal, endDragListeners]
+    [config.peek, config.snapPoints, activeIndex, isNarrow, commitActiveIndex, commitReveal, endDragListeners]
   );
 
   const onGrabberPointerDown = useCallback(
@@ -379,16 +393,12 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
 
       if (idx === activeIndex) {
         if (activeIndex <= 0) return; // nothing behind it to close into
-        // If there's still more of the stack to reveal (e.g. it was
-        // previously collapsed all the way to just this panel), the
-        // active grabber behaves exactly like a parent's — plain
-        // bidirectional reveal-adjust — so there's always a way back to a
-        // fully-collapsed panel's parents, even though every parent's own
-        // grabber became non-interactive once it collapsed to 0 width.
-        // Only once nothing is left to reveal does dragging right switch
-        // to the swipe-to-close gesture.
+        // In narrow mode, parents are not multi-column reveals, so dragging the
+        // active panel's grabber to the right is always a swipe-to-close gesture.
+        // On desktop, dragging right adjusts reveal until fully expanded, then
+        // switches to swipe-to-close.
         const structuralMax = bounds.min + Math.max(0, activeIndex);
-        if (committedReveal < structuralMax) {
+        if (!isNarrow && committedReveal < structuralMax) {
           grabRef.current = { el: grabberEl, startX: e.clientX, startReveal: committedReveal };
           setDragReveal(committedReveal);
         } else {
@@ -428,7 +438,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       window.addEventListener('pointerup', up);
       window.addEventListener('pointercancel', up);
     },
-    [committedReveal, activeIndex, bounds.min, endDragListeners, onGrabberPointerMove, onGrabberPointerUp]
+    [committedReveal, activeIndex, isNarrow, bounds.min, endDragListeners, onGrabberPointerMove, onGrabberPointerUp]
   );
 
   // Double-click a nubbin to instantly close as if fully swiped away —
@@ -488,31 +498,28 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       aria-roledescription="stacked panels"
       onKeyDown={onRootKeyDown}
       {...rest}
+      // How far each parent column runs beneath the next one; the
+      // stylesheet pads parent Repanels by this much so their content
+      // isn't hidden there.
+      style={{ '--repanel-overlap': `${getOverlapPx(config)}px`, ...rootStyle }}
     >
       <div className="repanel__viewport">
         {panels.map((child, idx) => {
           let d;
           let isActive;
           if (closeDrag) {
-            const dFrom = getPanelDescriptor({
+            d = getClosePreviewDescriptor({
               index: idx,
-              activeIndex: closeDrag.fromIndex,
+              fromIndex: closeDrag.fromIndex,
+              toIndex: closeDrag.toIndex,
+              progress: closeDrag.progress,
+              containerWidth: closeDrag.containerWidth,
               panelCount,
               reveal: committedReveal,
               config,
               isNarrow,
               narrowBehavior,
             });
-            const dTo = getPanelDescriptor({
-              index: idx,
-              activeIndex: closeDrag.toIndex,
-              panelCount,
-              reveal: committedReveal,
-              config,
-              isNarrow,
-              narrowBehavior,
-            });
-            d = blendPanelDescriptors(dFrom, dTo, closeDrag.progress, closeDrag.containerWidth);
             isActive = closeDrag.progress < 0.5 ? idx === closeDrag.fromIndex : idx === closeDrag.toIndex;
           } else {
             d = getPanelDescriptor({ index: idx, activeIndex, panelCount, reveal, config, isNarrow, narrowBehavior });
@@ -533,7 +540,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           // is fixed to the child's position in the `children` array, not
           // whatever is currently visible/active/narrow-collapsed.
           const isFirstChild = idx === 0;
-          const showGrabber = !isFirstChild && grabber && !isNarrow;
+          const showGrabber = !isFirstChild && grabber;
           // The nubbin is visual and lives on the panel itself (see
           // Repanel.jsx / MochiPanel.scss) — only a Repanel child knows how
           // to render it, so it's only cloned onto those, and never onto
@@ -567,6 +574,11 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
                   onPointerDown={onGrabberPointerDown(idx)}
                   onKeyDown={onGrabberKeyDown}
                   onDoubleClick={onGrabberDoubleClick(idx)}
+                  // No tap-to-close: the grabber holds pointer capture, so
+                  // the browser fires `click` after every drag (including a
+                  // below-threshold swipe that should spring back) and after
+                  // each half of a double-click. Closing is swipe or
+                  // double-click only, in narrow mode as on desktop.
                   onClick={(e) => e.stopPropagation()}
                 />
               )}

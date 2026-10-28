@@ -46,8 +46,9 @@ const Repanel = ({
   // variant's. Also picked in dark mode even for the 'default' panel
   // variant, since left.png's stroke color doesn't read against a dark
   // panel background the way left-shadow.png's does.
-  const { theme } = useTheme();
-  const nubbinImage = variant === 'shadow' || theme === 'dark' ? leftShadowNubbin : leftNubbin;
+  const { theme, isDark } = useTheme();
+  const isDarkTheme = isDark !== undefined ? isDark : theme === 'dark';
+  const nubbinImage = variant === 'shadow' || isDarkTheme ? leftShadowNubbin : leftNubbin;
 
   return (
     <div

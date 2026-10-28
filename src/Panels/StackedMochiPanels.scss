@@ -126,6 +126,22 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
     }
   }
 
+  // Every column but the active one runs --repanel-overlap (Mochi's 45px)
+  // beneath the next column (see stackedPanelsLayout.js), so — as in
+  // Mochi's Panels.less, whose panes are 320px plus 45px of right padding
+  // — its Repanel is padded by that much: the background still fills the
+  // tucked strip, which shows through the next column's rounded corner,
+  // but content stays clear of it.
+  &__panel:not([data-active='true']) > &__surface > .mochi-panel {
+    padding-right: var(--repanel-overlap, 0px);
+  }
+
+  // The base of the stack has nothing behind it, so it keeps a square
+  // corner (Mochi Panels.less: .mochi-base-panel).
+  &__panel[data-first-child='true'] > &__surface > .mochi-panel {
+    border-top-left-radius: 0;
+  }
+
   // ======================================
   // Grabber — reveal/close hitbox (every panel but the first)
   // ======================================
@@ -158,14 +174,45 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
       outline-offset: 2px;
       border-radius: 10px;
     }
+
+    // Invisible 54px-square touch target (webOS TouchPad standard, per
+    // the HIG's "Laying Out Content and Controls") over the nubbin. It
+    // grows left over the nubbin's own corner of the column behind, and
+    // up the panel's edge, reaching only 10px into this panel so it
+    // doesn't take taps from content along its bottom-left edge. The box
+    // above stays nubbin-sized so the focus ring still hugs the nubbin.
+    &::before {
+      content: '';
+      position: absolute;
+      left: -30px; // panel edge -44px (the box itself starts at -14px)
+      bottom: 8px; // the panel's bottom edge (the box sits 8px below it)
+      width: 54px;
+      height: 54px;
+    }
   }
 
   // ======================================
   // Narrow mode
   // ======================================
 
+  // Only the active panel is laid out, and its nubbin sits in the 20px
+  // gutter the viewport inset reserves (see data-first-child-visible
+  // above). The hitbox fills that gutter, reaching only 2px into the
+  // panel (its left border), so it can't steal taps from content along
+  // the panel's bottom-left edge, such as footer controls. It runs
+  // taller than the nubbin instead, up the empty gutter, for a
+  // touch-sized target.
   &[data-narrow='true'] &__grabber {
-    display: none;
+    left: -20px;
+    bottom: 0;
+    width: 22px;
+    height: 64px;
+
+    // The gutter is all the room there is; the wide-mode square above
+    // would only reach further into the panel.
+    &::before {
+      content: none;
+    }
   }
 }
 
