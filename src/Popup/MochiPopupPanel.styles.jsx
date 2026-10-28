@@ -11,6 +11,44 @@ import topLeftCornerLeft   from "./nubbinImages/top-left-corner-left.png";
 import topLeftCornerUp     from "./nubbinImages/top-left-corner-up.png";
 import topRightCornerRight from "./nubbinImages/top-right-corner-right.png";
 import topRightCornerUp   from "./nubbinImages/top-right-corner-up.png";
+import bottomLeftCornerDownDark   from "./nubbinImages/dark/bottom-left-corner-down.png";
+import bottomLeftCornerLeftDark   from "./nubbinImages/dark/bottom-left-corner-left.png";
+import bottomRightCornerDownDark  from "./nubbinImages/dark/bottom-right-corner-down.png";
+import bottomRightCornerRightDark from "./nubbinImages/dark/bottom-right-corner-right.png";
+import downDark            from "./nubbinImages/dark/down.png";
+import upDark              from "./nubbinImages/dark/up.png";
+import leftDark            from "./nubbinImages/dark/left.png";
+import rightDark           from "./nubbinImages/dark/right.png";
+import topLeftCornerLeftDark   from "./nubbinImages/dark/top-left-corner-left.png";
+import topLeftCornerUpDark     from "./nubbinImages/dark/top-left-corner-up.png";
+import topRightCornerRightDark from "./nubbinImages/dark/top-right-corner-right.png";
+import topRightCornerUpDark    from "./nubbinImages/dark/top-right-corner-up.png";
+
+// Dark-mode nubbins — the light images recolored the way Repanel's
+// left-shadow.png was: alpha untouched, fill → dark --mochi-surface
+// (#2a2a2a), stroke kept at --mochi-popup-border (#646464, both themes),
+// shadow kept black like the panel's box-shadow. The panel is portaled to
+// document.body, so its colors come from the :root theme attribute; the
+// images key off that same attribute rather than React context so the
+// nubbin always matches the body it's attached to.
+const DARK_NUBBINS = [
+  ["&.vertical.below",              upDark],
+  ["&.vertical.above",              downDark],
+  ["&.vertical.below.left.corner",  topRightCornerUpDark],
+  ["&.vertical.below.right.corner", topLeftCornerUpDark],
+  ["&.vertical.above.left.corner",  bottomRightCornerDownDark],
+  ["&.vertical.above.right.corner", bottomLeftCornerDownDark],
+  ["&.horizontal.left",             leftDark],
+  ["&.horizontal.right",            rightDark],
+  ["&.horizontal.left.high.corner", topLeftCornerLeftDark],
+  ["&.horizontal.right.high.corner", topRightCornerRightDark],
+  ["&.horizontal.left.low.corner",  bottomLeftCornerLeftDark],
+  ["&.horizontal.right.low.corner", bottomRightCornerRightDark],
+];
+const darkNubbinRules = DARK_NUBBINS.map(
+  ([selector, image]) =>
+    `:root[data-mochi-theme='dark'] ${selector}::after { background-image: url(${image}); }`
+).join("\n");
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: scale(0.97); }
@@ -51,6 +89,12 @@ export const Panel = styled.div.attrs(({ className }) => ({
   z-index: 1000;
   animation: ${fadeIn} 0.22s ease forwards;
   max-width: 320px;
+
+  /* The panel takes focus when it opens; show it when opened from the keyboard. */
+  &:focus-visible {
+    outline: 2px solid var(--mochi-primary, #4a8bc2);
+    outline-offset: 2px;
+  }
 
   /* ────────────────────────────────────────────────────────────────
      VERTICAL POPUP MARGIN OFFSETS
@@ -207,6 +251,8 @@ export const Panel = styled.div.attrs(({ className }) => ({
     height: 71px;
     background: transparent url(${bottomRightCornerRight}) no-repeat;
   }
+
+  ${darkNubbinRules}
 `;
 
 export const PanelTitle = styled.div`
