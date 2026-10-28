@@ -1,47 +1,103 @@
-// The Lato Google Font is loaded via a <link> tag injected in
-// MochiThemeWrapper.jsx, not a CSS @import here. Rollup concatenates every
-// component's SCSS into one bundled stylesheet, and @import is only valid
-// as the literal first statement of that FINAL file — since which
-// component's styles happen to land first in the bundle isn't something
-// this file controls, an @import here reliably ends up preceded by other
-// rules and gets dropped (with a build warning) regardless of its
-// position in this source file.
+@use 'sass:list';
+@use 'sass:map';
 
-@font-face {
-  font-family: 'Prelude';
-  src: local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), local('Arial');
-  font-weight: 300;
-  font-style: normal;
+// ============================================
+// Fonts — Mochi's faces (enyojs/mochi css/mochi-fonts.less)
+// ============================================
+// Mochi's voice is Prelude, the webOS system face, which can't be
+// redistributed — so like Mochi, each face tries the locally installed
+// Prelude first (present on webOS devices) and falls back to the
+// open-source Lato bundled in ./fonts (SIL OFL, see fonts/OFL.txt).
+// rollup.config.js copies ./fonts to dist/fonts, next to the extracted
+// CSS, so the same relative url() resolves from both places.
+//
+// The .woff files are fresh WOFF 1.0 encodings of Mochi's fonts/*.ttf
+// (Lato 1.x). Mochi's own .woff builds of the same faces render several
+// glyphs displaced in current Chromium (regular "g"/"8", bold "b"/"p",
+// bold-italic "3"); the TTFs, and these re-encodings, don't.
+//
+// The browser only downloads a face once text actually uses it.
+
+// Prelude's own face names (full + PostScript, incl. the "WGL" web build
+// Palm's apps shipped) paired with the Lato file standing in for it.
+$mochi-faces: (
+  light:       (local: ('Prelude Light', 'Prelude-Light', 'PreludeWGL-Light'),
+                lato: 'Lato Light', lato-ps: 'Lato-Light', file: 'lato-light'),
+  medium:      (local: ('Prelude Medium', 'Prelude-Medium', 'PreludeWGL-Medium'),
+                lato: 'Lato Regular', lato-ps: 'Lato-Regular', file: 'lato-regular'),
+  medium-italic: (local: ('Prelude Medium Oblique', 'Prelude-MediumOblique', 'PreludeWGL-MediumItalic'),
+                lato: 'Lato Italic', lato-ps: 'Lato-Italic', file: 'lato-italic'),
+  bold:        (local: ('Prelude Bold', 'Prelude-Bold', 'PreludeWGL-Bold'),
+                lato: 'Lato Bold', lato-ps: 'Lato-Bold', file: 'lato-bold'),
+  bold-italic: (local: ('Prelude Bold Oblique', 'Prelude-BoldOblique', 'PreludeWGL-BoldItalic'),
+                lato: 'Lato Bold Italic', lato-ps: 'Lato-BoldItalic', file: 'lato-bolditalic'),
+);
+
+@mixin mochi-font-face($family, $face, $weight, $style, $use-prelude: true) {
+  $f: map.get($mochi-faces, $face);
+  $src: ();
+  @if $use-prelude {
+    @each $name in map.get($f, local) {
+      $src: list.append($src, local($name), comma);
+    }
+  }
+  $src: list.append($src, local(map.get($f, lato)), comma);
+  $src: list.append($src, local(map.get($f, lato-ps)), comma);
+  $src: list.append($src, url('./fonts/#{map.get($f, file)}.woff') format('woff'), comma);
+
+  @font-face {
+    font-family: $family;
+    src: $src;
+    font-weight: $weight;
+    font-style: $style;
+    font-display: swap;
+  }
 }
 
-@font-face {
-  font-family: 'Prelude';
-  src: local('Segoe UI Semibold'), local('Roboto Medium'), local('Helvetica Neue Medium');
-  font-weight: 500;
-  font-style: normal;
-}
+// Mochi's own family names, declared exactly as mochi-fonts.less does —
+// component styles reference these directly (Button → Mochi Bold Oblique,
+// Header → Mochi Light, list items/subheaders → Mochi Medium italic, …).
+@include mochi-font-face('Mochi Light',        light,         normal, normal);
+@include mochi-font-face('Mochi Medium',       medium,        normal, normal);
+@include mochi-font-face('Mochi Medium',       medium-italic, normal, italic);
+// Mochi's list items and list headers ask "Mochi Medium" for bold italic
+// (ListItem.less, ListHeader.less) and relied on the browser faking the
+// bold; current browsers don't reliably synthesize it for a web font, so
+// the family also gets the real bold faces.
+@include mochi-font-face('Mochi Medium',       bold,          bold,   normal);
+@include mochi-font-face('Mochi Medium',       bold-italic,   bold,   italic);
+@include mochi-font-face('Mochi Med Oblique',  medium-italic, normal, oblique);
+@include mochi-font-face('Mochi Bold',         bold,          bold,   normal);
+@include mochi-font-face('Mochi Bold Italic',  bold-italic,   normal, normal);
+@include mochi-font-face('Mochi Bold Oblique', bold-italic,   bold,   oblique);
 
-@font-face {
-  font-family: 'Prelude';
-  src: local('Segoe UI Bold'), local('Roboto Bold'), local('Helvetica Neue Bold');
-  font-weight: 600;
-  font-style: normal;
-}
+// 'Prelude' — the wrapper's body family, with real weights so ordinary
+// 400 text gets the Medium/Regular face. (It previously only had 300/500/
+// 600 faces, so 400 text resolved to the 500 face — Segoe UI Semibold.)
+// 500 still resolves to 400 and 600 to 700, per CSS font matching.
+@include mochi-font-face('Prelude', light,         300, normal);
+@include mochi-font-face('Prelude', medium,        400, normal);
+@include mochi-font-face('Prelude', medium-italic, 400, italic);
+@include mochi-font-face('Prelude', bold,          700, normal);
+@include mochi-font-face('Prelude', bold-italic,   700, italic);
+
+// 'Mochi Lato' — the same weights, Lato only (fontFamily="Lato").
+@include mochi-font-face('Mochi Lato', light,         300, normal, false);
+@include mochi-font-face('Mochi Lato', medium,        400, normal, false);
+@include mochi-font-face('Mochi Lato', medium-italic, 400, italic, false);
+@include mochi-font-face('Mochi Lato', bold,          700, normal, false);
+@include mochi-font-face('Mochi Lato', bold-italic,   700, italic, false);
 
 .mochi-theme-wrapper {
-  min-height: 100vh;
-  font-family: 'Prelude', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-               'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Prelude', sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 
   &[data-font-family='Lato'] {
-    font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Mochi Lato', sans-serif;
   }
 
   &[data-font-family='Prelude'] {
-    font-family: 'Prelude', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Prelude', sans-serif;
   }
 
   // ============================================
@@ -102,6 +158,13 @@
   --transition-base: 250ms ease;
   --transition-slow: 350ms ease;
 
+  // Only the document-level wrapper (the one syncing <html>'s
+  // data-mochi-theme) fills the viewport; a nested wrapper theming one
+  // section sizes to its content.
+  &--root {
+    min-height: 100vh;
+  }
+
   // Theme colors themselves are NOT defined here (see the top-level
   // :root[data-mochi-theme] blocks below this .mochi-theme-wrapper rule) —
   // they need to reach components that render via createPortal(el,
@@ -153,8 +216,16 @@
 // via createPortal(el, document.body) — Dialog, Dropdown's menu, Popup —
 // which sit outside the wrapper in the actual DOM and would otherwise
 // never inherit them (see the comment on .mochi-theme-wrapper above).
+// The same tokens are also scoped to each wrapper div's own attribute/
+// class, so a nested ThemeWrapper can theme just its subtree.
+//
+// Deliberately no bare `:root` fallback here: outside any ThemeWrapper
+// these tokens stay undefined, so components fall back to their own
+// light-look var() fallbacks (see the comment atop MochiButton.jsx).
 
-:root[data-mochi-theme='dark'] {
+:root[data-mochi-theme='dark'],
+[data-mochi-theme='dark'],
+.mochi-theme-dark {
   // Primary/secondary/error refined to the exact values from the Figma
   // dark-mode spec (previously close-but-approximated guesses).
   --color-primary:        #5ab8f5;
@@ -257,9 +328,16 @@
   // rather than a subtle highlight. This is a solid, slightly lighter
   // shade of --mochi-panel-bg (#404040) instead.
   --mochi-panel-hover: #4d4d4d;
+
+  // Slider's unfilled track. Mochi only defined a light look (#a2a2a2);
+  // in dark mode that's brighter than the text it sits beside, so this
+  // uses the same neutral "off" grey as --mochi-toggle-track instead.
+  --mochi-slider-track: #646464;
 }
 
-:root[data-mochi-theme='light'] {
+:root[data-mochi-theme='light'],
+[data-mochi-theme='light'],
+.mochi-theme-light {
   --color-primary:        #4a8bc2;
   --color-primary-hover:  #5b9dd9;
   --color-primary-active: #3a7bb2;
@@ -336,6 +414,11 @@
   --mochi-toggle-knob:  #ffffff;
   --mochi-mark:         #ffffff;
   --mochi-panel-hover:  #ececec;
+
+  // Slider's unfilled track — Mochi's own #a2a2a2 (Slider.less/
+  // ProgressBar.less). It previously reused --mochi-hover (4% black),
+  // which left the track barely visible.
+  --mochi-slider-track: #a2a2a2;
 }
 
 // ============================================
@@ -357,6 +440,18 @@
   // having its own (Radio/Checkbox previously used a plain white fill).
   // Constant across both themes, same as --mochi-selected above.
   --mochi-toggle-track: #646464;
+
+  // Mochi's interactive accent (#69cdff in Button.less, Slider.less,
+  // ProgressBar.less, InputDecorator.less): the button press bar, slider
+  // knob/fill, progress fill and a focused field's border. Kept separate
+  // from --mochi-primary, which also colors text (links, dropdown labels)
+  // where #69cdff on a light background would be too faint to read.
+  --mochi-accent:      #69cdff;
+  --mochi-accent-soft: rgba(105, 205, 255, 0.3);
+
+  // Mochi dims every disabled control to the same 40%
+  // (@mochi-disabled-opacity in mochi-variables.less).
+  --mochi-disabled-opacity: 0.4;
 }
 
 // ============================================
