@@ -1,5 +1,6 @@
 export default NubbinDivider;
-declare function NubbinDivider({ nubbin, nubbinOffset, orientation, thickness, className, style, }: {
+declare function NubbinDivider({ nubbin, nubbinOffset, orientation, thickness, className, style, ...rest }: {
+    [x: string]: any;
     nubbin?: string | undefined;
     nubbinOffset?: string | undefined;
     orientation?: string | undefined;

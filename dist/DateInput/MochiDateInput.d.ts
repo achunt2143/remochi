@@ -1,5 +1,6 @@
 export default MochiDateInput;
-declare function MochiDateInput({ value, onChange, label, placeholder, minDate, maxDate, disabled, className, }: {
+declare function MochiDateInput({ value, onChange, label, placeholder, minDate, maxDate, disabled, className, style, ...rest }: {
+    [x: string]: any;
     value: any;
     onChange: any;
     label: any;
@@ -8,4 +9,5 @@ declare function MochiDateInput({ value, onChange, label, placeholder, minDate, 
     maxDate: any;
     disabled?: boolean | undefined;
     className?: string | undefined;
+    style: any;
 }): any;

@@ -27,6 +27,7 @@ const MochiTable = ({
   hoverable = true,
   striped   = false,
   className = '',
+  ...rest
 }) => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
@@ -72,7 +73,7 @@ const MochiTable = ({
 
   // ── Render ────────────────────────────────────────────────────────
   return (
-    <div className={`mochi-table-container ${className}`}>
+    <div {...rest} className={['mochi-table-container', className].filter(Boolean).join(' ')}>
       <table
         className={[
           'mochi-table',

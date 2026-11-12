@@ -33,7 +33,7 @@ $mochi-panel-radius: 45px;
 
     // Top-left only — the bottom is left to the nubbin accent (see
     // .mochi-panel-handle-nubbin) rather than a separate rounded corner.
-    border-radius: $mochi-panel-radius 0px 0px 0px;
+    border-radius: var(--mochi-scallop, #{$mochi-panel-radius} 0px 0px 0px);
   }
 
   // ── Shadow style (Overlay Inset Shadow from Figma) ─────────────────────
@@ -44,7 +44,7 @@ $mochi-panel-radius: 45px;
     border-style: solid;
     border-color: var(--mochi-panel-border, #666666);
 
-    border-radius: $mochi-panel-radius 0px 0px 0px;
+    border-radius: var(--mochi-scallop, #{$mochi-panel-radius} 0px 0px 0px);
 
     box-shadow: inset 0px 4px 50px var(--mochi-panel-shadow-tint, rgba(0, 0, 0, 0.3));
   }
@@ -82,8 +82,13 @@ $mochi-panel-radius: 45px;
 .mochi-floating-panel {
   width: 100%;
 
+  &.mochi-panel--default {
+    background: var(--mochi-surface-material, var(--mochi-panel-bg, #f5f5f5));
+    border-color: var(--mochi-panel-border, #666666);
+  }
+
   &.mochi-panel--default,
   &.mochi-panel--shadow {
-    border-radius: 16px;
+    border-radius: var(--mochi-corner, 16px);
   }
 }

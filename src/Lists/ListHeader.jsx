@@ -11,9 +11,9 @@ import './ListHeader.scss';
  *   - content: String for list header text (default: '')
  *   - children: Optional content to render below header
  */
-const ListHeader = ({ content = '', children }) => {
+const ListHeader = ({ content = '', children, className = '', ...rest }) => {
   return (
-    <div className="mochi-list-header">
+    <div {...rest} className={['mochi-list-header', className].filter(Boolean).join(' ')}>
       {content}
       {children}
     </div>

@@ -21,7 +21,7 @@ const Track = styled.div`
   width: ${({ width }) => width || "100%"};
   height: ${trackHeight};
   background: var(--mochi-slider-track, #a2a2a2);
-  border-radius: 12px;
+  border-radius: var(--mochi-corner-pill, 9999px);
   position: relative;
   margin: 42px 0 36px 0;
 
@@ -41,7 +41,7 @@ const Fill = styled.div`
   top: 0;
   left: 0;
   height: ${trackHeight};
-  border-radius: 12px;
+  border-radius: var(--mochi-corner-pill, 9999px);
   background-color: ${({ $color }) => $color || ACCENT};
   width: ${({ $percent }) => $percent}%;
   transition: ${({ $active }) => $active ? "none" : "width 0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0)"};
@@ -138,6 +138,9 @@ export const MochiSlider = ({
   max = 100,
   step = 1,
   onChange,
+  style,
+  onKeyDown: userOnKeyDown,
+  ...rest
 }) => {
   const [active, setActive] = useState(false);
   const [internalVal, setInternalVal] = useState(value);
@@ -248,14 +251,18 @@ export const MochiSlider = ({
 
   return (
     <SliderRoot
-      style={{ width }}
+      {...rest}
+      style={{ width, ...style }}
       tabIndex={0}
       role="slider"
       aria-valuenow={internalVal}
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuetext={`${internalVal}`}
-      onKeyDown={handleKeyDown}
+      onKeyDown={(e) => {
+        userOnKeyDown?.(e);
+        if (!e.defaultPrevented) handleKeyDown(e);
+      }}
     >
       <Track ref={trackRef} width={width} onClick={handleTrackClick}>
         <Fill $percent={percent} $color={resolvedColor} $active={active} />

@@ -28,7 +28,7 @@
   white-space: nowrap;
 
   &.oval {
-    border-radius: 12px;
+    border-radius: var(--mochi-corner-pill, 9999px);
     padding: 0 10px;
   }
 

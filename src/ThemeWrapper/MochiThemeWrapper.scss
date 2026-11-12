@@ -295,6 +295,7 @@ $mochi-faces: (
   --mochi-panel-border:      #333333;
   --mochi-panel-shadow-bg:   #1a1a1a;
   --mochi-panel-shadow-tint: #606060;
+  --mochi-surface-material:  var(--mochi-panel-bg);
 
   // MochiButton's "normal" decorator/label text. A dedicated token rather
   // than reusing --mochi-text-muted: this button was previously hardcoded
@@ -403,6 +404,7 @@ $mochi-faces: (
   --mochi-panel-border:      #666666;
   --mochi-panel-shadow-bg:   #f5f5f5;
   --mochi-panel-shadow-tint: rgba(0, 0, 0, 0.3);
+  --mochi-surface-material:  var(--mochi-panel-bg);
 
   // MochiButton's original hardcoded light-mode value, preserved exactly
   // (see the dark block's comment on this same token).
@@ -446,8 +448,17 @@ $mochi-faces: (
   // knob/fill, progress fill and a focused field's border. Kept separate
   // from --mochi-primary, which also colors text (links, dropdown labels)
   // where #69cdff on a light background would be too faint to read.
-  --mochi-accent:      #69cdff;
-  --mochi-accent-soft: rgba(105, 205, 255, 0.3);
+  /* --mochi-accent / --mochi-accent-soft intentionally have no :root default so
+     overriding --mochi-accent alone retints Slider, Toggle, Checkbox, Radio,
+     Input, Button, and ProgressBar together while un-overridden components
+     keep their 0.4.0 fallback colors (#69cdff / #ffb80d). */
+
+  /* Corner radius & scallop defaults (overridable via CSS or ThemeWrapper tokens) */
+  --mochi-corner:       16px;
+  --mochi-corner-sm:    10px;
+  --mochi-corner-field: 24px;
+  --mochi-corner-pill:  9999px;
+  --mochi-scallop:      45px 0 0 0;
 
   // Mochi dims every disabled control to the same 40%
   // (@mochi-disabled-opacity in mochi-variables.less).

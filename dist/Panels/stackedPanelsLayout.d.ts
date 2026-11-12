@@ -39,6 +39,7 @@ export function resolveReveal(value: any, snapPoints: any, maxParents: any): any
 export function clampIndex(index: any, count: any, wrap?: boolean): number;
 /** Resolve/normalize the layout-affecting props into a stable config object. */
 export function resolveLayoutConfig({ snapPoints, maxVisiblePanels, peek, overlap, }?: {
+    snapPoints: any;
     maxVisiblePanels?: number | undefined;
     peek?: number | undefined;
     overlap?: number | undefined;

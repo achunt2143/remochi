@@ -10,10 +10,13 @@ export default GridList;
  *   - columns: Number of columns (default: 3)
  *   - gap: Gap between items in px (default: 12)
  */
-declare function GridList({ children, columns, gap }: {
+declare function GridList({ children, columns, gap, className, style, ...rest }: {
+    [x: string]: any;
     children: any;
     columns?: number | undefined;
     gap?: number | undefined;
+    className?: string | undefined;
+    style: any;
 }): any;
 /**
  * Mochi GridList Image Item Component
@@ -27,9 +30,13 @@ declare function GridList({ children, columns, gap }: {
  *   - onSelect: Callback when item is selected
  *   - selected: Boolean for selected state
  */
-export function GridListImageItem({ src, caption, onSelect, selected }: {
+export function GridListImageItem({ src, caption, onSelect, selected, className, onClick: userOnClick, onKeyDown: userOnKeyDown, ...rest }: {
+    [x: string]: any;
     src: any;
     caption: any;
     onSelect?: (() => void) | undefined;
     selected?: boolean | undefined;
+    className?: string | undefined;
+    onClick: any;
+    onKeyDown: any;
 }): any;

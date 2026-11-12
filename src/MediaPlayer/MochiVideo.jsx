@@ -28,6 +28,10 @@ const MochiVideo = ({
   onPause,
   onEnded,
   onTimeUpdate,
+  onMouseMove: userOnMouseMove,
+  onMouseEnter: userOnMouseEnter,
+  onMouseLeave: userOnMouseLeave,
+  ...rest
 }) => {
   const videoRef         = useRef(null);
   const timelineRef      = useRef(null);
@@ -163,10 +167,20 @@ const MochiVideo = ({
 
   return (
     <div
+      {...rest}
       className={`mochi-video-container ${className} ${isFullscreen ? 'fullscreen' : ''}`}
-      onMouseMove={revealControls}
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => !isPlaying && setShowControls(false)}
+      onMouseMove={(e) => {
+        userOnMouseMove?.(e);
+        revealControls(e);
+      }}
+      onMouseEnter={(e) => {
+        userOnMouseEnter?.(e);
+        setShowControls(true);
+      }}
+      onMouseLeave={(e) => {
+        userOnMouseLeave?.(e);
+        if (!isPlaying) setShowControls(false);
+      }}
     >
       <video
         ref={videoRef}

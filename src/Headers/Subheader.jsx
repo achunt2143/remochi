@@ -10,7 +10,7 @@ import './Subheader.scss';
  * Props:
  *   - content: String for subheader text (default: '')
  */
-const Subheader = ({ content = '' }) => {
+const Subheader = ({ content = '', className = '', ...rest }) => {
   const [contentWidth, setContentWidth] = useState('auto');
   const subheaderRef = useRef(null);
   const contentRef = useRef(null);
@@ -35,7 +35,7 @@ const Subheader = ({ content = '' }) => {
   };
 
   return (
-    <div className="mochi-subheader" ref={subheaderRef}>
+    <div {...rest} className={['mochi-subheader', className].filter(Boolean).join(' ')} ref={subheaderRef}>
       <div
         className="mochi-subheader-content"
         ref={contentRef}

@@ -14,7 +14,9 @@ const MochiItem = ({
   disabled = false,
   hoverable = true,
   variant = 'default', // 'default', 'compact', 'detailed'
-  className = ''
+  className = '',
+  onKeyDown: userOnKeyDown,
+  ...rest
 }) => {
   const handleClick = (e) => {
     if (!disabled && onClick) {
@@ -31,6 +33,7 @@ const MochiItem = ({
 
   return (
     <div
+      {...rest}
       className={`mochi-item mochi-item-${variant} ${selected ? 'selected' : ''} ${
         disabled ? 'disabled' : ''
       } ${hoverable ? 'hoverable' : ''} ${onClick ? 'clickable' : ''} ${className}`}
@@ -38,6 +41,8 @@ const MochiItem = ({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick && !disabled ? 0 : undefined}
       onKeyDown={(e) => {
+        userOnKeyDown?.(e);
+        if (e.defaultPrevented) return;
         if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault();
           onClick(e);

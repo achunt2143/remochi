@@ -10,8 +10,10 @@ export default MochiWizard;
  * tracking would have changed it to, so the app can take, adjust or ignore
  * it. Same controlled/uncontrolled split as RepanelStack's activeIndex.
  */
-declare function MochiWizard({ steps, onComplete, onCancel, onStepChange, completedSteps: completedStepsProp, onCompletedStepsChange, showStepNumbers, allowSkip, className }: {
-    steps?: never[] | undefined;
+declare function MochiWizard({ steps, step: controlledStep, onComplete, onCancel, onStepChange, completedSteps: completedStepsProp, onCompletedStepsChange, showStepNumbers, allowSkip, className, ...rest }: {
+    [x: string]: any;
+    steps?: any[] | undefined;
+    step: any;
     onComplete: any;
     onCancel: any;
     onStepChange: any;

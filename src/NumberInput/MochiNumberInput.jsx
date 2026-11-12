@@ -25,6 +25,8 @@ const MochiNumberInput = ({
   disabled   = false,
   showControls = true,
   className  = '',
+  style,
+  ...rest
 }) => {
   const [local, setLocal] = useState(Number(value));
 
@@ -56,8 +58,9 @@ const MochiNumberInput = ({
 
   return (
     <div
+      {...rest}
       className={className}
-      style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px' }}
+      style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px', ...style }}
     >
       {label && (
         <label style={{ fontSize: '0.9rem', color: 'var(--mochi-text-muted, #888)' }}>

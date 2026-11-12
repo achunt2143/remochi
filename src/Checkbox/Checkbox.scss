@@ -70,8 +70,8 @@
   cursor: default;
 }
 
-// Focus ring — amber to match the active color family
+// Focus ring — accent or amber to match the active color family
 .mochi-checkbox:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 184, 13, 0.4);
+  box-shadow: 0 0 0 3px var(--mochi-accent-soft, var(--mochi-selected-soft, rgba(255, 184, 13, 0.4)));
 }

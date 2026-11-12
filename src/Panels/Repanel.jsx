@@ -40,6 +40,8 @@ const Repanel = ({
 }) => {
   // Accept plain number (treated as %) or any CSS string
   const resolvedWidth = typeof width === 'number' ? `${width}%` : width;
+  const resolvedVariant = typeof variant === 'string' ? variant : 'default';
+  const inlineStyle = variant && typeof variant === 'object' ? variant : undefined;
 
   // The shadow variant gets its own nubbin asset — left-shadow.png — so its
   // accent matches that variant's own (darker) look instead of the default
@@ -48,13 +50,18 @@ const Repanel = ({
   // panel background the way left-shadow.png's does.
   const { theme, isDark } = useTheme();
   const isDarkTheme = isDark !== undefined ? isDark : theme === 'dark';
-  const nubbinImage = variant === 'shadow' || isDarkTheme ? leftShadowNubbin : leftNubbin;
+  const nubbinImage = resolvedVariant === 'shadow' || isDarkTheme ? leftShadowNubbin : leftNubbin;
 
   return (
     <div
-      className={`mochi-panel mochi-panel--${variant} ${handle ? 'mochi-panel--handle' : ''} ${className}`}
-      style={{ width: resolvedWidth }}
       {...rest}
+      className={[
+        'mochi-panel',
+        `mochi-panel--${resolvedVariant}`,
+        handle && 'mochi-panel--handle',
+        className,
+      ].filter(Boolean).join(' ')}
+      style={inlineStyle ? { width: resolvedWidth, ...inlineStyle } : { width: resolvedWidth }}
     >
       {children}
       {handle && (

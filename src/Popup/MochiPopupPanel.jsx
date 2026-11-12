@@ -25,6 +25,9 @@ export function MochiPopupPanel({
   onClose,
   anchorEl,
   anchorRect: anchorRectProp,
+  className = "",
+  style: styleProp,
+  ...rest
 }) {
   const panelRef = useRef(null);
   const [pos, setPos] = useState(null);
@@ -207,10 +210,13 @@ export function MochiPopupPanel({
       role="dialog"
     >
       <Panel
+        {...rest}
         tabIndex={isOpen ? -1 : undefined}
         ref={panelRef}
-        style={panelStyle}
-        className={isOpen && pos ? pos.classes : ""}
+        style={styleProp ? { ...styleProp, ...panelStyle } : panelStyle}
+        className={[isOpen && pos ? pos.classes : "", className]
+          .filter(Boolean)
+          .join(" ")}
       >
         {title && <PanelTitle>{title}</PanelTitle>}
         <ContentArea>{children}</ContentArea>

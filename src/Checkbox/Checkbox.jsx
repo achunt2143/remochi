@@ -12,9 +12,9 @@ import './Checkbox.scss';
  *   onChange           {Function} Called with { checked, value } on toggle
  *   disabled           {boolean}  Disables interaction (default: false)
  *   canAnimate         {boolean}  Animate background-color transition (default: true)
- *   colorActive        {string}   Background when checked (default: var(--mochi-selected, '#ffb80d'))
+ *   colorActive        {string}   Background when checked (default: var(--mochi-accent, var(--mochi-selected, '#ffb80d')))
  *   colorInactive      {string}   Background when unchecked (default: var(--mochi-mark, '#fff'))
- *   colorActiveDisabled   {string}   Background when checked + disabled (default: var(--mochi-selected, '#ffb80d'))
+ *   colorActiveDisabled   {string}   Background when checked + disabled (default: var(--mochi-accent, var(--mochi-selected, '#ffb80d')))
  *   colorInactiveDisabled {string}   Background when unchecked + disabled (default: '#fff')
  */
 const Checkbox = ({
@@ -22,14 +22,19 @@ const Checkbox = ({
   onChange = () => {},
   disabled = false,
   canAnimate = true,
-  colorActive = 'var(--mochi-selected, #ffb80d)',
+  colorActive = 'var(--mochi-accent, var(--mochi-selected, #ffb80d))',
   // Light-grey accent (--mochi-mark) — the border below (.mochi-checkbox
   // in Checkbox.scss) is the dark --mochi-toggle-track instead, so
   // unchecked reads as a dark ring around a light-grey fill, same pairing
   // Radio uses.
   colorInactive = 'var(--mochi-mark, #fff)',
-  colorActiveDisabled = 'var(--mochi-selected, #ffb80d)',
+  colorActiveDisabled = 'var(--mochi-accent, var(--mochi-selected, #ffb80d))',
   colorInactiveDisabled = '#fff',
+  className = '',
+  style: styleProp,
+  onClick: userOnClick,
+  onKeyDown: userOnKeyDown,
+  ...rest
 }) => {
   const [isChecked, setIsChecked] = useState(checked);
 
@@ -55,24 +60,32 @@ const Checkbox = ({
     isChecked  && 'checked',
     disabled   && 'disabled',
     canAnimate && 'mochi-checkbox-animate',
+    className,
   ].filter(Boolean).join(' ');
 
   // When checked the CSS supplies the image; backgroundColor drives the tint.
   // When unchecked we still honour the colorInactive prop inline.
-  const style = isChecked
-    ? { backgroundColor: getBackgroundColor() }
-    : { backgroundColor: getBackgroundColor() };
+  const mergedStyle = {
+    backgroundColor: getBackgroundColor(),
+    ...styleProp,
+  };
 
   return (
     <div
+      {...rest}
       className={classes}
-      style={style}
-      onClick={handleToggle}
+      style={mergedStyle}
+      onClick={(e) => {
+        userOnClick?.(e);
+        if (!e.defaultPrevented) handleToggle();
+      }}
       role="checkbox"
       aria-checked={isChecked}
       aria-disabled={disabled}
       tabIndex={disabled ? -1 : 0}
       onKeyDown={(e) => {
+        userOnKeyDown?.(e);
+        if (e.defaultPrevented) return;
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
           handleToggle();

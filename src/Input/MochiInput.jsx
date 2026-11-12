@@ -6,7 +6,7 @@ export const MochiInput = styled.input.attrs(props => ({
   background: var(--mochi-field-bg, #fff);
   color: var(--mochi-field-text, #444);
   border: 2px solid var(--mochi-field-border, #ccc);
-  border-radius: 24px;
+  border-radius: var(--mochi-corner-field, 24px);
   font-size: 1.13rem;
   padding: 8px 22px;
   transition:

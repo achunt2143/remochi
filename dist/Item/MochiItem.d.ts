@@ -1,5 +1,6 @@
 export default MochiItem;
-declare function MochiItem({ children, title, subtitle, icon, rightContent, onClick, onIconClick, selected, disabled, hoverable, variant, className }: {
+declare function MochiItem({ children, title, subtitle, icon, rightContent, onClick, onIconClick, selected, disabled, hoverable, variant, className, onKeyDown: userOnKeyDown, ...rest }: {
+    [x: string]: any;
     children: any;
     title: any;
     subtitle: any;
@@ -12,4 +13,5 @@ declare function MochiItem({ children, title, subtitle, icon, rightContent, onCl
     hoverable?: boolean | undefined;
     variant?: string | undefined;
     className?: string | undefined;
+    onKeyDown: any;
 }): any;

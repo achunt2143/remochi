@@ -18,14 +18,22 @@ const FloatingPanel = ({
   className = '',
   children,
   ...rest
-}) => (
-  <div
-    className={`mochi-panel mochi-floating-panel mochi-panel--${variant} ${className}`}
-    {...rest}
-  >
-    {children}
-  </div>
-);
+}) => {
+  const resolvedVariant = typeof variant === 'string' ? variant : 'default';
+  const inlineStyle = variant && typeof variant === 'object' ? variant : undefined;
+
+  return (
+    <div
+      {...rest}
+      className={['mochi-panel', 'mochi-floating-panel', `mochi-panel--${resolvedVariant}`, className]
+        .filter(Boolean)
+        .join(' ')}
+      style={inlineStyle}
+    >
+      {children}
+    </div>
+  );
+};
 
 export { FloatingPanel };
 export { FloatingPanel as MochiFloatingPanel };

@@ -12,7 +12,7 @@ import './Header.scss';
  *   - children: React elements for controls (displayed right-aligned)
  *   - customClasses: Additional CSS classes to apply (default: '')
  */
-const Header = ({ content = '', children, customClasses = '' }) => {
+const Header = ({ content = '', children, customClasses = '', className = '', ...rest }) => {
   const [contentWidth, setContentWidth] = useState('auto');
   const headerRef = useRef(null);
   const controlsRef = useRef(null);
@@ -48,7 +48,7 @@ const Header = ({ content = '', children, customClasses = '' }) => {
   const hasControls = React.Children.count(children) > 0;
 
   return (
-    <div className="mochi-header" ref={headerRef}>
+    <div {...rest} className={['mochi-header', className].filter(Boolean).join(' ')} ref={headerRef}>
       <div
         className={`mochi-header-content ${customClasses}`}
         style={{ maxWidth: contentWidth, width: contentWidth }}

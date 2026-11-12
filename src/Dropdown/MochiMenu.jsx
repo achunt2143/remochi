@@ -25,6 +25,9 @@ const MochiMenu = ({
   onClose,
   maxHeight = 200,
   children,
+  className = '',
+  style: styleProp,
+  ...rest
 }) => {
   const menuRef = useRef(null);
   const [style, setStyle] = useState({ visibility: 'hidden', position: 'fixed' });
@@ -86,9 +89,10 @@ const MochiMenu = ({
           bg, border, border-radius, box-shadow, fadeIn animation.
           The 'mochi-menu' class adds no-nubbin override from MochiMenu.scss. */}
       <Panel
+        {...rest}
         ref={menuRef}
-        className="mochi-menu"
-        style={style}
+        className={['mochi-menu', className].filter(Boolean).join(' ')}
+        style={styleProp ? { ...styleProp, ...style } : style}
         role="listbox"
       >
         <div

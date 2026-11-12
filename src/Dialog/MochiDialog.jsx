@@ -30,6 +30,7 @@ const MochiDialog = ({
   onPromptChange,
   // Custom actions: [{ label, onClick, type? }]
   actions,
+  ...rest
 }) => {
   const dialogRef = useRef(null);
   const titleId = useId();
@@ -120,6 +121,7 @@ const MochiDialog = ({
       aria-hidden={!isOpen}
     >
       <div
+        {...rest}
         ref={dialogRef}
         className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type}${className ? ` ${className}` : ''}`}
         role="dialog"

@@ -11,4 +11,4 @@ export default MochiSlidingMenuItemGroup;
  * @param {string}          className
  * @param {object}          style
  */
-export function MochiSlidingMenuItemGroup({ children, label, className, style, divider, }: React.ReactNode): any;
+export function MochiSlidingMenuItemGroup({ children, label, className, style, divider, ...rest }: React.ReactNode): any;

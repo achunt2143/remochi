@@ -29,6 +29,7 @@ const MochiSlidingMenuItem = ({
   style = {},
   disabled = false,
   variant = 'default',
+  ...rest
 }) => {
   const handleClick = useCallback(
     (e) => {
@@ -57,11 +58,12 @@ const MochiSlidingMenuItem = ({
   if (href && !disabled) {
     return (
       <a
+        data-testid="mochi-sliding-menu-item"
+        {...rest}
         href={href}
         className={itemClass}
         style={style}
         onClick={handleClick}
-        data-testid="mochi-sliding-menu-item"
       >
         {content}
       </a>
@@ -71,11 +73,12 @@ const MochiSlidingMenuItem = ({
   return (
     <button
       type="button"
+      data-testid="mochi-sliding-menu-item"
+      {...rest}
       className={itemClass}
       style={style}
       onClick={handleClick}
       disabled={disabled}
-      data-testid="mochi-sliding-menu-item"
     >
       {content}
     </button>

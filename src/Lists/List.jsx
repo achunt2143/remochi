@@ -34,7 +34,9 @@ const ScrollFade = ({ show, position = 'top' }) => {
 const List = ({ 
   children, 
   onScrollStart = () => {},
-  onScrollStop = () => {}
+  onScrollStop = () => {},
+  className = '',
+  ...rest
 }) => {
   const [scrollDirection, setScrollDirection] = useState(null);
   const [showFade, setShowFade] = useState(false);
@@ -96,7 +98,7 @@ const List = ({
   };
 
   return (
-    <div className="mochi-list-container">
+    <div {...rest} className={['mochi-list-container', className].filter(Boolean).join(' ')}>
       <ScrollFade show={showFade && scrollDirection === 'top'} position="top" />
       
       <div className="mochi-list" ref={scrollRef}>

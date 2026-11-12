@@ -13,7 +13,7 @@ import './MochiToggle.scss';
  *   onChange       {Function} Called with { value, checked, target } once per change
  *   disabled       {boolean}  Disables interaction (default: false)
  *   canAnimate     {boolean}  Animate background-color transition (default: true)
- *   colorActive    {string}   Pill bg when on (default: var(--mochi-selected, '#ffb80d'))
+ *   colorActive    {string}   Pill bg when on (default: var(--mochi-accent, var(--mochi-selected, '#ffb80d')))
  *   colorInactive  {string}   Pill bg when off (default: var(--mochi-toggle-track, '#646464'))
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
@@ -24,12 +24,19 @@ const MochiToggle = ({
   onChange = () => {},
   disabled = false,
   canAnimate = true,
-  colorActive = 'var(--mochi-selected, #ffb80d)',
+  colorActive = 'var(--mochi-accent, var(--mochi-selected, #ffb80d))',
   // Radio/Checkbox's own unchecked fill matches this same token, so all
   // three controls share one neutral "off state" grey.
   colorInactive = 'var(--mochi-toggle-track, #646464)',
   onContent = 'On',
   offContent = 'Off',
+  className = '',
+  style,
+  onPointerDown: userOnPointerDown,
+  onPointerMove: userOnPointerMove,
+  onPointerUp: userOnPointerUp,
+  onKeyDown: userOnKeyDown,
+  ...rest
 }) => {
   const resolvedValue = checked !== undefined ? checked : value;
   const [isOn, setIsOn] = useState(resolvedValue);
@@ -110,21 +117,34 @@ const MochiToggle = ({
     'mochi-toggle-button',
     canAnimate && 'mochi-toggle-animate',
     disabled   && 'disabled',
+    className,
   ].filter(Boolean).join(' ');
 
   return (
     <div
+      {...rest}
       ref={trackRef}
       className={classes}
-      style={{ backgroundColor: isOn ? colorActive : colorInactive }}
+      style={{ backgroundColor: isOn ? colorActive : colorInactive, ...style }}
       role="switch"
       aria-checked={isOn}
       aria-disabled={disabled}
       tabIndex={disabled ? -1 : 0}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
+      onPointerDown={(e) => {
+        userOnPointerDown?.(e);
+        onPointerDown(e);
+      }}
+      onPointerMove={(e) => {
+        userOnPointerMove?.(e);
+        onPointerMove(e);
+      }}
+      onPointerUp={(e) => {
+        userOnPointerUp?.(e);
+        onPointerUp(e);
+      }}
       onKeyDown={(e) => {
+        userOnKeyDown?.(e);
+        if (e.defaultPrevented) return;
         if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(!isOn); }
         if (e.key === 'ArrowRight') { e.preventDefault(); toggle(true); }
         if (e.key === 'ArrowLeft')  { e.preventDefault(); toggle(false); }

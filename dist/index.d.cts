@@ -3,8 +3,12 @@ import * as React from 'react';
 // ---------------------------------------------------------------------------
 // Badge
 // ---------------------------------------------------------------------------
-interface BadgeProps {
+interface BadgeProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'> {
+  children?: React.ReactNode;
   content?: string | number;
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'danger' | 'info';
+  count?: number;
   background?: string;
   color?: string;
 }
@@ -22,6 +26,8 @@ interface ButtonProps
    * positive choice, 'blue' for sparing emphasis — Mochi's ButtonColors.
    */
   type?: 'normal' | 'warning' | 'affirmative' | 'blue' | 'disabled' | 'dropdown';
+  /** Visual framing: 'caps' (classic brackets + bar, default) or 'drop' (shaped pill/waterdrop button). */
+  appearance?: 'caps' | 'drop';
   /** Native `<button type>`. Default: 'button', so a Button inside a `<form>` doesn't submit it. */
   htmlType?: 'button' | 'submit' | 'reset';
   /** Disables the button and shows the disabled look; same as `type="disabled"`. */
@@ -31,7 +37,8 @@ interface ButtonProps
 }
 declare const Button: React.FC<ButtonProps>;
 
-interface RadioProps {
+interface RadioProps
+  extends Omit<React.LabelHTMLAttributes<HTMLLabelElement>, 'onChange'> {
   name?: string;
   value?: string;
   checked?: boolean;
@@ -46,7 +53,8 @@ interface ViewSelectButtonItem {
   active?: boolean;
   disabled?: boolean;
 }
-interface ViewSelectButtonProps {
+interface ViewSelectButtonProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   items?: ViewSelectButtonItem[];
   onSelect?: (item: ViewSelectButtonItem, index: number) => void;
   decoratorLeft?: string;
@@ -64,7 +72,8 @@ interface CheckboxChangeEvent {
   checked: boolean;
   value: boolean;
 }
-interface CheckboxProps {
+interface CheckboxProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   checked?: boolean;
   onChange?: (event: CheckboxChangeEvent) => void;
   disabled?: boolean;
@@ -79,21 +88,24 @@ declare const Checkbox: React.FC<CheckboxProps>;
 // ---------------------------------------------------------------------------
 // Collapsable
 // ---------------------------------------------------------------------------
-interface CollapsableProps {
+interface CollapsableProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onToggle' | 'title'> {
   title?: string;
   children?: React.ReactNode;
+  isOpen?: boolean;
   defaultExpanded?: boolean;
   onToggle?: (isExpanded: boolean) => void;
 }
 declare const Collapsable: React.FC<CollapsableProps>;
-declare const CollapsableHeader: React.FC<{ children?: React.ReactNode; onClick?: () => void }>;
-declare const CollapsableItem: React.FC<{ children?: React.ReactNode }>;
-declare const CollapsableFooter: React.FC;
+declare const CollapsableHeader: React.FC<React.HTMLAttributes<HTMLDivElement>>;
+declare const CollapsableItem: React.FC<React.HTMLAttributes<HTMLDivElement>>;
+declare const CollapsableFooter: React.FC<React.HTMLAttributes<HTMLDivElement>>;
 
 // ---------------------------------------------------------------------------
 // DateInput
 // ---------------------------------------------------------------------------
-interface DateInputProps {
+interface DateInputProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   value?: string | Date;
   onChange?: (date: Date) => void;
   label?: string;
@@ -108,7 +120,8 @@ declare const DateInput: React.FC<DateInputProps>;
 // ---------------------------------------------------------------------------
 // Dialog
 // ---------------------------------------------------------------------------
-interface DialogProps {
+interface DialogProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   isOpen?: boolean;
   onClose?: () => void;
   title?: string;
@@ -139,7 +152,7 @@ declare const Dialog: React.FC<DialogProps>;
 // ---------------------------------------------------------------------------
 // Divider
 // ---------------------------------------------------------------------------
-interface DividerProps {
+interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
   /** @default 'horizontal' */
   orientation?: 'horizontal' | 'vertical';
   /** Px height (horizontal) or width (vertical) of the line. @default 4 */
@@ -158,7 +171,7 @@ type NubbinDividerNubbin =
   | 'bottom-left-down' | 'bottom-right-down'
   | 'bottom-left-left' | 'bottom-right-right';
 
-interface NubbinDividerProps {
+interface NubbinDividerProps extends React.HTMLAttributes<HTMLDivElement> {
   /** @default 'up' */
   nubbin?: NubbinDividerNubbin;
   /** CSS left value shifting the nubbin from centre, e.g. '50%' (default), '120px', 'calc(...)'. */
@@ -180,13 +193,15 @@ interface DropdownOption {
   value: string | number;
   label: string;
 }
-interface DropdownProps {
+interface DropdownProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   options?: DropdownOption[];
   value?: string | number;
   onChange?: (value: string | number) => void;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
+  maxHeight?: number;
   searchable?: boolean;
   className?: string;
 }
@@ -195,14 +210,14 @@ declare const Dropdown: React.FC<DropdownProps>;
 // ---------------------------------------------------------------------------
 // Headers
 // ---------------------------------------------------------------------------
-interface HeaderProps {
+interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   content?: string;
   children?: React.ReactNode;
   customClasses?: string;
 }
 declare const Header: React.FC<HeaderProps>;
 
-interface SubheaderProps {
+interface SubheaderProps extends React.HTMLAttributes<HTMLDivElement> {
   content?: string;
 }
 declare const Subheader: React.FC<SubheaderProps>;
@@ -213,7 +228,8 @@ declare const Subheader: React.FC<SubheaderProps>;
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 declare const Input: React.ComponentType<InputProps>;
 
-interface RichTextProps {
+interface RichTextProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'onFocus' | 'onBlur'> {
   value?: string;
   onChange?: React.FormEventHandler<HTMLDivElement>;
   onFocus?: React.FocusEventHandler<HTMLDivElement>;
@@ -228,7 +244,8 @@ interface RichTextProps {
 }
 declare const RichText: React.FC<RichTextProps>;
 
-interface TextAreaProps {
+interface TextAreaProps
+  extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'value'> {
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
   onFocus?: React.FocusEventHandler<HTMLTextAreaElement>;
@@ -245,7 +262,8 @@ declare const TextArea: React.FC<TextAreaProps>;
 // ---------------------------------------------------------------------------
 // Item
 // ---------------------------------------------------------------------------
-interface ItemProps {
+interface ItemProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   children?: React.ReactNode;
   title?: string;
   subtitle?: string;
@@ -264,7 +282,7 @@ declare const Item: React.FC<ItemProps>;
 // ---------------------------------------------------------------------------
 // Lists
 // ---------------------------------------------------------------------------
-interface ListProps {
+interface ListProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   onScrollStart?: () => void;
   onScrollStop?: () => void;
@@ -279,20 +297,21 @@ interface ListItemProps
 }
 declare const ListItem: React.FC<ListItemProps>;
 
-interface ListHeaderProps {
+interface ListHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   content?: string;
   children?: React.ReactNode;
 }
 declare const ListHeader: React.FC<ListHeaderProps>;
 
-interface GridListProps {
+interface GridListProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   columns?: number;
   gap?: number;
 }
 declare const GridList: React.FC<GridListProps>;
 
-interface GridListImageItemProps {
+interface GridListImageItemProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   src?: string;
   caption?: string;
   onSelect?: (selected: boolean) => void;
@@ -303,7 +322,8 @@ declare const GridListImageItem: React.FC<GridListImageItemProps>;
 // ---------------------------------------------------------------------------
 // MediaPlayer
 // ---------------------------------------------------------------------------
-interface VideoProps {
+interface VideoProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onPlay' | 'onPause' | 'onEnded' | 'onTimeUpdate'> {
   src?: string;
   poster?: string;
   autoPlay?: boolean;
@@ -321,7 +341,7 @@ declare const Video: React.FC<VideoProps>;
 // ---------------------------------------------------------------------------
 // Menu
 // ---------------------------------------------------------------------------
-interface MochiSlidingMenuProps {
+interface MochiSlidingMenuProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
   /** Which edge the menu slides in from. @default 'left' */
   position?: 'top' | 'bottom' | 'left' | 'right';
@@ -343,7 +363,8 @@ interface MochiSlidingMenuProps {
   showBackdrop?: boolean;
 }
 /** MochiSlidingMenu.ContentShifter props */
-interface MochiSlidingMenuContentShifterProps {
+interface MochiSlidingMenuContentShifterProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';
   isMenuOpen?: boolean;
@@ -364,7 +385,8 @@ declare const SlidingMenu: React.FC<MochiSlidingMenuProps> & {
 declare const MochiSlidingMenuContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
 declare const SlidingMenuContentShifter: React.FC<MochiSlidingMenuContentShifterProps>;
 
-interface MochiSlidingMenuItemProps {
+interface MochiSlidingMenuItemProps
+  extends Omit<React.HTMLAttributes<HTMLButtonElement | HTMLAnchorElement>, 'onClick'> {
   children?: React.ReactNode;
   icon?: React.ReactNode;
   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
@@ -379,7 +401,8 @@ interface MochiSlidingMenuItemProps {
 declare const MochiSlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
 declare const SlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
 
-interface MochiSlidingMenuItemGroupProps {
+interface MochiSlidingMenuItemGroupProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   /** Section heading rendered in uppercase muted text. */
   label?: string;
@@ -394,7 +417,8 @@ declare const SlidingMenuItemGroup: React.FC<MochiSlidingMenuItemGroupProps>;
 // ---------------------------------------------------------------------------
 // NumberInput
 // ---------------------------------------------------------------------------
-interface NumberInputProps {
+interface NumberInputProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   value?: number;
   onChange?: (value: number) => void;
   min?: number;
@@ -411,7 +435,7 @@ declare const NumberInput: React.FC<NumberInputProps>;
 // ---------------------------------------------------------------------------
 // Pagination
 // ---------------------------------------------------------------------------
-interface PaginationProps {
+interface PaginationProps extends React.HTMLAttributes<HTMLDivElement> {
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
@@ -429,8 +453,8 @@ interface RepanelProps {
   children?: React.ReactNode;
   /** Percentage width of the panel within its row, e.g. 25, 33, 50. */
   width?: number;
-  /** Visual style variant. */
-  style?: 'default' | 'shadow';
+  /** Visual style variant or inline CSS styles. */
+  style?: 'default' | 'shadow' | React.CSSProperties;
   /** Draws a nubbin grabber accent at the bottom-left edge. `RepanelStack` sets this on every child but the first. */
   handle?: boolean;
   className?: string;
@@ -441,8 +465,8 @@ declare const Repanel: React.FC<RepanelProps>;
 
 interface FloatingPanelProps {
   children?: React.ReactNode;
-  /** Visual style variant. */
-  style?: 'default' | 'shadow';
+  /** Visual style variant or inline CSS styles. */
+  style?: 'default' | 'shadow' | React.CSSProperties;
   className?: string;
   [key: string]: any;
 }
@@ -591,12 +615,14 @@ interface PopupAction {
   onClick: () => void;
   type?: 'normal' | 'warning';
 }
-interface PopupPanelProps {
+interface PopupPanelProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   isOpen: boolean;
   title?: string;
   children?: React.ReactNode;
   actions?: PopupAction[];
   onClose?: () => void;
+  anchorEl?: React.RefObject<HTMLElement | null>;
   anchorRect?: DOMRect | { top: number; left: number; bottom: number; width: number; height: number } | null;
 }
 declare const PopupPanel: React.FC<PopupPanelProps>;
@@ -604,7 +630,8 @@ declare const PopupPanel: React.FC<PopupPanelProps>;
 // ---------------------------------------------------------------------------
 // ProgressBar
 // ---------------------------------------------------------------------------
-interface ProgressBarProps {
+interface ProgressBarProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'color'> {
   value?: number;
   color?: 'blue' | 'yellow' | 'red' | string;
   width?: string;
@@ -615,7 +642,8 @@ declare const ProgressBar: React.FC<ProgressBarProps>;
 // ---------------------------------------------------------------------------
 // Slider
 // ---------------------------------------------------------------------------
-interface SliderProps {
+interface SliderProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'color'> {
   value?: number;
   color?: string;
   width?: string;
@@ -629,7 +657,7 @@ declare const Slider: React.FC<SliderProps>;
 // ---------------------------------------------------------------------------
 // Spinner
 // ---------------------------------------------------------------------------
-interface SpinnerProps {
+interface SpinnerProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   active?: boolean;
   styleType?: 'light' | 'dark';
   size?: 'normal' | 'large';
@@ -646,8 +674,11 @@ interface TableColumn<T = Record<string, any>> {
   width?: string | number;
   render?: (value: any, row: T) => React.ReactNode;
 }
-interface TableProps<T = Record<string, any>> {
+interface TableProps<T = Record<string, any>>
+  extends React.HTMLAttributes<HTMLDivElement> {
   columns?: TableColumn<T>[];
+  rows?: any[][];
+  onRowClick?: (row: T) => void;
   data?: T[];
   sortable?: boolean;
   hoverable?: boolean;
@@ -709,7 +740,7 @@ interface ThemeContextValue {
   colors: ThemeColors;
 }
 
-interface ThemeWrapperProps {
+interface ThemeWrapperProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   /** Controlled theme. */
   theme?: ThemeMode;
@@ -731,6 +762,8 @@ interface ThemeWrapperProps {
    * else the bundled Lato) or 'Lato' (bundled Lato only). Default: 'Prelude'.
    */
   fontFamily?: string;
+  /** CSS custom property overrides applied inline on the wrapper and synced to `:root` when `syncHtml` is enabled. */
+  tokens?: Record<string, string | number>;
   className?: string;
 }
 
@@ -752,7 +785,8 @@ interface ToggleChangeEvent {
     checked: boolean;
   };
 }
-interface ToggleProps {
+interface ToggleProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   value?: boolean;
   checked?: boolean;
   onChange?: (event: ToggleChangeEvent) => void;
@@ -782,8 +816,10 @@ interface WizardNavigationDetail {
   from: number;
   to: number;
 }
-interface WizardProps {
+interface WizardProps extends React.HTMLAttributes<HTMLDivElement> {
   steps?: WizardStep[];
+  /** Controlled active step index (0-based). Omit for uncontrolled navigation. */
+  step?: number;
   onComplete?: () => void;
   onCancel?: () => void;
   /** Fires whenever the shown step changes. */

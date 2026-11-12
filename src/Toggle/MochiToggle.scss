@@ -6,7 +6,7 @@
   line-height: 24px;
   min-width: 60px;
   vertical-align: middle;
-  border-radius: 12px;
+  border-radius: var(--mochi-corner-pill, 9999px);
   background-size: auto 100%;
   color: white;
   font-size: 14px;
@@ -35,7 +35,7 @@
 
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px var(--mochi-selected-soft, rgba(255, 184, 13, 0.45));
+    box-shadow: 0 0 0 3px var(--mochi-accent-soft, var(--mochi-selected-soft, rgba(255, 184, 13, 0.45)));
   }
 
   &.disabled {

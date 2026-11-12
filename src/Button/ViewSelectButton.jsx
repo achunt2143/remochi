@@ -20,19 +20,30 @@ const ViewSelectButtonItem = React.forwardRef(({
   active = false,
   disabled = false,
   onClick = () => {},
+  className = '',
+  onKeyDown: userOnKeyDown,
+  ...rest
 }, ref) => (
   <div
+    {...rest}
     ref={ref}
-    className={`mochi-view-select-button-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
+    className={[
+      'mochi-view-select-button-item',
+      active && 'active',
+      disabled && 'disabled',
+      className,
+    ].filter(Boolean).join(' ')}
     onClick={onClick}
     role="radio"
     aria-checked={active}
     aria-disabled={disabled}
     tabIndex={disabled ? -1 : 0}
     onKeyDown={(e) => {
+      userOnKeyDown?.(e);
+      if (e.defaultPrevented) return;
       if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
         e.preventDefault();
-        onClick();
+        onClick(e);
       }
     }}
   >
@@ -77,7 +88,9 @@ const ViewSelectButton = ({
   decoratorRight = ')',
   barClasses = '',
   decoratorClasses = '',
-  variant = 'normal'
+  variant = 'normal',
+  className = '',
+  ...rest
 }) => {
   // findIndex returns -1 when no item is active, and `-1 || 0` evaluates
   // to -1 (a truthy value in JS) rather than falling through to the 0
@@ -141,7 +154,12 @@ const ViewSelectButton = ({
   };
 
   return (
-    <div className={`mochi-view-select-button mochi-button-${variant}`}>
+    <div
+      {...rest}
+      className={['mochi-view-select-button', `mochi-button-${variant}`, className]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <span className={`mochi-button-decorator mochi-button-decorator-left ${decoratorClasses}`}>
         {decoratorLeft}
       </span>

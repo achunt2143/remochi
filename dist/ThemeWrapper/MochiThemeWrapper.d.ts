@@ -98,7 +98,7 @@ export namespace LIGHT_THEME_COLORS {
 export const ThemeContext: any;
 export function useTheme(): any;
 export default MochiThemeWrapper;
-declare function MochiThemeWrapper({ children, theme: controlledTheme, defaultTheme, onThemeChange, storageKey, syncHtml, fontFamily, className, ...rest }: {
+declare function MochiThemeWrapper({ children, theme: controlledTheme, defaultTheme, onThemeChange, storageKey, syncHtml, fontFamily, tokens, style, className, ...rest }: {
     [x: string]: any;
     children: any;
     theme: any;
@@ -107,5 +107,7 @@ declare function MochiThemeWrapper({ children, theme: controlledTheme, defaultTh
     storageKey?: null | undefined;
     syncHtml: any;
     fontFamily?: string | undefined;
+    tokens: any;
+    style: any;
     className?: string | undefined;
 }): any;
