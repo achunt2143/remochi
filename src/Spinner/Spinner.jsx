@@ -19,7 +19,13 @@ const SpinnerImg = styled.img`
  * - styleType: "light" | "dark" (default: "light")
  * - size: "normal" | "large" (default: "normal")
  */
-export const Spinner = ({ active = true, styleType = "light", size = "normal", alt = "Loading..." }) => {
+export const Spinner = ({
+  active = true,
+  styleType = "light",
+  size = "normal",
+  alt = "Loading...",
+  ...rest
+}) => {
   let src;
 
   if (styleType === "dark") {
@@ -28,5 +34,5 @@ export const Spinner = ({ active = true, styleType = "light", size = "normal", a
     src = size === "large" ? lightSpinnerLarge : lightSpinnerSmall;
   }
 
-  return <SpinnerImg src={src} alt={alt} $active={active} />;
+  return <SpinnerImg {...rest} src={src} alt={alt} $active={active} />;
 };

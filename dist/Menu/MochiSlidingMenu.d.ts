@@ -8,7 +8,8 @@ export namespace MochiSlidingMenu {
  * Wraps your main app content and translates it when the menu opens.
  * This is a static sub-component — it does NOT need to be inside a ThemeWrapper.
  */
-declare function ContentShifter({ children, position, isMenuOpen, menuWidth, menuHeight, duration, className, style, }: {
+declare function ContentShifter({ children, position, isMenuOpen, menuWidth, menuHeight, duration, className, style, ...rest }: {
+    [x: string]: any;
     children: any;
     position?: string | undefined;
     isMenuOpen?: boolean | undefined;

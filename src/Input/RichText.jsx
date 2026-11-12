@@ -37,7 +37,9 @@ const RichText = ({
   width        = '100%',
   minHeight    = 50,
   className    = '',
+  style,
   allowFormatting = true,
+  ...rest
 }) => {
   const editorRef = useRef(null);
 
@@ -97,7 +99,11 @@ const RichText = ({
   }, [allowFormatting]);
 
   return (
-    <div className={`mochi-richtext-wrapper ${className}`} style={{ width }}>
+    <div
+      {...rest}
+      className={['mochi-richtext-wrapper', className].filter(Boolean).join(' ')}
+      style={{ width, ...style }}
+    >
       {/* Placeholder sits behind the editor, shown via state */}
       {showPlaceholder && placeholder && (
         <span

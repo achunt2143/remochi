@@ -12,8 +12,9 @@ export default MochiTable;
  *
  * Both shapes are normalised to Shape B internally.
  */
-declare function MochiTable({ columns, rows, onRowClick, data, sortable, hoverable, striped, className, }: {
-    columns?: never[] | undefined;
+declare function MochiTable({ columns, rows, onRowClick, data, sortable, hoverable, striped, className, ...rest }: {
+    [x: string]: any;
+    columns?: any[] | undefined;
     rows: any;
     onRowClick: any;
     data: any;

@@ -3,7 +3,7 @@
   width: 100%;
   overflow-x: auto;
   background: var(--mochi-surface);
-  border-radius: 12px;
+  border-radius: var(--mochi-corner, 16px);
   border: 1px solid var(--mochi-border);
 }
 

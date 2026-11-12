@@ -22,7 +22,7 @@
     // it opens (see .mochi-contextual-popup.mochi-menu in MochiMenu.scss).
     background: var(--mochi-panel-bg, var(--mochi-surface));
     border: 1px solid var(--mochi-border);
-    border-radius: 32px;
+    border-radius: var(--mochi-corner-pill, 9999px);
     cursor: pointer;
     transition: all 0.2s ease;
 
@@ -68,9 +68,9 @@
     left: 0;
     right: 0;
     z-index: 100;
-    background: var(--mochi-surface);
-    border: 1px solid var(--mochi-border);
-    border-radius: 32px;
+    background: var(--mochi-surface-material, var(--mochi-panel-bg, var(--mochi-surface)));
+    border: 1px solid var(--mochi-panel-border, var(--mochi-border));
+    border-radius: var(--mochi-corner-field, 24px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     overflow: hidden;
   }
@@ -85,7 +85,7 @@
     padding: 8px 10px;
     background: var(--mochi-bg);
     border: 1px solid var(--mochi-border);
-    border-radius: 32px;
+    border-radius: var(--mochi-corner-pill, 9999px);
     color: var(--mochi-text);
     font-size: 14px;
     outline: none;

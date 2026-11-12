@@ -10,10 +10,12 @@ export default List;
  *   - onScrollStart: Callback when scrolling starts
  *   - onScrollStop: Callback when scrolling stops
  */
-declare function List({ children, onScrollStart, onScrollStop }: {
+declare function List({ children, onScrollStart, onScrollStop, className, ...rest }: {
+    [x: string]: any;
     children: any;
     onScrollStart?: (() => void) | undefined;
     onScrollStop?: (() => void) | undefined;
+    className?: string | undefined;
 }): any;
 /**
  * Mochi ScrollFade Component

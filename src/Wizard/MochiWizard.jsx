@@ -18,6 +18,7 @@ const sameSteps = (a, b) => a.length === b.length && a.every((s) => b.includes(s
  */
 const MochiWizard = ({
   steps = [],
+  step: controlledStep,
   onComplete,
   onCancel,
   onStepChange,
@@ -25,15 +26,21 @@ const MochiWizard = ({
   onCompletedStepsChange,
   showStepNumbers = true,
   allowSkip = false,
-  className = ''
+  className = '',
+  ...rest
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [uncontrolledStep, setUncontrolledStep] = useState(0);
   const [trackedSteps, setTrackedSteps] = useState([]);
+  const isStepControlled = controlledStep != null;
   const isCompletionControlled = completedStepsProp != null;
   const completedSteps = isCompletionControlled ? completedStepsProp : trackedSteps;
   // Ignores a second Next while an async step.onNext is still pending,
   // which would otherwise advance (and mark completed) twice.
   const advancingRef = useRef(false);
+
+  const maxIndex = Math.max(0, steps.length - 1);
+  const rawStep = isStepControlled ? controlledStep : uncontrolledStep;
+  const currentStep = Math.max(0, Math.min(rawStep, maxIndex));
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === steps.length - 1;
@@ -46,7 +53,9 @@ const MochiWizard = ({
   };
 
   const goTo = (index, reason) => {
-    setCurrentStep(index);
+    if (!isStepControlled) {
+      setUncontrolledStep(index);
+    }
     onStepChange?.(index, { reason, from: currentStep, to: index });
   };
 
@@ -103,8 +112,12 @@ const MochiWizard = ({
     }
   };
 
+  if (!currentStepData) {
+    return null;
+  }
+
   return (
-    <div className={`mochi-wizard ${className}`}>
+    <div {...rest} className={`mochi-wizard ${className}`.trim()}>
       <div className="mochi-wizard-header">
         <div className="mochi-wizard-steps">
           {steps.map((step, index) => (

@@ -51,7 +51,7 @@ import {
 } from 'remochi';
 ```
 
-The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme` from `useTheme()` for a light/dark switch.
+The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme` from `useTheme()` for a light/dark switch. `ThemeWrapper` also accepts controlled `theme` (`'dark' | 'light' | 'system'`), `defaultTheme`, `onThemeChange`, `storageKey`, `syncHtml`, `fontFamily` (`'Prelude' | 'Lato'`), and `tokens` (`Record<string, string | number>`) for CSS custom property overrides (such as `--mochi-surface-material`, `--mochi-corner`, `--mochi-corner-sm`, `--mochi-corner-field`, `--mochi-corner-pill`, `--mochi-scallop`, `--mochi-header-tracking`, `--mochi-button-bg`, `--mochi-button-radius`, `--mochi-button-ink`, `--mochi-accent`), which are applied to the wrapper and mirrored onto `:root` when `syncHtml` is enabled.
 
 ## Recommended app structure
 
@@ -61,16 +61,17 @@ A simple pattern is to keep a themed inner app and mount shared overlays outside
 
 ### Button
 
-`Button` is the primary clickable action surface. At the type level it uses the `variant` prop (`'normal' | 'warning' | 'affirmative' | 'blue'`) and supports children for the label, but the demo is still using the older `type` prop at runtime (`"warning"`, `"disabled"`, `"dropdown"`) [cite:20][cite:28]. When writing new code, prefer `variant` over `type` so you stay aligned with the typings.
-
-Example (aligned with typings):
+`Button` is the primary clickable action surface. It takes `type` (`'normal' | 'warning' | 'affirmative' | 'blue' | 'disabled' | 'dropdown'`) for the visual variant, `htmlType` (`'button' | 'submit' | 'reset'`, default `'button'`) for the native `<button type>`, `appearance` (`'caps' | 'drop'`, default `'caps'`) for Mochi bracket-caps vs. shaped pill/drop framing, `disabled`, and `children` for the label (forwarding standard button attributes to the underlying `<button>`).
 
 ```jsx
 <Button onClick={() => addLog('Button: normal')}>
   Normal
 </Button>
-<Button variant="warning" onClick={() => addLog('Button: warning')}>
+<Button type="warning" onClick={() => addLog('Button: warning')}>
   Warning
+</Button>
+<Button appearance="drop" type="affirmative" onClick={() => addLog('Button: drop')}>
+  Confirm
 </Button>
 <Button disabled>
   Disabled
@@ -241,10 +242,10 @@ const dropdownOptions = [
 
 ### Header and Subheader
 
-`Header` supports `content` and `children`; `Subheader` uses `content` only in the current typings [cite:28]. Using children keeps JSX readable and is consistent with the demo.
+`Header` supports `content`, `children` (for right-aligned controls), `customClasses` (applied to `.mochi-header-content`), and `className` / HTML attributes on the root element; `Subheader` takes `content` and `className` / HTML attributes.
 
 ```jsx
-<Header>Header Component</Header>
+<Header customClasses="app-header-title">Header Component</Header>
 <Subheader content="Subheader Component — sits below a Header" />
 ```
 
@@ -459,20 +460,21 @@ const [sliderVal, setSliderVal] = useState(50);
 
 ### Wizard
 
-`Wizard` renders step indicators and Back / Next / Finish controls for multi-step flows. Each entry in `steps` supplies its own `label`, optional `title` and `description`, and the `content` shown while that step is active. A step's `onNext` can return `false` (or a promise of `false`) to block moving on.
+`Wizard` renders step indicators and Back / Next / Finish controls for multi-step flows. Each entry in `steps` supplies its own `label`, optional `title` and `description`, and the `content` shown while that step is active. A step's `onNext` can return `false` (or a promise of `false`) to block moving on. Pass `step` (0-based index) alongside `onStepChange(nextStep, detail)` to control the active step externally, or omit `step` to track navigation internally.
 
 Completion is tracked like a stack: Next marks the step being left as completed, and going back (Back, or tapping an earlier step in the header) un-completes the step returned to and everything after it.
 
 Example:
 
 ```jsx
+const [step, setStep] = useState(0);
 const steps = [
   { label: 'Account', content: <AccountForm /> },
   { label: 'Profile', content: <ProfileForm /> },
   { label: 'Review', content: <Review /> },
 ];
 
-<Wizard steps={steps} onComplete={submit} onStepChange={(step) => setStep(step)} />
+<Wizard steps={steps} step={step} onComplete={submit} onStepChange={(next) => setStep(next)} />
 ```
 
 To manage completion yourself, pass `completedSteps`. The wizard then shows exactly that list, and `onCompletedStepsChange(next, { reason, from, to })` tells you what its default tracking would have done, so you can take it, adjust it, or ignore it:

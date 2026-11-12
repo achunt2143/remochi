@@ -16,4 +16,4 @@ export default MochiSlidingMenuItem;
  * @param {boolean}         disabled
  * @param {'default'|'danger'|'success'} variant
  */
-export function MochiSlidingMenuItem({ children, icon, onClick, href, isActive, badge, className, style, disabled, variant, }: React.ReactNode): any;
+export function MochiSlidingMenuItem({ children, icon, onClick, href, isActive, badge, className, style, disabled, variant, ...rest }: React.ReactNode): any;

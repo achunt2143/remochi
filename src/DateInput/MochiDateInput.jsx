@@ -129,6 +129,8 @@ const MochiDateInput = ({
   maxDate,
   disabled = false,
   className = '',
+  style,
+  ...rest
 }) => {
   const [isOpen,   setIsOpen]   = useState(false);
   const [selected, setSelected] = useState(value ? new Date(value) : null);
@@ -168,7 +170,11 @@ const MochiDateInput = ({
   const displayValue = selected ? formatDisplay(selected) : '';
 
   return (
-    <div className={className} style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px' }}>
+    <div
+      {...rest}
+      className={className}
+      style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px', ...style }}
+    >
       {label && (
         <label style={{ fontSize: '0.9rem', color: 'var(--mochi-text-muted, #888)' }}>
           {label}

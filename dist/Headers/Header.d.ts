@@ -10,8 +10,10 @@ export default Header;
  *   - children: React elements for controls (displayed right-aligned)
  *   - customClasses: Additional CSS classes to apply (default: '')
  */
-declare function Header({ content, children, customClasses }: {
+declare function Header({ content, children, customClasses, className, ...rest }: {
+    [x: string]: any;
     content?: string | undefined;
     children: any;
     customClasses?: string | undefined;
+    className?: string | undefined;
 }): any;

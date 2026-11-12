@@ -40,8 +40,10 @@ const barColor = (variant) =>
 // One canvas is reused across all button instances (no DOM reflow).
 let _canvas = null;
 function measureTextWidth(text, font) {
+  if (typeof document === 'undefined') return 0;
   if (!_canvas) _canvas = document.createElement('canvas');
-  const ctx = _canvas.getContext('2d');
+  const ctx = _canvas.getContext?.('2d');
+  if (!ctx) return 0;
   ctx.font = font;
   return ctx.measureText(text).width;
 }
@@ -57,10 +59,14 @@ function buildLabelFont(computed) {
 /**
  * Hook: returns the pixel width of the label text, measured via canvas.
  */
-function useLabelWidth(labelRef, children) {
+function useLabelWidth(labelRef, children, enabled = true) {
   const [width, setWidth] = useState(0);
 
   useLayoutEffect(() => {
+    if (!enabled) {
+      setWidth(0);
+      return undefined;
+    }
     const el = labelRef.current;
     if (!el) return;
 
@@ -82,7 +88,7 @@ function useLabelWidth(labelRef, children) {
     if (!fonts || !fonts.addEventListener) return;
     fonts.addEventListener('loadingdone', measure);
     return () => fonts.removeEventListener('loadingdone', measure);
-  }, [children, labelRef]);
+  }, [children, labelRef, enabled]);
 
   return width;
 }
@@ -97,29 +103,46 @@ function useLabelWidth(labelRef, children) {
 // Disabled follows Mochi too: the same colors and typeface, dimmed to
 // --mochi-disabled-opacity (Button.less: `.mochi-button.disabled`).
 const ButtonWrapper = styled.button`
-  background: none;
-  border: none;
+  background: ${({ $appearance }) =>
+    $appearance === "drop"
+      ? "var(--mochi-button-bg, var(--mochi-panel-bg, #f5f5f5))"
+      : "none"};
+  border: ${({ $appearance }) =>
+    $appearance === "drop"
+      ? "1px solid var(--mochi-panel-border, var(--mochi-border, rgba(0, 0, 0, 0.15)))"
+      : "none"};
+  border-radius: ${({ $appearance }) =>
+    $appearance === "drop"
+      ? "var(--mochi-button-radius, var(--mochi-corner, 16px))"
+      : "0"};
   font-family: "Mochi Bold Oblique", sans-serif;
   font-size: 1.1rem;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
   opacity: ${({ disabled }) => (disabled ? "var(--mochi-disabled-opacity, 0.4)" : 1)};
-  padding: 0;
-  color: ${({ $variant }) => textColor($variant)};
+  padding: ${({ $appearance }) => ($appearance === "drop" ? "8px 20px" : "0")};
+  color: ${({ $variant, $appearance }) =>
+    $appearance === "drop"
+      ? `var(--mochi-button-ink, ${textColor($variant)})`
+      : textColor($variant)};
   outline: none;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 
   &:focus {
     outline: none;
-    color: #222;
+    ${({ $appearance }) => ($appearance === "drop" ? "" : "color: #222;")}
   }
 
   &:focus-visible {
     outline: 2px solid var(--mochi-primary, #6e9ebd);
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: ${({ $appearance }) =>
+      $appearance === "drop"
+        ? "var(--mochi-button-radius, var(--mochi-corner, 16px))"
+        : "6px"};
   }
 
   &:active:not(:disabled) {
@@ -185,13 +208,16 @@ const Label = styled.span`
   font-family: "Mochi Bold Oblique", sans-serif;
   font-weight: bold;
   font-style: oblique;
-  color: ${({ $variant }) => textColor($variant)};
-  margin-top: 0.2em;
+  color: ${({ $variant, $appearance }) =>
+    $appearance === "drop"
+      ? `var(--mochi-button-ink, ${textColor($variant)})`
+      : textColor($variant)};
+  margin-top: ${({ $appearance }) => ($appearance === "drop" ? "0" : "0.2em")};
   letter-spacing: 0.02em;
 `;
 
 const DropdownIcon = styled(FaChevronDown)`
-  color: ${colors.dropdown};
+  color: ${({ $appearance }) => ($appearance === "drop" ? "currentColor" : colors.dropdown)};
   margin-left: 6px;
   font-size: 0.95em;
   vertical-align: middle;
@@ -202,8 +228,10 @@ const DropdownIcon = styled(FaChevronDown)`
 export function MochiButton({
   children = "Button",
   type = "normal",      // visual variant: normal | warning | affirmative | blue | disabled | dropdown
+  appearance = "caps",  // visual framing: caps (classic brackets/bar) | drop (shaped pill/drop button)
   htmlType = "button",  // native <button type>: button | submit | reset
   disabled: disabledProp = false,
+  className = "",
   ...props
 }) {
   // `type` is this component's visual variant, not the native button type.
@@ -214,11 +242,13 @@ export function MochiButton({
   // Disabled keeps the variant's own colors (only opacity changes), so
   // type="disabled" just means a disabled normal button.
   const variant    = type === "disabled" ? "normal" : type;
+  const resolvedAppearance = appearance === "drop" ? "drop" : "caps";
+  const isDrop     = resolvedAppearance === "drop";
   const labelRef   = useRef(null);
   const isDropdown = type === "dropdown";
 
   // Canvas-measured width of just the label text (excludes brackets + icon)
-  const labelPx = useLabelWidth(labelRef, children);
+  const labelPx = useLabelWidth(labelRef, children, !isDrop);
 
   // For dropdown buttons the bar must also cover the chevron icon (~20px wide)
   // so we extend the width by 20px and shift left by 10px to keep it centred
@@ -232,17 +262,31 @@ export function MochiButton({
   };
 
   return (
-    <ButtonWrapper {...props} type={htmlType} disabled={disabled} $variant={variant}>
+    <ButtonWrapper
+      data-appearance={resolvedAppearance}
+      {...props}
+      className={['mochi-button', `mochi-button--${resolvedAppearance}`, className]
+        .filter(Boolean)
+        .join(' ')}
+      type={htmlType}
+      disabled={disabled}
+      $variant={variant}
+      $appearance={resolvedAppearance}
+    >
       <TextContainer>
-        <Bracket $variant={variant} className="mochi-bracket-left">(</Bracket>
-        <Label ref={labelRef} $variant={variant}>{children}</Label>
-        {isDropdown && <DropdownIcon />}
-        <Bracket $variant={variant} className="mochi-bracket-right">)</Bracket>
-        <UnderlineBar
-          $variant={variant}
-          className="mochi-underline"
-          style={barStyle}
-        />
+        {!isDrop && <Bracket $variant={variant} className="mochi-bracket-left">(</Bracket>}
+        <Label ref={labelRef} $variant={variant} $appearance={resolvedAppearance}>
+          {children}
+        </Label>
+        {isDropdown && <DropdownIcon $appearance={resolvedAppearance} />}
+        {!isDrop && <Bracket $variant={variant} className="mochi-bracket-right">)</Bracket>}
+        {!isDrop && (
+          <UnderlineBar
+            $variant={variant}
+            className="mochi-underline"
+            style={barStyle}
+          />
+        )}
       </TextContainer>
     </ButtonWrapper>
   );

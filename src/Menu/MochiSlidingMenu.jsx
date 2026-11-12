@@ -38,6 +38,7 @@ const MochiSlidingMenuInner = ({
   closeOnBackdropClick = true,
   backdropColor,          // defaults handled in SCSS via CSS var
   showBackdrop = true,
+  ...rest
 }) => {
   const [internalOpen, setInternalOpen] = useState(isOpen);
   // Controlled vs uncontrolled
@@ -90,6 +91,7 @@ const MochiSlidingMenuInner = ({
         />
       )}
       <nav
+        {...rest}
         className={menuClass}
         style={menuStyle}
         role="navigation"
@@ -115,6 +117,7 @@ const ContentShifter = ({
   duration = 300,
   className = '',
   style = {},
+  ...rest
 }) => {
   const isVertical = position === 'left' || position === 'right';
   const isLeft     = position === 'left';
@@ -132,6 +135,7 @@ const ContentShifter = ({
 
   return (
     <div
+      {...rest}
       className={[
         'mochi-sliding-menu-content-shifter',
         `mochi-sliding-menu-content-shifter--${position}`,

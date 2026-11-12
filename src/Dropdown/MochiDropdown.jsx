@@ -31,6 +31,7 @@ const MochiDropdown = ({
   disabled = false,
   maxHeight = 200,
   className = '',
+  ...rest
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -50,7 +51,7 @@ const MochiDropdown = ({
   };
 
   return (
-    <div className={`mochi-dropdown ${className}`}>
+    <div {...rest} className={['mochi-dropdown', className].filter(Boolean).join(' ')}>
       {label && <label className="mochi-dropdown-label">{label}</label>}
 
       {/* Activator — mirrors mochi.MenuDecorator activating control */}

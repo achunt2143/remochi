@@ -11,12 +11,13 @@ export default MochiToggle;
  *   onChange       {Function} Called with { value, checked, target } once per change
  *   disabled       {boolean}  Disables interaction (default: false)
  *   canAnimate     {boolean}  Animate background-color transition (default: true)
- *   colorActive    {string}   Pill bg when on (default: var(--mochi-selected, '#ffb80d'))
+ *   colorActive    {string}   Pill bg when on (default: var(--mochi-accent, var(--mochi-selected, '#ffb80d')))
  *   colorInactive  {string}   Pill bg when off (default: var(--mochi-toggle-track, '#646464'))
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
  */
-export function MochiToggle({ value, checked, onChange, disabled, canAnimate, colorActive, colorInactive, onContent, offContent, }: {
+export function MochiToggle({ value, checked, onChange, disabled, canAnimate, colorActive, colorInactive, onContent, offContent, className, style, onPointerDown: userOnPointerDown, onPointerMove: userOnPointerMove, onPointerUp: userOnPointerUp, onKeyDown: userOnKeyDown, ...rest }: {
+    [x: string]: any;
     value?: boolean | undefined;
     checked: any;
     onChange?: (() => void) | undefined;
@@ -26,4 +27,10 @@ export function MochiToggle({ value, checked, onChange, disabled, canAnimate, co
     colorInactive?: string | undefined;
     onContent?: string | undefined;
     offContent?: string | undefined;
+    className?: string | undefined;
+    style: any;
+    onPointerDown: any;
+    onPointerMove: any;
+    onPointerUp: any;
+    onKeyDown: any;
 }): any;

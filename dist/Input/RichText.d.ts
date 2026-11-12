@@ -24,7 +24,8 @@ export default RichText;
  *   className      Additional CSS classes
  *   allowFormatting  Allow bold/italic/underline shortcuts (default: true)
  */
-declare function RichText({ value, onChange, onFocus, onBlur, disabled, placeholder, defaultFocus, width, minHeight, className, allowFormatting, }: {
+declare function RichText({ value, onChange, onFocus, onBlur, disabled, placeholder, defaultFocus, width, minHeight, className, style, allowFormatting, ...rest }: {
+    [x: string]: any;
     value?: string | undefined;
     onChange?: (() => void) | undefined;
     onFocus?: (() => void) | undefined;
@@ -35,5 +36,6 @@ declare function RichText({ value, onChange, onFocus, onBlur, disabled, placehol
     width?: string | undefined;
     minHeight?: number | undefined;
     className?: string | undefined;
+    style: any;
     allowFormatting?: boolean | undefined;
 }): any;

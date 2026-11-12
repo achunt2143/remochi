@@ -8,6 +8,8 @@ export default Subheader;
  * Props:
  *   - content: String for subheader text (default: '')
  */
-declare function Subheader({ content }: {
+declare function Subheader({ content, className, ...rest }: {
+    [x: string]: any;
     content?: string | undefined;
+    className?: string | undefined;
 }): any;

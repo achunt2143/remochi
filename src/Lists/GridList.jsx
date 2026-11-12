@@ -17,22 +17,32 @@ const GridListImageItem = ({
   src, 
   caption, 
   onSelect = () => {},
-  selected = false 
+  selected = false,
+  className = '',
+  onClick: userOnClick,
+  onKeyDown: userOnKeyDown,
+  ...rest
 }) => {
-  const handleClick = () => {
-    onSelect(!selected);
+  const handleClick = (e) => {
+    userOnClick?.(e);
+    if (!e?.defaultPrevented) onSelect(!selected);
   };
 
   return (
     <div
-      className={`mochi-gridlist-imageitem ${selected ? 'selected' : ''}`}
+      {...rest}
+      className={['mochi-gridlist-imageitem', selected && 'selected', className]
+        .filter(Boolean)
+        .join(' ')}
       onClick={handleClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
+        userOnKeyDown?.(e);
+        if (e.defaultPrevented) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleClick();
+          handleClick(e);
         }
       }}
     >
@@ -56,16 +66,21 @@ const GridListImageItem = ({
 const GridList = ({ 
   children, 
   columns = 3,
-  gap = 12 
+  gap = 12,
+  className = '',
+  style,
+  ...rest
 }) => {
   return (
     <div 
-      className="mochi-gridlist"
+      {...rest}
+      className={['mochi-gridlist', className].filter(Boolean).join(' ')}
       style={{
         display: 'grid',
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
         gap: `${gap}px`,
-        padding: `${gap}px`
+        padding: `${gap}px`,
+        ...style
       }}
     >
       {children}

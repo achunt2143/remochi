@@ -1,3 +1,19 @@
+# Remochi v0.5.0 — 2026-11-12
+
+This release exposes theme and surface/shape customization tokens, adds shaped `Button` and controlled `Wizard.step` options, ensures `...rest` DOM prop forwarding across components, and guards `MochiButton` text measurement in headless test environments.
+
+## Highlights
+
+- **Theme token overrides on `ThemeWrapper`.** New `tokens?: Record<string, string | number>` prop applies `--*` CSS custom properties to the wrapper element and syncs them onto `:root` (cleaning up removed keys on update/unmount) whenever `syncHtml` is enabled.
+- **Surface, geometry, and typography tokens.** Added `--mochi-surface-material` (overriding panel/surface material on `PopupPanel`, `Dialog`, `Dropdown`, `Repanel`, `FloatingPanel`), shape tokens `--mochi-corner` (`16px`), `--mochi-corner-sm` (`10px`), `--mochi-corner-field` (`24px`), `--mochi-corner-pill` (`9999px`), and `--mochi-scallop` (`45px 0 0 0`), `Header` letter-spacing token `--mochi-header-tracking`, and shaped-button tokens `--mochi-button-bg`, `--mochi-button-radius`, and `--mochi-button-ink`.
+- **`Button.appearance`.** New `'caps' | 'drop'` prop (`'caps'` default keeps classic Mochi brackets and press bar; `'drop'` renders a pill/drop shaped button).
+- **Controlled `Wizard.step`.** Pass `step` (0-based index) with `onStepChange` to control the active wizard step externally while keeping uncontrolled mode as the default.
+- **`Header` customization & consistent `...rest` forwarding.** `Header` now merges `className`, keeps `customClasses` on `.mochi-header-content`, and spreads `...rest` attributes onto its root element; `...rest` attributes (`aria-*`, `data-*`, event handlers, `style`, etc.) now forward cleanly across Remochi components.
+- **Headless/jsdom test safety.** `MochiButton` guards `canvas.getContext?.('2d')` so renders don't throw in jsdom environments without a 2D canvas context.
+- **Updated TypeScript declarations.** `remochi.d.ts` and `dist/` declarations cover `ButtonProps['appearance']`, `HeaderProps['customClasses']`, `ThemeWrapperProps['tokens']`, `WizardProps['step']`, and rest-attribute forwarding.
+
+---
+
 # Remochi v0.4.0 — 2026-10-28
 
 This release pulls Remochi back toward what Mochi and webOS actually looked like, and fixes a long list of bugs found in a full audit. The headline changes: Mochi's real typography and accent color, a redesigned `Dialog`, a restyled `SlidingMenu`, a rebuilt `Wizard`, a corrected CommonJS build, and a number of correctness fixes (Buttons no longer submit forms, Toggle and Slider no longer misfire, keyboard focus is visible).

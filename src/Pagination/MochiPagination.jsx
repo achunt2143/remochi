@@ -11,6 +11,7 @@ const MochiPagination = ({
   showPrevNext  = true,
   maxVisible   = 7,
   className    = '',
+  ...rest
 }) => {
   const go = (page) => {
     if (page !== currentPage && onPageChange) onPageChange(page);
@@ -32,7 +33,7 @@ const MochiPagination = ({
   const atLast  = currentPage === totalPages;
 
   return (
-    <div className={`mochi-pagination ${className}`}>
+    <div {...rest} className={['mochi-pagination', className].filter(Boolean).join(' ')}>
       {showFirstLast && (
         <MochiButton
           type={atFirst ? 'disabled' : 'normal'}

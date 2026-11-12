@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 // Fonts (Prelude, falling back to the bundled Lato) are declared in this
@@ -127,6 +128,8 @@ const MochiThemeWrapper = ({
   storageKey = null,
   syncHtml,
   fontFamily = 'Prelude',
+  tokens,
+  style,
   className = '',
   ...rest
 }) => {
@@ -173,12 +176,62 @@ const MochiThemeWrapper = ({
       ? 'light'
       : 'dark';
 
-  // Synchronize document.documentElement attribute
+  const normalizedTokenEntries = useMemo(() => {
+    if (!tokens || typeof tokens !== 'object') return [];
+    return Object.entries(tokens)
+      .filter(([key, val]) => key.startsWith('--') && val !== undefined && val !== null)
+      .map(([key, val]) => [key, String(val)]);
+  }, [tokens]);
+
+  const tokenStyles = useMemo(() => {
+    if (normalizedTokenEntries.length === 0) return undefined;
+    return Object.fromEntries(normalizedTokenEntries);
+  }, [normalizedTokenEntries]);
+
+  const tokenSignature = useMemo(
+    () => normalizedTokenEntries.map(([k, v]) => `${k}\0${v}`).join('\0'),
+    [normalizedTokenEntries]
+  );
+
+  const prevHtmlTokensRef = useRef([]);
+
+  // Synchronize document.documentElement attribute & CSS custom property tokens
   useIsomorphicLayoutEffect(() => {
     if (shouldSyncHtml && typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-mochi-theme', resolvedTheme);
     }
   }, [shouldSyncHtml, resolvedTheme]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+    const rootStyle = document.documentElement.style;
+    if (!shouldSyncHtml) {
+      for (const key of prevHtmlTokensRef.current) {
+        rootStyle.removeProperty(key);
+      }
+      prevHtmlTokensRef.current = [];
+      return undefined;
+    }
+
+    const nextKeys = new Set(normalizedTokenEntries.map(([key]) => key));
+    for (const prevKey of prevHtmlTokensRef.current) {
+      if (!nextKeys.has(prevKey)) {
+        rootStyle.removeProperty(prevKey);
+      }
+    }
+    for (const [key, val] of normalizedTokenEntries) {
+      rootStyle.setProperty(key, val);
+    }
+    const appliedKeys = normalizedTokenEntries.map(([key]) => key);
+    prevHtmlTokensRef.current = appliedKeys;
+
+    return () => {
+      for (const key of appliedKeys) {
+        rootStyle.removeProperty(key);
+      }
+      prevHtmlTokensRef.current = [];
+    };
+  }, [shouldSyncHtml, tokenSignature]);
 
   // Persist to localStorage
   useEffect(() => {
@@ -230,12 +283,16 @@ const MochiThemeWrapper = ({
     [activeTheme, resolvedTheme, setTheme, toggleTheme, colors]
   );
 
+  const mergedStyle =
+    tokenStyles || style ? { ...tokenStyles, ...style } : undefined;
+
   return (
     <ThemeContext.Provider value={contextValue}>
       <div
         className={`mochi-theme-wrapper ${shouldSyncHtml ? 'mochi-theme-wrapper--root ' : ''}mochi-theme-${resolvedTheme} ${className}`}
         data-mochi-theme={resolvedTheme}
         data-font-family={fontFamily}
+        style={mergedStyle}
         {...rest}
       >
         {children}

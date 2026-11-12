@@ -14,14 +14,16 @@ export default ViewSelectButton;
  *   - decoratorClasses: CSS classes for decorator styling (default: '')
  *   - variant: 'normal' | 'warning' | 'affirmative' | 'blue' (default: 'normal')
  */
-declare function ViewSelectButton({ items, onSelect, decoratorLeft, decoratorRight, barClasses, decoratorClasses, variant }: {
-    items?: never[] | undefined;
+declare function ViewSelectButton({ items, onSelect, decoratorLeft, decoratorRight, barClasses, decoratorClasses, variant, className, ...rest }: {
+    [x: string]: any;
+    items?: any[] | undefined;
     onSelect?: (() => void) | undefined;
     decoratorLeft?: string | undefined;
     decoratorRight?: string | undefined;
     barClasses?: string | undefined;
     decoratorClasses?: string | undefined;
     variant?: string | undefined;
+    className?: string | undefined;
 }): any;
 /**
  * Mochi ViewSelectButtonItem Component

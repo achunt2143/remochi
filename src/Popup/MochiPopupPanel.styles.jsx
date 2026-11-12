@@ -75,9 +75,9 @@ export const Panel = styled.div.attrs(({ className }) => ({
   className: `mochi-contextual-popup ${className || ""}`,
 }))`
   position: fixed;
-  background: var(--mochi-surface, #ffffff);
-  border: 2px solid var(--mochi-popup-border, #646464);
-  border-radius: 24px;
+  background: var(--mochi-surface-material, var(--mochi-panel-bg, #f5f5f5));
+  border: 2px solid var(--mochi-panel-border, var(--mochi-popup-border, #646464));
+  border-radius: var(--mochi-corner-field, 24px);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
   padding: 6px;
   min-width: 150px;

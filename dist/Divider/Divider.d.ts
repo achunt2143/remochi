@@ -12,7 +12,8 @@ export default Divider;
  *   className    extra class string
  *   style        inline style overrides
  */
-declare function Divider({ orientation, thickness, className, style, }: {
+declare function Divider({ orientation, thickness, className, style, ...rest }: {
+    [x: string]: any;
     orientation?: string | undefined;
     thickness?: number | undefined;
     className?: string | undefined;

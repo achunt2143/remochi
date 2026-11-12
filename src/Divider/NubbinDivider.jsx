@@ -106,6 +106,7 @@ const NubbinDivider = ({
   thickness    = 2,
   className    = '',
   style        = {},
+  ...rest
 }) => {
   const info       = NUB_INFO[nubbin] ?? NUB_INFO['up'];
   const isHoriz    = orientation === 'horizontal';
@@ -142,7 +143,10 @@ const NubbinDivider = ({
 
   return (
     <div
-      className={`mochi-nubbin-divider mochi-nubbin-divider--${orientation} ${className}`}
+      {...rest}
+      className={['mochi-nubbin-divider', `mochi-nubbin-divider--${orientation}`, className]
+        .filter(Boolean)
+        .join(' ')}
       style={rootStyle}
     >
       {/* Left / Top cap — stretches to fill its side. Omitted for a

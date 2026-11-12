@@ -11,7 +11,7 @@
   // surfaces.
   background: var(--mochi-panel-bg, var(--mochi-surface));
   border: 1px solid var(--mochi-border);
-  border-radius: 10px;
+  border-radius: var(--mochi-corner-sm, 10px);
   transition: all 0.2s ease;
   position: relative;
 
@@ -59,7 +59,7 @@
     justify-content: center;
     background: var(--mochi-hover);
     border: 1px solid var(--mochi-border);
-    border-radius: 10px;
+    border-radius: var(--mochi-corner-sm, 10px);
     font-size: 20px;
     color: var(--mochi-primary);
     transition: all 0.2s ease;

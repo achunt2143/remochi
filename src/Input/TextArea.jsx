@@ -29,7 +29,9 @@ const TextArea = ({
   defaultFocus = false,
   minHeight = 50,
   rows = 4,
-  className = ''
+  className = '',
+  style,
+  ...rest
 }) => {
   const textareaRef = useRef(null);
 
@@ -41,8 +43,9 @@ const TextArea = ({
 
   return (
     <textarea
+      {...rest}
       ref={textareaRef}
-      className={`mochi-textarea ${className}`}
+      className={['mochi-textarea', className].filter(Boolean).join(' ')}
       value={value}
       onChange={onChange}
       onFocus={onFocus}
@@ -50,7 +53,7 @@ const TextArea = ({
       disabled={disabled}
       placeholder={placeholder}
       rows={rows}
-      style={{ minHeight: `${minHeight}px` }}
+      style={{ minHeight: `${minHeight}px`, ...style }}
     />
   );
 };

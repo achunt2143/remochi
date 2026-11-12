@@ -17,7 +17,8 @@ export default TextArea;
  *   - rows: Number of visible text rows (default: 4)
  *   - className: Additional CSS classes
  */
-declare function TextArea({ value, onChange, onFocus, onBlur, disabled, placeholder, defaultFocus, minHeight, rows, className }: {
+declare function TextArea({ value, onChange, onFocus, onBlur, disabled, placeholder, defaultFocus, minHeight, rows, className, style, ...rest }: {
+    [x: string]: any;
     value?: string | undefined;
     onChange?: (() => void) | undefined;
     onFocus?: (() => void) | undefined;
@@ -28,4 +29,5 @@ declare function TextArea({ value, onChange, onFocus, onBlur, disabled, placehol
     minHeight?: number | undefined;
     rows?: number | undefined;
     className?: string | undefined;
+    style: any;
 }): any;

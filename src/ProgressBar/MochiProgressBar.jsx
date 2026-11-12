@@ -21,7 +21,7 @@ const Container = styled.div`
   width: ${({ $width }) => $width || "100%"};
   height: ${({ $height }) => $height || "12px"};
   background: var(--mochi-hover, rgba(0,0,0,0.08));
-  border-radius: 24px;
+  border-radius: var(--mochi-corner-field, 24px);
   overflow: hidden;
   border: 1px solid var(--mochi-border, rgba(0,0,0,0.1));
 `;
@@ -29,7 +29,7 @@ const Container = styled.div`
 const Fill = styled.div`
   height: 100%;
   background-color: ${({ $color }) => colorMap[$color] || colorMap.blue};
-  border-radius: 24px 0 0 24px;
+  border-radius: 0;
   width: ${({ $value }) => Math.min(Math.max($value, 0), 100)}%;
   transition: width 0.5s ease;
   will-change: width;
@@ -39,7 +39,8 @@ export const MochiProgressBar = ({
   value = 0,
   color = "blue",
   width,
-  height
+  height,
+  ...rest
 }) => (
   <Container
     $width={width}
@@ -48,6 +49,7 @@ export const MochiProgressBar = ({
     aria-valuemin={0}
     aria-valuemax={100}
     aria-valuenow={value}
+    {...rest}
   >
     <Fill $color={color} $value={value} />
   </Container>

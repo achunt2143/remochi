@@ -14,6 +14,7 @@
     font-weight: normal;
     font-size: 36px;
     line-height: 32px;
+    letter-spacing: var(--mochi-header-tracking, normal);
     color: var(--mochi-text);
     padding-top: 30px;
     text-overflow: ellipsis;

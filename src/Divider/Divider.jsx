@@ -21,6 +21,7 @@ const Divider = ({
   thickness   = 4,
   className   = '',
   style       = {},
+  ...rest
 }) => {
   const isHorizontal = orientation === 'horizontal';
 
@@ -31,7 +32,10 @@ const Divider = ({
 
   return (
     <div
-      className={`remochi-divider remochi-divider--${orientation} ${className}`}
+      {...rest}
+      className={['remochi-divider', `remochi-divider--${orientation}`, className]
+        .filter(Boolean)
+        .join(' ')}
       style={rootStyle}
     >
       <div

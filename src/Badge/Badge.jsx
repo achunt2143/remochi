@@ -43,6 +43,8 @@ const Badge = ({
   count,
   background,
   color      = '#ffffff',
+  className  = '',
+  ...rest
 }) => {
   // Resolve label: children > content > empty
   const label = children ?? (content !== undefined ? String(content) : '');
@@ -57,7 +59,7 @@ const Badge = ({
   const innerClass = `mochi-badge-inner ${isOval || count !== undefined ? 'oval' : 'round'}`;
 
   return (
-    <div className="mochi-badge">
+    <div {...rest} className={['mochi-badge', className].filter(Boolean).join(' ')}>
       <div
         className={innerClass}
         style={{ background: bg, color }}

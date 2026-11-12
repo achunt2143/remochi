@@ -18,12 +18,14 @@
  *   background {string}         Override background color (overrides variant)
  *   color      {string}         Text color (default: '#ffffff')
  */
-export function Badge({ children, content, variant, count, background, color, }: {
+export function Badge({ children, content, variant, count, background, color, className, ...rest }: {
+    [x: string]: any;
     children: any;
     content: any;
     variant?: string | undefined;
     count: any;
     background: any;
     color?: string | undefined;
+    className?: string | undefined;
 }): any;
 export { Badge as MochiBadge };

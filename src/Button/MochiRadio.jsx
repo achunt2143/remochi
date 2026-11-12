@@ -35,9 +35,11 @@ const MochiRadioOuter = styled.span`
   // distinct from each other.
   background: ${({ $checked, disabled }) =>
     disabled
-      ? "var(--mochi-selected-soft, #ffdb86)"
+      ? $checked
+        ? "var(--mochi-accent-soft, var(--mochi-accent, var(--mochi-selected-soft, #ffdb86)))"
+        : "var(--mochi-selected-soft, #ffdb86)"
       : $checked
-      ? "var(--mochi-selected, #ffb80d)"
+      ? "var(--mochi-accent, var(--mochi-selected, #ffb80d))"
       : "var(--mochi-mark, #fff)"};
   margin-right: 8px;
   box-sizing: border-box;
@@ -80,8 +82,16 @@ const CheckmarkSVG = styled.svg`
   color: var(--mochi-toggle-knob, #fff);
 `;
 
-const MochiRadio = ({ name, value, checked, onChange, disabled, children }) => (
-  <MochiRadioLabel disabled={disabled}>
+const MochiRadio = ({
+  name,
+  value,
+  checked,
+  onChange,
+  disabled,
+  children,
+  ...rest
+}) => (
+  <MochiRadioLabel disabled={disabled} {...rest}>
     <MochiRadioInput
       name={name}
       value={value}

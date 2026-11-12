@@ -5,7 +5,7 @@
   // Panel tone (#f5f5f5 light / #404040 dark), like Repanel — a pure white
   // block on the #f5f5f5 page glared in light mode.
   background: var(--mochi-panel-bg, var(--mochi-surface));
-  border-radius: 12px;
+  border-radius: var(--mochi-corner, 16px);
   border: 1px solid var(--mochi-border);
   overflow: hidden;
   min-height: 400px;

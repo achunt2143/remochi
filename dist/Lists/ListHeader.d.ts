@@ -9,7 +9,9 @@ export default ListHeader;
  *   - content: String for list header text (default: '')
  *   - children: Optional content to render below header
  */
-declare function ListHeader({ content, children }: {
+declare function ListHeader({ content, children, className, ...rest }: {
+    [x: string]: any;
     content?: string | undefined;
     children: any;
+    className?: string | undefined;
 }): any;

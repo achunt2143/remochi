@@ -19,15 +19,17 @@ const MochiSlidingMenuItemGroup = ({
   className = '',
   style = {},
   divider = false,
+  ...rest
 }) => (
   <div
+    data-testid="mochi-sliding-menu-item-group"
+    {...rest}
     className={[
       'mochi-sliding-menu-item-group',
       divider ? 'mochi-sliding-menu-item-group--divider' : '',
       className,
     ].filter(Boolean).join(' ')}
     style={style}
-    data-testid="mochi-sliding-menu-item-group"
   >
     {label && (
       <div className="mochi-sliding-menu-item-group-label">{label}</div>
