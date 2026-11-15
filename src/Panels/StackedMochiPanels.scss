@@ -99,30 +99,36 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
     // their own background if they want one.
     background: transparent;
 
-    // Let a child Repanel/FloatingPanel fill the shell without imposing its
-    // own fixed height, so tall content scrolls the surface rather than
-    // clipping.
+    // Keep each panel shell matched to the surface viewport height so
+    // .mochi-panel-body owns scrolling and clips scrolled content to the
+    // panel's curved border-radius without pushing .mochi-panel-handle-nubbin
+    // off-screen.
     > * {
       box-sizing: border-box;
       min-height: 100%;
     }
 
     > .mochi-panel {
-      height: auto;
+      height: 100%;
       min-height: 100%;
       width: 100%;
-    }
 
-    // Thin, theme-aware scrollbar.
-    scrollbar-width: thin;
-    scrollbar-color: var(--mochi-border, #cccccc) transparent;
+      > .mochi-panel-body {
+        overflow-x: hidden;
+        overflow-y: auto;
 
-    &::-webkit-scrollbar {
-      width: 8px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: var(--mochi-border, #cccccc);
-      border-radius: 6px;
+        // Thin, theme-aware scrollbar.
+        scrollbar-width: thin;
+        scrollbar-color: var(--mochi-border, #cccccc) transparent;
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: var(--mochi-border, #cccccc);
+          border-radius: 6px;
+        }
+      }
     }
   }
 
