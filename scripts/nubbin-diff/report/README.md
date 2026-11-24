@@ -201,6 +201,28 @@ Source: in-page snapshot, 1x only.
 Self-test (the check on a painted border with a tail offset by a known
 amount): 1×: 0px → 0.00px, 0.1px → 0.05px, 0.2px → 0.13px, 0.3px → 0.21px, 0.4px → 0.33px, 0.5px → 0.51px; 2×: 0px → 0.00px, 0.1px → 0.06px, 0.2px → 0.17px, 0.3px → 0.33px, 0.4px → 0.44px, 0.5px → 0.50px.
 
+## Shadow panel grabber
+
+`Repanel style="shadow"` paints an inset halo on its own box, so it used
+to stop at the straight edge and the grabber read as a flat patch. The
+shadow grabber now redraws the halo over the panel's bottom-left corner as
+the same inset shadow (offset 4px, blur sigma 25px, the tint token) of the
+panel's outline *including* the bump, fading into the CSS halo over its
+last 30px so there's no line where they meet (measured: 0–1 levels of 255
+across the hand-over, the rounding floor). The default variant is
+untouched (0 pixels differ).
+
+Shadow grabber, 4× (before | after | after, inside a RepanelStack):
+
+![shadow grabber, light](halo/shadow-grabber-light.png)
+
+![shadow grabber, dark](halo/shadow-grabber-dark.png)
+
+Default grabber for reference, unchanged (standalone | in a stack):
+
+![default grabber, light](halo/default-grabber-light.png)
+![default grabber, dark](halo/default-grabber-dark.png)
+
 ## In context
 
 Snapshots of `context.html` (SVG foreignObject, so text uses a fallback
@@ -221,3 +243,11 @@ font).
 ### static, dark
 
 ![static dark](context/static-dark-2x.png)
+
+### halo, light
+
+![halo light](context/halo-light-2x.png)
+
+### halo, dark
+
+![halo dark](context/halo-dark-2x.png)

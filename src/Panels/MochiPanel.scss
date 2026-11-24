@@ -86,6 +86,14 @@ $mochi-panel-radius: 45px;
   height: 43px;
   z-index: 2;
   pointer-events: none;
+
+  // The shadow variant's grabber also redraws the panel's halo over its
+  // bottom-left corner (see Repanel's ShadowHandle), so it's larger (sized
+  // inline) and sits under the body, like the CSS halo.
+  &--halo {
+    z-index: auto;
+    overflow: hidden;
+  }
 }
 
 // ── FloatingPanel overrides ────────────────────────────────────────────────

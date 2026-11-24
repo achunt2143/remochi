@@ -2,7 +2,7 @@
 // (plus a corner placement), NubbinDivider with a bump and corner caps,
 // Divider, and Repanels inside a RepanelStack.
 //
-//   /scripts/nubbin-diff/out/context.html?view=popups|static&theme=light|dark
+//   /scripts/nubbin-diff/out/context.html?view=popups|static|halo&theme=light|dark
 //
 // With &joints (popups view), it checks that each popup nubbin's line runs
 // on from the panel border without a step, from its own 1x snapshot; run.mjs
@@ -121,6 +121,34 @@ function Static() {
             <Repanel style="shadow"><div style={{ padding: 20 }}>Tracks</div></Repanel>
           </RepanelStack>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Repanel grabbers up close: standalone default and shadow panels with a
+// handle, and both kinds inside a RepanelStack.
+function Halo() {
+  const box = { position: 'absolute', top: 40, width: 300, height: 360 };
+  return (
+    <div style={{ position: 'relative', height: H }}>
+      <div style={{ ...box, left: 40 }} data-halo="standalone-default">
+        <Repanel handle><div style={{ padding: 20 }}>Default</div></Repanel>
+      </div>
+      <div style={{ ...box, left: 380 }} data-halo="standalone-shadow">
+        <Repanel handle style="shadow"><div style={{ padding: 20 }}>Shadow</div></Repanel>
+      </div>
+      <div style={{ position: 'absolute', left: 720, top: 40, width: 440, height: 360 }} data-halo="stack-shadow">
+        <RepanelStack defaultActiveIndex={1} defaultReveal={2}>
+          <Repanel style="shadow"><div style={{ padding: 20 }}>Back</div></Repanel>
+          <Repanel style="shadow"><div style={{ padding: 20 }}>Front</div></Repanel>
+        </RepanelStack>
+      </div>
+      <div style={{ position: 'absolute', left: 720, top: 440, width: 440, height: 360 }} data-halo="stack-default">
+        <RepanelStack defaultActiveIndex={1} defaultReveal={2}>
+          <Repanel><div style={{ padding: 20 }}>Back</div></Repanel>
+          <Repanel><div style={{ padding: 20 }}>Front</div></Repanel>
+        </RepanelStack>
       </div>
     </div>
   );
@@ -342,6 +370,7 @@ function App() {
     window.__measureScreenshot = measureScreenshot;
     window.__stopAnimations = stopAnimations;
     window.__checkJoints = checkJoints;
+    window.__capture = async () => { for (const s of [1, 2]) await capture(s); return true; };
     window.__jointTolerance = JOINT_TOLERANCE;
     window.__selfTestJoints = selfTestJoints;
     window.__snapshot = snapshot;
@@ -365,7 +394,7 @@ function App() {
   }, []);
   return (
     <MochiThemeWrapper theme={theme} style={{ width: W, height: H, overflow: 'hidden', background: 'var(--mochi-bg)' }}>
-      {view === 'popups' ? <Popups /> : <Static />}
+      {view === 'popups' ? <Popups /> : view === 'halo' ? <Halo /> : <Static />}
     </MochiThemeWrapper>
   );
 }

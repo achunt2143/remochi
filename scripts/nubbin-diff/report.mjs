@@ -23,7 +23,7 @@ export function writeReport() {
     ? Object.entries(joints.selfTest).map(([scale, byOffset]) =>
         `${scale}×: ${Object.entries(byOffset).map(([o, steps]) => `${o}px → ${Math.max(...steps).toFixed(2)}px`).join(', ')}`)
     : [];
-  const context = ['popups', 'static'].flatMap((view) =>
+  const context = ['popups', 'static', 'halo'].flatMap((view) =>
     ['light', 'dark']
       .filter((theme) => existsSync(join(dir, `context/${view}-${theme}-2x.png`)))
       .map((theme) => `### ${view}, ${theme}\n\n![${view} ${theme}](context/${view}-${theme}-2x.png)\n`)
@@ -110,6 +110,28 @@ ${jointRows.join('\n')}
 
 Self-test (the check on a painted border with a tail offset by a known
 amount): ${selfTest.join('; ')}.
+
+## Shadow panel grabber
+
+\`Repanel style="shadow"\` paints an inset halo on its own box, so it used
+to stop at the straight edge and the grabber read as a flat patch. The
+shadow grabber now redraws the halo over the panel's bottom-left corner as
+the same inset shadow (offset 4px, blur sigma 25px, the tint token) of the
+panel's outline *including* the bump, fading into the CSS halo over its
+last 30px so there's no line where they meet (measured: 0–1 levels of 255
+across the hand-over, the rounding floor). The default variant is
+untouched (0 pixels differ).
+
+Shadow grabber, 4× (before | after | after, inside a RepanelStack):
+
+![shadow grabber, light](halo/shadow-grabber-light.png)
+
+![shadow grabber, dark](halo/shadow-grabber-dark.png)
+
+Default grabber for reference, unchanged (standalone | in a stack):
+
+![default grabber, light](halo/default-grabber-light.png)
+![default grabber, dark](halo/default-grabber-dark.png)
 
 ## In context
 

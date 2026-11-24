@@ -27,7 +27,7 @@ try {
   await page.waitForFunction(() => window.__nubbinDiff, null, { timeout: 120000 });
   const results = await page.evaluate(() => window.__nubbinDiff);
   if (results.error) throw new Error(results.error);
-  for (const view of ['popups', 'static']) {
+  for (const view of ['popups', 'static', 'halo']) {
     for (const theme of ['light', 'dark']) {
       await page.goto(`${base}/context.html?view=${view}&theme=${theme}&capture`);
       await page.waitForFunction(() => window.__captured, null, { timeout: 30000 });

@@ -61,6 +61,11 @@ export const NUBBIN_STROKE_COLOR = 'var(--mochi-popup-border, #646464)';
 
 const fmt = (n) => +n.toFixed(2);
 
+// How far a bump stands off its line at `u` px along it: the traced profile
+// itself, for drawings that build their own outline around a bump.
+export const bumpRise = (u, peak = BUMP.peak) =>
+  BUMP.height * Math.exp(-((u - peak) ** 2) / (2 * BUMP.sigma * BUMP.sigma));
+
 // Smooth path through `points` (Catmull-Rom, written out as cubic Béziers).
 function smoothPath(points) {
   let d = `M${fmt(points[0][0])},${fmt(points[0][1])}`;
