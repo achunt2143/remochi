@@ -32,13 +32,15 @@ export const NUBBIN_STROKE = 2;
 // stroke centre, sigma 9.7px. Every sprite puts the peak 36px along the box.
 export const BUMP = { height: 13.1, sigma: 9.7, peak: 36, length: 71, depth: 20 };
 
-// Corner-cap ramp, fitted the same way (RMS 0.07px): one cubic Bézier for
-// the stroke's centre line, from the tip (where it meets the box's side,
-// 1px in) down into the line 13px below. Box: 32 along, 14 deep.
+// Corner-cap ramp, fitted the same way: one cubic Bézier for the stroke's
+// centre line, from the tip (where it meets the box's side, 1px in) down
+// into the line 13px below. Box: 32 along, 14 deep. The sprites' ramp was still settling at the box's end, which left a slight
+// kink where the line carries on beyond it; this one is pinned to land on
+// the line 2px before the end (refitted with that end fixed).
 export const CORNER = {
   length: 32,
   depth: 14,
-  ramp: [[1, 1.25], [9.5, 6.2], [24.5, 13], [32.5, 13]],
+  ramp: [[1, 1.45], [10, 6.2], [26, 13], [30, 13]],
 };
 
 // Divider taper, measured from div-left.png. Each of the groove's 4 rows is

@@ -14,6 +14,15 @@ export function writeReport() {
   const rows = results.map(
     (r) => `| \`${r.id}\` | ${r.theme} | ${r.scale}× | ${r.w}×${r.h} | ${pct(r.mismatch)} | ${pct(r.shifted)} | ${pct(r.mean)} | ![](${r.crop}) |`
   );
+  const jointsFile = join(dir, 'joints.json');
+  const joints = existsSync(jointsFile) ? JSON.parse(readFileSync(jointsFile, 'utf8')) : null;
+  const jointRows = joints
+    ? joints.results.map((j) => `| ${j.placement} | ${j.joint} | ${j.scale}× | ${j.step.toFixed(3)} | ${j.centreShift.toFixed(3)} | ${j.ok ? 'ok' : '**FAIL**'} |`)
+    : [];
+  const selfTest = joints
+    ? Object.entries(joints.selfTest).map(([scale, byOffset]) =>
+        `${scale}×: ${Object.entries(byOffset).map(([o, steps]) => `${o}px → ${Math.max(...steps).toFixed(2)}px`).join(', ')}`)
+    : [];
   const context = ['popups', 'static'].flatMap((view) =>
     ['light', 'dark']
       .filter((theme) => existsSync(join(dir, `context/${view}-${theme}-2x.png`)))
@@ -65,10 +74,42 @@ Places where the drawing doesn't copy the sprite because the sprite was off:
   fades out over the last stretch instead.
 - **Sizes.** down.png is 72px wide where every other bump is 71; Popup's
   box was always 71, so the drawing is 71.
+- **Corner ramp end.** The sprites' corner ramp was still settling onto the
+  line in the last 2–3px of its box, a slight kink where the border carries
+  on. The drawn ramp is pinned to land 2px before the end, which costs
+  about a point of shape mismatch on the corner rows below.
+- **Popup on whole pixels.** Not a sprite difference but the cause of the
+  one seam review found: the far-side nubbins sit at \`left/top: 100%\` of
+  a panel sized by its content, and when that size was fractional the
+  border and the nubbin could snap to device pixels differently (a 0.25–0.4px
+  step, worst on the right-pointing nub). PopupPanel now rounds its
+  position and rounds its size up by under a pixel, so there's nothing to
+  snap. See the joint check below.
 
 | sprite | theme | scale | size | mismatch | shape | mean | crop |
 |---|---|---|---|---|---|---|---|
 ${rows.join('\n')}
+
+## Joints
+
+The per-sprite table compares each nubbin on its own, so it can't see
+whether a popup nubbin's line lines up with the border it runs on from. This
+check samples the stroke 0.5–2.5px either side of each place a popup
+nubbin's line meets the panel's straight border (both ends of a bump; the
+line end and the side of a corner cap) and finds the stroke's two edges
+across the line. **step** is the largest edge step between border and
+nubbin, which fails over ${joints ? joints.tolerance : '–'}px; **centre** is how far the
+stroke's centre moves. (Where the border runs on behind the nubbin, an
+offset of d widens the line, so the centre only moves d/2.)
+
+${joints ? `Source: ${joints.source}.` : 'Not run yet.'}
+
+| placement | joint | scale | step (px) | centre (px) | |
+|---|---|---|---|---|---|
+${jointRows.join('\n')}
+
+Self-test (the check on a painted border with a tail offset by a known
+amount): ${selfTest.join('; ')}.
 
 ## In context
 

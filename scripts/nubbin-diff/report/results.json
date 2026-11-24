@@ -357,9 +357,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 2.6785714285714284,
-    "shifted": 1.3392857142857142,
-    "mean": 1.1519607843137254,
+    "mismatch": 7.366071428571429,
+    "shifted": 2.6785714285714284,
+    "mean": 1.6929271708683473,
     "crop": "crops/popup_top-left-corner-up-light-1x.png"
   },
   {
@@ -368,9 +368,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 17.689732142857142,
-    "shifted": 0.9486607142857143,
-    "mean": 3.0256477591036415,
+    "mismatch": 18.191964285714285,
+    "shifted": 1.5625,
+    "mean": 3.2790616246498603,
     "crop": "crops/popup_top-left-corner-up-light-2x.png"
   },
   {
@@ -379,9 +379,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 1.5625,
+    "mismatch": 2.6785714285714284,
     "shifted": 0.6696428571428571,
-    "mean": 0.5873599439775911,
+    "mean": 0.8061974789915967,
     "crop": "crops/popup_dark_top-left-corner-up-dark-1x.png"
   },
   {
@@ -390,9 +390,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 5.301339285714286,
-    "shifted": 0.11160714285714286,
-    "mean": 1.4519870448179273,
+    "mismatch": 6.25,
+    "shifted": 0,
+    "mean": 1.529893207282913,
     "crop": "crops/popup_dark_top-left-corner-up-dark-2x.png"
   },
   {
@@ -401,9 +401,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 4.017857142857143,
-    "shifted": 2.455357142857143,
-    "mean": 1.4968487394957983,
+    "mismatch": 7.366071428571429,
+    "shifted": 2.6785714285714284,
+    "mean": 1.875875350140056,
     "crop": "crops/divider_top-left-corner-up-light-1x.png"
   },
   {
@@ -412,9 +412,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 15.066964285714286,
-    "shifted": 0.78125,
-    "mean": 2.810749299719888,
+    "mismatch": 15.625,
+    "shifted": 1.3950892857142858,
+    "mean": 2.9950105042016806,
     "crop": "crops/divider_top-left-corner-up-light-2x.png"
   },
   {
@@ -423,9 +423,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 7.142857142857143,
-    "shifted": 2.455357142857143,
-    "mean": 1.4294467787114846,
+    "mismatch": 7.589285714285714,
+    "shifted": 1.7857142857142858,
+    "mean": 1.5432422969187676,
     "crop": "crops/divider_top-left-corner-up-dark-1x.png"
   },
   {
@@ -434,9 +434,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 11.662946428571429,
-    "shifted": 0.78125,
-    "mean": 1.9708508403361344,
+    "mismatch": 12.611607142857142,
+    "shifted": 0.22321428571428573,
+    "mean": 2.0575105042016806,
     "crop": "crops/divider_top-left-corner-up-dark-2x.png"
   },
   {
@@ -445,9 +445,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 3.5714285714285716,
-    "shifted": 2.232142857142857,
-    "mean": 1.1939775910364145,
+    "mismatch": 7.142857142857143,
+    "shifted": 2.455357142857143,
+    "mean": 1.642156862745098,
     "crop": "crops/popup_top-right-corner-up-light-1x.png"
   },
   {
@@ -456,9 +456,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 18.415178571428573,
-    "shifted": 0.8928571428571429,
-    "mean": 3.153667717086835,
+    "mismatch": 19.140625,
+    "shifted": 1.7857142857142858,
+    "mean": 3.393075980392157,
     "crop": "crops/popup_top-right-corner-up-light-2x.png"
   },
   {
@@ -467,9 +467,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 1.1160714285714286,
+    "mismatch": 2.232142857142857,
     "shifted": 0.6696428571428571,
-    "mean": 0.6162464985994398,
+    "mean": 0.8053221288515406,
     "crop": "crops/popup_dark_top-right-corner-up-dark-1x.png"
   },
   {
@@ -478,9 +478,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 5.803571428571429,
-    "shifted": 0.22321428571428573,
-    "mean": 1.5038515406162465,
+    "mismatch": 6.417410714285714,
+    "shifted": 0.05580357142857143,
+    "mean": 1.5841649159663864,
     "crop": "crops/popup_dark_top-right-corner-up-dark-2x.png"
   },
   {
@@ -489,9 +489,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 4.241071428571429,
-    "shifted": 2.455357142857143,
-    "mean": 1.491596638655462,
+    "mismatch": 7.366071428571429,
+    "shifted": 3.125,
+    "mean": 1.8312324929971988,
     "crop": "crops/divider_top-right-corner-up-light-1x.png"
   },
   {
@@ -500,9 +500,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 16.183035714285715,
-    "shifted": 0.6696428571428571,
-    "mean": 2.9521183473389354,
+    "mismatch": 16.796875,
+    "shifted": 1.5066964285714286,
+    "mean": 3.1190913865546217,
     "crop": "crops/divider_top-right-corner-up-light-2x.png"
   },
   {
@@ -511,9 +511,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 7.366071428571429,
-    "shifted": 2.455357142857143,
-    "mean": 1.4206932773109244,
+    "mismatch": 7.142857142857143,
+    "shifted": 1.5625,
+    "mean": 1.5248599439775912,
     "crop": "crops/divider_top-right-corner-up-dark-1x.png"
   },
   {
@@ -522,9 +522,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 11.71875,
-    "shifted": 0.8928571428571429,
-    "mean": 1.9988620448179273,
+    "mismatch": 12.332589285714286,
+    "shifted": 0.44642857142857145,
+    "mean": 2.0892419467787113,
     "crop": "crops/divider_top-right-corner-up-dark-2x.png"
   },
   {
@@ -533,9 +533,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 3.794642857142857,
-    "shifted": 2.6785714285714284,
-    "mean": 1.2736344537815127,
+    "mismatch": 8.482142857142858,
+    "shifted": 3.3482142857142856,
+    "mean": 1.8583683473389354,
     "crop": "crops/popup_bottom-left-corner-down-light-1x.png"
   },
   {
@@ -544,9 +544,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 18.080357142857142,
-    "shifted": 0.9486607142857143,
-    "mean": 3.159576330532213,
+    "mismatch": 19.029017857142858,
+    "shifted": 1.8415178571428572,
+    "mean": 3.42874649859944,
     "crop": "crops/popup_bottom-left-corner-down-light-2x.png"
   },
   {
@@ -555,9 +555,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 1.5625,
+    "mismatch": 2.9017857142857144,
     "shifted": 0.6696428571428571,
-    "mean": 0.6302521008403361,
+    "mean": 0.8534663865546219,
     "crop": "crops/popup_dark_bottom-left-corner-down-dark-1x.png"
   },
   {
@@ -566,9 +566,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 6.584821428571429,
-    "shifted": 0.22321428571428573,
-    "mean": 1.5196078431372548,
+    "mismatch": 7.198660714285714,
+    "shifted": 0.05580357142857143,
+    "mean": 1.6082370448179273,
     "crop": "crops/popup_dark_bottom-left-corner-down-dark-2x.png"
   },
   {
@@ -577,9 +577,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 3.794642857142857,
-    "shifted": 2.455357142857143,
-    "mean": 1.5091036414565826,
+    "mismatch": 8.482142857142858,
+    "shifted": 3.5714285714285716,
+    "mean": 1.953781512605042,
     "crop": "crops/divider_bottom-left-corner-down-light-1x.png"
   },
   {
@@ -588,9 +588,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 15.904017857142858,
-    "shifted": 0.78125,
-    "mean": 2.9499299719887957,
+    "mismatch": 16.741071428571427,
+    "shifted": 1.5625,
+    "mean": 3.1403186274509802,
     "crop": "crops/divider_bottom-left-corner-down-light-2x.png"
   },
   {
@@ -600,8 +600,8 @@
     "w": 32,
     "h": 14,
     "mismatch": 7.142857142857143,
-    "shifted": 2.0089285714285716,
-    "mean": 1.4635854341736696,
+    "shifted": 0.8928571428571429,
+    "mean": 1.5677521008403361,
     "crop": "crops/divider_bottom-left-corner-down-dark-1x.png"
   },
   {
@@ -610,9 +610,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 12.388392857142858,
-    "shifted": 0.8370535714285714,
-    "mean": 2.029280462184874,
+    "mismatch": 13.058035714285714,
+    "shifted": 0.390625,
+    "mean": 2.1240371148459385,
     "crop": "crops/divider_bottom-left-corner-down-dark-2x.png"
   },
   {
@@ -621,9 +621,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 2.455357142857143,
-    "shifted": 1.1160714285714286,
-    "mean": 1.0950630252100841,
+    "mismatch": 8.035714285714286,
+    "shifted": 2.9017857142857144,
+    "mean": 1.714810924369748,
     "crop": "crops/popup_bottom-right-corner-down-light-1x.png"
   },
   {
@@ -632,9 +632,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 18.136160714285715,
-    "shifted": 0.7254464285714286,
-    "mean": 3.0665703781512605,
+    "mismatch": 18.526785714285715,
+    "shifted": 1.6183035714285714,
+    "mean": 3.3153886554621845,
     "crop": "crops/popup_bottom-right-corner-down-light-2x.png"
   },
   {
@@ -643,9 +643,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 0.8928571428571429,
+    "mismatch": 1.7857142857142858,
     "shifted": 0.44642857142857145,
-    "mean": 0.5768557422969187,
+    "mean": 0.8263305322128852,
     "crop": "crops/popup_dark_bottom-right-corner-down-dark-1x.png"
   },
   {
@@ -654,9 +654,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 5.189732142857143,
-    "shifted": 0.22321428571428573,
-    "mean": 1.4607405462184873,
+    "mismatch": 6.305803571428571,
+    "shifted": 0.05580357142857143,
+    "mean": 1.5484943977591037,
     "crop": "crops/popup_dark_bottom-right-corner-down-dark-2x.png"
   },
   {
@@ -665,9 +665,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 4.017857142857143,
-    "shifted": 2.232142857142857,
-    "mean": 1.4644607843137254,
+    "mismatch": 7.589285714285714,
+    "shifted": 2.9017857142857144,
+    "mean": 1.87062324929972,
     "crop": "crops/divider_bottom-right-corner-down-light-1x.png"
   },
   {
@@ -676,9 +676,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 15.848214285714286,
-    "shifted": 0.5580357142857143,
-    "mean": 2.882309173669468,
+    "mismatch": 16.350446428571427,
+    "shifted": 1.3392857142857142,
+    "mean": 3.05672268907563,
     "crop": "crops/divider_bottom-right-corner-down-light-2x.png"
   },
   {
@@ -687,9 +687,9 @@
     "scale": 1,
     "w": 32,
     "h": 14,
-    "mismatch": 7.142857142857143,
-    "shifted": 2.6785714285714284,
-    "mean": 1.3926820728291316,
+    "mismatch": 7.8125,
+    "shifted": 1.7857142857142858,
+    "mean": 1.565126050420168,
     "crop": "crops/divider_bottom-right-corner-down-dark-1x.png"
   },
   {
@@ -698,9 +698,9 @@
     "scale": 2,
     "w": 32,
     "h": 14,
-    "mismatch": 11.216517857142858,
-    "shifted": 0.8370535714285714,
-    "mean": 1.9596901260504203,
+    "mismatch": 12.388392857142858,
+    "shifted": 0.44642857142857145,
+    "mean": 2.0529149159663866,
     "crop": "crops/divider_bottom-right-corner-down-dark-2x.png"
   },
   {
@@ -709,9 +709,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 4.241071428571429,
-    "shifted": 2.455357142857143,
-    "mean": 1.2386204481792717,
+    "mismatch": 8.482142857142858,
+    "shifted": 2.9017857142857144,
+    "mean": 1.7078081232492999,
     "crop": "crops/popup_top-left-corner-left-light-1x.png"
   },
   {
@@ -720,9 +720,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 18.75,
-    "shifted": 0.6696428571428571,
-    "mean": 3.1090248599439776,
+    "mismatch": 18.805803571428573,
+    "shifted": 1.6741071428571428,
+    "mean": 3.3427433473389354,
     "crop": "crops/popup_top-left-corner-left-light-2x.png"
   },
   {
@@ -731,9 +731,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 0.44642857142857145,
+    "mismatch": 1.3392857142857142,
     "shifted": 0,
-    "mean": 0.6179971988795518,
+    "mean": 0.7668067226890756,
     "crop": "crops/popup_dark_top-left-corner-left-dark-1x.png"
   },
   {
@@ -742,9 +742,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 5.357142857142857,
-    "shifted": 0.22321428571428573,
-    "mean": 1.487876400560224,
+    "mismatch": 6.361607142857143,
+    "shifted": 0.05580357142857143,
+    "mean": 1.5587797619047619,
     "crop": "crops/popup_dark_top-left-corner-left-dark-2x.png"
   },
   {
@@ -753,9 +753,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 4.241071428571429,
-    "shifted": 2.232142857142857,
-    "mean": 1.4985994397759104,
+    "mismatch": 7.589285714285714,
+    "shifted": 2.6785714285714284,
+    "mean": 1.8539915966386555,
     "crop": "crops/divider_top-left-corner-left-light-1x.png"
   },
   {
@@ -764,9 +764,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 15.959821428571429,
-    "shifted": 0.5022321428571429,
-    "mean": 2.8831845238095237,
+    "mismatch": 16.629464285714285,
+    "shifted": 1.3950892857142858,
+    "mean": 3.070728291316527,
     "crop": "crops/divider_top-left-corner-left-light-2x.png"
   },
   {
@@ -775,9 +775,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 6.919642857142857,
-    "shifted": 1.7857142857142858,
-    "mean": 1.4373249299719888,
+    "mismatch": 7.142857142857143,
+    "shifted": 1.5625,
+    "mean": 1.4907212885154062,
     "crop": "crops/divider_top-left-corner-left-dark-1x.png"
   },
   {
@@ -786,9 +786,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 11.383928571428571,
-    "shifted": 0.8370535714285714,
-    "mean": 1.9813550420168067,
+    "mismatch": 12.220982142857142,
+    "shifted": 0.5022321428571429,
+    "mean": 2.0555409663865545,
     "crop": "crops/divider_top-left-corner-left-dark-2x.png"
   },
   {
@@ -797,9 +797,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 3.5714285714285716,
-    "shifted": 2.455357142857143,
-    "mean": 1.2202380952380951,
+    "mismatch": 8.035714285714286,
+    "shifted": 3.3482142857142856,
+    "mean": 1.796218487394958,
     "crop": "crops/popup_bottom-left-corner-left-light-1x.png"
   },
   {
@@ -808,9 +808,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 18.526785714285715,
-    "shifted": 0.9486607142857143,
-    "mean": 3.165266106442577,
+    "mismatch": 18.861607142857142,
+    "shifted": 1.7299107142857142,
+    "mean": 3.3886992296918765,
     "crop": "crops/popup_bottom-left-corner-left-light-2x.png"
   },
   {
@@ -819,9 +819,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 0.8928571428571429,
-    "shifted": 0,
-    "mean": 0.5794817927170868,
+    "mismatch": 3.125,
+    "shifted": 0.22321428571428573,
+    "mean": 0.7851890756302521,
     "crop": "crops/popup_dark_bottom-left-corner-left-dark-1x.png"
   },
   {
@@ -830,9 +830,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 6.361607142857143,
-    "shifted": 0.22321428571428573,
-    "mean": 1.5084471288515404,
+    "mismatch": 7.477678571428571,
+    "shifted": 0.05580357142857143,
+    "mean": 1.6010154061624648,
     "crop": "crops/popup_dark_bottom-left-corner-left-dark-2x.png"
   },
   {
@@ -841,9 +841,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 3.794642857142857,
-    "shifted": 2.455357142857143,
-    "mean": 1.4434523809523812,
+    "mismatch": 7.366071428571429,
+    "shifted": 3.3482142857142856,
+    "mean": 1.8662464985994398,
     "crop": "crops/divider_bottom-left-corner-left-light-1x.png"
   },
   {
@@ -852,9 +852,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 15.792410714285714,
-    "shifted": 0.78125,
-    "mean": 2.927389705882353,
+    "mismatch": 16.350446428571427,
+    "shifted": 1.4508928571428572,
+    "mean": 3.0899859943977592,
     "crop": "crops/divider_bottom-left-corner-left-light-2x.png"
   },
   {
@@ -863,9 +863,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 7.142857142857143,
-    "shifted": 2.0089285714285716,
-    "mean": 1.4268207282913166,
+    "mismatch": 7.8125,
+    "shifted": 1.3392857142857142,
+    "mean": 1.5336134453781511,
     "crop": "crops/divider_bottom-left-corner-left-dark-1x.png"
   },
   {
@@ -874,9 +874,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 12.332589285714286,
-    "shifted": 0.8370535714285714,
-    "mean": 2.027748599439776,
+    "mismatch": 13.28125,
+    "shifted": 0.44642857142857145,
+    "mean": 2.12141106442577,
     "crop": "crops/divider_bottom-left-corner-left-dark-2x.png"
   },
   {
@@ -885,9 +885,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 2.455357142857143,
-    "shifted": 1.3392857142857142,
-    "mean": 1.1624649859943978,
+    "mismatch": 7.366071428571429,
+    "shifted": 2.455357142857143,
+    "mean": 1.6754201680672267,
     "crop": "crops/popup_top-right-corner-right-light-1x.png"
   },
   {
@@ -896,9 +896,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 18.582589285714285,
-    "shifted": 0.8370535714285714,
-    "mean": 3.1365983893557425,
+    "mismatch": 19.029017857142858,
+    "shifted": 1.6741071428571428,
+    "mean": 3.3700980392156863,
     "crop": "crops/popup_top-right-corner-right-light-2x.png"
   },
   {
@@ -907,9 +907,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 0.8928571428571429,
-    "shifted": 0,
-    "mean": 0.5453431372549019,
+    "mismatch": 2.6785714285714284,
+    "shifted": 0.22321428571428573,
+    "mean": 0.7668067226890756,
     "crop": "crops/popup_dark_top-right-corner-right-dark-1x.png"
   },
   {
@@ -918,9 +918,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 5.691964285714286,
-    "shifted": 0.22321428571428573,
-    "mean": 1.4896271008403361,
+    "mismatch": 6.640625,
+    "shifted": 0.05580357142857143,
+    "mean": 1.5795693277310923,
     "crop": "crops/popup_dark_top-right-corner-right-dark-2x.png"
   },
   {
@@ -929,9 +929,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 3.794642857142857,
-    "shifted": 2.6785714285714284,
-    "mean": 1.4662114845938374,
+    "mismatch": 7.142857142857143,
+    "shifted": 3.125,
+    "mean": 1.8189775910364145,
     "crop": "crops/divider_top-right-corner-right-light-1x.png"
   },
   {
@@ -940,9 +940,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 15.904017857142858,
-    "shifted": 0.5580357142857143,
-    "mean": 2.9105392156862746,
+    "mismatch": 16.517857142857142,
+    "shifted": 1.3950892857142858,
+    "mean": 3.083202030812325,
     "crop": "crops/divider_top-right-corner-right-light-2x.png"
   },
   {
@@ -951,9 +951,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 6.919642857142857,
-    "shifted": 1.7857142857142858,
-    "mean": 1.3996848739495797,
+    "mismatch": 7.8125,
+    "shifted": 1.5625,
+    "mean": 1.5309873949579833,
     "crop": "crops/divider_top-right-corner-right-dark-1x.png"
   },
   {
@@ -962,9 +962,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 11.551339285714286,
-    "shifted": 0.8928571428571429,
-    "mean": 1.986607142857143,
+    "mismatch": 12.779017857142858,
+    "shifted": 0.5022321428571429,
+    "mean": 2.0890231092436977,
     "crop": "crops/divider_top-right-corner-right-dark-2x.png"
   },
   {
@@ -973,9 +973,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 3.3482142857142856,
-    "shifted": 2.232142857142857,
-    "mean": 1.2780112044817928,
+    "mismatch": 7.8125,
+    "shifted": 3.125,
+    "mean": 1.7410714285714286,
     "crop": "crops/popup_bottom-right-corner-right-light-1x.png"
   },
   {
@@ -984,9 +984,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 17.96875,
-    "shifted": 0.8928571428571429,
-    "mean": 3.05344012605042,
+    "mismatch": 18.359375,
+    "shifted": 1.6183035714285714,
+    "mean": 3.2928483893557425,
     "crop": "crops/popup_bottom-right-corner-right-light-2x.png"
   },
   {
@@ -995,9 +995,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 0.8928571428571429,
+    "mismatch": 1.7857142857142858,
     "shifted": 0,
-    "mean": 0.6206232492997199,
+    "mean": 0.780812324929972,
     "crop": "crops/popup_dark_bottom-right-corner-right-dark-1x.png"
   },
   {
@@ -1006,9 +1006,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 5.46875,
-    "shifted": 0.11160714285714286,
-    "mean": 1.4727766106442577,
+    "mismatch": 6.584821428571429,
+    "shifted": 0,
+    "mean": 1.5423669467787116,
     "crop": "crops/popup_dark_bottom-right-corner-right-dark-2x.png"
   },
   {
@@ -1017,9 +1017,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 3.794642857142857,
-    "shifted": 2.455357142857143,
-    "mean": 1.5047268907563027,
+    "mismatch": 7.142857142857143,
+    "shifted": 2.6785714285714284,
+    "mean": 1.871498599439776,
     "crop": "crops/divider_bottom-right-corner-right-light-1x.png"
   },
   {
@@ -1028,9 +1028,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 15.122767857142858,
-    "shifted": 0.7254464285714286,
-    "mean": 2.8181897759103642,
+    "mismatch": 15.848214285714286,
+    "shifted": 1.4508928571428572,
+    "mean": 3.013174019607843,
     "crop": "crops/divider_bottom-right-corner-right-light-2x.png"
   },
   {
@@ -1039,9 +1039,9 @@
     "scale": 1,
     "w": 14,
     "h": 32,
-    "mismatch": 6.696428571428571,
-    "shifted": 1.3392857142857142,
-    "mean": 1.4749649859943978,
+    "mismatch": 6.919642857142857,
+    "shifted": 0.8928571428571429,
+    "mean": 1.5161064425770308,
     "crop": "crops/divider_bottom-right-corner-right-dark-1x.png"
   },
   {
@@ -1050,9 +1050,9 @@
     "scale": 2,
     "w": 14,
     "h": 32,
-    "mismatch": 11.71875,
-    "shifted": 0.78125,
-    "mean": 1.993172268907563,
+    "mismatch": 12.723214285714286,
+    "shifted": 0.27901785714285715,
+    "mean": 2.066482843137255,
     "crop": "crops/divider_bottom-right-corner-right-dark-2x.png"
   },
   {

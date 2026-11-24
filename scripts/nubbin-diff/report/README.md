@@ -42,6 +42,17 @@ Places where the drawing doesn't copy the sprite because the sprite was off:
   fades out over the last stretch instead.
 - **Sizes.** down.png is 72px wide where every other bump is 71; Popup's
   box was always 71, so the drawing is 71.
+- **Corner ramp end.** The sprites' corner ramp was still settling onto the
+  line in the last 2–3px of its box, a slight kink where the border carries
+  on. The drawn ramp is pinned to land 2px before the end, which costs
+  about a point of shape mismatch on the corner rows below.
+- **Popup on whole pixels.** Not a sprite difference but the cause of the
+  one seam review found: the far-side nubbins sit at `left/top: 100%` of
+  a panel sized by its content, and when that size was fractional the
+  border and the nubbin could snap to device pixels differently (a 0.25–0.4px
+  step, worst on the right-pointing nub). PopupPanel now rounds its
+  position and rounds its size up by under a pixel, so there's nothing to
+  snap. See the joint check below.
 
 | sprite | theme | scale | size | mismatch | shape | mean | crop |
 |---|---|---|---|---|---|---|---|
@@ -77,70 +88,70 @@ Places where the drawing doesn't copy the sprite because the sprite was off:
 | `divider/right` | light | 2× | 20×71 | 9.45% | 0.48% | 1.77% | ![](crops/divider_right-light-2x.png) |
 | `divider/right` | dark | 1× | 20×71 | 3.66% | 0.70% | 0.68% | ![](crops/divider_right-dark-1x.png) |
 | `divider/right` | dark | 2× | 20×71 | 6.23% | 0.48% | 1.09% | ![](crops/divider_right-dark-2x.png) |
-| `popup/top-left-corner-up` | light | 1× | 32×14 | 2.68% | 1.34% | 1.15% | ![](crops/popup_top-left-corner-up-light-1x.png) |
-| `popup/top-left-corner-up` | light | 2× | 32×14 | 17.69% | 0.95% | 3.03% | ![](crops/popup_top-left-corner-up-light-2x.png) |
-| `popup/dark/top-left-corner-up` | dark | 1× | 32×14 | 1.56% | 0.67% | 0.59% | ![](crops/popup_dark_top-left-corner-up-dark-1x.png) |
-| `popup/dark/top-left-corner-up` | dark | 2× | 32×14 | 5.30% | 0.11% | 1.45% | ![](crops/popup_dark_top-left-corner-up-dark-2x.png) |
-| `divider/top-left-corner-up` | light | 1× | 32×14 | 4.02% | 2.46% | 1.50% | ![](crops/divider_top-left-corner-up-light-1x.png) |
-| `divider/top-left-corner-up` | light | 2× | 32×14 | 15.07% | 0.78% | 2.81% | ![](crops/divider_top-left-corner-up-light-2x.png) |
-| `divider/top-left-corner-up` | dark | 1× | 32×14 | 7.14% | 2.46% | 1.43% | ![](crops/divider_top-left-corner-up-dark-1x.png) |
-| `divider/top-left-corner-up` | dark | 2× | 32×14 | 11.66% | 0.78% | 1.97% | ![](crops/divider_top-left-corner-up-dark-2x.png) |
-| `popup/top-right-corner-up` | light | 1× | 32×14 | 3.57% | 2.23% | 1.19% | ![](crops/popup_top-right-corner-up-light-1x.png) |
-| `popup/top-right-corner-up` | light | 2× | 32×14 | 18.42% | 0.89% | 3.15% | ![](crops/popup_top-right-corner-up-light-2x.png) |
-| `popup/dark/top-right-corner-up` | dark | 1× | 32×14 | 1.12% | 0.67% | 0.62% | ![](crops/popup_dark_top-right-corner-up-dark-1x.png) |
-| `popup/dark/top-right-corner-up` | dark | 2× | 32×14 | 5.80% | 0.22% | 1.50% | ![](crops/popup_dark_top-right-corner-up-dark-2x.png) |
-| `divider/top-right-corner-up` | light | 1× | 32×14 | 4.24% | 2.46% | 1.49% | ![](crops/divider_top-right-corner-up-light-1x.png) |
-| `divider/top-right-corner-up` | light | 2× | 32×14 | 16.18% | 0.67% | 2.95% | ![](crops/divider_top-right-corner-up-light-2x.png) |
-| `divider/top-right-corner-up` | dark | 1× | 32×14 | 7.37% | 2.46% | 1.42% | ![](crops/divider_top-right-corner-up-dark-1x.png) |
-| `divider/top-right-corner-up` | dark | 2× | 32×14 | 11.72% | 0.89% | 2.00% | ![](crops/divider_top-right-corner-up-dark-2x.png) |
-| `popup/bottom-left-corner-down` | light | 1× | 32×14 | 3.79% | 2.68% | 1.27% | ![](crops/popup_bottom-left-corner-down-light-1x.png) |
-| `popup/bottom-left-corner-down` | light | 2× | 32×14 | 18.08% | 0.95% | 3.16% | ![](crops/popup_bottom-left-corner-down-light-2x.png) |
-| `popup/dark/bottom-left-corner-down` | dark | 1× | 32×14 | 1.56% | 0.67% | 0.63% | ![](crops/popup_dark_bottom-left-corner-down-dark-1x.png) |
-| `popup/dark/bottom-left-corner-down` | dark | 2× | 32×14 | 6.58% | 0.22% | 1.52% | ![](crops/popup_dark_bottom-left-corner-down-dark-2x.png) |
-| `divider/bottom-left-corner-down` | light | 1× | 32×14 | 3.79% | 2.46% | 1.51% | ![](crops/divider_bottom-left-corner-down-light-1x.png) |
-| `divider/bottom-left-corner-down` | light | 2× | 32×14 | 15.90% | 0.78% | 2.95% | ![](crops/divider_bottom-left-corner-down-light-2x.png) |
-| `divider/bottom-left-corner-down` | dark | 1× | 32×14 | 7.14% | 2.01% | 1.46% | ![](crops/divider_bottom-left-corner-down-dark-1x.png) |
-| `divider/bottom-left-corner-down` | dark | 2× | 32×14 | 12.39% | 0.84% | 2.03% | ![](crops/divider_bottom-left-corner-down-dark-2x.png) |
-| `popup/bottom-right-corner-down` | light | 1× | 32×14 | 2.46% | 1.12% | 1.10% | ![](crops/popup_bottom-right-corner-down-light-1x.png) |
-| `popup/bottom-right-corner-down` | light | 2× | 32×14 | 18.14% | 0.73% | 3.07% | ![](crops/popup_bottom-right-corner-down-light-2x.png) |
-| `popup/dark/bottom-right-corner-down` | dark | 1× | 32×14 | 0.89% | 0.45% | 0.58% | ![](crops/popup_dark_bottom-right-corner-down-dark-1x.png) |
-| `popup/dark/bottom-right-corner-down` | dark | 2× | 32×14 | 5.19% | 0.22% | 1.46% | ![](crops/popup_dark_bottom-right-corner-down-dark-2x.png) |
-| `divider/bottom-right-corner-down` | light | 1× | 32×14 | 4.02% | 2.23% | 1.46% | ![](crops/divider_bottom-right-corner-down-light-1x.png) |
-| `divider/bottom-right-corner-down` | light | 2× | 32×14 | 15.85% | 0.56% | 2.88% | ![](crops/divider_bottom-right-corner-down-light-2x.png) |
-| `divider/bottom-right-corner-down` | dark | 1× | 32×14 | 7.14% | 2.68% | 1.39% | ![](crops/divider_bottom-right-corner-down-dark-1x.png) |
-| `divider/bottom-right-corner-down` | dark | 2× | 32×14 | 11.22% | 0.84% | 1.96% | ![](crops/divider_bottom-right-corner-down-dark-2x.png) |
-| `popup/top-left-corner-left` | light | 1× | 14×32 | 4.24% | 2.46% | 1.24% | ![](crops/popup_top-left-corner-left-light-1x.png) |
-| `popup/top-left-corner-left` | light | 2× | 14×32 | 18.75% | 0.67% | 3.11% | ![](crops/popup_top-left-corner-left-light-2x.png) |
-| `popup/dark/top-left-corner-left` | dark | 1× | 14×32 | 0.45% | 0.00% | 0.62% | ![](crops/popup_dark_top-left-corner-left-dark-1x.png) |
-| `popup/dark/top-left-corner-left` | dark | 2× | 14×32 | 5.36% | 0.22% | 1.49% | ![](crops/popup_dark_top-left-corner-left-dark-2x.png) |
-| `divider/top-left-corner-left` | light | 1× | 14×32 | 4.24% | 2.23% | 1.50% | ![](crops/divider_top-left-corner-left-light-1x.png) |
-| `divider/top-left-corner-left` | light | 2× | 14×32 | 15.96% | 0.50% | 2.88% | ![](crops/divider_top-left-corner-left-light-2x.png) |
-| `divider/top-left-corner-left` | dark | 1× | 14×32 | 6.92% | 1.79% | 1.44% | ![](crops/divider_top-left-corner-left-dark-1x.png) |
-| `divider/top-left-corner-left` | dark | 2× | 14×32 | 11.38% | 0.84% | 1.98% | ![](crops/divider_top-left-corner-left-dark-2x.png) |
-| `popup/bottom-left-corner-left` | light | 1× | 14×32 | 3.57% | 2.46% | 1.22% | ![](crops/popup_bottom-left-corner-left-light-1x.png) |
-| `popup/bottom-left-corner-left` | light | 2× | 14×32 | 18.53% | 0.95% | 3.17% | ![](crops/popup_bottom-left-corner-left-light-2x.png) |
-| `popup/dark/bottom-left-corner-left` | dark | 1× | 14×32 | 0.89% | 0.00% | 0.58% | ![](crops/popup_dark_bottom-left-corner-left-dark-1x.png) |
-| `popup/dark/bottom-left-corner-left` | dark | 2× | 14×32 | 6.36% | 0.22% | 1.51% | ![](crops/popup_dark_bottom-left-corner-left-dark-2x.png) |
-| `divider/bottom-left-corner-left` | light | 1× | 14×32 | 3.79% | 2.46% | 1.44% | ![](crops/divider_bottom-left-corner-left-light-1x.png) |
-| `divider/bottom-left-corner-left` | light | 2× | 14×32 | 15.79% | 0.78% | 2.93% | ![](crops/divider_bottom-left-corner-left-light-2x.png) |
-| `divider/bottom-left-corner-left` | dark | 1× | 14×32 | 7.14% | 2.01% | 1.43% | ![](crops/divider_bottom-left-corner-left-dark-1x.png) |
-| `divider/bottom-left-corner-left` | dark | 2× | 14×32 | 12.33% | 0.84% | 2.03% | ![](crops/divider_bottom-left-corner-left-dark-2x.png) |
-| `popup/top-right-corner-right` | light | 1× | 14×32 | 2.46% | 1.34% | 1.16% | ![](crops/popup_top-right-corner-right-light-1x.png) |
-| `popup/top-right-corner-right` | light | 2× | 14×32 | 18.58% | 0.84% | 3.14% | ![](crops/popup_top-right-corner-right-light-2x.png) |
-| `popup/dark/top-right-corner-right` | dark | 1× | 14×32 | 0.89% | 0.00% | 0.55% | ![](crops/popup_dark_top-right-corner-right-dark-1x.png) |
-| `popup/dark/top-right-corner-right` | dark | 2× | 14×32 | 5.69% | 0.22% | 1.49% | ![](crops/popup_dark_top-right-corner-right-dark-2x.png) |
-| `divider/top-right-corner-right` | light | 1× | 14×32 | 3.79% | 2.68% | 1.47% | ![](crops/divider_top-right-corner-right-light-1x.png) |
-| `divider/top-right-corner-right` | light | 2× | 14×32 | 15.90% | 0.56% | 2.91% | ![](crops/divider_top-right-corner-right-light-2x.png) |
-| `divider/top-right-corner-right` | dark | 1× | 14×32 | 6.92% | 1.79% | 1.40% | ![](crops/divider_top-right-corner-right-dark-1x.png) |
-| `divider/top-right-corner-right` | dark | 2× | 14×32 | 11.55% | 0.89% | 1.99% | ![](crops/divider_top-right-corner-right-dark-2x.png) |
-| `popup/bottom-right-corner-right` | light | 1× | 14×32 | 3.35% | 2.23% | 1.28% | ![](crops/popup_bottom-right-corner-right-light-1x.png) |
-| `popup/bottom-right-corner-right` | light | 2× | 14×32 | 17.97% | 0.89% | 3.05% | ![](crops/popup_bottom-right-corner-right-light-2x.png) |
-| `popup/dark/bottom-right-corner-right` | dark | 1× | 14×32 | 0.89% | 0.00% | 0.62% | ![](crops/popup_dark_bottom-right-corner-right-dark-1x.png) |
-| `popup/dark/bottom-right-corner-right` | dark | 2× | 14×32 | 5.47% | 0.11% | 1.47% | ![](crops/popup_dark_bottom-right-corner-right-dark-2x.png) |
-| `divider/bottom-right-corner-right` | light | 1× | 14×32 | 3.79% | 2.46% | 1.50% | ![](crops/divider_bottom-right-corner-right-light-1x.png) |
-| `divider/bottom-right-corner-right` | light | 2× | 14×32 | 15.12% | 0.73% | 2.82% | ![](crops/divider_bottom-right-corner-right-light-2x.png) |
-| `divider/bottom-right-corner-right` | dark | 1× | 14×32 | 6.70% | 1.34% | 1.47% | ![](crops/divider_bottom-right-corner-right-dark-1x.png) |
-| `divider/bottom-right-corner-right` | dark | 2× | 14×32 | 11.72% | 0.78% | 1.99% | ![](crops/divider_bottom-right-corner-right-dark-2x.png) |
+| `popup/top-left-corner-up` | light | 1× | 32×14 | 7.37% | 2.68% | 1.69% | ![](crops/popup_top-left-corner-up-light-1x.png) |
+| `popup/top-left-corner-up` | light | 2× | 32×14 | 18.19% | 1.56% | 3.28% | ![](crops/popup_top-left-corner-up-light-2x.png) |
+| `popup/dark/top-left-corner-up` | dark | 1× | 32×14 | 2.68% | 0.67% | 0.81% | ![](crops/popup_dark_top-left-corner-up-dark-1x.png) |
+| `popup/dark/top-left-corner-up` | dark | 2× | 32×14 | 6.25% | 0.00% | 1.53% | ![](crops/popup_dark_top-left-corner-up-dark-2x.png) |
+| `divider/top-left-corner-up` | light | 1× | 32×14 | 7.37% | 2.68% | 1.88% | ![](crops/divider_top-left-corner-up-light-1x.png) |
+| `divider/top-left-corner-up` | light | 2× | 32×14 | 15.63% | 1.40% | 3.00% | ![](crops/divider_top-left-corner-up-light-2x.png) |
+| `divider/top-left-corner-up` | dark | 1× | 32×14 | 7.59% | 1.79% | 1.54% | ![](crops/divider_top-left-corner-up-dark-1x.png) |
+| `divider/top-left-corner-up` | dark | 2× | 32×14 | 12.61% | 0.22% | 2.06% | ![](crops/divider_top-left-corner-up-dark-2x.png) |
+| `popup/top-right-corner-up` | light | 1× | 32×14 | 7.14% | 2.46% | 1.64% | ![](crops/popup_top-right-corner-up-light-1x.png) |
+| `popup/top-right-corner-up` | light | 2× | 32×14 | 19.14% | 1.79% | 3.39% | ![](crops/popup_top-right-corner-up-light-2x.png) |
+| `popup/dark/top-right-corner-up` | dark | 1× | 32×14 | 2.23% | 0.67% | 0.81% | ![](crops/popup_dark_top-right-corner-up-dark-1x.png) |
+| `popup/dark/top-right-corner-up` | dark | 2× | 32×14 | 6.42% | 0.06% | 1.58% | ![](crops/popup_dark_top-right-corner-up-dark-2x.png) |
+| `divider/top-right-corner-up` | light | 1× | 32×14 | 7.37% | 3.13% | 1.83% | ![](crops/divider_top-right-corner-up-light-1x.png) |
+| `divider/top-right-corner-up` | light | 2× | 32×14 | 16.80% | 1.51% | 3.12% | ![](crops/divider_top-right-corner-up-light-2x.png) |
+| `divider/top-right-corner-up` | dark | 1× | 32×14 | 7.14% | 1.56% | 1.52% | ![](crops/divider_top-right-corner-up-dark-1x.png) |
+| `divider/top-right-corner-up` | dark | 2× | 32×14 | 12.33% | 0.45% | 2.09% | ![](crops/divider_top-right-corner-up-dark-2x.png) |
+| `popup/bottom-left-corner-down` | light | 1× | 32×14 | 8.48% | 3.35% | 1.86% | ![](crops/popup_bottom-left-corner-down-light-1x.png) |
+| `popup/bottom-left-corner-down` | light | 2× | 32×14 | 19.03% | 1.84% | 3.43% | ![](crops/popup_bottom-left-corner-down-light-2x.png) |
+| `popup/dark/bottom-left-corner-down` | dark | 1× | 32×14 | 2.90% | 0.67% | 0.85% | ![](crops/popup_dark_bottom-left-corner-down-dark-1x.png) |
+| `popup/dark/bottom-left-corner-down` | dark | 2× | 32×14 | 7.20% | 0.06% | 1.61% | ![](crops/popup_dark_bottom-left-corner-down-dark-2x.png) |
+| `divider/bottom-left-corner-down` | light | 1× | 32×14 | 8.48% | 3.57% | 1.95% | ![](crops/divider_bottom-left-corner-down-light-1x.png) |
+| `divider/bottom-left-corner-down` | light | 2× | 32×14 | 16.74% | 1.56% | 3.14% | ![](crops/divider_bottom-left-corner-down-light-2x.png) |
+| `divider/bottom-left-corner-down` | dark | 1× | 32×14 | 7.14% | 0.89% | 1.57% | ![](crops/divider_bottom-left-corner-down-dark-1x.png) |
+| `divider/bottom-left-corner-down` | dark | 2× | 32×14 | 13.06% | 0.39% | 2.12% | ![](crops/divider_bottom-left-corner-down-dark-2x.png) |
+| `popup/bottom-right-corner-down` | light | 1× | 32×14 | 8.04% | 2.90% | 1.71% | ![](crops/popup_bottom-right-corner-down-light-1x.png) |
+| `popup/bottom-right-corner-down` | light | 2× | 32×14 | 18.53% | 1.62% | 3.32% | ![](crops/popup_bottom-right-corner-down-light-2x.png) |
+| `popup/dark/bottom-right-corner-down` | dark | 1× | 32×14 | 1.79% | 0.45% | 0.83% | ![](crops/popup_dark_bottom-right-corner-down-dark-1x.png) |
+| `popup/dark/bottom-right-corner-down` | dark | 2× | 32×14 | 6.31% | 0.06% | 1.55% | ![](crops/popup_dark_bottom-right-corner-down-dark-2x.png) |
+| `divider/bottom-right-corner-down` | light | 1× | 32×14 | 7.59% | 2.90% | 1.87% | ![](crops/divider_bottom-right-corner-down-light-1x.png) |
+| `divider/bottom-right-corner-down` | light | 2× | 32×14 | 16.35% | 1.34% | 3.06% | ![](crops/divider_bottom-right-corner-down-light-2x.png) |
+| `divider/bottom-right-corner-down` | dark | 1× | 32×14 | 7.81% | 1.79% | 1.57% | ![](crops/divider_bottom-right-corner-down-dark-1x.png) |
+| `divider/bottom-right-corner-down` | dark | 2× | 32×14 | 12.39% | 0.45% | 2.05% | ![](crops/divider_bottom-right-corner-down-dark-2x.png) |
+| `popup/top-left-corner-left` | light | 1× | 14×32 | 8.48% | 2.90% | 1.71% | ![](crops/popup_top-left-corner-left-light-1x.png) |
+| `popup/top-left-corner-left` | light | 2× | 14×32 | 18.81% | 1.67% | 3.34% | ![](crops/popup_top-left-corner-left-light-2x.png) |
+| `popup/dark/top-left-corner-left` | dark | 1× | 14×32 | 1.34% | 0.00% | 0.77% | ![](crops/popup_dark_top-left-corner-left-dark-1x.png) |
+| `popup/dark/top-left-corner-left` | dark | 2× | 14×32 | 6.36% | 0.06% | 1.56% | ![](crops/popup_dark_top-left-corner-left-dark-2x.png) |
+| `divider/top-left-corner-left` | light | 1× | 14×32 | 7.59% | 2.68% | 1.85% | ![](crops/divider_top-left-corner-left-light-1x.png) |
+| `divider/top-left-corner-left` | light | 2× | 14×32 | 16.63% | 1.40% | 3.07% | ![](crops/divider_top-left-corner-left-light-2x.png) |
+| `divider/top-left-corner-left` | dark | 1× | 14×32 | 7.14% | 1.56% | 1.49% | ![](crops/divider_top-left-corner-left-dark-1x.png) |
+| `divider/top-left-corner-left` | dark | 2× | 14×32 | 12.22% | 0.50% | 2.06% | ![](crops/divider_top-left-corner-left-dark-2x.png) |
+| `popup/bottom-left-corner-left` | light | 1× | 14×32 | 8.04% | 3.35% | 1.80% | ![](crops/popup_bottom-left-corner-left-light-1x.png) |
+| `popup/bottom-left-corner-left` | light | 2× | 14×32 | 18.86% | 1.73% | 3.39% | ![](crops/popup_bottom-left-corner-left-light-2x.png) |
+| `popup/dark/bottom-left-corner-left` | dark | 1× | 14×32 | 3.13% | 0.22% | 0.79% | ![](crops/popup_dark_bottom-left-corner-left-dark-1x.png) |
+| `popup/dark/bottom-left-corner-left` | dark | 2× | 14×32 | 7.48% | 0.06% | 1.60% | ![](crops/popup_dark_bottom-left-corner-left-dark-2x.png) |
+| `divider/bottom-left-corner-left` | light | 1× | 14×32 | 7.37% | 3.35% | 1.87% | ![](crops/divider_bottom-left-corner-left-light-1x.png) |
+| `divider/bottom-left-corner-left` | light | 2× | 14×32 | 16.35% | 1.45% | 3.09% | ![](crops/divider_bottom-left-corner-left-light-2x.png) |
+| `divider/bottom-left-corner-left` | dark | 1× | 14×32 | 7.81% | 1.34% | 1.53% | ![](crops/divider_bottom-left-corner-left-dark-1x.png) |
+| `divider/bottom-left-corner-left` | dark | 2× | 14×32 | 13.28% | 0.45% | 2.12% | ![](crops/divider_bottom-left-corner-left-dark-2x.png) |
+| `popup/top-right-corner-right` | light | 1× | 14×32 | 7.37% | 2.46% | 1.68% | ![](crops/popup_top-right-corner-right-light-1x.png) |
+| `popup/top-right-corner-right` | light | 2× | 14×32 | 19.03% | 1.67% | 3.37% | ![](crops/popup_top-right-corner-right-light-2x.png) |
+| `popup/dark/top-right-corner-right` | dark | 1× | 14×32 | 2.68% | 0.22% | 0.77% | ![](crops/popup_dark_top-right-corner-right-dark-1x.png) |
+| `popup/dark/top-right-corner-right` | dark | 2× | 14×32 | 6.64% | 0.06% | 1.58% | ![](crops/popup_dark_top-right-corner-right-dark-2x.png) |
+| `divider/top-right-corner-right` | light | 1× | 14×32 | 7.14% | 3.13% | 1.82% | ![](crops/divider_top-right-corner-right-light-1x.png) |
+| `divider/top-right-corner-right` | light | 2× | 14×32 | 16.52% | 1.40% | 3.08% | ![](crops/divider_top-right-corner-right-light-2x.png) |
+| `divider/top-right-corner-right` | dark | 1× | 14×32 | 7.81% | 1.56% | 1.53% | ![](crops/divider_top-right-corner-right-dark-1x.png) |
+| `divider/top-right-corner-right` | dark | 2× | 14×32 | 12.78% | 0.50% | 2.09% | ![](crops/divider_top-right-corner-right-dark-2x.png) |
+| `popup/bottom-right-corner-right` | light | 1× | 14×32 | 7.81% | 3.13% | 1.74% | ![](crops/popup_bottom-right-corner-right-light-1x.png) |
+| `popup/bottom-right-corner-right` | light | 2× | 14×32 | 18.36% | 1.62% | 3.29% | ![](crops/popup_bottom-right-corner-right-light-2x.png) |
+| `popup/dark/bottom-right-corner-right` | dark | 1× | 14×32 | 1.79% | 0.00% | 0.78% | ![](crops/popup_dark_bottom-right-corner-right-dark-1x.png) |
+| `popup/dark/bottom-right-corner-right` | dark | 2× | 14×32 | 6.58% | 0.00% | 1.54% | ![](crops/popup_dark_bottom-right-corner-right-dark-2x.png) |
+| `divider/bottom-right-corner-right` | light | 1× | 14×32 | 7.14% | 2.68% | 1.87% | ![](crops/divider_bottom-right-corner-right-light-1x.png) |
+| `divider/bottom-right-corner-right` | light | 2× | 14×32 | 15.85% | 1.45% | 3.01% | ![](crops/divider_bottom-right-corner-right-light-2x.png) |
+| `divider/bottom-right-corner-right` | dark | 1× | 14×32 | 6.92% | 0.89% | 1.52% | ![](crops/divider_bottom-right-corner-right-dark-1x.png) |
+| `divider/bottom-right-corner-right` | dark | 2× | 14×32 | 12.72% | 0.28% | 2.07% | ![](crops/divider_bottom-right-corner-right-dark-2x.png) |
 | `repanel/left` | light | 1× | 20×43 | 3.60% | 0.47% | 0.85% | ![](crops/repanel_left-light-1x.png) |
 | `repanel/left` | light | 2× | 20×43 | 10.90% | 0.55% | 1.81% | ![](crops/repanel_left-light-2x.png) |
 | `repanel/left-shadow` | dark | 1× | 20×43 | 0.12% | 0.00% | 0.29% | ![](crops/repanel_left-shadow-dark-1x.png) |
@@ -157,6 +168,38 @@ Places where the drawing doesn't copy the sprite because the sprite was off:
 | `divider/div-right` | dark | 2× | 320×4 | 100.00% | 100.00% | 45.89% | ![](crops/divider_div-right-dark-2x.png) |
 | `divider/div-mid` | dark | 1× | 1×4 | 100.00% | 100.00% | 66.27% | ![](crops/divider_div-mid-dark-1x.png) |
 | `divider/div-mid` | dark | 2× | 1×4 | 100.00% | 100.00% | 66.32% | ![](crops/divider_div-mid-dark-2x.png) |
+
+## Joints
+
+The per-sprite table compares each nubbin on its own, so it can't see
+whether a popup nubbin's line lines up with the border it runs on from. This
+check samples the stroke 0.5–2.5px either side of each place a popup
+nubbin's line meets the panel's straight border (both ends of a bump; the
+line end and the side of a corner cap) and finds the stroke's two edges
+across the line. **step** is the largest edge step between border and
+nubbin, which fails over 0.2px; **centre** is how far the
+stroke's centre moves. (Where the border runs on behind the nubbin, an
+offset of d widens the line, so the centre only moves d/2.)
+
+Source: in-page snapshot, 1x only.
+
+| placement | joint | scale | step (px) | centre (px) | |
+|---|---|---|---|---|---|
+| vertical below | start | 1× | 0.004 | 0.002 | ok |
+| vertical below | end | 1× | 0.004 | 0.002 | ok |
+| vertical above | start | 1× | 0.004 | 0.002 | ok |
+| vertical above | end | 1× | 0.004 | 0.002 | ok |
+| horizontal left | start | 1× | 0.004 | 0.002 | ok |
+| horizontal left | end | 1× | 0.004 | 0.002 | ok |
+| horizontal right | start | 1× | 0.004 | 0.002 | ok |
+| horizontal right | end | 1× | 0.004 | 0.002 | ok |
+| vertical below right corner | line end | 1× | 0.000 | 0.000 | ok |
+| vertical below right corner | side | 1× | 0.016 | 0.006 | ok |
+| vertical above left corner | line end | 1× | 0.082 | 0.026 | ok |
+| vertical above left corner | side | 1× | 0.013 | 0.004 | ok |
+
+Self-test (the check on a painted border with a tail offset by a known
+amount): 1×: 0px → 0.00px, 0.1px → 0.05px, 0.2px → 0.13px, 0.3px → 0.21px, 0.4px → 0.33px, 0.5px → 0.51px; 2×: 0px → 0.00px, 0.1px → 0.06px, 0.2px → 0.17px, 0.3px → 0.33px, 0.4px → 0.44px, 0.5px → 0.50px.
 
 ## In context
 

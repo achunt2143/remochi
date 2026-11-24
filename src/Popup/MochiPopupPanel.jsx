@@ -202,6 +202,22 @@ export function MochiPopupPanel({
     };
   }, [isOpen, onClose, computePosition]);
 
+  // Keep the panel on whole pixels. Its border is painted snapped to device
+  // pixels; the nubbin (an SVG) sits at `left/top: 100%` of a size that's
+  // fractional whenever the content is, and the two don't always snap the
+  // same way, which leaves a sub-pixel step where the border runs into the
+  // nubbin. Rounding the position (see panelStyle) and rounding the size up
+  // (by under a pixel) leaves nothing to snap.
+  const [wholeSize, setWholeSize] = useState(null);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    if (!pos || !el) { setWholeSize(null); return; }
+    const cs = getComputedStyle(el);
+    const w = Math.ceil(parseFloat(cs.width) - 0.01);
+    const h = Math.ceil(parseFloat(cs.height) - 0.01);
+    setWholeSize((prev) => (prev && prev.w === w && prev.h === h ? prev : { w, h }));
+  }, [pos]);
+
   useEffect(() => {
     if (pos) panelRef.current?.focus();
   }, [pos]);
@@ -210,8 +226,9 @@ export function MochiPopupPanel({
   // the panel invisible so useLayoutEffect can read its dimensions.
   const panelStyle = pos
     ? {
-        top:  pos.top,
-        left: pos.left,
+        top:  Math.round(pos.top),
+        left: Math.round(pos.left),
+        ...(wholeSize && { minWidth: wholeSize.w, minHeight: wholeSize.h }),
         "--nubbin-h-offset": `${pos.nubHOff}px`,
         "--nubbin-v-offset": `${pos.nubVOff}px`,
       }
