@@ -1,6 +1,10 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import './StackedMochiPanels.scss';
+import './StackedMochiPanelsControls.scss';
 import { Repanel } from './Repanel';
+import { MochiButton } from '../Button/MochiButton';
+import { SCREEN_NARROW } from '../shared/screens';
+import { useWidthClass } from '../shared/useWidthClass';
 import {
   DEFAULT_SNAP_POINTS,
   DEFAULT_MAX_VISIBLE_PANELS,
@@ -84,8 +88,10 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
     wrap = false,
     animate = true,
     narrowFit = true,
-    narrowFitWidth = 768,
+    narrowFitWidth = SCREEN_NARROW,
     narrowBehavior = 'single',
+    controls = 'auto',
+    onControlsAction,
     className = '',
     style: rootStyle,
     ...rest
@@ -139,36 +145,17 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
   const [closeDrag, setCloseDrag] = useState(null);
 
   // ---- Transient gesture state -------------------------------------------
-  const [isNarrow, setIsNarrow] = useState(false);
   const [isRevealDragging, setIsRevealDragging] = useState(false);
 
   const rootRef = useRef(null);
   const grabRef = useRef(null);
   const closeRef = useRef(null);
 
-  // ---- Narrow detection (observe the root width) -------------------------
-  useEffect(() => {
-    if (!narrowFit) {
-      setIsNarrow(false);
-      return undefined;
-    }
-    const el = rootRef.current;
-    if (!el) return undefined;
-
-    const check = () => setIsNarrow(el.getBoundingClientRect().width <= narrowFitWidth);
-    check();
-
-    if (typeof ResizeObserver !== 'undefined') {
-      const ro = new ResizeObserver(check);
-      ro.observe(el);
-      return () => ro.disconnect();
-    }
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', check);
-      return () => window.removeEventListener('resize', check);
-    }
-    return undefined;
-  }, [narrowFit, narrowFitWidth]);
+  // ---- Narrow detection (the stack's own width, not the window's) --------
+  // Narrow is up to narrowFitWidth; wide (from SCREEN_WIDE) is what 'auto'
+  // controls key off.
+  const widthClass = useWidthClass(rootRef, { narrow: narrowFitWidth });
+  const isNarrow = narrowFit && widthClass === 'narrow';
 
   // ---- Whether the wholly first child is among the currently-visible -----
   // panels. It never carries a nubbin (see the map loop below), so when
@@ -456,7 +443,16 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
   );
 
   const onGrabberKeyDown = useCallback(
-    (e) => {
+    (idx) => (e) => {
+      // Enter / Space is the keyboard equal of the double-click: close the
+      // active panel, or jump back to a parent.
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        const target = idx === activeIndex ? activeIndex - 1 : idx;
+        if (target >= 0 && target !== activeIndex) commitActiveIndex(target, 'grabber');
+        return;
+      }
       if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         e.preventDefault();
         commitReveal(stepSnap(committedReveal, config.snapPoints, +1), 'method');
@@ -465,7 +461,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
         commitReveal(stepSnap(committedReveal, config.snapPoints, -1), 'method');
       }
     },
-    [committedReveal, config.snapPoints, commitReveal]
+    [committedReveal, config.snapPoints, commitReveal, activeIndex, commitActiveIndex]
   );
 
   // ---- Root keyboard navigation (panels) ---------------------------------
@@ -483,6 +479,15 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
     },
     [activeIndex, commitActiveIndex]
   );
+
+  // ---- Visible controls: ◀ ▶ do what the gestures do ----------------------
+  const showControls = controls === 'always' || (controls === 'auto' && widthClass === 'wide');
+  const canBack = panelCount > 0 && (wrap ? panelCount > 1 : activeIndex > 0);
+  const canForward = panelCount > 0 && (wrap ? panelCount > 1 : activeIndex < panelCount - 1);
+  const onControl = (action) => () => {
+    commitActiveIndex(activeIndex + (action === 'back' ? -1 : 1), 'controls');
+    onControlsAction?.(action);
+  };
 
   // ---- Render ------------------------------------------------------------
   return (
@@ -565,14 +570,14 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
                 <div
                   className="repanel__grabber"
                   role="slider"
-                  aria-label={idx === activeIndex ? 'Reveal depth or close panel' : 'Reveal depth'}
+                  aria-label={idx === activeIndex ? 'Close panel' : 'Show more panels'}
                   aria-orientation="horizontal"
                   aria-valuemin={bounds.min}
                   aria-valuemax={bounds.max}
                   aria-valuenow={committedReveal}
                   tabIndex={0}
                   onPointerDown={onGrabberPointerDown(idx)}
-                  onKeyDown={onGrabberKeyDown}
+                  onKeyDown={onGrabberKeyDown(idx)}
                   onDoubleClick={onGrabberDoubleClick(idx)}
                   // No tap-to-close: the grabber holds pointer capture, so
                   // the browser fires `click` after every drag (including a
@@ -586,6 +591,17 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           );
         })}
       </div>
+
+      {showControls && (
+        <div className="repanel__controls">
+          <MochiButton aria-label="Back" disabled={!canBack} onClick={onControl('back')}>
+            ◀
+          </MochiButton>
+          <MochiButton aria-label="Forward" disabled={!canForward} onClick={onControl('forward')}>
+            ▶
+          </MochiButton>
+        </div>
+      )}
     </div>
   );
 });
