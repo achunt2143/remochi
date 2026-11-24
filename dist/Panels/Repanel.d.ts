@@ -12,12 +12,11 @@
  *                             Default: 100 (100%)
  *   style    {'default'|'shadow'}  Visual variant. Default: 'default'
  *   handle   {boolean}        Marks the bottom-left edge as a grabber with a
- *                              wavy nubbin accent (transparent background,
- *                              laid directly over the panel's own edge).
- *                              Uses the shadow-variant nubbin asset when
- *                              `style="shadow"` OR the active theme (see
- *                              ThemeWrapper) is 'dark', the default one
- *                              otherwise. `RepanelStack` sets this on every
+ *                              wavy nubbin accent, laid directly over the
+ *                              panel's own edge and coloured from the theme
+ *                              tokens. On a 'shadow' panel the panel's inset
+ *                              halo carries on into it. `RepanelStack` sets
+ *                              this on every
  *                              child but the first (the base of the stack,
  *                              which has nothing behind it to reveal).
  *                              Default: false
