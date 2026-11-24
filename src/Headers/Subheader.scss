@@ -1,22 +1,28 @@
 /* MochiSubheader — color from ThemeWrapper CSS variables */
 
 .mochi-subheader {
+  box-sizing: border-box;
   height: 56px;
   padding: 0px 32px;
   white-space: nowrap;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
+  color: var(--mochi-text-muted, #555555);
 
   .mochi-subheader-content {
     // Mochi's Subheader.less face: Prelude Medium Italic.
     font-family: "Mochi Medium", sans-serif;
     font-size: 18px;
     font-style: italic;
-    color: var(--mochi-text-muted);
+    color: var(--mochi-text-muted, #555555);
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
     line-height: 26px;
     padding-top: 30px;
+    width: 100%;
+    min-width: 0;
   }
 }

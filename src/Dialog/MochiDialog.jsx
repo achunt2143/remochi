@@ -30,6 +30,7 @@ const MochiDialog = ({
   onPromptChange,
   // Custom actions: [{ label, onClick, type? }]
   actions,
+  tone = 'normal',        // 'normal' | 'warning' | 'error'
   ...rest
 }) => {
   const dialogRef = useRef(null);
@@ -58,7 +59,7 @@ const MochiDialog = ({
       const focusable = dialogRef.current.querySelector(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      focusable?.focus();
+      (focusable || dialogRef.current).focus();
     }
   }, [isOpen]);
 
@@ -114,6 +115,8 @@ const MochiDialog = ({
     return null;
   };
 
+  const toneClass = tone && tone !== 'normal' ? ` mochi-dialog--${tone}` : '';
+
   const dialog = (
     <div
       className={`mochi-dialog-overlay${isOpen ? ' open' : ''}`}
@@ -123,7 +126,8 @@ const MochiDialog = ({
       <div
         {...rest}
         ref={dialogRef}
-        className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type}${className ? ` ${className}` : ''}`}
+        className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type}${toneClass}${className ? ` ${className}` : ''}`}
+        data-tone={tone}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
@@ -134,11 +138,12 @@ const MochiDialog = ({
             <h2 id={titleId} className="mochi-dialog-title">{title}</h2>
             {showCloseButton && (
               <button
+                type="button"
                 className="mochi-dialog-close"
                 onClick={onClose}
                 aria-label="Close dialog"
               >
-                &times;
+                <span aria-hidden="true">&times;</span>
               </button>
             )}
           </div>

@@ -141,6 +141,8 @@ export interface DialogProps
   showCloseButton?: boolean;
   /** Card width: 320px, 420px (default) or 600px, capped to the viewport. */
   size?: 'small' | 'medium' | 'large';
+  /** Optional tone accent for warning or error dialogs. @default 'normal' */
+  tone?: 'normal' | 'warning' | 'error';
   /** Custom footer buttons; replaces the type-based defaults. */
   actions?: { label: React.ReactNode; onClick?: () => void; type?: ButtonProps['type'] }[];
   className?: string;
@@ -451,8 +453,8 @@ export const Pagination: React.FC<PaginationProps>;
 // ---------------------------------------------------------------------------
 export interface RepanelProps {
   children?: React.ReactNode;
-  /** Percentage width of the panel within its row, e.g. 25, 33, 50. */
-  width?: number;
+  /** Width as a percentage number (e.g. 25, 33, 50) or any valid CSS width string (e.g. '30%', '320px'). */
+  width?: number | string;
   /** Visual style variant or inline CSS styles. */
   style?: 'default' | 'shadow' | React.CSSProperties;
   /** Draws a nubbin grabber accent at the bottom-left edge. `RepanelStack` sets this on every child but the first. */
@@ -595,6 +597,7 @@ export interface StackedPanelsProps {
   narrowBehavior?: NarrowBehavior;
 
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const RepanelStack: React.ForwardRefExoticComponent<

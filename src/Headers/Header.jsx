@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import './Header.scss';
 
 /**
@@ -13,53 +13,15 @@ import './Header.scss';
  *   - customClasses: Additional CSS classes to apply (default: '')
  */
 const Header = ({ content = '', children, customClasses = '', className = '', ...rest }) => {
-  const [contentWidth, setContentWidth] = useState('auto');
-  const headerRef = useRef(null);
-  const controlsRef = useRef(null);
-
-  const minContentWidth = 80;
-
-  useEffect(() => {
-    adjustContent();
-    window.addEventListener('resize', adjustContent);
-    return () => window.removeEventListener('resize', adjustContent);
-  }, [children]);
-
-  const adjustContent = () => {
-    if (!headerRef.current) return;
-
-    const headerBounds = headerRef.current.getBoundingClientRect();
-    const headerPadding = window.getComputedStyle(headerRef.current);
-    const paddingLeft = parseFloat(headerPadding.paddingLeft) || 0;
-    const paddingRight = parseFloat(headerPadding.paddingRight) || 0;
-    const pw = paddingLeft + paddingRight;
-
-    let calculatedWidth = headerBounds.width - pw;
-
-    if (controlsRef.current) {
-      const controlBounds = controlsRef.current.getBoundingClientRect();
-      const controlWidth = controlBounds.width;
-      calculatedWidth = Math.max(minContentWidth, (headerBounds.width - controlWidth - pw));
-    }
-
-    setContentWidth(calculatedWidth + 'px');
-  };
-
-  const hasControls = React.Children.count(children) > 0;
+  const hasControls = React.Children.toArray(children).length > 0;
 
   return (
-    <div {...rest} className={['mochi-header', className].filter(Boolean).join(' ')} ref={headerRef}>
-      <div
-        className={`mochi-header-content ${customClasses}`}
-        style={{ maxWidth: contentWidth, width: contentWidth }}
-      >
+    <div {...rest} className={['mochi-header', className].filter(Boolean).join(' ')}>
+      <div className={['mochi-header-content', customClasses].filter(Boolean).join(' ')}>
         {content}
       </div>
       {hasControls && (
-        <div
-          className="mochi-header-controls mochi-header-controls-first"
-          ref={controlsRef}
-        >
+        <div className="mochi-header-controls mochi-header-controls-first">
           {children}
         </div>
       )}

@@ -63,7 +63,7 @@ const Repanel = ({
       ].filter(Boolean).join(' ')}
       style={inlineStyle ? { width: resolvedWidth, ...inlineStyle } : { width: resolvedWidth }}
     >
-      {children}
+      <div className="mochi-panel-body">{children}</div>
       {handle && (
         <div
           className="mochi-panel-handle-nubbin"

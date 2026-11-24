@@ -1,3 +1,17 @@
+# Remochi v0.5.1 — 2026-11-15
+
+This patch release adds dark-mode `--mochi-*` dialog tokens and `Dialog.tone`, fixes `Repanel` / `FloatingPanel` corner clipping while keeping the grabber nubbin unclipped, and moves `Header` and `Subheader` to pure CSS-flex sizing without stale JS resize state.
+
+## Highlights
+
+- **`Dialog` dark-mode tokens, `tone`, and focus/a11y fixes.** `ThemeWrapper` now defines `--mochi-dialog-bg`, `--mochi-dialog-ring`, `--mochi-overlay`, `--mochi-warning`, and `--mochi-font-display` across light and dark themes (synced onto `:root` for portaled dialogs). `Dialog` adds `tone?: 'normal' | 'warning' | 'error'` (default `'normal'`, applying `.mochi-dialog--warning` / `.mochi-dialog--error` and `data-tone`), updates scrim/ring/bottom-sheet styling, falls back to focusing the dialog element itself (`dialogRef.current`) when no focusable child is present, and sets `type="button"` and `aria-hidden="true"` on the close button glyph.
+- **`Repanel` curve clipping without clipping `.mochi-panel-handle-nubbin`.** `Repanel` now wraps `{children}` in `.mochi-panel-body` (`border-radius: inherit; overflow: hidden;`) while keeping `.mochi-panel-handle-nubbin` outside it, and `RepanelStack` delegates vertical scrolling to `.mochi-panel-body` so scrolled content stays clipped to the panel's 45px top-left curve.
+- **`FloatingPanel` corner clipping.** `.mochi-floating-panel` sets `display: block` and `overflow: hidden` so child content clips to its rounded corners.
+- **CSS-flex `Header` and `Subheader` sizing.** Removed `useState`/`adjustContent()` `window` resize listeners and inline width/`maxWidth` styles from `Header` and `Subheader` in favor of CSS flex truncation (`flex: 1 1 auto; min-width: 0;` / `width: 100%; min-width: 0;`), and switched `Header`'s control check to `React.Children.toArray(children).length > 0`.
+- **TypeScript declarations.** Added `DialogProps['tone']`, widened `RepanelProps['width']` to `number | string`, and added `StackedPanelsProps['style']` in `remochi.d.ts` and `dist/` declarations.
+
+---
+
 # Remochi v0.5.0 — 2026-11-12
 
 This release exposes theme and surface/shape customization tokens, adds shaped `Button` and controlled `Wizard.step` options, ensures `...rest` DOM prop forwarding across components, and guards `MochiButton` text measurement in headless test environments.
