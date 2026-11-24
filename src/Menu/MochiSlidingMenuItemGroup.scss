@@ -14,8 +14,10 @@
 .mochi-sliding-menu-item-group-label {
   padding: 16px 16px 8px;
   color: var(--group-label-color);
+  // The `label` rung: Mochi Bold.
+  font-family: "Mochi Bold", sans-serif;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   user-select: none;

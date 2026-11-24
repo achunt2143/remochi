@@ -42,4 +42,16 @@
       white-space: nowrap;
     }
   }
+
+  // Display rung: Mochi Light 72/64, same 32px edge. The bar keeps the header
+  // pattern (30px above the line box, 2px below): 30 + 64 + 2 = 96px, so the
+  // text still stands on the bottom.
+  &.mochi-header--display {
+    height: 96px;
+
+    .mochi-header-content {
+      font-size: 72px;
+      line-height: 64px;
+    }
+  }
 }

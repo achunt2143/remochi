@@ -10,13 +10,14 @@ import './Header.scss';
  * Props:
  *   - content: String for header text (default: '')
  *   - children: React elements for controls (displayed right-aligned)
+ *   - size: 'header' (default, 36/32) or 'display' (72/64, at most once per screen)
  *   - customClasses: Additional CSS classes to apply (default: '')
  */
-const Header = ({ content = '', children, customClasses = '', className = '', ...rest }) => {
+const Header = ({ content = '', children, size = 'header', customClasses = '', className = '', ...rest }) => {
   const hasControls = React.Children.toArray(children).length > 0;
 
   return (
-    <div {...rest} className={['mochi-header', className].filter(Boolean).join(' ')}>
+    <div {...rest} className={['mochi-header', size === 'display' && 'mochi-header--display', className].filter(Boolean).join(' ')}>
       <div className={['mochi-header-content', customClasses].filter(Boolean).join(' ')}>
         {content}
       </div>

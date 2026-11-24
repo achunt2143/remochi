@@ -1,0 +1,17 @@
+/* MochiLabel — color from ThemeWrapper CSS variables */
+
+.mochi-label {
+  box-sizing: border-box;
+  margin: var(--spacing-2xl, 32px) 0 var(--spacing-sm, 8px);
+  padding: 0 0 0 var(--spacing-2xl, 32px);
+  font-family: "Mochi Bold", sans-serif;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mochi-text, #1a1a1a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

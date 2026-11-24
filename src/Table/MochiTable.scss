@@ -15,9 +15,14 @@
   &-header {
     padding: 12px 16px;
     text-align: left;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--mochi-text-muted);
+    // The `label` rung: Mochi Bold 12/16, uppercase, 0.05em.
+    font-family: "Mochi Bold", sans-serif;
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--mochi-text);
     border-bottom: 1px solid var(--mochi-border);
     -webkit-user-select: none;
     user-select: none;
