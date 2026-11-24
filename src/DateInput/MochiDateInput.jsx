@@ -199,7 +199,7 @@ const MochiDateInput = ({
         isOpen={isOpen}
         anchorRect={anchorRectRef.current}
         onClose={close}
-        title="Select a date"
+        title="Select date"
       >
         <Calendar
           selected={selected}

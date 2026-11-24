@@ -91,7 +91,7 @@ export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pa
  * - active: boolean — show or hide spinner
  * - styleType: "light" | "dark" (default: "light")
  * - size: "normal" | "large" (default: "normal")
- * - alt: accessible label (default: "Loading...")
+ * - alt: accessible label (default: "Loading…")
  *
  * Drawn and animated in code. With `prefers-reduced-motion: reduce` it stops
  * morphing and instead holds each of the three shapes for a second, with a
@@ -101,7 +101,7 @@ export const Spinner = ({
   active = true,
   styleType = "light",
   size = "normal",
-  alt = "Loading...",
+  alt = "Loading…",
   style,
   ...rest
 }) => {

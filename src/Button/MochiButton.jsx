@@ -225,7 +225,7 @@ const DropdownIcon = styled(FaChevronDown)`
 
 // ── component ────────────────────────────────────────────────────────────────
 
-export function MochiButton({
+export const MochiButton = React.forwardRef(function MochiButton({
   children = "Button",
   type = "normal",      // visual variant: normal | warning | affirmative | blue | disabled | dropdown
   appearance = "caps",  // visual framing: caps (classic brackets/bar) | drop (shaped pill/drop button)
@@ -233,7 +233,7 @@ export function MochiButton({
   disabled: disabledProp = false,
   className = "",
   ...props
-}) {
+}, ref) {
   // `type` is this component's visual variant, not the native button type.
   // Passing it through made every Button inside a <form> submit it (an
   // unrecognized type falls back to "submit"), so the native type always
@@ -265,6 +265,7 @@ export function MochiButton({
     <ButtonWrapper
       data-appearance={resolvedAppearance}
       {...props}
+      ref={ref}
       className={['mochi-button', `mochi-button--${resolvedAppearance}`, className]
         .filter(Boolean)
         .join(' ')}
@@ -290,4 +291,4 @@ export function MochiButton({
       </TextContainer>
     </ButtonWrapper>
   );
-}
+});

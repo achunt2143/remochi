@@ -22,17 +22,17 @@ import './MochiDropdown.scss';
  *   maxHeight    {number}   Max height of the menu in px (default: 200)
  *   className    {string}   Extra class on the root wrapper
  */
-const MochiDropdown = ({
+const MochiDropdown = React.forwardRef(({
   options = [],
   value,
   onChange,
   label,
-  placeholder = 'Select an option',
+  placeholder = 'Select an option…',
   disabled = false,
   maxHeight = 200,
   className = '',
   ...rest
-}) => {
+}, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -51,7 +51,7 @@ const MochiDropdown = ({
   };
 
   return (
-    <div {...rest} className={['mochi-dropdown', className].filter(Boolean).join(' ')}>
+    <div {...rest} ref={ref} className={['mochi-dropdown', className].filter(Boolean).join(' ')}>
       {label && <label className="mochi-dropdown-label">{label}</label>}
 
       {/* Activator — mirrors mochi.MenuDecorator activating control */}
@@ -115,6 +115,8 @@ const MochiDropdown = ({
       </MochiMenu>
     </div>
   );
-};
+});
+
+MochiDropdown.displayName = 'MochiDropdown';
 
 export default MochiDropdown;

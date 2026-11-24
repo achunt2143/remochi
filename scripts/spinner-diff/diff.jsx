@@ -190,7 +190,7 @@ async function clippedCrops() {
   const clipped = (await (await fetch('/scripts/spinner-diff/report/clipped-before.json')).json()).large || {};
   const w = 260, h = 83, zoom = 5, x0 = 190, cw = w + PAD - x0;
   for (const [theme, bg] of Object.entries(THEMES)) {
-    const gif = await decodeGif(`/src/Spinner/spinners/spinner-large-${theme}.gif`);
+    const gif = await decodeGif(`/scripts/spinner-diff/fixtures/spinner-large-${theme}.gif`);
     for (const [f, befores] of Object.entries(clipped)) {
       const frame = Number(f);
       const strip = (markup, withGif) => {
@@ -230,7 +230,7 @@ async function run() {
   const results = [];
   for (const [size, file] of Object.entries(SIZES)) {
     for (const [theme, bg] of Object.entries(THEMES)) {
-      const gif = await decodeGif(`/src/Spinner/spinners/${file}-${theme}.gif`);
+      const gif = await decodeGif(`/scripts/spinner-diff/fixtures/${file}-${theme}.gif`);
       const w = gif[0].displayWidth, h = gif[0].displayHeight;
       for (const scale of SCALES) {
         const cells = [];

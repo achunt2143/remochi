@@ -18,7 +18,7 @@ import './MochiToggle.scss';
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
  */
-const MochiToggle = ({
+const MochiToggle = React.forwardRef(({
   value = false,
   checked,
   onChange = () => {},
@@ -37,10 +37,16 @@ const MochiToggle = ({
   onPointerUp: userOnPointerUp,
   onKeyDown: userOnKeyDown,
   ...rest
-}) => {
+}, ref) => {
   const resolvedValue = checked !== undefined ? checked : value;
   const [isOn, setIsOn] = useState(resolvedValue);
   const trackRef = useRef(null);
+  // The track is the root element; hand it to the caller's ref as well.
+  const setTrackRef = useCallback((node) => {
+    trackRef.current = node;
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  }, [ref]);
   const knobRef  = useRef(null);
 
   // Sync controlled prop (honors either checked or value)
@@ -123,7 +129,7 @@ const MochiToggle = ({
   return (
     <div
       {...rest}
-      ref={trackRef}
+      ref={setTrackRef}
       className={classes}
       style={{ backgroundColor: isOn ? colorActive : colorInactive, ...style }}
       role="switch"
@@ -170,7 +176,9 @@ const MochiToggle = ({
       <span ref={knobRef} className="mochi-toggle-button-knob" />
     </div>
   );
-};
+});
+
+MochiToggle.displayName = 'MochiToggle';
 
 export { MochiToggle };
 export default MochiToggle;

@@ -261,7 +261,7 @@ export function MochiPopupPanel({
         {actions.length > 0 && (
           <ButtonBar>
             {actions.map(({ label, onClick, type }, idx) => (
-              <MochiButton key={idx} onClick={onClick} $type={type}>
+              <MochiButton key={idx} onClick={onClick} type={type}>
                 {label}
               </MochiButton>
             ))}

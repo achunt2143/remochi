@@ -24,33 +24,33 @@ const DARK_BG = '#1a1a1a';
 export const CASES = [
   ...Object.entries(SHAPES).flatMap(([name, nub]) => [
     {
-      id: `popup/${name}`, sprite: `src/Popup/nubbinImages/${name}.png`, theme: 'light', bg: LIGHT_BG,
+      id: `popup/${name}`, sprite: `scripts/nubbin-diff/fixtures/sprites/Popup/nubbinImages/${name}.png`, theme: 'light', bg: LIGHT_BG,
       nubbin: { ...nub, stroke: '#666666', fill: '#ffffff', shadow: true },
     },
     {
-      id: `popup/dark/${name}`, sprite: `src/Popup/nubbinImages/dark/${name}.png`, theme: 'dark', bg: DARK_BG,
+      id: `popup/dark/${name}`, sprite: `scripts/nubbin-diff/fixtures/sprites/Popup/nubbinImages/dark/${name}.png`, theme: 'dark', bg: DARK_BG,
       nubbin: { ...nub, stroke: '#646464', fill: '#2a2a2a', shadow: true },
     },
     // NubbinDivider's copies are outlines (transparent inside) with no dark
     // variant, so they're compared over both themes' backgrounds.
     ...[['light', LIGHT_BG], ['dark', DARK_BG]].map(([theme, bg]) => ({
-      id: `divider/${name}`, sprite: `src/Divider/div-img/${name}.png`, theme, bg,
+      id: `divider/${name}`, sprite: `scripts/nubbin-diff/fixtures/sprites/Divider/div-img/${name}.png`, theme, bg,
       nubbin: { ...nub, stroke: '#666666', fill: 'none', shadow: true },
     })),
   ]),
   {
-    id: 'repanel/left', sprite: 'src/Panels/nubbins/left.png', theme: 'light', bg: LIGHT_BG,
+    id: 'repanel/left', sprite: 'scripts/nubbin-diff/fixtures/sprites/Panels/nubbins/left.png', theme: 'light', bg: LIGHT_BG,
     nubbin: { shape: 'bump', direction: 'left', length: 43, stroke: '#666666', fill: '#f5f5f5', shadow: true },
   },
   {
-    id: 'repanel/left-shadow', sprite: 'src/Panels/nubbins/left-shadow.png', theme: 'dark', bg: DARK_BG,
+    id: 'repanel/left-shadow', sprite: 'scripts/nubbin-diff/fixtures/sprites/Panels/nubbins/left-shadow.png', theme: 'dark', bg: DARK_BG,
     nubbin: { shape: 'bump', direction: 'left', length: 43, stroke: '#383838', fill: '#3f3f3f', shadow: true },
   },
   ...[['light', LIGHT_BG], ['dark', DARK_BG]].flatMap(([theme, bg]) => [
-    { id: 'divider/div-left', sprite: 'src/Divider/div-img/div-left.png', theme, bg, taper: { end: 'start', w: 320 } },
-    { id: 'divider/div-right', sprite: 'src/Divider/div-img/div-right.png', theme, bg, taper: { end: 'end', w: 320 } },
+    { id: 'divider/div-left', sprite: 'scripts/nubbin-diff/fixtures/sprites/Divider/div-img/div-left.png', theme, bg, taper: { end: 'start', w: 320 } },
+    { id: 'divider/div-right', sprite: 'scripts/nubbin-diff/fixtures/sprites/Divider/div-img/div-right.png', theme, bg, taper: { end: 'end', w: 320 } },
     // div-mid.png isn't used by any component; it's the groove's unfaded
     // middle, compared against the drawn groove's inner end.
-    { id: 'divider/div-mid', sprite: 'src/Divider/div-img/div-mid.png', theme, bg, taper: { end: 'mid', w: 1 } },
+    { id: 'divider/div-mid', sprite: 'scripts/nubbin-diff/fixtures/sprites/Divider/div-img/div-mid.png', theme, bg, taper: { end: 'mid', w: 1 } },
   ]),
 ];
