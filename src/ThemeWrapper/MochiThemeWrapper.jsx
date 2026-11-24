@@ -236,6 +236,20 @@ const MochiThemeWrapper = ({
     };
   }, [shouldSyncHtml, modeAttrs['data-motion'], modeAttrs['data-mochi-contrast'], modeAttrs['data-mochi-transparency']]);
 
+  // Mirror fontFamily onto <html> as well: --mochi-font-body follows
+  // data-font-family (see MochiThemeWrapper.scss), so portaled surfaces use
+  // the wrapper's face. Restores whatever the host had on unmount.
+  useIsomorphicLayoutEffect(() => {
+    if (!shouldSyncHtml || typeof document === 'undefined') return undefined;
+    const html = document.documentElement;
+    const previous = html.getAttribute('data-font-family');
+    html.setAttribute('data-font-family', fontFamily);
+    return () => {
+      if (previous === null) html.removeAttribute('data-font-family');
+      else html.setAttribute('data-font-family', previous);
+    };
+  }, [shouldSyncHtml, fontFamily]);
+
   // Synchronize document.documentElement attribute & CSS custom property tokens
   useIsomorphicLayoutEffect(() => {
     if (shouldSyncHtml && typeof document !== 'undefined') {

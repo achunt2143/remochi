@@ -867,6 +867,8 @@ export interface ThemeWrapperProps extends React.HTMLAttributes<HTMLDivElement> 
    * - Screens: `--mochi-peek-width` (80px), `--mochi-peek-width-narrow`
    *   (20px), `--mochi-screen-narrow` (768px) and `--mochi-screen-wide`
    *   (1280px; informational, media queries can't read them)
+   * - Font: `--mochi-font-body` (the wrapper's resolved `fontFamily`; portaled
+   *   surfaces read it)
    * - Spinner: `--mochi-spinner-circle`, `-square`, `-triangle` and their
    *   `-outline` values are fixed constants from the webOS guide, not for
    *   retheming

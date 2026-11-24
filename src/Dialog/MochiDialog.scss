@@ -14,6 +14,8 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
+  // Portaled outside the ThemeWrapper: take its face (see --mochi-font-body).
+  font-family: var(--mochi-font-body, 'Prelude', sans-serif);
   background-color: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;

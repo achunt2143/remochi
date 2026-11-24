@@ -34,6 +34,7 @@ export const Panel = styled.div.attrs(({ className }) => ({
   padding: 6px;
   min-width: 150px;
   color: var(--mochi-text, #1a1a1a);
+  font-family: var(--mochi-font-body, 'Prelude', sans-serif);
   font-size: 14px;
   box-sizing: border-box;
   outline: none;

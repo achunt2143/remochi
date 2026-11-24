@@ -89,16 +89,10 @@ $mochi-faces: (
 @include mochi-font-face('Mochi Lato', bold-italic,   700, italic, false);
 
 .mochi-theme-wrapper {
-  font-family: 'Prelude', sans-serif;
+  // The body family is a token (--mochi-font-body, see the :root block and
+  // the data-font-family rules below) so portaled surfaces can read it too.
+  font-family: var(--mochi-font-body, 'Prelude', sans-serif);
   transition: background-color 0.3s ease, color 0.3s ease;
-
-  &[data-font-family='Lato'] {
-    font-family: 'Mochi Lato', sans-serif;
-  }
-
-  &[data-font-family='Prelude'] {
-    font-family: 'Prelude', sans-serif;
-  }
 
   // ============================================
   // Typography scale
@@ -532,6 +526,12 @@ $mochi-faces: (
   // overridable via CSS or ThemeWrapper tokens.
   --mochi-font-display: "Mochi Light", "Prelude", sans-serif;
 
+  // Body font token — what the wrapper's fontFamily resolves to. Portaled
+  // surfaces (Dialog, Popup, Dropdown menu) sit outside the wrapper and
+  // read it as their inherited base; the wrapper mirrors its fontFamily
+  // onto <html> as data-font-family (see the rules after this block).
+  --mochi-font-body: 'Prelude', sans-serif;
+
   // Mochi dims every disabled control to the same 40%
   // (@mochi-disabled-opacity in mochi-variables.less).
   --mochi-disabled-opacity: 0.4;
@@ -577,12 +577,22 @@ $mochi-faces: (
   --mochi-spinner-triangle-outline: #5d4305;
 }
 
+:root[data-font-family='Lato'],
+.mochi-theme-wrapper[data-font-family='Lato'] {
+  --mochi-font-body: 'Mochi Lato', sans-serif;
+}
+
+:root[data-font-family='Prelude'],
+.mochi-theme-wrapper[data-font-family='Prelude'] {
+  --mochi-font-body: 'Prelude', sans-serif;
+}
+
 // ============================================
 // Accessibility settings beat materials
 // ============================================
-// High contrast takes ink to pure black/white, edges to full ink and the
-// panel material solid; reduced transparency makes the scrim and the
-// material solid. Each applies from the OS preference (when the
+// High contrast takes ink to pure black/white, edges to full ink, the
+// scrim and the panel material solid; reduced transparency makes the scrim
+// and the material solid. Each applies from the OS preference (when the
 // ThemeWrapper prop is 'system', no attribute is written) or from
 // data-mochi-contrast="more" / data-mochi-transparency="reduced" on <html>
 // or a wrapper; "standard" opts out of the OS preference. Declared after
@@ -607,6 +617,9 @@ $mochi-faces: (
   }
 }
 
+// The solid scrim both modes use, per theme (the values live once).
+$mochi-solid-overlay: (dark: #050608, light: #cfd0d6);
+
 @mixin mochi-contrast-more($theme, $ink) {
   @include mochi-a11y-selectors($theme, 'data-mochi-contrast', 'more') {
     --color-text:           #{$ink};
@@ -626,30 +639,40 @@ $mochi-faces: (
     --mochi-field-border: #{$ink};
     --mochi-dialog-ring:  #{$ink};
 
+    --mochi-overlay:          #{map.get($mochi-solid-overlay, $theme)} !important;
     --mochi-surface-material: var(--mochi-panel-bg) !important;
   }
 }
 
-@mixin mochi-transparency-reduced($theme, $overlay) {
+@mixin mochi-transparency-reduced($theme) {
   @include mochi-a11y-selectors($theme, 'data-mochi-transparency', 'reduced') {
-    --mochi-overlay:          #{$overlay} !important;
+    --mochi-overlay:          #{map.get($mochi-solid-overlay, $theme)} !important;
     --mochi-surface-material: var(--mochi-panel-bg) !important;
   }
 }
 
 @include mochi-contrast-more('dark', #ffffff);
 @include mochi-contrast-more('light', #000000);
-@include mochi-transparency-reduced('dark', #050608);
-@include mochi-transparency-reduced('light', #cfd0d6);
+@include mochi-transparency-reduced('dark');
+@include mochi-transparency-reduced('light');
 
-// The Dialog scrim drops its blur under reduced transparency.
-[data-mochi-transparency='reduced'] .mochi-dialog-overlay.open {
+// The Dialog scrim drops its blur under reduced transparency and under
+// high contrast.
+[data-mochi-transparency='reduced'] .mochi-dialog-overlay.open,
+[data-mochi-contrast='more'] .mochi-dialog-overlay.open {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 @media (prefers-reduced-transparency: reduce) {
   :root:not([data-mochi-transparency]) .mochi-dialog-overlay.open {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root:not([data-mochi-contrast]) .mochi-dialog-overlay.open {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }

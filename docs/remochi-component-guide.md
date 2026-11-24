@@ -58,7 +58,9 @@ The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme
 
 Every motion has three forms. **Full** is as designed. **Reduced** is opacity only: a fade of at most `--mochi-duration-reduced` (150ms), with no travel, scale, blur or stagger. **Off** is instant. Drags always track exactly. The mode comes from the `motion` prop, a `data-motion="full|reduced|off"` attribute on `<html>` or a wrapper (a host such as Pyxis can set it), else `prefers-reduced-motion: reduce` (which means Reduced). Timing lives in tokens: `--mochi-ease-forward`, `--mochi-duration-stack` (260ms), `--mochi-ease-arrive`, `--mochi-duration-arrive` (220ms).
 
-`contrast="more"` (or `prefers-contrast: more`) takes ink to pure black or white and surfaces solid. `transparency="reduced"` (or `prefers-reduced-transparency`) makes the Dialog scrim and `--mochi-surface-material` solid. `"standard"` opts out of the OS preference; the default `"system"` follows it.
+`contrast="more"` (or `prefers-contrast: more`) takes ink to pure black or white and surfaces solid. `transparency="reduced"` (or `prefers-reduced-transparency`) makes the Dialog scrim and `--mochi-surface-material` solid. High contrast makes scrims solid as well. `"standard"` opts out of the OS preference; the default `"system"` follows it.
+
+Portaled surfaces (`Dialog`, `PopupPanel`, the `Dropdown` menu) follow the wrapper's font through `--mochi-font-body`, which `fontFamily` sets and the root wrapper syncs to `<html>`.
 
 Run `npm run check:tokens` to keep bare hex colours out of component styles and to check the contrast floors.
 
