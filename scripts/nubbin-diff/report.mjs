@@ -23,7 +23,7 @@ export function writeReport() {
     ? Object.entries(joints.selfTest).map(([scale, byOffset]) =>
         `${scale}×: ${Object.entries(byOffset).map(([o, steps]) => `${o}px → ${Math.max(...steps).toFixed(2)}px`).join(', ')}`)
     : [];
-  const context = ['popups', 'static', 'halo'].flatMap((view) =>
+  const context = ['popups', 'corners', 'grabber', 'static', 'halo'].flatMap((view) =>
     ['light', 'dark']
       .filter((theme) => existsSync(join(dir, `context/${view}-${theme}-2x.png`)))
       .map((theme) => `### ${view}, ${theme}\n\n![${view} ${theme}](context/${view}-${theme}-2x.png)\n`)
@@ -78,6 +78,18 @@ Places where the drawing doesn't copy the sprite because the sprite was off:
   line in the last 2–3px of its box, a slight kink where the border carries
   on. The drawn ramp is pinned to land 2px before the end, which costs
   about a point of shape mismatch on the corner rows below.
+- **Corner caps over round corners.** PopupPanel's panel is a waterdrop
+  (\`--mochi-floating-radius\`, 16px with a nearly sharp 4px top right), and
+  no longer squares the corner a cap sits on. The cap takes that corner's
+  radius, from the panel's computed style, and reaches over the curve to
+  meet the straight border. The sprites (square corners) are unchanged at
+  radius 0, so the table above is the same; the joint check below runs all 8
+  corner placements over the round corners.
+- **Repanel grabber edge.** The component's grabber is as thick as the
+  pane's left edge (\`--mochi-pane-edge-width\`, 1px by default) and in the
+  pane-edge colour. The table still compares the 2px nubbin against the
+  sprite, which is the shape check; the joint check below measures the real
+  grabber at 1px and 2px edges.
 - **Popup on whole pixels.** Not a sprite difference but the cause of the
   one seam review found: the far-side nubbins sit at \`left/top: 100%\` of
   a panel sized by its content, and when that size was fractional the

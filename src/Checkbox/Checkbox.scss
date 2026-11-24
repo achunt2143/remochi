@@ -8,8 +8,9 @@
   display: inline-block;
   vertical-align: middle;
 
-  // Original uses 13px — creates the distinctive pill/rounded-square shape
-  border-radius: 13px;
+  // Original uses 13px, which on a 22px box is already a full round: the pill
+  // token draws the same shape.
+  border-radius: var(--mochi-corner-pill, 9999px);
   // Same dark grey as Toggle's own track (--mochi-toggle-track) — Radio's
   // unchecked border matches this token too, so both controls' "off state"
   // read as one consistent dark-border/light-grey-fill look.

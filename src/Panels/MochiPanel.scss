@@ -26,15 +26,14 @@ $mochi-panel-radius: 45px;
   &.mochi-panel--default {
     background: var(--mochi-panel-bg, #f5f5f5);
 
-    // Weight matched to the nubbin accent's own stroke (2px, see
-    // shared/nubbin.jsx) so a straight border runs into the wavy
-    // nubbin line as one continuous stroke, not a thin line suddenly
-    // turning into a thick one. Color is themed — --mochi-panel-border is
-    // #666666 in light mode (the nubbins' own stroke) and #333333 in dark
-    // mode per the Figma dark-mode spec.
-    border-width: 2px 0px 0px 2px;
+    // Light, not chrome: only a left hairline, in --mochi-pane-edge (the
+    // ground's grey, a little darker). Repanel reads the same width and
+    // colour to draw the grabber, so the edge runs into the grabber's line
+    // as one continuous stroke. The 0.5 look is --mochi-pane-edge-width: 2px
+    // with --mochi-pane-edge: #666666.
+    border-width: 0 0 0 var(--mochi-pane-edge-width, 1px);
     border-style: solid;
-    border-color: var(--mochi-panel-border, #666666);
+    border-color: var(--mochi-pane-edge, #cccccc);
 
     // Top-left only — the bottom is left to the nubbin accent (see
     // .mochi-panel-handle-nubbin) rather than a separate rounded corner.
@@ -45,9 +44,9 @@ $mochi-panel-radius: 45px;
   &.mochi-panel--shadow {
     background: var(--mochi-panel-shadow-bg, #f5f5f5);
 
-    border-width: 2px 0px 0px 2px;
+    border-width: 0 0 0 var(--mochi-pane-edge-width, 1px);
     border-style: solid;
-    border-color: var(--mochi-panel-border, #666666);
+    border-color: var(--mochi-pane-edge, #cccccc);
 
     border-radius: var(--mochi-scallop, #{$mochi-panel-radius} 0px 0px 0px);
 
@@ -78,7 +77,8 @@ $mochi-panel-radius: 45px;
 // to mark it as a grabber — no separate shape needed, the panel's normal
 // square corner (see border-radius above) shows through around it.
 //
-// Its box's right 2px sit exactly over the panel's left border: the
+// Its box's right edge-width px (Repanel draws it at the measured
+// --mochi-pane-edge-width) sit exactly over the panel's left border: the
 // accent's straight top runs on along that border, and its fill covers the
 // border under the bump, so the two read as one stroke.
 .mochi-panel-handle-nubbin {
@@ -100,7 +100,8 @@ $mochi-panel-radius: 45px;
 }
 
 // ── FloatingPanel overrides ────────────────────────────────────────────────
-// Full radius on all corners; fills its container completely.
+// The waterdrop (--mochi-floating-radius) on all corners; fills its
+// container completely. `fullBleed` is square with no shadow.
 .mochi-floating-panel {
   display: block;
   width: 100%;
@@ -108,11 +109,18 @@ $mochi-panel-radius: 45px;
 
   &.mochi-panel--default {
     background: var(--mochi-surface-material, var(--mochi-panel-bg, #f5f5f5));
-    border-color: var(--mochi-panel-border, #666666);
   }
 
   &.mochi-panel--default,
   &.mochi-panel--shadow {
-    border-radius: var(--mochi-corner, 16px);
+    border-radius: var(--mochi-floating-radius, 16px 4px 16px 16px);
+  }
+
+  // Full-bleed: square, no edge and no shadow (the shadow variant's inset
+  // halo goes too).
+  &.mochi-floating-panel--full-bleed {
+    border-width: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 }

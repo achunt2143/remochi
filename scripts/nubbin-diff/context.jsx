@@ -1,12 +1,17 @@
 // The drawn nubbins in context: PopupPanel opened in all four directions
-// (plus a corner placement), NubbinDivider with a bump and corner caps,
-// Divider, and Repanels inside a RepanelStack.
+// (plus a corner placement), PopupPanel in all 8 corner placements over its
+// waterdrop corners, NubbinDivider with a bump and corner caps, Divider, and
+// Repanels inside a RepanelStack, and the Repanel grabber at 1px and 2px edge
+// widths.
 //
-//   /scripts/nubbin-diff/out/context.html?view=popups|static|halo&theme=light|dark
+//   /scripts/nubbin-diff/out/context.html?view=popups|corners|grabber|static|halo&theme=light|dark
 //
-// With &joints (popups view), it checks that each popup nubbin's line runs
-// on from the panel border without a step, from its own 1x snapshot; run.mjs
-// does the same from real 1x and 2x screenshots (see measureScreenshot).
+// With &joints (popups, corners and grabber views), it checks that each
+// nubbin's line runs on from the border without a step, from its own 1x
+// snapshot; run.mjs does the same from real 1x and 2x screenshots (see
+// measureScreenshot), with &probe, which swaps the border colour for one that
+// contrasts with both sides in either theme (the dark theme's own #333 on
+// #404040 is too faint to measure; the geometry doesn't care).
 //
 // With &capture, the page snapshots itself (an SVG foreignObject drawn into
 // a canvas, at 1x and 2x) and POSTs the PNGs to serve.mjs, which writes
@@ -73,6 +78,61 @@ function Popups() {
       </PopupPanel>
     </React.Fragment>
   ));
+}
+
+// All 8 corner placements, each over the waterdrop's own corners (its 4px
+// one top right, 16px elsewhere): a wide popup gets a vertical placement
+// when its anchor is near the left or right edge of the top or bottom 100px,
+// a tall one a horizontal placement when the anchor is there but mid-width
+// (PopupPanel's logic: the popup is pushed up or down against the viewport
+// edge, and the cap sits on that corner).
+const CORNERS = [
+  { label: 'top-left, below',  anchor: rect(16.4, 24.3), wide: true },
+  { label: 'top-right, below',  anchor: rect(1140.3, 24.3), wide: true },
+  { label: 'bottom-left, above', anchor: rect(16.4, 816.25), wide: true },
+  { label: 'bottom-right, above', anchor: rect(1140.3, 816.25), wide: true },
+  { label: 'top-left, nub left',    anchor: rect(330.4, 10.3), tall: true },
+  { label: 'top-right, nub right',  anchor: rect(920.4, 10.3), tall: true },
+  { label: 'bottom-left, nub left',  anchor: rect(330.4, 826.25), tall: true },
+  { label: 'bottom-right, nub right', anchor: rect(920.4, 826.25), tall: true },
+];
+
+function Corners() {
+  return CORNERS.map((p) => (
+    <React.Fragment key={p.label}>
+      <Anchor anchor={p.anchor} />
+      <PopupPanel isOpen anchorRect={p.anchor} title={p.label} onClose={() => {}}>
+        <div style={{ width: p.wide ? 180.4 : 90.3, height: p.tall ? 240.35 : 40.4 }}>Content</div>
+      </PopupPanel>
+    </React.Fragment>
+  ));
+}
+
+// Repanel's grabber at the default 1px edge (--mochi-pane-edge-width) and at
+// the 0.5 look (2px, #666666): the grabber's line has to run on out of the
+// pane's left edge in both. The edge colour is a dark probe so the stroke
+// contrasts with both sides; the geometry doesn't depend on it.
+const PROBE = theme === 'dark' ? '#dddddd' : '#444444';
+const GRABBERS = [
+  { id: 'edge-1px', vars: { '--mochi-pane-edge-width': '1px', '--mochi-pane-edge': PROBE }, left: 60 },
+  { id: 'edge-2px', vars: { '--mochi-pane-edge-width': '2px', '--mochi-pane-edge': PROBE }, left: 460 },
+  { id: 'edge-1px-shadow', vars: { '--mochi-pane-edge-width': '1px', '--mochi-pane-edge': PROBE }, left: 860, shadow: true },
+];
+
+function Grabbers() {
+  return (
+    <div style={{ position: 'relative', height: H }}>
+      {GRABBERS.map((g) => (
+        <div
+          key={g.id}
+          data-grabber={g.id}
+          style={{ position: 'absolute', top: 40, left: g.left, width: 300, height: 360, ...g.vars }}
+        >
+          <Repanel handle style={g.shadow ? 'shadow' : 'default'}><div style={{ padding: 20 }}>{g.id}</div></Repanel>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 const Label = ({ children }) => <div style={{ font: '12px sans-serif', margin: '18px 0 8px', opacity: 0.7 }}>{children}</div>;
@@ -210,27 +270,36 @@ function frameToBox(u, v, { direction, side, length, depth }) {
   }
 }
 
+// `radiusProp` is the computed-style property of the panel corner a cap sits
+// on (see MochiPopupPanel's cornerRadiusProp).
 function placement(classes) {
   const has = (c) => classes.split(/\s+/).includes(c);
   if (has('vertical')) {
     const direction = has('below') ? 'up' : 'down';
     return has('corner')
-      ? { shape: 'corner', direction, side: has('left') ? 'end' : 'start' }
+      ? {
+        shape: 'corner', direction, side: has('left') ? 'end' : 'start',
+        radiusProp: `border${has('below') ? 'Top' : 'Bottom'}${has('left') ? 'Right' : 'Left'}Radius`,
+      }
       : { shape: 'bump', direction, side: 'start' };
   }
   const direction = has('left') ? 'left' : 'right';
   return has('corner')
-    ? { shape: 'corner', direction, side: has('high') ? 'start' : 'end' }
+    ? {
+      shape: 'corner', direction, side: has('high') ? 'start' : 'end',
+      radiusProp: `border${has('high') ? 'Top' : 'Bottom'}${has('left') ? 'Left' : 'Right'}Radius`,
+    }
     : { shape: 'bump', direction, side: 'start' };
 }
 
 // Edges (in CSS px, along the frame's `across` axis) of the stroke at one
 // sample, each found where the profile across the line crosses halfway
-// between the stroke (#666) and the background 3px out on that side,
-// interpolated between pixels so sub-pixel shifts show. Taking the
-// background per side matters under a bottom border, where the panel's drop
-// shadow leaves it at ~180 rather than the panel's 245.
-const STROKE_LUM = 102;
+// between the stroke and the background 3px out on that side, interpolated
+// between pixels so sub-pixel shifts show. Taking the background per side
+// matters under a bottom border, where the panel's drop shadow leaves it at
+// ~180 rather than the panel's 245. The stroke is whichever sample is
+// furthest from the two sides' mean, so it may be darker (#666 in light) or
+// lighter (the dark probe) than both.
 function strokeCentre(px, scale, geo, rect, along, acrossAxis, expected) {
   const ts = [], lums = [];
   for (let k = -3 * scale; k < 3 * scale; k++) {
@@ -241,10 +310,14 @@ function strokeCentre(px, scale, geo, rect, along, acrossAxis, expected) {
     ts.push(t);
     lums.push((px.data[i] + px.data[i + 1] + px.data[i + 2]) / 3);
   }
-  const halfLo = (lums[0] + STROKE_LUM) / 2;
-  const halfHi = (lums[lums.length - 1] + STROKE_LUM) / 2;
-  const first = lums.findIndex((l) => l < halfLo);
-  const last = lums.length - 1 - [...lums].reverse().findIndex((l) => l < halfHi);
+  const ref = (lums[0] + lums[lums.length - 1]) / 2;
+  const strokeLum = lums.reduce((best, l) => (Math.abs(l - ref) > Math.abs(best - ref) ? l : best), ref);
+  const sign = strokeLum < ref ? -1 : 1;
+  const halfLo = (lums[0] + strokeLum) / 2;
+  const halfHi = (lums[lums.length - 1] + strokeLum) / 2;
+  const inStroke = (l, half) => sign * (l - half) > 0;
+  const first = lums.findIndex((l) => inStroke(l, halfLo));
+  const last = lums.length - 1 - [...lums].reverse().findIndex((l) => inStroke(l, halfHi));
   if (first <= 0 || last >= lums.length - 1) return { lo: NaN, hi: NaN };
   const cross = (a, b, half) => ts[a] + ((ts[b] - ts[a]) * (lums[a] - half)) / (lums[a] - lums[b]);
   return { lo: cross(first - 1, first, halfLo), hi: cross(last + 1, last, halfHi) };
@@ -274,6 +347,13 @@ function measureJoints(px, scale, originX = 0, originY = 0, panels = document.qu
     if (rect.left < 4 || rect.top < 4 || (rect.left + r.width + 4) * scale > px.width || (rect.top + r.height + 4) * scale > px.height) continue;
     const geo = { ...p, length: vertical ? r.height : r.width, depth: vertical ? r.width : r.height };
     const line = geo.depth - 1;
+    // A cap over a round corner (the waterdrop's) reaches `radius - 2` px
+    // below its box to meet the straight border (see cornerPaths in
+    // shared/nubbin.jsx), and draws 1px past its box where it overflows, so
+    // the border is sampled beyond both.
+    const radius = p.shape === 'corner' ? parseFloat(getComputedStyle(panel)[p.radiusProp]) || 0 : 0;
+    const below = Math.max(0, radius - 2);
+    const over = radius > 2 ? 1 : 0;
     // Samples sit at pixel centres (half-integers along the line), so a
     // mirrored box is sampled at the same distances from its ends, and start
     // right at the joint, where a misplaced nubbin shows most.
@@ -283,7 +363,10 @@ function measureJoints(px, scale, originX = 0, originY = 0, panels = document.qu
     // [label, across axis, expected centre, border samples, nubbin samples]
     const joints = p.shape === 'bump'
       ? [['start', 'v', line, before(0), after(0)], ['end', 'v', line, after(geo.length), before(geo.length)]]
-      : [['line end', 'v', line, after(geo.length), before(geo.length)], ['side', 'u', 1, after(geo.depth), before(geo.depth)]];
+      : [
+        ['line end', 'v', line, after(geo.length + over), before(geo.length)],
+        ['side', 'u', 1, after(geo.depth + below + over), before(geo.depth + below)],
+      ];
     for (const [label, axis, expected, outside, inside] of joints) {
       const edges = (samples) => samples.map((s) => strokeCentre(px, scale, geo, rect, s, axis, expected));
       const mean = (xs) => xs.reduce((a, x) => a + x, 0) / xs.length;
@@ -296,11 +379,41 @@ function measureJoints(px, scale, originX = 0, originY = 0, panels = document.qu
       const step = Math.max(...ins.map((e) => Math.max(Math.abs(e.lo - lo), Math.abs(e.hi - hi))));
       const border = (lo + hi) / 2, nubbin = mean(ins.map((e) => (e.lo + e.hi) / 2));
       results.push({
-        placement: classes, joint: label, scale,
+        placement: `${classes}${p.shape === 'corner' ? ` (r ${radius}px)` : ''}`, joint: label, scale,
         border: +border.toFixed(3), nubbin: +nubbin.toFixed(3), centreShift: +Math.abs(nubbin - border).toFixed(3),
         step: +step.toFixed(3), ok: step <= JOINT_TOLERANCE,
       });
     }
+  }
+  return results;
+}
+
+// The Repanel grabber's joint: where its straight tail (the top of its box)
+// meets the pane's left border above it, at each edge width. The stroke is
+// as thick as the border (Repanel reads --mochi-pane-edge-width), so the two
+// edges should line up whatever the width.
+function measureGrabberJoints(px, scale, originX = 0, originY = 0) {
+  const results = [];
+  for (const holder of document.querySelectorAll('[data-grabber]')) {
+    const panel = holder.querySelector('.mochi-panel');
+    const outer = holder.querySelector('.mochi-panel-handle-nubbin');
+    const nub = outer.querySelector('svg') || outer;
+    const r = nub.getBoundingClientRect();
+    const rect = { left: r.left - originX, top: r.top - originY };
+    const width = parseFloat(getComputedStyle(panel).borderLeftWidth);
+    const geo = { shape: 'bump', direction: 'left', side: 'start', length: r.height, depth: r.width };
+    const near = [0.5, 1.5, 2.5];
+    const edges = (samples) => samples.map((s) => strokeCentre(px, scale, geo, rect, s, 'v', geo.depth - width / 2));
+    const mean = (xs) => xs.reduce((a, x) => a + x, 0) / xs.length;
+    const out = edges(near.map((d) => -d)), ins = edges(near);
+    const lo = mean(out.map((e) => e.lo)), hi = mean(out.map((e) => e.hi));
+    const step = Math.max(...ins.map((e) => Math.max(Math.abs(e.lo - lo), Math.abs(e.hi - hi))));
+    const border = (lo + hi) / 2, nubbin = mean(ins.map((e) => (e.lo + e.hi) / 2));
+    results.push({
+      placement: `grabber ${holder.dataset.grabber} (${width}px edge)`, joint: 'start', scale,
+      border: +border.toFixed(3), nubbin: +nubbin.toFixed(3), centreShift: +Math.abs(nubbin - border).toFixed(3),
+      step: +step.toFixed(3), ok: step <= JOINT_TOLERANCE,
+    });
   }
   return results;
 }
@@ -319,7 +432,10 @@ async function measureScreenshot(src, scale, originX = 0, originY = 0) {
   canvas.height = img.naturalHeight;
   const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0);
-  return measureJoints(ctx.getImageData(0, 0, canvas.width, canvas.height), scale, originX, originY);
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  return view === 'grabber'
+    ? measureGrabberJoints(data, scale, originX, originY)
+    : measureJoints(data, scale, originX, originY);
 }
 
 // Checks the checker: paints the right-pointing popup's border, with its
@@ -356,7 +472,8 @@ async function checkJoints(save = false) {
   // (A timeout, not requestAnimationFrame: rAF stalls in a hidden tab.)
   await new Promise((r) => setTimeout(r, 100));
   const canvas = await snapshot(1);
-  const results = measureJoints(canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height), 1);
+  const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+  const results = view === 'grabber' ? measureGrabberJoints(data, 1) : measureJoints(data, 1);
   if (save) {
     const selfTest = { 1: await selfTestJoints(undefined, 1), 2: await selfTestJoints(undefined, 2) };
     const body = { source: 'in-page snapshot, 1x only', tolerance: JOINT_TOLERANCE, results, selfTest };
@@ -374,6 +491,11 @@ function App() {
     window.__jointTolerance = JOINT_TOLERANCE;
     window.__selfTestJoints = selfTestJoints;
     window.__snapshot = snapshot;
+    // &still: no entrance animation, for looking at the page in a screenshot.
+    if (params.has('still')) stopAnimations();
+    // The probe colour (see the header): set on <html>, which is where
+    // PopupPanel, rendered in a portal, gets its tokens from.
+    if (params.has('probe')) document.documentElement.style.setProperty('--mochi-panel-border', PROBE);
     if (!params.has('joints')) return;
     const t = setTimeout(() => {
       checkJoints(true).then((r) => { window.__joints = r; }, (err) => { window.__joints = { error: String(err) }; });
@@ -394,7 +516,7 @@ function App() {
   }, []);
   return (
     <MochiThemeWrapper theme={theme} style={{ width: W, height: H, overflow: 'hidden', background: 'var(--mochi-bg)' }}>
-      {view === 'popups' ? <Popups /> : view === 'halo' ? <Halo /> : <Static />}
+      {view === 'popups' ? <Popups /> : view === 'corners' ? <Corners /> : view === 'grabber' ? <Grabbers /> : view === 'halo' ? <Halo /> : <Static />}
     </MochiThemeWrapper>
   );
 }

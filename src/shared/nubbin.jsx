@@ -14,7 +14,10 @@
  *           panel's bottom edge 7px past its peak).
  *   corner  The 8 corner caps PopupPanel and NubbinDivider share: a pointed
  *           tip that runs on into the box's side on one end and ramps down
- *           into the line on the other.
+ *           into the line on the other. A cap stands in for the box's
+ *           corner, so over a rounded one (PopupPanel's waterdrop) it also
+ *           reaches `radius` px into the box to cover the curve; see
+ *           `cornerPaths`.
  *   taper   Divider's grooved end caps.
  *
  * Shapes are drawn in an "up" frame (u along the line, v across it, the
@@ -23,7 +26,9 @@
  */
 import React, { useId } from 'react';
 
-// Stroke weight of every traced sprite, and of the borders they join.
+// Stroke weight of every traced sprite. The popup and divider borders they
+// join are this thick too; the Repanel grabber instead takes the width of
+// the pane's edge (--mochi-pane-edge-width, 1px by default; see Repanel).
 export const NUBBIN_STROKE = 2;
 
 // Bump profile, fitted to the sprites' measured stroke edges (RMS error
@@ -134,17 +139,29 @@ function bumpPaths(geo) {
   return { stroke, fill, shadow, fade };
 }
 
+// A cap sits on its box's corner, where the border's own corner is
+// `geo.radius` px round (0 = square, the sprites' case). The curve runs from
+// the side, `radius` px down it, to the line, `radius` px along it, and the
+// border is only straight beyond that. So the cap's side runs on down to
+// where the border is straight, and its fill covers the square the curve
+// cuts a corner from (under the line's stroke, which is where the box ends,
+// so only `radius - strokeWidth` px of it is below the box), leaving a pointed
+// corner in place of the round one. The caller gives the box's top-left (or
+// matching) corner at the border's outer corner, as the popup placements do.
 function cornerPaths(geo) {
-  const { length, depth, strokeWidth } = geo;
+  const { length, depth, strokeWidth, radius } = geo;
   const map = (p) => toBox(p, geo);
   const [p0, p1, p2, p3] = CORNER.ramp;
   const base = depth - strokeWidth / 2;
   const side = strokeWidth / 2;
   const curve = `${pt(map(p1))} ${pt(map(p2))} ${pt(map(p3))}`;
+  const below = Math.max(0, radius - strokeWidth);
   // The box's side runs past the bottom of the box and the line past its
   // end, so both join whatever border continues beyond it.
-  const stroke = `M${pt(map([side, depth + 1]))}L${pt(map(p0))}C${curve}L${pt(map([length + 1, base]))}`;
-  const fill = `M${pt(map([side, depth]))}L${pt(map(p0))}C${curve}L${pt(map([length + 1, depth]))}Z`;
+  const stroke = `M${pt(map([side, depth + below + 1]))}L${pt(map(p0))}C${curve}L${pt(map([length + 1, base]))}`;
+  // ...and the fill steps out along the curve's square, below the box.
+  const notch = below > 0 ? `L${pt(map([radius, depth]))}L${pt(map([radius, depth + below]))}` : '';
+  const fill = `M${pt(map([side, depth + below]))}L${pt(map(p0))}C${curve}L${pt(map([length + 1, depth]))}${notch}Z`;
   const drop = ([u, v]) => pt(map([u, v + SHADOW.offset]));
   const shadow = `M${drop(p0)}C${drop(p1)} ${drop(p2)} ${drop(p3)}`;
   // Faded out as the ramp flattens into the line, so it doesn't stop short
@@ -165,6 +182,10 @@ function cornerPaths(geo) {
  *   length       Box size along the line (defaults: 71 bump, 32 corner)
  *   depth        Box size across the line (defaults: 20 bump, 14 corner)
  *   peak         Bumps only: where the peak sits along the box (default 36)
+ *   radius       Corner caps only: radius in px of the border's corner the cap
+ *                sits on (default 0, a square one). The cap then reaches that
+ *                far into the box's neighbour, so the drawing overflows its
+ *                box; PopupPanel reads the radius from the panel's own corner.
  *   strokeWidth  Stroke weight (default 2)
  *   stroke       Stroke colour (default: --mochi-popup-border)
  *   fill         Fill colour, or 'none' for an outline (default 'none')
@@ -177,6 +198,7 @@ export function Nubbin({
   length,
   depth,
   peak        = BUMP.peak,
+  radius      = 0,
   strokeWidth = NUBBIN_STROKE,
   stroke      = NUBBIN_STROKE_COLOR,
   fill        = 'none',
@@ -196,6 +218,7 @@ export function Nubbin({
     height: BUMP.height,
     sigma: BUMP.sigma,
     strokeWidth,
+    radius: isCorner ? Math.max(0, radius) : 0,
   };
   const paths = isCorner ? cornerPaths(geo) : bumpPaths(geo);
   const vertical = direction === 'left' || direction === 'right';
@@ -206,7 +229,9 @@ export function Nubbin({
     <svg
       {...rest}
       className={className}
-      style={{ display: 'block', overflow: 'hidden', ...style }}
+      // Past its box only for a cap over a round corner (see cornerPaths);
+      // the shadow stays inside it, as its mask is the box.
+      style={{ display: 'block', overflow: geo.radius > strokeWidth ? 'visible' : 'hidden', ...style }}
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}

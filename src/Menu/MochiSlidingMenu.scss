@@ -13,7 +13,11 @@
   --sliding-menu-duration:  var(--animation-duration, var(--mochi-duration-stack, 260ms));
   --sliding-menu-ease:      var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
   --sliding-menu-width:     280px;
-  --sliding-menu-radius:    24px;
+  // Waterdrop corners on the side facing the page (see --mochi-sheet-radius
+  // in the theme: the bottom sheet's top corners), turned to face each edge.
+  // The flush side is square.
+  --sliding-menu-drop:      var(--mochi-corner, 16px);
+  --sliding-menu-point:     var(--mochi-corner-xs, 4px);
 
   --sliding-menu-bg:        var(--mochi-surface, #ffffff);
   --sliding-menu-text:      var(--mochi-text, #1a1a1a);
@@ -63,7 +67,7 @@
   height: 100vh;
   width: var(--sliding-menu-width);
   border-right: 2px solid var(--sliding-menu-border);
-  border-radius: 0 var(--sliding-menu-radius) var(--sliding-menu-radius) 0;
+  border-radius: 0 var(--sliding-menu-drop) var(--sliding-menu-point) 0;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.44);
   transform: translateX(-100%);
   &.mochi-sliding-menu--open { transform: translateX(0); }
@@ -74,7 +78,7 @@
   height: 100vh;
   width: var(--sliding-menu-width);
   border-left: 2px solid var(--sliding-menu-border);
-  border-radius: var(--sliding-menu-radius) 0 0 var(--sliding-menu-radius);
+  border-radius: var(--sliding-menu-point) 0 0 var(--sliding-menu-drop);
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.44);
   transform: translateX(100%);
   &.mochi-sliding-menu--open { transform: translateX(0); }
@@ -86,7 +90,7 @@
   height: auto;
   max-height: 80vh;
   border-bottom: 2px solid var(--sliding-menu-border);
-  border-radius: 0 0 var(--sliding-menu-radius) var(--sliding-menu-radius);
+  border-radius: 0 0 var(--sliding-menu-drop) var(--sliding-menu-point);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
   transform: translateY(-100%);
   &.mochi-sliding-menu--open { transform: translateY(0); }
@@ -104,7 +108,7 @@
   height: auto;
   max-height: 80vh;
   border-top: 2px solid var(--sliding-menu-border);
-  border-radius: var(--sliding-menu-radius) var(--sliding-menu-radius) 0 0;
+  border-radius: var(--mochi-sheet-radius, var(--sliding-menu-drop) var(--sliding-menu-point) 0 0);
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.44);
   transform: translateY(100%);
   &.mochi-sliding-menu--open { transform: translateY(0); }

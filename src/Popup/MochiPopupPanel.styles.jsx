@@ -27,7 +27,9 @@ export const Panel = styled.div.attrs(({ className }) => ({
   position: fixed;
   background: var(--mochi-surface-material, var(--mochi-panel-bg, #f5f5f5));
   border: 2px solid var(--mochi-panel-border, var(--mochi-popup-border, #646464));
-  border-radius: var(--mochi-corner-field, 24px);
+  /* The waterdrop; the corner a corner-placement nubbin sits on keeps its
+     radius, and the nubbin takes it from there (see MochiPopupPanel). */
+  border-radius: var(--mochi-floating-radius, 16px 4px 16px 16px);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
   padding: 6px;
   min-width: 150px;
@@ -63,18 +65,6 @@ export const Panel = styled.div.attrs(({ className }) => ({
   &.horizontal.left  { margin-left:  10px; }
 
   /* ────────────────────────────────────────────────────────────────
-     CORNER BORDER-RADIUS ZEROING
-  ──────────────────────────────────────────────────────────────── */
-  &.vertical.below.left.corner   { border-top-right-radius:    0; }
-  &.vertical.below.right.corner  { border-top-left-radius:     0; }
-  &.vertical.above.left.corner   { border-bottom-right-radius: 0; }
-  &.vertical.above.right.corner  { border-bottom-left-radius:  0; }
-  &.horizontal.left.high.corner  { border-top-left-radius:     0; }
-  &.horizontal.right.high.corner { border-top-right-radius:    0; }
-  &.horizontal.left.low.corner   { border-bottom-left-radius:  0; }
-  &.horizontal.right.low.corner  { border-bottom-right-radius: 0; }
-
-  /* ────────────────────────────────────────────────────────────────
      NUBBIN
      Drawn in code (see shared/nubbin.jsx) and rendered by
      MochiPopupPanel as the panel's last child. Each rule places the
@@ -83,6 +73,11 @@ export const Panel = styled.div.attrs(({ className }) => ({
      border and their fill covers it under the shape, so the two read as
      one stroke. Colours come from the same tokens as the panel's own
      border and background, so light and dark need nothing extra.
+
+     A corner placement's cap stands in for the panel's corner there. The
+     panel keeps its own radius for that corner (the waterdrop's 4px at the
+     top right, 16px elsewhere) and the cap, given that radius, reaches over
+     the curve to meet the straight border; nothing zeroes the corner.
   ──────────────────────────────────────────────────────────────── */
   & > .mochi-popup-nubbin {
     position: absolute;

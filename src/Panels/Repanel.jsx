@@ -4,10 +4,14 @@ import { Nubbin, bumpRise } from '../shared/nubbin';
 
 // The grabber is a bump pointing left (see shared/nubbin.jsx), 43px tall
 // with its peak 36px down, so the panel's bottom edge cuts it off just past
-// the peak. It's drawn in the panel's own border colour and filled with the
+// the peak. It's drawn in the pane's own edge colour and filled with the
 // variant's own background, so it reads as part of the panel's edge in
-// either theme.
-const HANDLE_STROKE = 'var(--mochi-panel-border, #666666)';
+// either theme. Its stroke is as thick as that edge (the pane's left border,
+// --mochi-pane-edge-width: 1px by default, measured from the panel), so the
+// line runs straight out of the edge as one stroke; with the 0.5 look
+// (2px, #666666) it joins just as cleanly.
+const HANDLE_STROKE = 'var(--mochi-pane-edge, #cccccc)';
+const EDGE_WIDTH = 1;
 const HANDLE_FILL = {
   default: 'var(--mochi-panel-bg, #f5f5f5)',
   shadow: 'var(--mochi-panel-shadow-bg, #f5f5f5)',
@@ -30,7 +34,7 @@ const HANDLE_LENGTH = 43;
 const HALO = { reach: 110, rise: 150, sigma: 25, dy: 4, fade: 30 };
 const HALO_TINT = 'var(--mochi-panel-shadow-tint, rgba(0, 0, 0, 0.3))';
 
-function ShadowHandle({ panelWidth, panelHeight }) {
+function ShadowHandle({ panelWidth, panelHeight, edgeWidth }) {
   const id = `mochi-halo-${useId().replace(/:/g, '')}`;
   const { reach, rise, sigma, dy, fade } = HALO;
   // Never past the panel's own edges.
@@ -88,7 +92,7 @@ function ShadowHandle({ panelWidth, panelHeight }) {
       </defs>
       <path d={outline} style={{ fill: HANDLE_FILL.shadow }} />
       <path d={outline} filter={`url(#${id})`} />
-      <Nubbin x={0} y={bump} direction="left" length={HANDLE_LENGTH} stroke={HANDLE_STROKE} shadow />
+      <Nubbin x={0} y={bump} direction="left" length={HANDLE_LENGTH} strokeWidth={edgeWidth} stroke={HANDLE_STROKE} shadow />
     </svg>
   );
 }
@@ -148,6 +152,17 @@ const Repanel = ({
     return () => observer.disconnect();
   }, [haloed]);
 
+  // The grabber's line is as thick as the panel's left edge. Read from the
+  // computed border, in the layout pass, so it is never painted at another
+  // width (and follows --mochi-pane-edge-width however a host sets it).
+  const [edgeWidth, setEdgeWidth] = useState(EDGE_WIDTH);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    if (!handle || !el) return;
+    const w = parseFloat(getComputedStyle(el).borderLeftWidth);
+    setEdgeWidth((prev) => (w > 0 && prev !== w ? w : prev));
+  }, [handle]);
+
   return (
     <div
       {...rest}
@@ -169,13 +184,14 @@ const Repanel = ({
     >
       {/* Under the body, like the CSS halo it continues: the body has no
           background and clips to the panel, so it never covers the bump. */}
-      {haloed && panelSize && <ShadowHandle panelWidth={panelSize.w} panelHeight={panelSize.h} />}
+      {haloed && panelSize && <ShadowHandle panelWidth={panelSize.w} panelHeight={panelSize.h} edgeWidth={edgeWidth} />}
       <div className="mochi-panel-body">{children}</div>
       {handle && !haloed && (
         <Nubbin
           className="mochi-panel-handle-nubbin"
           direction="left"
           length={HANDLE_LENGTH}
+          strokeWidth={edgeWidth}
           stroke={HANDLE_STROKE}
           fill={HANDLE_FILL[resolvedVariant] ?? HANDLE_FILL.default}
           shadow

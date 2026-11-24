@@ -71,12 +71,16 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
     overflow: visible;
     will-change: left, width, opacity, transform;
 
-    // Soft shadow that reads as separation between overlapping shells.
-    filter: drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14));
+    // Light, not chrome: no shadow between overlapping shells by default
+    // (--mochi-stack-shadow: none). A host brings the 0.5 look back with
+    //   --mochi-stack-shadow: drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14));
+    //   --mochi-stack-shadow-front: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22));
+    filter: var(--mochi-stack-shadow, none);
 
     &[data-active='true'] {
-      // The front panel sits proud of the stack.
-      filter: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22));
+      // The front panel sits proud of the stack, when the host asks for
+      // shadows (it follows --mochi-stack-shadow otherwise).
+      filter: var(--mochi-stack-shadow-front, var(--mochi-stack-shadow, none));
     }
   }
 
@@ -129,7 +133,7 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
         }
         &::-webkit-scrollbar-thumb {
           background: var(--mochi-border, rgba(0, 0, 0, 0.12));
-          border-radius: 6px;
+          border-radius: var(--mochi-corner-pill, 9999px);
         }
       }
     }
@@ -145,10 +149,16 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
     padding-right: var(--repanel-overlap, 0px);
   }
 
-  // The base of the stack has nothing behind it, so it keeps a square
-  // corner (Mochi Panels.less: .mochi-base-panel).
+  // The base of the stack has nothing behind it, so it is full-bleed:
+  // square (Mochi Panels.less: .mochi-base-panel), no edge, no shadow.
+  &__panel[data-first-child='true'] {
+    filter: none;
+  }
+
   &__panel[data-first-child='true'] > &__surface > .mochi-panel {
     border-top-left-radius: 0;
+    border-left-width: 0;
+    box-shadow: none;
   }
 
   // ======================================
@@ -181,7 +191,7 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
     &:focus-visible {
       outline: 2px solid var(--mochi-focus-ring, #357099);
       outline-offset: 2px;
-      border-radius: 10px;
+      border-radius: var(--mochi-corner-sm, 10px);
     }
 
     // Invisible 54px-square touch target (webOS TouchPad standard, per

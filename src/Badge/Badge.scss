@@ -45,7 +45,8 @@
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.22);
-  border-radius: 10px;
+  // 18px tall, so this is a full pill (capped at 9px, as the old 10px was).
+  border-radius: var(--mochi-corner-pill, 9999px);
   min-width: 18px;
   height: 18px;
   padding: 0 5px;

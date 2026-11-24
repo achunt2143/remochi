@@ -27,7 +27,7 @@ try {
   await page.waitForFunction(() => window.__nubbinDiff, null, { timeout: 120000 });
   const results = await page.evaluate(() => window.__nubbinDiff);
   if (results.error) throw new Error(results.error);
-  for (const view of ['popups', 'static', 'halo']) {
+  for (const view of ['popups', 'corners', 'grabber', 'static', 'halo']) {
     for (const theme of ['light', 'dark']) {
       await page.goto(`${base}/context.html?view=${view}&theme=${theme}&capture`);
       await page.waitForFunction(() => window.__captured, null, { timeout: 30000 });
@@ -35,19 +35,34 @@ try {
   }
 
   // Joint check from real screenshots at device scale 1 and 2 (the page's
-  // own snapshot isn't stable to a sub-pixel at 2x).
+  // own snapshot isn't stable to a sub-pixel at 2x): the popups (all four
+  // directions), the waterdrop popups in all 8 corner placements, and the
+  // Repanel grabber at 1px and 2px edges, light and dark. `probe` swaps the
+  // border colour for one that contrasts in either theme (see context.jsx).
   const joints = { source: 'Chromium screenshots, device scale 1 and 2', results: [], selfTest: {} };
+  const VIEWS = [['popups', 6], ['corners', 8], ['grabber', 0]];
   for (const scale of [1, 2]) {
     const context = await browser.newContext({ viewport: { width: 1200, height: 860 }, deviceScaleFactor: scale });
-    const shotPage = await context.newPage();
-    await shotPage.goto(`${base}/context.html?view=popups&theme=light`);
-    await shotPage.waitForFunction(() => window.__measureScreenshot && document.querySelectorAll('.mochi-popup-nubbin').length === 6);
-    await shotPage.evaluate(() => window.__stopAnimations());
-    await shotPage.waitForTimeout(300);
-    const shot = `data:image/png;base64,${(await shotPage.screenshot()).toString('base64')}`;
-    joints.results.push(...(await shotPage.evaluate(([src, s]) => window.__measureScreenshot(src, s), [shot, scale])));
-    joints.selfTest[scale] = await shotPage.evaluate((s) => window.__selfTestJoints(undefined, s), scale);
-    joints.tolerance = await shotPage.evaluate(() => window.__jointTolerance);
+    for (const theme of ['light', 'dark']) {
+      for (const [view, nubbins] of VIEWS) {
+        const shotPage = await context.newPage();
+        await shotPage.goto(`${base}/context.html?view=${view}&theme=${theme}&probe`);
+        await shotPage.waitForFunction(
+          (n) => window.__measureScreenshot && (n === 0 ? document.querySelectorAll('[data-grabber]').length > 0 : document.querySelectorAll('.mochi-popup-nubbin').length === n),
+          nubbins
+        );
+        await shotPage.evaluate(() => window.__stopAnimations());
+        await shotPage.waitForTimeout(300);
+        const shot = `data:image/png;base64,${(await shotPage.screenshot()).toString('base64')}`;
+        const found = await shotPage.evaluate(([src, s]) => window.__measureScreenshot(src, s), [shot, scale]);
+        joints.results.push(...found.map((j) => ({ ...j, placement: `${theme}: ${j.placement}` })));
+        if (view === 'popups' && theme === 'light') {
+          joints.selfTest[scale] = await shotPage.evaluate((s) => window.__selfTestJoints(undefined, s), scale);
+          joints.tolerance = await shotPage.evaluate(() => window.__jointTolerance);
+        }
+        await shotPage.close();
+      }
+    }
     await context.close();
   }
   writeFileSync(join(here, 'report/joints.json'), JSON.stringify(joints, null, 2));

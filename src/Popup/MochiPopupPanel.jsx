@@ -38,6 +38,19 @@ function nubbinFor(classes) {
   return { shape: "corner", direction, side: has("high") ? "start" : "end" };
 }
 
+// The panel corner a corner cap sits on, as the computed-style property that
+// holds its radius (the cap stands in for that corner; see nubbin.jsx).
+function cornerRadiusProp(classes) {
+  const has = (c) => classes.split(" ").includes(c);
+  if (!has("corner")) return null;
+  if (has("vertical")) {
+    const top = has("below");
+    return `border${top ? "Top" : "Bottom"}${has("left") ? "Right" : "Left"}Radius`;
+  }
+  const high = has("high");
+  return `border${high ? "Top" : "Bottom"}${has("left") ? "Left" : "Right"}Radius`;
+}
+
 // Where a nubbin's tip is inside its own box (the box is `length` x `depth`
 // for up/down, transposed for left/right), in the same frame nubbin.jsx
 // draws in: u along the line, v across it, mapped the way its `toBox` does.
@@ -236,6 +249,19 @@ export function MochiPopupPanel({
     setWholeSize((prev) => (prev && prev.w === w && prev.h === h ? prev : { w, h }));
   }, [pos]);
 
+  // A corner cap takes the radius of the panel corner it sits on, so it
+  // meets the waterdrop's 4px corner and its 16px ones alike. Read from the
+  // computed style (the token can be overridden, and a corner is capped at
+  // half the panel's short side), in the layout pass so the cap is never
+  // painted with another radius.
+  const [cornerRadius, setCornerRadius] = useState(0);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    const prop = pos && el && cornerRadiusProp(pos.classes);
+    const r = prop ? parseFloat(getComputedStyle(el)[prop]) || 0 : 0;
+    setCornerRadius((prev) => (prev === r ? prev : r));
+  }, [pos, wholeSize]);
+
   // The entrance scales from the nubbin's tip, so the popup grows out of the
   // thing it points at. Measured from the drawn nubbin (relative to the
   // panel's border box, undoing the entrance's own scale) and handed to the
@@ -310,6 +336,7 @@ export function MochiPopupPanel({
         {isOpen && pos && (
           <Nubbin
             {...nubbinFor(pos.classes)}
+            radius={cornerRadius}
             className="mochi-popup-nubbin"
             stroke={NUB_STROKE}
             fill={NUB_FILL}

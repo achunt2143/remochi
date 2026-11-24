@@ -294,6 +294,9 @@ $mochi-faces: (
   // Repanel — solid card vs. inset-shadow variant, per the Figma spec.
   --mochi-panel-bg:          #404040;
   --mochi-panel-border:      #333333;
+  // The pane's 1px left edge (and the grabber's line out of it): light, not
+  // chrome. Width is --mochi-pane-edge-width on :root.
+  --mochi-pane-edge:         #333333;
   --mochi-panel-shadow-bg:   #1a1a1a;
   --mochi-panel-shadow-tint: #606060;
   --mochi-surface-material:  var(--mochi-panel-bg);
@@ -415,6 +418,7 @@ $mochi-faces: (
 
   --mochi-panel-bg:          #f5f5f5;
   --mochi-panel-border:      #666666;
+  --mochi-pane-edge:         #cccccc;
   --mochi-panel-shadow-bg:   #f5f5f5;
   --mochi-panel-shadow-tint: rgba(0, 0, 0, 0.3);
   --mochi-surface-material:  var(--mochi-panel-bg);
@@ -487,11 +491,34 @@ $mochi-faces: (
      keep their 0.4.0 fallback colors (#69cdff / #ffb80d). */
 
   /* Corner radius & scallop defaults (overridable via CSS or ThemeWrapper tokens) */
+  --mochi-corner-xs:    4px;
   --mochi-corner:       16px;
   --mochi-corner-sm:    10px;
   --mochi-corner-field: 24px;
   --mochi-corner-pill:  9999px;
   --mochi-scallop:      45px 0 0 0;
+
+  // The two signature corners (the rest sit on the ladder above): the
+  // scallop for panes anchored to an edge, and the waterdrop for floating
+  // surfaces (top-right nearly sharp). Dialog, the Dropdown menu and
+  // PopupPanel read --mochi-floating-radius; --mochi-dialog-radius defaults
+  // to it. For a surface smaller than ~56px use waterdropRadius(size)
+  // (shared/waterdrop.js) so the corner follows its size.
+  --mochi-floating-radius: 16px 4px 16px 16px;
+  // The waterdrop's top corners, for a sheet anchored to an edge (the
+  // flush side stays square): this is the bottom sheet, and the phone Dialog.
+  // A sheet on another edge is the same drop turned to face the page, built
+  // from --mochi-corner and --mochi-corner-xs in MochiSlidingMenu.scss:
+  // docked left 0 16px 4px 0, docked right 4px 0 0 16px, top 0 0 16px 4px.
+  --mochi-sheet-radius: 16px 4px 0 0;
+
+  // The pane's edge: a 1px hairline on its left, no drop shadow between
+  // stacked panes. The 0.5 look is --mochi-pane-edge-width: 2px,
+  // --mochi-pane-edge: #666666 and --mochi-stack-shadow:
+  // drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14)) (the front pane
+  // --mochi-stack-shadow-front: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22))).
+  --mochi-pane-edge-width: 1px;
+  --mochi-stack-shadow: none;
 
   // Display font token — available everywhere (portals included) and
   // overridable via CSS or ThemeWrapper tokens.
@@ -574,6 +601,7 @@ $mochi-faces: (
     --color-border-light: #{$ink};
     --mochi-popup-border: #{$ink};
     --mochi-panel-border: #{$ink};
+    --mochi-pane-edge:    #{$ink};
     --mochi-field-border: #{$ink};
     --mochi-dialog-ring:  #{$ink};
 

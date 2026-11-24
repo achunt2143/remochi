@@ -15,7 +15,7 @@
   padding: 10px 32px;
   cursor: pointer;
   user-select: none;
-  border-radius: 4px;
+  border-radius: var(--mochi-corner-xs, 4px);
   transition:
     background-color 180ms ease,
     color 180ms ease;
@@ -81,6 +81,7 @@
   height: 4px;
   border-top: 0 solid transparent;
   border-bottom: 1px solid var(--mochi-border, rgba(0, 0, 0, 0.12));
-  border-radius: 32px;
+  // 4px tall: a pill (32px was capped to 2px).
+  border-radius: var(--mochi-corner-pill, 9999px);
   background-color: var(--mochi-hover, rgba(0, 0, 0, 0.04));
 }
