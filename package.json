@@ -28,7 +28,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:lib": "rollup -c",
     "build": "rollup -c && npm pack",
-    "nubbin-diff": "node scripts/nubbin-diff/run.mjs"
+    "nubbin-diff": "node scripts/nubbin-diff/run.mjs",
+    "spinner-diff": "node scripts/spinner-diff/build.mjs && node scripts/spinner-diff/serve.mjs",
+    "check:tokens": "node scripts/check-tokens.mjs"
   },
   "keywords": [
     "react",
