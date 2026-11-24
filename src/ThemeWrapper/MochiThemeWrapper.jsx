@@ -142,6 +142,7 @@ const MochiThemeWrapper = ({
   motion = 'system',
   contrast = 'system',
   transparency = 'system',
+  ground = 'plain',
   fontFamily = 'Prelude',
   tokens,
   style,
@@ -329,7 +330,7 @@ const MochiThemeWrapper = ({
   return (
     <ThemeContext.Provider value={contextValue}>
       <div
-        className={`mochi-theme-wrapper ${shouldSyncHtml ? 'mochi-theme-wrapper--root ' : ''}mochi-theme-${resolvedTheme} ${className}`}
+        className={`mochi-theme-wrapper ${shouldSyncHtml ? 'mochi-theme-wrapper--root ' : ''}mochi-theme-${resolvedTheme}${ground === 'vignette' ? ' mochi-ground--vignette' : ''} ${className}`}
         data-mochi-theme={resolvedTheme}
         data-font-family={fontFamily}
         {...modeAttrs}

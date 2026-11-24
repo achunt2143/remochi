@@ -11,6 +11,7 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--mochi-text, #1a1a1a);
+  flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

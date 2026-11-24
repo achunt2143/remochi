@@ -844,6 +844,12 @@ export interface ThemeWrapperProps extends React.HTMLAttributes<HTMLDivElement> 
    */
   transparency?: 'system' | 'standard' | 'reduced';
   /**
+   * 'vignette' shades the edges of the area the wrapper covers with an inset
+   * `--mochi-vignette` shadow (class `mochi-ground--vignette`); 'plain' draws
+   * nothing. @default 'plain'
+   */
+  ground?: 'plain' | 'vignette';
+  /**
    * CSS custom property overrides applied inline on the wrapper and synced to
    * `:root` when `syncHtml` is enabled. The main public tokens added in 0.6.0:
    *

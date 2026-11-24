@@ -28,6 +28,11 @@ export const MochiInput = styled.input.attrs(props => ({
     box-shadow: 0 0 0 3px var(--mochi-accent-soft, rgba(105,205,255,0.3));
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--mochi-focus-ring, #357099);
+    outline-offset: 1px;
+  }
+
   &::placeholder {
     color: var(--mochi-field-placeholder, #888888);
     font-style: italic;

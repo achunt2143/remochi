@@ -90,8 +90,18 @@ export function MochiPopupPanel({
   const computePosition = useCallback(() => {
     if (!panelRef.current) return;
 
-    const a = anchorRectProp ?? anchorEl?.current?.getBoundingClientRect();
-    if (!a) return;
+    const ar = anchorRectProp ?? anchorEl?.current?.getBoundingClientRect();
+    if (!ar) return;
+    // A plain { top, left, bottom, width, height } is accepted, so derive
+    // the edges it may leave out.
+    const a = {
+      top: ar.top,
+      left: ar.left,
+      width: ar.width,
+      height: ar.height,
+      bottom: ar.bottom ?? ar.top + ar.height,
+      right: ar.right ?? ar.left + ar.width,
+    };
 
     const pw    = panelRef.current.offsetWidth;
     const ph    = panelRef.current.offsetHeight;

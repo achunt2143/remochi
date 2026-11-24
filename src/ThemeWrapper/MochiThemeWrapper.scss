@@ -165,6 +165,12 @@ $mochi-faces: (
     min-height: 100vh;
   }
 
+  // Opt-in ground (ground="vignette"): an inset shade at the edges of the
+  // area the wrapper covers.
+  &.mochi-ground--vignette {
+    box-shadow: var(--mochi-vignette);
+  }
+
   // Theme colors themselves are NOT defined here (see the top-level
   // :root[data-mochi-theme] blocks below this .mochi-theme-wrapper rule) —
   // they need to reach components that render via createPortal(el,
@@ -347,6 +353,7 @@ $mochi-faces: (
   --mochi-dialog-bg:   #333333;
   --mochi-dialog-ring: rgba(255, 255, 255, 0.14);
   --mochi-overlay:     rgba(4, 6, 14, 0.56);
+  --mochi-vignette:    inset 0 0 169px rgba(0, 0, 0, 0.5);
 }
 
 :root[data-mochi-theme='light'],
@@ -446,6 +453,7 @@ $mochi-faces: (
   --mochi-dialog-bg:   #f5f5f5;
   --mochi-dialog-ring: rgba(0, 0, 0, 0.10);
   --mochi-overlay:     rgba(8, 10, 24, 0.36);
+  --mochi-vignette:    inset 0 0 169px rgba(0, 0, 0, 0.3);
 
   // The accent (#69cdff) is only 1.64:1 on the light ground, under the 3:1
   // a focus ring needs, so light rings follow primary (5.3:1) instead.
@@ -697,6 +705,7 @@ $mochi-faces: (
 
 // Elements that only fade a colour or opacity in Full: clamped under Reduced.
 $mochi-fade-selectors: (
+  '.mochi-theme-wrapper',
   '.mochi-sliding-menu-item',
   '.mochi-button',
   '.mochi-button .mochi-bracket-left',
