@@ -23,11 +23,11 @@ $mochi-panel-radius: 45px;
   &.mochi-panel--default {
     background: var(--mochi-panel-bg, #f5f5f5);
 
-    // Weight matched to the nubbin accent's own stroke (sampled from
-    // div-img/left.png: ~2px wide) so a straight border runs into the wavy
+    // Weight matched to the nubbin accent's own stroke (2px, see
+    // shared/nubbin.jsx) so a straight border runs into the wavy
     // nubbin line as one continuous stroke, not a thin line suddenly
     // turning into a thick one. Color is themed — --mochi-panel-border is
-    // #666666 in light mode (the sampled value above) and #333333 in dark
+    // #666666 in light mode (the nubbins' own stroke) and #333333 in dark
     // mode per the Figma dark-mode spec.
     border-width: 2px 0px 0px 2px;
     border-style: solid;
@@ -70,17 +70,14 @@ $mochi-panel-radius: 45px;
 
 // Set by RepanelStack on every child but the first (Repanel's `handle`
 // prop) — the base of the stack has nothing behind it to reveal, so it
-// gets no grabber. A wavy nubbin accent (transparent background, see
-// ./nubbins/left.png), laid directly over the panel's own bottom-left edge
+// gets no grabber. A wavy nubbin accent (drawn in code by Repanel, see
+// shared/nubbin.jsx), laid directly over the panel's own bottom-left edge
 // to mark it as a grabber — no separate shape needed, the panel's normal
 // square corner (see border-radius above) shows through around it.
 //
-// The panel's own straight left border still runs the full height behind
-// this (border-radius only affects corners, not a mid-edge cutout). The
-// commented-out background-color below was an earlier attempt at covering
-// that stretch of border with a solid fill so only the wavy accent showed;
-// left disabled — re-enable (or replace with a per-panel fix) if the
-// straight border reappears as a parallel line next to the nubbin.
+// Its box's right 2px sit exactly over the panel's left border: the
+// accent's straight top runs on along that border, and its fill covers the
+// border under the bump, so the two read as one stroke.
 .mochi-panel-handle-nubbin {
   position: absolute;
   left: -20px;
@@ -88,10 +85,6 @@ $mochi-panel-radius: 45px;
   width: 20px;
   height: 43px;
   z-index: 2;
-
-  // background-color: #f5f5f5;
-  background-repeat: no-repeat;
-  background-size: contain;
   pointer-events: none;
 }
 

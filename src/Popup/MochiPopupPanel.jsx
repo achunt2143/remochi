@@ -8,6 +8,7 @@ import {
   ButtonBar,
 } from "./MochiPopupPanel.styles";
 import { Button as MochiButton } from "../Button";
+import { Nubbin } from "../shared/nubbin";
 
 const VERT_FLUSH_MARGIN  = 100;
 const HORIZ_FLUSH_MARGIN = 100;
@@ -16,6 +17,26 @@ const LONG_POPUP         = 200;
 const MARGIN             = 8;
 const NUB_W              = 71;
 const NUB_SIDE           = 71;
+
+// The panel's own border and background (see Panel), so the nubbin reads
+// as part of the panel in either theme.
+const NUB_STROKE = "var(--mochi-panel-border, var(--mochi-popup-border, #646464))";
+const NUB_FILL   = "var(--mochi-surface-material, var(--mochi-panel-bg, #f5f5f5))";
+
+// Which nubbin a placement (Panel's position classes) gets: a bump pointing
+// at the anchor, or, for the corner placements, a corner cap whose tip sits
+// at the panel corner nearest it ('start' = left/top end of its box).
+function nubbinFor(classes) {
+  const has = (c) => classes.split(" ").includes(c);
+  if (has("vertical")) {
+    const direction = has("below") ? "up" : "down";
+    if (!has("corner")) return { shape: "bump", direction };
+    return { shape: "corner", direction, side: has("left") ? "end" : "start" };
+  }
+  const direction = has("left") ? "left" : "right";
+  if (!has("corner")) return { shape: "bump", direction };
+  return { shape: "corner", direction, side: has("high") ? "start" : "end" };
+}
 
 export function MochiPopupPanel({
   isOpen,
@@ -228,6 +249,15 @@ export function MochiPopupPanel({
               </MochiButton>
             ))}
           </ButtonBar>
+        )}
+        {isOpen && pos && (
+          <Nubbin
+            {...nubbinFor(pos.classes)}
+            className="mochi-popup-nubbin"
+            stroke={NUB_STROKE}
+            fill={NUB_FILL}
+            shadow
+          />
         )}
       </Panel>
     </Overlay>,

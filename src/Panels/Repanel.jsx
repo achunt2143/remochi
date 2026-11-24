@@ -1,8 +1,17 @@
 import React from 'react';
 import './MochiPanel.scss';
-import { useTheme } from '../ThemeWrapper/MochiThemeWrapper';
-import leftNubbin from './nubbins/left.png';
-import leftShadowNubbin from './nubbins/left-shadow.png';
+import { Nubbin } from '../shared/nubbin';
+
+// The grabber is a bump pointing left (see shared/nubbin.jsx), 43px tall
+// with its peak 36px down, so the panel's bottom edge cuts it off just past
+// the peak. It's drawn in the panel's own border colour and filled with the
+// variant's own background, so it reads as part of the panel's edge in
+// either theme.
+const HANDLE_STROKE = 'var(--mochi-panel-border, #666666)';
+const HANDLE_FILL = {
+  default: 'var(--mochi-panel-bg, #f5f5f5)',
+  shadow: 'var(--mochi-panel-shadow-bg, #f5f5f5)',
+};
 
 /**
  * Repanel
@@ -18,12 +27,9 @@ import leftShadowNubbin from './nubbins/left-shadow.png';
  *                             Default: 100 (100%)
  *   style    {'default'|'shadow'}  Visual variant. Default: 'default'
  *   handle   {boolean}        Marks the bottom-left edge as a grabber with a
- *                              wavy nubbin accent (transparent background,
- *                              laid directly over the panel's own edge).
- *                              Uses the shadow-variant nubbin asset when
- *                              `style="shadow"` OR the active theme (see
- *                              ThemeWrapper) is 'dark', the default one
- *                              otherwise. `RepanelStack` sets this on every
+ *                              wavy nubbin accent, laid directly over the
+ *                              panel's own edge and coloured from the theme
+ *                              tokens. `RepanelStack` sets this on every
  *                              child but the first (the base of the stack,
  *                              which has nothing behind it to reveal).
  *                              Default: false
@@ -43,15 +49,6 @@ const Repanel = ({
   const resolvedVariant = typeof variant === 'string' ? variant : 'default';
   const inlineStyle = variant && typeof variant === 'object' ? variant : undefined;
 
-  // The shadow variant gets its own nubbin asset — left-shadow.png — so its
-  // accent matches that variant's own (darker) look instead of the default
-  // variant's. Also picked in dark mode even for the 'default' panel
-  // variant, since left.png's stroke color doesn't read against a dark
-  // panel background the way left-shadow.png's does.
-  const { theme, isDark } = useTheme();
-  const isDarkTheme = isDark !== undefined ? isDark : theme === 'dark';
-  const nubbinImage = resolvedVariant === 'shadow' || isDarkTheme ? leftShadowNubbin : leftNubbin;
-
   return (
     <div
       {...rest}
@@ -65,10 +62,13 @@ const Repanel = ({
     >
       <div className="mochi-panel-body">{children}</div>
       {handle && (
-        <div
+        <Nubbin
           className="mochi-panel-handle-nubbin"
-          style={{ backgroundImage: `url(${nubbinImage})` }}
-          aria-hidden="true"
+          direction="left"
+          length={43}
+          stroke={HANDLE_STROKE}
+          fill={HANDLE_FILL[resolvedVariant] ?? HANDLE_FILL.default}
+          shadow
         />
       )}
     </div>
