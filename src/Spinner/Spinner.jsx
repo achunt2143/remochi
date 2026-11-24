@@ -6,6 +6,9 @@ import {
   OUTLINE_VAR,
   OUTLINE_WIDTH,
   MAX_PIECES,
+  CALM_FRAMES,
+  CALM_HOLD,
+  CALM_FADE,
   framePieces,
 } from "./spinnerArt";
 
@@ -31,36 +34,54 @@ function usePrefersReducedMotion() {
  * rewrite them in place. Self-contained (inline styles only) so it also
  * renders to static markup.
  */
-export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pathRef, calm = false, style, ...rest }) => {
-  const spec = SPINNERS[size === "large" ? "large" : "normal"];
-  const pieces = framePieces(size === "large" ? "large" : "normal", frame);
+export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pathRef, calmStep, style, ...rest }) => {
+  const kind = size === "large" ? "large" : "normal";
+  const spec = SPINNERS[kind];
+  const outline = `var(${OUTLINE_VAR}, ${OUTLINE[kind][styleType === "dark" ? "dark" : "light"]})`;
+  const group = (pieces, key, layerStyle) => (
+    <g
+      key={key}
+      strokeWidth={kind === "large" ? OUTLINE_WIDTH * 0.7 : OUTLINE_WIDTH}
+      strokeLinejoin="round"
+      paintOrder="stroke"
+      style={{ stroke: outline, ...layerStyle }}
+    >
+      {pieces}
+    </g>
+  );
+  const body = calmStep === undefined
+    ? group(
+        Array.from({ length: MAX_PIECES }, (_, i) => {
+          const piece = framePieces(kind, frame)[i];
+          return (
+            <path
+              key={i}
+              ref={pathRef ? (el) => pathRef(i, el) : undefined}
+              d={piece?.d}
+              fill={piece?.fill}
+              display={piece ? undefined : "none"}
+            />
+          );
+        }),
+        "art",
+      )
+    : // reduced motion: one layer per held keyframe, crossfaded by opacity
+      CALM_FRAMES[kind].map((f, k) =>
+        group(
+          framePieces(kind, f).map((piece, i) => <path key={i} d={piece.d} fill={piece.fill} />),
+          k,
+          { opacity: k === calmStep ? 1 : 0, transition: `opacity ${CALM_FADE}ms ease-in-out` },
+        ),
+      );
   return (
     <svg
       {...rest}
       width={spec.width}
       height={spec.height}
       viewBox={`0 0 ${spec.width} ${spec.height}`}
-      style={style}
+      style={{ overflow: "visible", ...style }}
     >
-      {calm && (
-        <style>{`@keyframes mochi-spinner-calm{from{opacity:1}to{opacity:.45}}.mochi-spinner-calm{animation:mochi-spinner-calm 2.4s ease-in-out infinite alternate}`}</style>
-      )}
-      <g className={calm ? "mochi-spinner-calm" : undefined}
-        strokeWidth={size === "large" ? OUTLINE_WIDTH * 0.7 : OUTLINE_WIDTH}
-        strokeLinejoin="round"
-        paintOrder="stroke"
-        style={{ stroke: `var(${OUTLINE_VAR}, ${OUTLINE[size === "large" ? "large" : "normal"][styleType === "dark" ? "dark" : "light"]})` }}
-      >
-        {Array.from({ length: MAX_PIECES }, (_, i) => (
-          <path
-            key={i}
-            ref={pathRef ? (el) => pathRef(i, el) : undefined}
-            d={pieces[i]?.d}
-            fill={pieces[i]?.fill}
-            display={pieces[i] ? undefined : "none"}
-          />
-        ))}
-      </g>
+      {body}
     </svg>
   );
 };
@@ -72,8 +93,9 @@ export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pa
  * - size: "normal" | "large" (default: "normal")
  * - alt: accessible label (default: "Loading...")
  *
- * Drawn and animated in code. With `prefers-reduced-motion: reduce` it holds
- * the circle and fades it slowly in and out instead of morphing.
+ * Drawn and animated in code. With `prefers-reduced-motion: reduce` it stops
+ * morphing and instead holds each of the three shapes for a second, with a
+ * soft crossfade between them.
  */
 export const Spinner = ({
   active = true,
@@ -86,6 +108,14 @@ export const Spinner = ({
   const kind = size === "large" ? "large" : "normal";
   const reduced = usePrefersReducedMotion();
   const paths = useRef([]);
+  const [calmStep, setCalmStep] = useState(0);
+
+  // Reduced motion: step calmly through the three shapes, in place.
+  useEffect(() => {
+    if (!active || !reduced) return undefined;
+    const id = setInterval(() => setCalmStep((k) => (k + 1) % CALM_FRAMES[kind].length), CALM_HOLD + CALM_FADE);
+    return () => clearInterval(id);
+  }, [active, reduced, kind]);
 
   useEffect(() => {
     const show = (index) => {
@@ -102,9 +132,6 @@ export const Spinner = ({
         }
       });
     };
-    if (reduced) {
-      show(0);
-    }
     if (!active || reduced) return undefined;
     const { frames, delay } = SPINNERS[kind];
     let raf;
@@ -125,7 +152,7 @@ export const Spinner = ({
   return (
     <SpinnerArt
       {...rest}
-      calm={reduced}
+      calmStep={reduced ? calmStep : undefined}
       role="img"
       aria-label={alt}
       size={kind}

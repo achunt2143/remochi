@@ -38,7 +38,7 @@ const cache = new Map();
 
 // Closed polygon for one piece: z(t) = Σ c_k e^(ikt), coefficients stored as
 // re,im pairs (hundredths of a px) for k = 0, 1, -1, 2, -2, …
-function outline(flat) {
+export function outline(flat) {
   const K = (flat.length / 2 - 1) / 2;
   const n = Math.max(32, Math.round(K * 12));
   let d = '';
@@ -69,3 +69,12 @@ export function framePieces(size, index) {
   }
   return pieces;
 }
+
+// Reduced motion: no morphing. Cycle through three real keyframes, each held
+// in place, in the order red → blue → yellow. Normal: the circle, the square
+// and the triangle at their steadiest. Large: that GIF only ever draws round
+// balls, so these are its resting ball (where it sits at the left of the
+// strip) in each colour.
+export const CALM_FRAMES = { normal: [0, 32, 60], large: [0, 88, 44] };
+export const CALM_HOLD = 1000;
+export const CALM_FADE = 250;

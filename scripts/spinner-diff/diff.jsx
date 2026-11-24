@@ -10,6 +10,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { SpinnerArt } from '../../src/Spinner/Spinner.jsx';
+import { framePieces, outline } from '../../src/Spinner/spinnerArt.js';
 
 const SCALES = [1, 2];
 const THEMES = { light: '#f5f5f5', dark: '#333333' };
@@ -177,6 +178,54 @@ function sheet(cells, w, h, scale, zoom, cols) {
 const post = (path, body) => fetch(`/save?path=${path}`, { method: 'POST', body });
 const hex = (s) => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16));
 
+// The large GIFs clip a few px off their right edge when the ball reaches it
+// (frames listed in clipped-before.json); the drawing completes those shapes
+// and lets them run past the 260px box. This saves GIF | before (the traced,
+// still clipped outline) | after (completed) crops of those frames, on a canvas
+// widened by PAD so the overshoot shows. The main comparison above is
+// confined to the GIF's own 260px, so these frames are deliberately left
+// out of its "drawing is wrong" reading.
+const PAD = 30;
+async function clippedCrops() {
+  const clipped = (await (await fetch('/scripts/spinner-diff/report/clipped-before.json')).json()).large || {};
+  const w = 260, h = 83, zoom = 5, x0 = 190, cw = w + PAD - x0;
+  for (const [theme, bg] of Object.entries(THEMES)) {
+    const gif = await decodeGif(`/src/Spinner/spinners/spinner-large-${theme}.gif`);
+    for (const [f, befores] of Object.entries(clipped)) {
+      const frame = Number(f);
+      const strip = (markup, withGif) => {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w + PAD}" height="${h}" viewBox="0 0 ${w + PAD} ${h}"><rect width="${w + PAD}" height="${h}" fill="${bg}"/>${markup}</svg>`;
+        return loadImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
+      };
+      const art = (override) => {
+        const html = renderToStaticMarkup(<SpinnerArt size="large" styleType={theme} frame={frame} />);
+        let inner = html.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+        if (override) {
+          const pieces = framePieces('large', frame);
+          inner = inner.replace(pieces[0].d, override);
+        }
+        return inner;
+      };
+      const flat = befores[0].flatMap(([re, im]) => [Math.round(re * 100), Math.round(im * 100)]);
+      const images = [null, await strip(art(outline(flat))), await strip(art())];
+      const c = canvasFor(cw * zoom * 3 + 12, h * zoom);
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      const g = canvasFor(w + PAD, h).getContext('2d');
+      g.fillStyle = bg; g.fillRect(0, 0, w + PAD, h); g.drawImage(gif[frame], 0, 0);
+      ctx.drawImage(g.canvas, x0, 0, cw, h, 0, 0, cw * zoom, h * zoom);
+      images.slice(1).forEach((img, k) => {
+        const t = canvasFor(w + PAD, h); t.getContext('2d').drawImage(img, 0, 0);
+        ctx.drawImage(t, x0, 0, cw, h, (k + 1) * (cw * zoom + 6), 0, cw * zoom, h * zoom);
+      });
+      // the old 260px edge
+      ctx.strokeStyle = '#06f'; ctx.setLineDash([4, 4]);
+      for (let k = 0; k < 3; k++) { const x = k * (cw * zoom + 6) + (w - x0) * zoom; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h * zoom); ctx.stroke(); }
+      await post(`clipped/frame-${String(frame).padStart(3, '0')}-${theme}.png`, c.toDataURL('image/png'));
+    }
+  }
+}
+
 async function run() {
   const results = [];
   for (const [size, file] of Object.entries(SIZES)) {
@@ -213,6 +262,7 @@ async function run() {
       }
     }
   }
+  await clippedCrops();
   await post('results.json', JSON.stringify(results));
   return results;
 }

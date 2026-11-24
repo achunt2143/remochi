@@ -747,6 +747,18 @@
      "area": 1018,
      "harmonics": 18,
      "err": 0.265
+    },
+    {
+     "fill": "#809ba9",
+     "area": 5,
+     "harmonics": 3,
+     "err": 0.101
+    },
+    {
+     "fill": "#58abd5",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -755,6 +767,18 @@
      "area": 1024,
      "harmonics": 18,
      "err": 0.243
+    },
+    {
+     "fill": "#809ba9",
+     "area": 5,
+     "harmonics": 3,
+     "err": 0.101
+    },
+    {
+     "fill": "#58abd5",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -763,6 +787,30 @@
      "area": 1019,
      "harmonics": 18,
      "err": 0.289
+    },
+    {
+     "fill": "#6593aa",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#54a4cc",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#529fc6",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#6994a8",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -777,6 +825,18 @@
      "area": 17,
      "harmonics": 6,
      "err": 0.109
+    },
+    {
+     "fill": "#7296a8",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#5bb2de",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -1013,6 +1073,18 @@
      "area": 1016,
      "harmonics": 18,
      "err": 0.417
+    },
+    {
+     "fill": "#bfa976",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#ebae1c",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -1021,6 +1093,18 @@
      "area": 1023,
      "harmonics": 18,
      "err": 0.497
+    },
+    {
+     "fill": "#bfa976",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#ebae1c",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -1029,6 +1113,30 @@
      "area": 1017,
      "harmonics": 18,
      "err": 0.427
+    },
+    {
+     "fill": "#beb08d",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#c3a660",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#d5a73a",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
+    },
+    {
+     "fill": "#c0a86f",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1036,13 +1144,31 @@
      "fill": "#69cdff",
      "area": 958,
      "harmonics": 18,
-     "err": 0.33
+     "err": 0.327
     },
     {
      "fill": "#ffb80d",
      "area": 20,
      "harmonics": 5,
      "err": 0.095
+    },
+    {
+     "fill": "#bfa871",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#c3a660",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
+    },
+    {
+     "fill": "#d9a932",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1273,6 +1399,18 @@
      "area": 1018,
      "harmonics": 18,
      "err": 0.256
+    },
+    {
+     "fill": "#b08383",
+     "area": 5,
+     "harmonics": 3,
+     "err": 0.101
+    },
+    {
+     "fill": "#b18686",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1281,6 +1419,18 @@
      "area": 1024,
      "harmonics": 18,
      "err": 0.244
+    },
+    {
+     "fill": "#b08383",
+     "area": 5,
+     "harmonics": 3,
+     "err": 0.101
+    },
+    {
+     "fill": "#b18686",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1289,6 +1439,30 @@
      "area": 1019,
      "harmonics": 18,
      "err": 0.283
+    },
+    {
+     "fill": "#b07d7d",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#af7070",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#c83f3f",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#b06e6e",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1303,6 +1477,18 @@
      "area": 17,
      "harmonics": 6,
      "err": 0.109
+    },
+    {
+     "fill": "#af7373",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#dd4040",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -1545,6 +1731,18 @@
      "area": 1016,
      "harmonics": 18,
      "err": 0.271
+    },
+    {
+     "fill": "#6093ac",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#60bcea",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -1553,6 +1751,18 @@
      "area": 1023,
      "harmonics": 18,
      "err": 0.317
+    },
+    {
+     "fill": "#6093ac",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#60bcea",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -1561,6 +1771,30 @@
      "area": 1017,
      "harmonics": 18,
      "err": 0.295
+    },
+    {
+     "fill": "#5d92ad",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#5d92ad",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#54a3cb",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
+    },
+    {
+     "fill": "#6593aa",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1568,13 +1802,31 @@
      "fill": "#ff4a4a",
      "area": 958,
      "harmonics": 18,
-     "err": 0.255
+     "err": 0.251
     },
     {
      "fill": "#69cdff",
      "area": 20,
      "harmonics": 7,
      "err": 0.084
+    },
+    {
+     "fill": "#5992ae",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#5d92ad",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
+    },
+    {
+     "fill": "#56a9d2",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1811,6 +2063,18 @@
      "area": 1018,
      "harmonics": 18,
      "err": 0.407
+    },
+    {
+     "fill": "#bfb191",
+     "area": 5,
+     "harmonics": 3,
+     "err": 0.101
+    },
+    {
+     "fill": "#bfb191",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1819,6 +2083,18 @@
      "area": 1024,
      "harmonics": 18,
      "err": 0.383
+    },
+    {
+     "fill": "#bfb191",
+     "area": 5,
+     "harmonics": 3,
+     "err": 0.101
+    },
+    {
+     "fill": "#bfb191",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1827,6 +2103,30 @@
      "area": 1019,
      "harmonics": 18,
      "err": 0.404
+    },
+    {
+     "fill": "#bead85",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#beaa7a",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#d2a63d",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#bfa976",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -1841,6 +2141,18 @@
      "area": 17,
      "harmonics": 6,
      "err": 0.109
+    },
+    {
+     "fill": "#beab7d",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#e2ab27",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -2083,6 +2395,18 @@
      "area": 1016,
      "harmonics": 18,
      "err": 0.28
+    },
+    {
+     "fill": "#b06e6e",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#ec4545",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -2091,6 +2415,18 @@
      "area": 1023,
      "harmonics": 18,
      "err": 0.295
+    },
+    {
+     "fill": "#b06e6e",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#ec4545",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
     }
    ],
    [
@@ -2099,6 +2435,30 @@
      "area": 1017,
      "harmonics": 18,
      "err": 0.278
+    },
+    {
+     "fill": "#b08383",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#b55959",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#cb3b3b",
+     "area": 4,
+     "harmonics": 2,
+     "err": 0.118
+    },
+    {
+     "fill": "#b16565",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [
@@ -2106,13 +2466,31 @@
      "fill": "#ffb80d",
      "area": 958,
      "harmonics": 18,
-     "err": 0.254
+     "err": 0.251
     },
     {
      "fill": "#ff4a4a",
      "area": 20,
      "harmonics": 5,
      "err": 0.095
+    },
+    {
+     "fill": "#b06969",
+     "area": 4,
+     "harmonics": 1,
+     "err": 0.035
+    },
+    {
+     "fill": "#b55959",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
+    },
+    {
+     "fill": "#d33d3d",
+     "area": 3,
+     "harmonics": 1,
+     "err": 0.106
     }
    ],
    [

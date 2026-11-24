@@ -8,7 +8,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, 'out');
 mkdirSync(out, { recursive: true });
 await esbuild.build({
-  entryPoints: { diff: join(here, 'diff.jsx') },
+  entryPoints: { diff: join(here, 'diff.jsx'), live: join(here, 'live.jsx') },
   bundle: true,
   outdir: out,
   format: 'esm',
@@ -18,4 +18,5 @@ await esbuild.build({
   logLevel: 'warning',
 });
 writeFileSync(join(out, 'diff.html'), '<!doctype html><meta charset="utf-8"><title>spinner diff</title><body style="margin:0"><div id="root"></div><script type="module" src="./diff.js"></script>');
+writeFileSync(join(out, 'live.html'), '<!doctype html><meta charset="utf-8"><title>spinner live</title><body style="margin:0"><div id="root"></div><script type="module" src="./live.js"></script>');
 console.log(`built ${out}`);

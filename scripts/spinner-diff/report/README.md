@@ -28,8 +28,10 @@ Per-frame centroid, area, fill and piece count: [`report/motion.csv`](report/mot
 Each frame's silhouette is traced to sub-pixel precision (fill-colour coverage, marching squares) and stored as
 a Fourier series per piece (≤ 18 harmonics, fit within 0.12px of the contour; 0.5px for droplets).
 `Spinner` steps through the frames every 30 ms with `requestAnimationFrame`, rewriting a pool
-of `<path>`s in place. `prefers-reduced-motion: reduce` holds the circle and fades it 100% ↔ 45%
-(no morphing). `role="img"` + `aria-label={alt}`; `active`, `styleType`, `size`, `alt` and the rest props work as before
+of `<path>`s in place. `prefers-reduced-motion: reduce` stops the morphing and steps in place through three real keyframes,
+red → blue → yellow, each held 1 s with a 250 ms opacity crossfade (normal: circle f0, square f32,
+triangle f60; large: its resting ball at the left of the strip, f0 red, f88 blue, f44 yellow; that GIF only
+draws balls). It follows the setting live. `role="img"` + `aria-label={alt}`; `active`, `styleType`, `size`, `alt` and the rest props work as before
 (the rest props now land on the `<svg>`). Data is ~90 KB of source (large) + ~45 KB (normal) before gzip.
 
 ## Frame-by-frame diff
@@ -48,9 +50,9 @@ Percentages are of *ink* pixels (where either image differs from the background;
 | normal | light | 2x | 15.0% | 0.5% | 43.0% (f72) | 3.3% |
 | normal | dark | 1x | 10.3% | 1.9% | 35.7% (f72) | 8.3% |
 | normal | dark | 2x | 20.1% | 3.4% | 51.6% (f72) | 9.4% |
-| large | light | 1x | 11.9% | 6.3% | 17.3% (f80) | 9.1% |
-| large | light | 2x | 14.0% | 6.1% | 19.7% (f102) | 8.9% |
-| large | dark | 1x | 10.3% | 5.7% | 15.6% (f102) | 10.2% |
+| large | light | 1x | 11.8% | 6.4% | 17.3% (f80) | 9.1% |
+| large | light | 2x | 13.9% | 6.2% | 19.7% (f102) | 8.9% |
+| large | dark | 1x | 10.2% | 5.7% | 15.6% (f102) | 10.2% |
 | large | dark | 2x | 13.2% | 2.1% | 18.1% (f14) | 3.8% |
 
 All 8×86/132 per-frame numbers: [`report/diff.csv`](report/diff.csv). Contact sheets of every frame
@@ -72,3 +74,19 @@ is mostly droplets and necks a pixel or two wide, which the GIF draws a little d
 - The large light outline is grey, the normal light one white. Kept as is, per GIF.
 - Corners are hand-rounded and wobble by up to a pixel between frames; the traced Fourier outline smooths this
   rather than reproducing the jitter (most visible on the square's edges, frames 22–37).
+
+## Clipped frames in the large GIFs (deliberate difference)
+
+The 260×83 large GIFs lose a few px off their right edge when the ball reaches it. Frames **29, 73 and 117**
+(the same moment in each of the three bounces, in light and dark) have a contour running flat along the last
+column (x = 259; 24px of it). Frames 28, 72 and 116 only touch column 258 and are whole.
+
+Those three silhouettes are completed from their own symmetry: the visible left part of the outline,
+mirrored about the vertical axis through the ball's top and bottom extremes (`complete_clipped` in `trace.py`).
+The result is a round ball that reaches ~10px past the old edge. `Spinner` keeps its 260×83 footprint and
+its `<svg>` has `overflow: visible`, so the overshoot draws over the neighbours and nothing moves.
+
+Before/after crops (GIF | traced as clipped | completed; dashed blue line = the GIF's right edge), for all
+three frames in light and dark: `report/clipped/frame-029-light.png`, `…-073-…`, `…-117-…` (and `-dark`).
+The frame-by-frame diff above is confined to the GIF's own 260px, so these frames compare the
+visible part only; the missing 10px is not in the numbers and is deliberately different from the GIF.
