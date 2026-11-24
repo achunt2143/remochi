@@ -504,6 +504,305 @@ $mochi-faces: (
   // One focus ring for every control; follows the accent unless the host
   // sets it (#69cdff when no accent is declared).
   --mochi-focus-ring: var(--mochi-accent, #69cdff);
+
+  // Motion. Components read these for Full; the Reduced and Off blocks at
+  // the end of this file replace them with a short fade and with nothing.
+  // Forward travel (the stack, SlidingMenu) and arrival (Dialog, Popup) each
+  // have one curve and one duration, and an exit never outlasts its entrance.
+  --mochi-ease-forward:     cubic-bezier(0.16, 1, 0.3, 1);
+  --mochi-duration-stack:   260ms;
+  --mochi-ease-arrive:      cubic-bezier(0.22, 1, 0.36, 1);
+  --mochi-duration-arrive:  220ms;
+  // The longest a Reduced-motion fade may run.
+  --mochi-duration-reduced: 150ms;
+
+  // The spinner's three shapes: constants from the webOS guide, not for
+  // retheming (Pyxis and apps read these as the one source). The drawn
+  // Spinner doesn't read them: its frames carry about 40 in-between shades
+  // from the morph, so it keeps its traced fills, whose base three equal
+  // these (check:tokens asserts that).
+  --mochi-spinner-circle:           #ff4a4a;
+  --mochi-spinner-square:           #69cdff;
+  --mochi-spinner-triangle:         #ffb80d;
+  --mochi-spinner-circle-outline:   #a12c2c;
+  --mochi-spinner-square-outline:   #33647c;
+  --mochi-spinner-triangle-outline: #5d4305;
+}
+
+// ============================================
+// Accessibility settings beat materials
+// ============================================
+// High contrast takes ink to pure black/white, edges to full ink and the
+// panel material solid; reduced transparency makes the scrim and the
+// material solid. Each applies from the OS preference (when the
+// ThemeWrapper prop is 'system', no attribute is written) or from
+// data-mochi-contrast="more" / data-mochi-transparency="reduced" on <html>
+// or a wrapper; "standard" opts out of the OS preference. Declared after
+// the theme blocks so they win on equal specificity, and the material and
+// scrim are !important so a host's `tokens` (inline style) can't undo them.
+
+@mixin mochi-a11y-selectors($theme, $attr, $value) {
+  $plain: ':root[data-mochi-theme="#{$theme}"][#{$attr}="#{$value}"], '
+          + '[data-mochi-theme="#{$theme}"][#{$attr}="#{$value}"], '
+          + '.mochi-theme-#{$theme}[#{$attr}="#{$value}"], '
+          // A nested wrapper that sets nothing follows the mode set above it.
+          + '[#{$attr}="#{$value}"] [data-mochi-theme="#{$theme}"]:not([#{$attr}]), '
+          + '[#{$attr}="#{$value}"] .mochi-theme-#{$theme}:not([#{$attr}])';
+  $system: ':root[data-mochi-theme="#{$theme}"]:not([#{$attr}]), '
+           + '[data-mochi-theme="#{$theme}"]:not([#{$attr}]), '
+           + '.mochi-theme-#{$theme}:not([#{$attr}])';
+  @at-root #{$plain} { @content; }
+  @if $attr == 'data-mochi-contrast' {
+    @media (prefers-contrast: more) { @at-root #{$system} { @content; } }
+  } @else {
+    @media (prefers-reduced-transparency: reduce) { @at-root #{$system} { @content; } }
+  }
+}
+
+@mixin mochi-contrast-more($theme, $ink) {
+  @include mochi-a11y-selectors($theme, 'data-mochi-contrast', 'more') {
+    --color-text:           #{$ink};
+    --color-text-secondary: #{$ink};
+    --color-text-muted:     #{$ink};
+    --mochi-panel-text-muted:  #{$ink};
+    --mochi-panel-button-text: #{$ink};
+    --mochi-button-text:       #{$ink};
+    --mochi-field-text:        #{$ink};
+    --mochi-field-placeholder: #{$ink};
+
+    --color-border:       #{$ink};
+    --color-border-light: #{$ink};
+    --mochi-popup-border: #{$ink};
+    --mochi-panel-border: #{$ink};
+    --mochi-field-border: #{$ink};
+    --mochi-dialog-ring:  #{$ink};
+
+    --mochi-surface-material: var(--mochi-panel-bg) !important;
+  }
+}
+
+@mixin mochi-transparency-reduced($theme, $overlay) {
+  @include mochi-a11y-selectors($theme, 'data-mochi-transparency', 'reduced') {
+    --mochi-overlay:          #{$overlay} !important;
+    --mochi-surface-material: var(--mochi-panel-bg) !important;
+  }
+}
+
+@include mochi-contrast-more('dark', #ffffff);
+@include mochi-contrast-more('light', #000000);
+@include mochi-transparency-reduced('dark', #050608);
+@include mochi-transparency-reduced('light', #cfd0d6);
+
+// The Dialog scrim drops its blur under reduced transparency.
+[data-mochi-transparency='reduced'] .mochi-dialog-overlay.open {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root:not([data-mochi-transparency]) .mochi-dialog-overlay.open {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+// ============================================
+// Motion: Full, Reduced, Off
+// ============================================
+// Every motion has three forms. Full is as designed (the component's own
+// rules). Reduced is opacity only: a fade of at most --mochi-duration-
+// reduced, no travel, scale, blur or stagger. Off is instant.
+//
+// The mode comes from data-motion="full|reduced|off" on <html> or on a
+// ThemeWrapper element (Pyxis sets it on <html>), else from
+// prefers-reduced-motion: reduce, which means Reduced. A wrapper's
+// attribute beats <html>'s: the <html> rules below step aside for anything
+// inside a wrapper that sets its own (which is also why "full" needs no
+// rules of its own). With nested wrappers, the outer wrapper's rules still
+// apply inside an inner one that sets a different mode.
+//
+// Scoped to remochi's own class names, never `*`, so the host app's
+// content is left alone. !important because these must also beat
+// styled-components, inline transitions and higher-specificity rules.
+//
+// Pointer-driven transforms are not listed here and stay exact in every
+// mode: the stack while dragging (data-no-transition), the Slider knob
+// (its left/width stay on the drag's own timing) and the Toggle knob.
+
+@mixin mochi-motion($mode, $selectors) {
+  $scoped: ();
+  @each $s in $selectors {
+    $scoped: list.append($scoped, '.mochi-theme-wrapper[data-motion="#{$mode}"] #{$s}', comma);
+    $scoped: list.append($scoped, ':root[data-motion="#{$mode}"] #{$s}:not(.mochi-theme-wrapper[data-motion] #{$s})', comma);
+  }
+  @at-root #{$scoped} { @content; }
+  @if $mode == 'reduced' {
+    @media (prefers-reduced-motion: reduce) {
+      $system: ();
+      @each $s in $selectors {
+        $system: list.append($system, ':root:not([data-motion]) #{$s}:not(.mochi-theme-wrapper[data-motion] #{$s})', comma);
+      }
+      @at-root #{$system} { @content; }
+    }
+  }
+}
+
+// Reduced: a colour or opacity fade, no transform.
+@mixin mochi-fade-only {
+  transition-property: opacity, background-color, color, border-color !important;
+  transition-duration: var(--mochi-duration-reduced, 150ms) !important;
+  transition-delay: 0s !important;
+}
+
+// Elements that only fade a colour or opacity in Full: clamped under Reduced.
+$mochi-fade-selectors: (
+  '.mochi-sliding-menu-item',
+  '.mochi-button',
+  '.mochi-button .mochi-bracket-left',
+  '.mochi-button .mochi-bracket-right',
+  '.mochi-button .mochi-underline',
+  '.mochi-view-select-button-item',
+  '.mochi-button-decorator',
+  '.mochi-collapsable-header',
+  '.mochi-toggle-animate',
+  '.mochi-toggle-animate .mochi-toggle-button-knob',
+  '.mochi-checkbox-animate',
+  '.mochi-radio-box',
+  '.mochi-slider-bubble',
+  '.mochi-dropdown-trigger',
+  '.mochi-dropdown-option',
+  '.mochi-table tbody tr',
+  '.mochi-table-header',
+  '.mochi-list-item',
+  '.mochi-item',
+  '.mochi-gridlist-imageitem',
+);
+
+// Everything with a transition or keyframe, for Off.
+$mochi-motion-selectors: list.join((
+  '.repanel[data-animate="true"] .repanel__panel:not([data-no-transition="true"])',
+  '.mochi-dialog-overlay',
+  '.mochi-dialog',
+  '.mochi-contextual-popup',
+  '.mochi-sliding-menu',
+  '.mochi-sliding-menu-backdrop',
+  '.mochi-sliding-menu-content-shifter',
+  '.mochi-collapsable-toggle',
+  '.mochi-collapsable-body',
+  '.mochi-collapsable-content',
+  '.mochi-slider-fill',
+  '.mochi-slider-thumb',
+  '.mochi-progress-fill',
+  '.mochi-button-bar',
+  '.mochi-view-select-button-item .mochi-button-base',
+  '.mochi-dropdown-arrow',
+), $mochi-fade-selectors, comma);
+
+@keyframes mochi-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@include mochi-motion('reduced', $mochi-fade-selectors) {
+  @include mochi-fade-only;
+}
+
+// The stack: panels fade; they no longer slide or resize between slots.
+@include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel:not([data-no-transition="true"])')) {
+  transition-property: opacity !important;
+  transition-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+
+// Press: no 1.05 scale, no bracket spread, and the bar fades in at full width.
+@include mochi-motion('reduced', ('.mochi-button:active:not(:disabled)')) {
+  transform: none !important;
+}
+@include mochi-motion('reduced', ('.mochi-button .mochi-bracket-left', '.mochi-button .mochi-bracket-right')) {
+  transform: none !important;
+}
+@include mochi-motion('reduced', ('.mochi-button .mochi-underline')) {
+  transform: scaleX(1) !important;
+}
+
+// Things that travel or resize cut instead (their state still changes).
+@include mochi-motion('reduced', (
+  '.mochi-sliding-menu-content-shifter',
+  '.mochi-collapsable-toggle',
+  '.mochi-collapsable-body',
+  '.mochi-slider-fill',
+  '.mochi-slider-thumb',
+  '.mochi-progress-fill',
+  '.mochi-button-bar',
+  '.mochi-view-select-button-item .mochi-button-base',
+  '.mochi-dropdown-arrow',
+)) {
+  transition: none !important;
+}
+
+// Collapsable content: opacity only, no 4px rise.
+@include mochi-motion('reduced', ('.mochi-collapsable-content')) {
+  transform: none !important;
+  transition-property: opacity !important;
+  transition-duration: var(--mochi-duration-reduced, 150ms) !important;
+  transition-delay: 0s !important;
+}
+
+// Dialog: the card fades (no rise, no scale, and the phone sheet no longer
+// slides), the scrim fades its colour, and the overlay stays long enough
+// to show the card's fade out.
+@include mochi-motion('reduced', ('.mochi-dialog-overlay')) {
+  transition:
+    background-color var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear var(--mochi-duration-reduced, 150ms) !important;
+}
+@include mochi-motion('reduced', ('.mochi-dialog-overlay.open')) {
+  transition:
+    background-color var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear 0s !important;
+}
+@include mochi-motion('reduced', ('.mochi-dialog-overlay .mochi-dialog')) {
+  opacity: 0;
+  transform: none !important;
+  transition: opacity var(--mochi-duration-reduced, 150ms) ease !important;
+}
+@include mochi-motion('reduced', ('.mochi-dialog-overlay.open .mochi-dialog')) {
+  opacity: 1;
+  transform: none !important;
+}
+
+// PopupPanel (and so the Dropdown menu): a fade, not a fade and scale.
+@include mochi-motion('reduced', ('.mochi-contextual-popup')) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+
+// SlidingMenu: the panel fades in place instead of sliding in from its edge;
+// the backdrop already only fades.
+@include mochi-motion('reduced', ('.mochi-sliding-menu')) {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: none !important;
+  transition:
+    opacity var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear var(--mochi-duration-reduced, 150ms) !important;
+}
+@include mochi-motion('reduced', ('.mochi-sliding-menu.mochi-sliding-menu--open')) {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear 0s !important;
+}
+@include mochi-motion('reduced', ('.mochi-sliding-menu-backdrop')) {
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+
+// Off: every transition and keyframe above, instant.
+@include mochi-motion('off', $mochi-motion-selectors) {
+  transition: none !important;
+  animation: none !important;
 }
 
 // ============================================

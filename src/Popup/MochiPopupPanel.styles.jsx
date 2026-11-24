@@ -37,7 +37,10 @@ export const Panel = styled.div.attrs(({ className }) => ({
   outline: none;
   pointer-events: auto;
   z-index: 1000;
-  animation: ${fadeIn} 0.22s ease forwards;
+  /* Grows from the nubbin's tip (MochiPopupPanel measures it); a fade only
+     under Reduced motion, none under Off (see MochiThemeWrapper.scss). */
+  transform-origin: var(--popup-origin-x, 50%) var(--popup-origin-y, 50%);
+  animation: ${fadeIn} var(--mochi-duration-arrive, 220ms) var(--mochi-ease-arrive, ease) forwards;
   max-width: 320px;
 
   /* The panel takes focus when it opens; show it when opened from the keyboard. */

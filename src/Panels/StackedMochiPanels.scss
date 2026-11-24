@@ -25,8 +25,11 @@
 // the component still reads correctly outside a ThemeWrapper). No :root
 // overrides live here.
 
-$repanel-duration: 260ms;
-$repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
+// Forward travel: the shared motion tokens (MochiThemeWrapper.scss), with the
+// same values as fallbacks outside a ThemeWrapper. Reduced and Off are
+// handled there too.
+$repanel-duration: var(--mochi-duration-stack, 260ms);
+$repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
 
 // ========================================
 // Root / viewport
@@ -222,12 +225,3 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
-// ========================================
-// Reduced motion
-// ========================================
-
-@media (prefers-reduced-motion: reduce) {
-  .repanel[data-animate='true'] .repanel__panel:not([data-no-transition='true']) {
-    transition: none;
-  }
-}

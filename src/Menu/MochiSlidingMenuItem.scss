@@ -128,14 +128,7 @@
   }
 }
 
-// Accessibility
-@media (prefers-reduced-motion: reduce) {
-  :root:not([data-mochi-theme]) .mochi-sliding-menu-item {
-    transition: none;
-    &:active:not(.mochi-sliding-menu-item--disabled) { transform: none; }
-  }
-}
-
+// Accessibility (Reduced and Off motion: see MochiThemeWrapper.scss)
 @media (prefers-contrast: more) {
   :root:not([data-mochi-theme]) .mochi-sliding-menu-item {
     border-bottom: 1px solid var(--item-text);

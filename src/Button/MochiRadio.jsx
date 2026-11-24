@@ -21,7 +21,7 @@ const MochiRadioLabel = styled.label`
 // --mochi-primary itself resolves to blue, so the live color silently
 // didn't match what the fallback implied. Figma confirms the checked
 // state is meant to be amber with a muted-gray border, in both themes.
-const MochiRadioOuter = styled.span`
+const MochiRadioOuter = styled.span.attrs({ className: "mochi-radio-box" })`
   display: inline-flex;
   align-items: center;
   justify-content: center;

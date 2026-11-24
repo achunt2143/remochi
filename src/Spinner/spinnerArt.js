@@ -77,4 +77,4 @@ export function framePieces(size, index) {
 // strip) in each colour.
 export const CALM_FRAMES = { normal: [0, 32, 60], large: [0, 88, 44] };
 export const CALM_HOLD = 1000;
-export const CALM_FADE = 250;
+export const CALM_FADE = 150;

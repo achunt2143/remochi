@@ -26,7 +26,7 @@ const Container = styled.div`
   border: 1px solid var(--mochi-border, rgba(0,0,0,0.1));
 `;
 
-const Fill = styled.div`
+const Fill = styled.div.attrs({ className: "mochi-progress-fill" })`
   height: 100%;
   background-color: ${({ $color }) => colorMap[$color] || colorMap.blue};
   border-radius: 0;

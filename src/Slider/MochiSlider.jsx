@@ -36,7 +36,7 @@ const Track = styled.div`
   }
 `;
 
-const Fill = styled.div`
+const Fill = styled.div.attrs({ className: "mochi-slider-fill" })`
   position: absolute;
   top: 0;
   left: 0;
@@ -48,7 +48,7 @@ const Fill = styled.div`
   z-index: 1;
 `;
 
-const Thumb = styled.div`
+const Thumb = styled.div.attrs({ className: "mochi-slider-thumb" })`
   position: absolute;
   top: 50%;
   left: ${({ $percent }) => $percent}%;
@@ -94,7 +94,7 @@ const Thumb = styled.div`
   }
 `;
 
-const PopupText = styled.div`
+const PopupText = styled.div.attrs({ className: "mochi-slider-bubble" })`
   position: absolute;
   left: 100%;
   top: -45px;

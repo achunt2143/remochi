@@ -8,7 +8,7 @@ import {
   ButtonBar,
 } from "./MochiPopupPanel.styles";
 import { Button as MochiButton } from "../Button";
-import { Nubbin } from "../shared/nubbin";
+import { Nubbin, BUMP, CORNER, NUBBIN_STROKE } from "../shared/nubbin";
 
 const VERT_FLUSH_MARGIN  = 100;
 const HORIZ_FLUSH_MARGIN = 100;
@@ -36,6 +36,24 @@ function nubbinFor(classes) {
   const direction = has("left") ? "left" : "right";
   if (!has("corner")) return { shape: "bump", direction };
   return { shape: "corner", direction, side: has("high") ? "start" : "end" };
+}
+
+// Where a nubbin's tip is inside its own box (the box is `length` x `depth`
+// for up/down, transposed for left/right), in the same frame nubbin.jsx
+// draws in: u along the line, v across it, mapped the way its `toBox` does.
+function nubbinTip({ shape, direction, side }) {
+  const { length, depth } = shape === "bump" ? BUMP : CORNER;
+  let u = shape === "bump" ? BUMP.peak : CORNER.ramp[0][0];
+  const v = shape === "bump"
+    ? depth - NUBBIN_STROKE / 2 - BUMP.height
+    : CORNER.ramp[0][1];
+  if (shape === "corner" && side === "end") u = length - u;
+  switch (direction) {
+    case "down":  return [u, depth - v];
+    case "left":  return [v, u];
+    case "right": return [depth - v, u];
+    default:      return [u, v];
+  }
 }
 
 export function MochiPopupPanel({
@@ -218,6 +236,24 @@ export function MochiPopupPanel({
     setWholeSize((prev) => (prev && prev.w === w && prev.h === h ? prev : { w, h }));
   }, [pos]);
 
+  // The entrance scales from the nubbin's tip, so the popup grows out of the
+  // thing it points at. Measured from the drawn nubbin (relative to the
+  // panel's border box, undoing the entrance's own scale) and handed to the
+  // panel as custom properties.
+  const [origin, setOrigin] = useState(null);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    const nub = el?.querySelector(".mochi-popup-nubbin");
+    if (!pos || !el || !nub) { setOrigin(null); return; }
+    const panelRect = el.getBoundingClientRect();
+    const nubRect = nub.getBoundingClientRect();
+    const scale = el.offsetWidth ? panelRect.width / el.offsetWidth : 1;
+    const [tipX, tipY] = nubbinTip(nubbinFor(pos.classes));
+    const x = Math.round((nubRect.left - panelRect.left) / scale + tipX);
+    const y = Math.round((nubRect.top - panelRect.top) / scale + tipY);
+    setOrigin((prev) => (prev && prev.x === x && prev.y === y ? prev : { x, y }));
+  }, [pos, wholeSize]);
+
   useEffect(() => {
     if (pos) panelRef.current?.focus();
   }, [pos]);
@@ -231,6 +267,10 @@ export function MochiPopupPanel({
         ...(wholeSize && { minWidth: wholeSize.w, minHeight: wholeSize.h }),
         "--nubbin-h-offset": `${pos.nubHOff}px`,
         "--nubbin-v-offset": `${pos.nubVOff}px`,
+        ...(origin && {
+          "--popup-origin-x": `${origin.x}px`,
+          "--popup-origin-y": `${origin.y}px`,
+        }),
       }
     : { visibility: "hidden", top: 0, left: 0 };
 

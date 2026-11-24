@@ -21,10 +21,10 @@
   visibility: hidden;
   pointer-events: none;
   transition:
-    background-color 0.22s ease,
-    backdrop-filter 0.22s ease,
-    -webkit-backdrop-filter 0.22s ease,
-    visibility 0s linear 0.22s;
+    background-color var(--mochi-duration-arrive, 220ms) ease,
+    backdrop-filter var(--mochi-duration-arrive, 220ms) ease,
+    -webkit-backdrop-filter var(--mochi-duration-arrive, 220ms) ease,
+    visibility 0s linear var(--mochi-duration-arrive, 220ms);
 
   &.open {
     background-color: var(--mochi-overlay, rgba(8, 10, 24, 0.44));
@@ -33,9 +33,9 @@
     visibility: visible;
     pointer-events: auto;
     transition:
-      background-color 0.22s ease,
-      backdrop-filter 0.22s ease,
-      -webkit-backdrop-filter 0.22s ease,
+      background-color var(--mochi-duration-arrive, 220ms) ease,
+      backdrop-filter var(--mochi-duration-arrive, 220ms) ease,
+      -webkit-backdrop-filter var(--mochi-duration-arrive, 220ms) ease,
       visibility 0s linear 0s;
 
     .mochi-dialog {
@@ -68,8 +68,8 @@
   opacity: 0;
   transform: translateY(8px) scale(0.97);
   transition:
-    opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--mochi-duration-arrive, 220ms) var(--mochi-ease-arrive, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--mochi-duration-arrive, 220ms) var(--mochi-ease-arrive, cubic-bezier(0.22, 1, 0.36, 1));
 
   &--warning {
     box-shadow:
@@ -200,7 +200,8 @@
     border-radius: 16px 4px 0 0;
     opacity: 1;
     transform: translateY(100%);
-    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    // Same duration both ways: the exit never outlasts the arrival.
+    transition: transform var(--mochi-duration-arrive, 220ms) var(--mochi-ease-arrive, cubic-bezier(0.22, 1, 0.36, 1));
   }
 
   .mochi-dialog-overlay.open .mochi-dialog {
@@ -216,12 +217,5 @@
   .mochi-dialog-actions {
     justify-content: flex-start;
     padding: 0 16px max(16px, env(safe-area-inset-bottom));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mochi-dialog-overlay,
-  .mochi-dialog {
-    transition: none;
   }
 }

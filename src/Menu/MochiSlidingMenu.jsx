@@ -33,7 +33,7 @@ const MochiSlidingMenuInner = ({
   onOpenChange,
   className = '',
   style = {},
-  duration = 300,
+  duration,               // ms; defaults to the stack token (--mochi-duration-stack)
   closeOnEscape = true,
   closeOnBackdropClick = true,
   backdropColor,          // defaults handled in SCSS via CSS var
@@ -77,7 +77,7 @@ const MochiSlidingMenuInner = ({
 
   const menuStyle = {
     ...style,
-    '--animation-duration': `${duration}ms`,
+    ...(duration !== undefined ? { '--animation-duration': `${duration}ms` } : {}),
     ...(backdropColor ? { '--backdrop-color': backdropColor } : {}),
   };
 
@@ -114,7 +114,7 @@ const ContentShifter = ({
   isMenuOpen = false,
   menuWidth = '280px',
   menuHeight = 'auto',
-  duration = 300,
+  duration,
   className = '',
   style = {},
   ...rest
@@ -143,7 +143,9 @@ const ContentShifter = ({
       ].filter(Boolean).join(' ')}
       style={{
         ...style,
-        transition: `transform ${duration}ms cubic-bezier(0.16, 1, 0.3, 1)`,
+        transition: `transform ${
+          duration !== undefined ? `${duration}ms` : 'var(--mochi-duration-stack, 260ms)'
+        } var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1))`,
         transform,
       }}
     >

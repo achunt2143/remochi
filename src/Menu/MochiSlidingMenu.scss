@@ -9,8 +9,9 @@
 // Mochi popup border (#646464 in both themes) and its drop shadow. The
 // --mochi-* tokens already follow the theme, so no per-theme blocks.
 .mochi-sliding-menu {
-  --sliding-menu-duration:  var(--animation-duration, 300ms);
-  --sliding-menu-ease:      cubic-bezier(0.16, 1, 0.3, 1);
+  // --animation-duration is only set when the `duration` prop is given.
+  --sliding-menu-duration:  var(--animation-duration, var(--mochi-duration-stack, 260ms));
+  --sliding-menu-ease:      var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
   --sliding-menu-width:     280px;
   --sliding-menu-radius:    24px;
 
@@ -121,8 +122,8 @@
   z-index: 999;
   background-color: var(--backdrop-color, rgba(0, 0, 0, 0.4));
   cursor: pointer;
-  animation: mochiBackdropFadeIn var(--sliding-menu-duration, 300ms)
-             cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: mochiBackdropFadeIn var(--sliding-menu-duration, var(--mochi-duration-stack, 260ms))
+             var(--sliding-menu-ease, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
 
   @keyframes mochiBackdropFadeIn {
     from { opacity: 0; }
@@ -146,13 +147,7 @@
 }
 
 // --- Accessibility -------------------------------------------
-@media (prefers-reduced-motion: reduce) {
-  .mochi-sliding-menu,
-  .mochi-sliding-menu-backdrop {
-    transition: none;
-    animation: none;
-  }
-}
+// Reduced and Off motion: see MochiThemeWrapper.scss.
 
 @media (prefers-contrast: more) {
   .mochi-sliding-menu {

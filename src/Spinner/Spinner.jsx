@@ -14,19 +14,41 @@ import {
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(
-    () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia(REDUCED_MOTION).matches,
-  );
+const MOTION_MODES = ["full", "reduced", "off"];
+
+function systemMotion() {
+  return typeof window !== "undefined" && !!window.matchMedia && window.matchMedia(REDUCED_MOTION).matches
+    ? "reduced"
+    : "full";
+}
+
+// "full" | "reduced" | "off": the nearest data-motion on the spinner's
+// ancestors (a ThemeWrapper, else <html>) wins, and the OS preference
+// stands in when none is set, so "full" beats an OS request for reduced.
+// Read live, like the media query.
+function useMotionMode(ref) {
+  const [mode, setMode] = useState(systemMotion);
   useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return undefined;
-    const query = window.matchMedia(REDUCED_MOTION);
-    const update = () => setReduced(query.matches);
+    if (typeof window === "undefined") return undefined;
+    const query = window.matchMedia ? window.matchMedia(REDUCED_MOTION) : null;
+    const update = () => {
+      const set = ref.current?.closest("[data-motion]")?.getAttribute("data-motion");
+      setMode(MOTION_MODES.includes(set) ? set : systemMotion());
+    };
     update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
-  return reduced;
+    query?.addEventListener("change", update);
+    const observer = typeof MutationObserver !== "undefined" ? new MutationObserver(update) : null;
+    observer?.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-motion"],
+      subtree: true,
+    });
+    return () => {
+      query?.removeEventListener("change", update);
+      observer?.disconnect();
+    };
+  }, [ref]);
+  return mode;
 }
 
 /**
@@ -34,7 +56,7 @@ function usePrefersReducedMotion() {
  * rewrite them in place. Self-contained (inline styles only) so it also
  * renders to static markup.
  */
-export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pathRef, calmStep, style, ...rest }) => {
+export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pathRef, svgRef, calmStep, still, style, ...rest }) => {
   const kind = size === "large" ? "large" : "normal";
   const spec = SPINNERS[kind];
   const outline = `var(${OUTLINE_VAR}, ${OUTLINE[kind][styleType === "dark" ? "dark" : "light"]})`;
@@ -66,16 +88,18 @@ export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pa
         "art",
       )
     : // reduced motion: one layer per held keyframe, crossfaded by opacity
+      // (no fade at all when `still`)
       CALM_FRAMES[kind].map((f, k) =>
         group(
           framePieces(kind, f).map((piece, i) => <path key={i} d={piece.d} fill={piece.fill} />),
           k,
-          { opacity: k === calmStep ? 1 : 0, transition: `opacity ${CALM_FADE}ms ease-in-out` },
+          { opacity: k === calmStep ? 1 : 0, transition: still ? "none" : `opacity ${CALM_FADE}ms ease-in-out` },
         ),
       );
   return (
     <svg
       {...rest}
+      ref={svgRef}
       width={spec.width}
       height={spec.height}
       viewBox={`0 0 ${spec.width} ${spec.height}`}
@@ -93,9 +117,10 @@ export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pa
  * - size: "normal" | "large" (default: "normal")
  * - alt: accessible label (default: "Loading…")
  *
- * Drawn and animated in code. With `prefers-reduced-motion: reduce` it stops
- * morphing and instead holds each of the three shapes for a second, with a
- * soft crossfade between them.
+ * Drawn and animated in code. Under Reduced motion (`data-motion="reduced"`,
+ * or `prefers-reduced-motion: reduce` when none is set) it stops morphing and
+ * instead holds each of the three shapes for a second, with a soft crossfade
+ * between them. Under Off (`data-motion="off"`) it shows the circle, still.
  */
 export const Spinner = ({
   active = true,
@@ -106,16 +131,20 @@ export const Spinner = ({
   ...rest
 }) => {
   const kind = size === "large" ? "large" : "normal";
-  const reduced = usePrefersReducedMotion();
+  const svgRef = useRef(null);
+  const mode = useMotionMode(svgRef);
+  const reduced = mode !== "full";
+  const still = mode === "off";
   const paths = useRef([]);
   const [calmStep, setCalmStep] = useState(0);
 
   // Reduced motion: step calmly through the three shapes, in place.
   useEffect(() => {
-    if (!active || !reduced) return undefined;
+    if (!active || mode !== "reduced") return undefined;
+    setCalmStep(0);
     const id = setInterval(() => setCalmStep((k) => (k + 1) % CALM_FRAMES[kind].length), CALM_HOLD + CALM_FADE);
     return () => clearInterval(id);
-  }, [active, reduced, kind]);
+  }, [active, mode, kind]);
 
   useEffect(() => {
     const show = (index) => {
@@ -152,7 +181,9 @@ export const Spinner = ({
   return (
     <SpinnerArt
       {...rest}
-      calmStep={reduced ? calmStep : undefined}
+      calmStep={still ? 0 : reduced ? calmStep : undefined}
+      still={still}
+      svgRef={svgRef}
       role="img"
       aria-label={alt}
       size={kind}
