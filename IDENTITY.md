@@ -1,8 +1,9 @@
 # remochi identity
 
 What remochi is, how it looks, and how it sits inside Pyxis. Written
-2026-11-16 against remochi **0.5.1** (`release/0.5.1`), from the source in
-`src/` and the notes in `RELEASE_NOTES.md`. Where this file and the code
+2026-11-16 against remochi 0.5.1 and brought up to date for **0.6.0**
+(`release/0.6.0`) on 2026-11-24, from the source in `src/` and the notes in
+`RELEASE_NOTES.md`. Where this file and the code
 disagree, the code is right.
 
 Companion: `/home/andrew/geckos/geckos/docs/identity/pyxis-identity.md` (the
@@ -86,18 +87,21 @@ The two themes, light and dark (`theme.scss`):
 | `--color-text` | `#1a1a1a` | `#ffffff` |
 | `--color-text-secondary` | `#555555` | `#a0a0a0` |
 | `--color-text-muted` | `#888888` | `#666666` |
-| `--color-primary` | `#4a8bc2` | `#5ab8f5` |
+| `--color-primary` | `#357099` (was `#4a8bc2` before 0.6.0; 5.3:1 on white) | `#5ab8f5` |
 | `--color-border` | `rgba(0,0,0,0.12)` | `#646464` |
 | `--color-success` | `#388e3c` | `#4caf50` |
 | `--color-warning` | `#e65100` | `#ff9800` |
 | `--color-error` | `#c62828` | `#ef5350` |
 | `--mochi-panel-bg` | `#f5f5f5` | `#404040` |
 | `--mochi-panel-border` | `#666666` | `#333333` |
+| `--mochi-pane-edge` (0.6.0) | `#cccccc` | `#333333` |
+| `--mochi-panel-text-muted` (0.6.0) | the muted text | `#c0c0c0` (5.6:1 on a dark panel) |
+| `--mochi-focus-ring` (0.6.0) | the primary (3:1 on light) | the accent |
 | `--mochi-dialog-bg` | `#f5f5f5` | `#333333` |
 | `--mochi-dialog-ring` | `rgba(0,0,0,0.10)` | `rgba(255,255,255,0.14)` |
 | `--mochi-overlay` (scrim) | `rgba(8,10,24,0.36)` | `rgba(4,6,14,0.56)` |
 | `--mochi-field-bg` | the surface | `#606060` |
-| `--mochi-button-text` | `#333333` | `#a0a0a0` |
+| `--mochi-button-text` | `#333333` | `#a0a0a0` (`#b4b4b4` inside a panel) |
 | `--mochi-surface-material` | `var(--mochi-panel-bg)` | `var(--mochi-panel-bg)` |
 
 Constant across themes, on `:root`:
@@ -110,6 +114,7 @@ Constant across themes, on `:root`:
 | `--mochi-accent` | no default (falls back to `#69cdff`) | One variable that retints Slider, Toggle, Checkbox, Radio, Input, Button press bar and ProgressBar |
 | `--mochi-popup-border` | `#646464` | Contextual popup border, both themes |
 | `--mochi-disabled-opacity` | `0.4` | Every disabled control, as in Mochi |
+| `--mochi-spinner-circle`, `-square`, `-triangle` and their `-outline` values | `#ff4a4a`, `#69cdff`, `#ffb80d` | The spinner's shapes, fixed constants from the webOS guide. Not for retheming |
 
 `--mochi-accent` deliberately has no default so un-overridden components keep
 their 0.4.0 colours.
@@ -125,7 +130,12 @@ All on `:root`, all overridable (`theme.scss`):
 | `--mochi-corner-field` | `24px` | Input, Popup panel, Dropdown panel |
 | `--mochi-corner-pill` | `9999px` | Dropdown trigger, menu items |
 | `--mochi-scallop` | `45px 0 0 0` | Repanel and FloatingPanel's corner |
-| `--mochi-dialog-radius` | `16px 4px 16px 16px` | Dialog card (note: already the waterdrop, see 6.3) |
+| `--mochi-corner-xs` (0.6.0) | `4px` | The smallest rung of the ladder: List, GridList, Dropdown option |
+| `--mochi-floating-radius` (0.6.0) | `16px 4px 16px 16px` | The waterdrop on floating surfaces: Dialog, PopupPanel, Dropdown menu, FloatingPanel (built in; see 6.3) |
+| `--mochi-dialog-radius` | `var(--mochi-floating-radius)` | Dialog card |
+| `--mochi-sheet-radius` (0.6.0) | the waterdrop's corners on the side facing the page | Phone Dialog sheet, SlidingMenu |
+| `--mochi-pane-edge-width` (0.6.0) | `1px` | A pane's left edge. `2px` with `--mochi-pane-edge: #666` is the 0.5 look |
+| `--mochi-stack-shadow`, `--mochi-stack-shadow-front` (0.6.0) | `none` | RepanelStack's shadow between panes (the 0.5 look is a drop-shadow) |
 
 ### 3.3 Type, spacing, motion
 
@@ -136,8 +146,23 @@ All on `:root`, all overridable (`theme.scss`):
 | Spacing | `--spacing-xs` 4, `-sm` 8, `-md` 12, `-lg` 16, `-xl` 24, `-2xl` 32, `-3xl` 48 (px) |
 | Shadows | `--shadow-sm` to `--shadow-xl` (0.1 to 0.25 black, 2 to 12 px down) |
 | Transitions | `--transition-fast` 150 ms, `-base` 250 ms, `-slow` 350 ms |
+| Motion (0.6.0) | `--mochi-ease-forward`, `--mochi-duration-stack` 260 ms, `--mochi-ease-arrive`, `--mochi-duration-arrive` 220 ms, `--mochi-duration-reduced` 150 ms (the longest a Reduced fade may run) |
+| Screens (0.6.0) | `--mochi-peek-width` 80 px, `--mochi-peek-width-narrow` 20 px, `--mochi-screen-narrow` 768 px, `--mochi-screen-wide` 1280 px (the last two mirror `SCREEN_NARROW` / `SCREEN_WIDE`; media queries can't read them) |
 | Header | `--mochi-header-tracking` (default `normal`), `--mochi-font-display` (`"Mochi Light", "Prelude", sans-serif`) |
 | Button (`drop`) | `--mochi-button-bg`, `--mochi-button-radius`, `--mochi-button-ink` |
+
+### 3.3a Motion, contrast and transparency modes (0.6.0)
+
+Every motion has three forms. **Full** is as designed. **Reduced** is opacity
+only: a fade of at most `--mochi-duration-reduced` (150 ms), with no travel,
+scale, blur or stagger (it used to mean Off in three components and was
+ignored by the rest). **Off** is instant. Drags always track exactly. The mode
+is `data-motion="full|reduced|off"` on `<html>` (as Pyxis sets it) or on a
+wrapper, else `prefers-reduced-motion`; `ThemeWrapper` has a `motion` prop.
+`contrast="more"` (or `prefers-contrast: more`) takes ink to pure black or
+white and surfaces solid; `transparency="reduced"` makes the scrim and
+`--mochi-surface-material` solid. A host can still set solid values through
+`tokens`. `npm run check:tokens` guards the contrast floors.
 
 ### 3.4 The `tokens` prop
 
@@ -159,9 +184,9 @@ bundled in `dist/fonts/` as WOFF files (SIL OFL, `OFL.txt`).
 
 | Family | Maps to (Lato fallback) | Where remochi uses it |
 |---|---|---|
-| Mochi Light | Lato Light | Headers (uppercase, 36 px), dialog titles |
+| Mochi Light | Lato Light | Headers (uppercase, 36 px; `size="display"` is 72 px), dialog titles |
 | Mochi Medium | Lato Regular; real italic, bold and bold-italic | Body, list items (bold italic) |
-| Mochi Bold | Lato Bold | Button brackets (upright) |
+| Mochi Bold | Lato Bold | Button brackets (upright), `Label`, Table headers |
 | Mochi Bold Oblique | Lato Bold Italic | Button labels, in every state |
 | Mochi Med Oblique | Lato Italic | Oblique medium text (declared; check a component before relying on it) |
 | Prelude | Light 300, Medium 400, Bold 700 and their italics | The wrapper's body family |
@@ -169,7 +194,7 @@ bundled in `dist/fonts/` as WOFF files (SIL OFL, `OFL.txt`).
 
 Practical rules:
 
-- **Headers are Mochi Light, uppercase, 36 px**, flush bottom-left. Tracking is
+- **Headers are Mochi Light, uppercase, 36 px** (or 72 px as `size="display"`), flush bottom-left; `Label` (Mochi Bold 12 px, uppercase) names a section. Tracking is
   `normal` by default; Pyxis sets `0.14em` through `--mochi-header-tracking`.
 - **A button label is Bold Oblique.** It is the only place the oblique is
   routine.
@@ -187,14 +212,14 @@ remochi ships about 25 groups of components. The ones that carry the identity:
 |---|---|
 | **Button** | `appearance="caps"` (default): "( )" brackets in upright Mochi Bold around a Bold Oblique label; pressing spreads the brackets and shows a bar in `--mochi-accent` (or the variant's colour). Variants: `normal`, `warning`, `affirmative`, `blue`, `disabled`, `dropdown`. Buttons never submit forms. |
 | **Button `drop`** | `appearance="drop"` (0.5.0): a shaped pill, `--mochi-corner` radius, panel background, `8px 20px` padding. Not a Mochi thing; a modern alternative. Off by default. |
-| **Repanel, RepanelStack, FloatingPanel** | The scallop: a 45 px top-left curve (`--mochi-scallop`), the nubbin grabber on the left edge, inset-shadow variant. In a stack the column behind runs 45 px under the one in front. The nubbin is a PNG accent laid over the panel edge, kept outside the clipped body. |
+| **Repanel, RepanelStack, FloatingPanel** | The scallop: a 45 px top-left curve (`--mochi-scallop`), the nubbin grabber on the left edge, inset-shadow variant. In a stack the column behind runs 45 px under the one in front. The pane has a 1 px left edge (`--mochi-pane-edge`) and no stack shadow; the base pane is square. The nubbin is drawn in code over the panel edge, kept outside the clipped body. RepanelStack keeps a left sliver of the past and shows a right peek of the predicted next panel. |
 | **Dialog** | A centred card over a scrim with a 6 px inset; a Mochi Light title (18 px), a divider, content, then centred buttons. `tone`: `normal`, `warning`, `error` (a 2 px coloured line along the top). Becomes a one-handed bottom sheet below 768 px. |
-| **PopupPanel** | Contextual popup, 2 px `#646464` border, 24 px radius, nubbin pointing at its anchor, fade in 0.22 s. |
-| **Spinner** | An animated GIF: a red circle, a blue square and a yellow triangle (light and dark, normal and large). The mark Pyxis took its window controls from. |
+| **PopupPanel** | Contextual popup, 2 px `#646464` border, the waterdrop corner (`--mochi-floating-radius`), a drawn nubbin pointing at its anchor that the popup grows from, fade in 0.22 s (a plain fade under Reduced). |
+| **Spinner** | Drawn in code as an SVG, traced from the original animation: a red circle, a blue square and a yellow triangle (light and dark, normal and large). Reduced holds each shape with a 150 ms crossfade; Off is a still circle. The mark Pyxis took its window controls from. |
 | **Toggle, Checkbox, Radio** | Amber `--mochi-selected` when on, `--mochi-toggle-track` grey when off. |
 | **Slider, ProgressBar** | `--mochi-accent` fill, a bubble popup on the slider knob. |
 | **Input** | 24 px radius, accent border on focus. |
-| **Header, Subheader** | Header is Mochi Light, uppercase. Pure CSS flex sizing since 0.5.1. |
+| **Header, Subheader, Label** | Header is Mochi Light, uppercase (`display` size in 0.6.0). Pure CSS flex sizing since 0.5.1. Label is the section nameplate. |
 | **Item, List, ListItem, Wizard, Table, Dropdown, Menu, Pagination, Badge, Divider, NubbinDivider, Video, ...** | Same rules: soft radii, grey surfaces, bold-italic list items. |
 
 ---
@@ -224,7 +249,7 @@ remochi has no idea any of this exists, and should not.
 
 | Pyxis adds | What it is |
 |---|---|
-| **The waterdrop corner** | `16 4 16 16`, top-right sharp, on windows, panels, toasts, cards and icons. remochi's surfaces are uniformly round (16, 24, pill), except the scallop. |
+| **The waterdrop corner** | `16 4 16 16`, top-right sharp, on windows, panels, toasts, cards and icons. remochi's floating surfaces have it built in since 0.6.0 (`--mochi-floating-radius`); the rest of remochi sits on the corner ladder (16, 24, pill), plus the scallop. |
 | **Wallpaper tint** | The shell's panels, strip and launch bar take colour and ink from the wallpaper's palette (`--px-ink`, `--px-material`, `--px-edge-material`). remochi's greys never change with the time of day. |
 | **Frost** | Title bars are real glass of the wallpaper, drawn by the compositor. remochi surfaces are opaque (or a fixed material). |
 | **Lumen motion** | Bloom, Droplet, Evaporate, Recede, glint. remochi's motion is fades and short rises. |
@@ -242,14 +267,18 @@ The meeting points, and which way each was decided:
   proportions as the waterdrop's large corner. `--mochi-scallop` is the token
   each surface uses to pick. Which surfaces keep the scallop is settled
   component by component, on device.
-- **The dialog is already a waterdrop.** `--mochi-dialog-radius` defaults to
-  `16px 4px 16px 16px` in 0.5.1, so a dialog from remochi and a panel from the
-  shell have the same corner without any override.
+- **Floating surfaces are waterdrops.** Since 0.6.0
+  `--mochi-floating-radius` (`16px 4px 16px 16px`) is read by Dialog,
+  PopupPanel, the Dropdown menu and FloatingPanel (`fullBleed` for square),
+  and `--mochi-dialog-radius` defaults to it, so a remochi surface and a shell
+  panel have the same corner without any override. `waterdropRadius(size)`
+  scales it down for small things.
 - **The `drop` button.** remochi's pill shape can follow the waterdrop by
   setting `--mochi-button-radius: 16px 4px 16px 16px`. Not used in Pyxis, by the
   user's call.
-- **The spinner is both projects'.** remochi ships it as a GIF; Pyxis draws
-  its shapes at 14 px as window controls from sampled colours. The yellow
+- **The spinner is both projects'.** remochi draws it in code (0.6.0, no GIF);
+  Pyxis draws its shapes at 14 px as window controls from sampled colours, and
+  both read the fixed `--mochi-spinner-*` constants. The yellow
   `#ffb80d` is `--mochi-selected` too, so an app's "on" toggle and a window's
   minimize control are the same amber.
 - **Headers and display type.** The shell's uppercase display heads are remochi's
@@ -280,8 +309,9 @@ variables had to reach `:root`.) The result:
 
 Exceptions that work from `:root` alone, because they are declared on `:root`
 only: `--mochi-accent`, `--mochi-accent-soft`, `--mochi-selected`,
-`--mochi-toggle-track`, and the shape tokens (`--mochi-corner*`,
-`--mochi-scallop`).
+`--mochi-toggle-track`, the shape tokens (`--mochi-corner*`,
+`--mochi-scallop`, `--mochi-floating-radius`, `--mochi-sheet-radius`), the pane
+and motion tokens, and `--mochi-focus-ring`.
 
 Practical rules for Pyxis code:
 

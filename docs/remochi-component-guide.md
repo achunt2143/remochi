@@ -30,6 +30,7 @@ import {
   NubbinDivider,
   Header,
   Subheader,
+  Label,
   Item,
   List,
   ListItem,
@@ -51,7 +52,23 @@ import {
 } from 'remochi';
 ```
 
-The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme` from `useTheme()` for a light/dark switch. `ThemeWrapper` also accepts controlled `theme` (`'dark' | 'light' | 'system'`), `defaultTheme`, `onThemeChange`, `storageKey`, `syncHtml`, `fontFamily` (`'Prelude' | 'Lato'`), and `tokens` (`Record<string, string | number>`) for CSS custom property overrides (such as `--mochi-surface-material`, `--mochi-corner`, `--mochi-corner-sm`, `--mochi-corner-field`, `--mochi-corner-pill`, `--mochi-scallop`, `--mochi-header-tracking`, `--mochi-button-bg`, `--mochi-button-radius`, `--mochi-button-ink`, `--mochi-accent`), which are applied to the wrapper and mirrored onto `:root` when `syncHtml` is enabled.
+The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme` from `useTheme()` for a light/dark switch. `ThemeWrapper` also accepts controlled `theme` (`'dark' | 'light' | 'system'`), `defaultTheme`, `onThemeChange`, `storageKey`, `syncHtml`, `fontFamily` (`'Prelude' | 'Lato'`), the accessibility modes `motion` (`'system' | 'full' | 'reduced' | 'off'`), `contrast` (`'system' | 'standard' | 'more'`) and `transparency` (`'system' | 'standard' | 'reduced'`), and `tokens` (`Record<string, string | number>`) for CSS custom property overrides (such as `--mochi-surface-material`, `--mochi-corner`, `--mochi-corner-sm`, `--mochi-corner-field`, `--mochi-corner-pill`, `--mochi-scallop`, `--mochi-header-tracking`, `--mochi-button-bg`, `--mochi-button-radius`, `--mochi-button-ink`, `--mochi-accent`, `--mochi-floating-radius`, `--mochi-sheet-radius`, `--mochi-pane-edge`, `--mochi-pane-edge-width`, `--mochi-stack-shadow`, `--mochi-focus-ring`), which are applied to the wrapper and mirrored onto `:root` when `syncHtml` is enabled.
+
+### Motion, contrast, and transparency
+
+Every motion has three forms. **Full** is as designed. **Reduced** is opacity only: a fade of at most `--mochi-duration-reduced` (150ms), with no travel, scale, blur or stagger. **Off** is instant. Drags always track exactly. The mode comes from the `motion` prop, a `data-motion="full|reduced|off"` attribute on `<html>` or a wrapper (a host such as Pyxis can set it), else `prefers-reduced-motion: reduce` (which means Reduced). Timing lives in tokens: `--mochi-ease-forward`, `--mochi-duration-stack` (260ms), `--mochi-ease-arrive`, `--mochi-duration-arrive` (220ms).
+
+`contrast="more"` (or `prefers-contrast: more`) takes ink to pure black or white and surfaces solid. `transparency="reduced"` (or `prefers-reduced-transparency`) makes the Dialog scrim and `--mochi-surface-material` solid. `"standard"` opts out of the OS preference; the default `"system"` follows it.
+
+Run `npm run check:tokens` to keep bare hex colours out of component styles and to check the contrast floors.
+
+```jsx
+<ThemeWrapper motion="reduced" contrast="system" transparency="system">
+  <App />
+</ThemeWrapper>
+```
+
+Screen widths are `SCREEN_NARROW` (768) and `SCREEN_WIDE` (1280), exported with `useWidthClass(ref)`, which returns `'narrow' | 'medium' | 'wide'` for an element's own width. `waterdropRadius(size)` returns the waterdrop corner scaled to a surface's short side.
 
 ## Recommended app structure
 
@@ -100,7 +117,7 @@ Example:
 
 ### ViewSelectButton
 
-`ViewSelectButton` is a compact segmented control for switching between named views — a group of buttons with decorative brackets and an animated underline bar marking the active one. It accepts an `items` array (`{ content, active?, disabled? }`) and an `onSelect(item, index)` callback; only one item can be active at a time.
+`ViewSelectButton` is a compact segmented control for switching between named views — a group of buttons with decorative brackets and an animated underline bar marking the active one. It accepts an `items` array (`{ content, active?, disabled? }`) and an `onSelect(item, index, detail)` callback, where `detail` is `{ direction: 'forward' | 'back' | null, from, to }` so content can enter from the side of the segment chosen; only one item can be active at a time.
 
 `items` is used to derive the *initial* active item (whichever has `active: true`, or the first item if none do) — after that, the component tracks selection internally and calls `onSelect` on every click, so a controlled parent should update whichever item's `active` flag it passes in on the next render (see the demo pattern below, which keys `active` off its own `viewMode` state).
 
@@ -242,11 +259,17 @@ const dropdownOptions = [
 
 ### Header and Subheader
 
-`Header` supports `content`, `children` (for right-aligned controls), `customClasses` (applied to `.mochi-header-content`), and `className` / HTML attributes on the root element; `Subheader` takes `content` and `className` / HTML attributes.
+`Header` supports `size` (`'header'`, the default, or `'display'`: Mochi Light 72/64, uppercase, at most once per screen), `content`, `children` (for right-aligned controls), `customClasses` (applied to `.mochi-header-content`), and `className` / HTML attributes on the root element; `Subheader` takes `content` and `className` / HTML attributes.
 
 ```jsx
 <Header customClasses="app-header-title">Header Component</Header>
 <Subheader content="Subheader Component — sits below a Header" />
+```
+
+`Label` names a section inside a panel (Mochi Bold 12, uppercase via CSS, on the 32px edge). Write the text in title case and pass it as `content` or `children`; it renders with `role="heading"` (`level` sets `aria-level`, default 3) or as a real heading with `as="h2"`, and forwards other props.
+
+```jsx
+<Label content="Recent Albums" />
 ```
 
 ### Divider and NubbinDivider
@@ -317,7 +340,7 @@ const data: UserRow[] = [
 
 ### Repanel and FloatingPanel
 
-`Repanel` is a full-height panel with a rounded left edge and flush right edge — used standalone as a percentage-width layout column (`width` is a percentage of its row, e.g. `25`), or as the stackable card surface rendered inside `RepanelStack` below. `style` can be `"default"` or `"shadow"` for a raised, inset-shadow look. `FloatingPanel` is the same surface but fills its container with rounded corners on all sides, for use outside a row layout.
+`Repanel` is a full-height panel with a rounded left edge and flush right edge — used standalone as a percentage-width layout column (`width` is a percentage of its row, e.g. `25`), or as the stackable card surface rendered inside `RepanelStack` below. `style` can be `"default"` or `"shadow"` for a raised, inset-shadow look. `FloatingPanel` is the same surface but fills its container with the waterdrop corner (`--mochi-floating-radius`), for use outside a row layout; `fullBleed` makes it square with no shadow when it is the whole surface. Panes draw a 1px left edge (`--mochi-pane-edge`).
 
 Example:
 
@@ -342,7 +365,9 @@ Every panel but the first gets a nubbin **grabber** at its bottom-left edge:
 - The active panel's own grabber does the same reveal-adjust in either direction, as long as there's more of the stack left to reveal — that's the only way back once the stack has been collapsed all the way down to just the front panel.
 - Once nothing is left to reveal, dragging the active grabber right instead becomes **swipe-to-close**: release past ~45% dragged, a fast flick, or a double-click commits it, handing the front to whatever panel was behind it. Release short of that and it springs back open.
 
-Useful props: `defaultActiveIndex`/`activeIndex` (controlled), `defaultReveal`/`reveal` (controlled), `onActiveIndexChange(index, detail)`, `onRevealChange(reveal, detail)`, `snapPoints`, `maxVisiblePanels`. An imperative ref exposes `next()`, `prev()`, `expand()`, `collapse()`, `setActiveIndex()`, and `setReveal()`.
+Useful props: `defaultActiveIndex`/`activeIndex` (controlled), `defaultReveal`/`reveal` (controlled), `onActiveIndexChange(index, detail)`, `onRevealChange(reveal, detail)`, `snapPoints`, `maxVisiblePanels`.
+
+The stack also shows where you came from and where you're going. `keepPast` (default `true`) keeps a left sliver of the panel you came from when the stack is collapsed. `upcoming` (one keyed `Repanel`, or `null`) waits as a right sliver (`--mochi-peek-width`, 80px; 20px narrow), opened by tap, a drag left or `next()`; `onUpcomingOpen` reports it and you append the panel to your children. A peeking `Repanel` takes `hint` (one short clue), `sequence` (`{ index, label }`) and `peekLabel` (its accessible name). `controls` (`'auto' | 'always' | 'never'`) adds ◀ ▶ buttons, shown when the stack is wide on `'auto'`, and `onControlsAction('back' | 'forward')` reports them. The stack decides narrow from its own width, not the window's. An imperative ref exposes `next()`, `prev()`, `expand()`, `collapse()`, `setActiveIndex()`, and `setReveal()`.
 
 Example:
 
@@ -449,7 +474,7 @@ const [sliderVal, setSliderVal] = useState(50);
 
 ### Spinner
 
-`Spinner` props are `active`, `styleType: 'light' | 'dark'`, and `size: 'normal' | 'large'` with an optional `alt` text [cite:28].
+`Spinner` props are `active`, `styleType: 'light' | 'dark'`, and `size: 'normal' | 'large'` with an optional `alt` text [cite:28]. It is drawn in code as an SVG. Under Reduced motion it holds each of its three shapes with a 150ms crossfade, and under Off it shows a still circle.
 
 ```jsx
 <Spinner active styleType="light" size="normal" />
