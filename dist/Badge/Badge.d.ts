@@ -16,7 +16,7 @@
  *   variant    {string}         'default'|'success'|'warning'|'error'|'danger'|'info'
  *   count      {number}         If provided, renders a count pill after the label
  *   background {string}         Override background color (overrides variant)
- *   color      {string}         Text color (default: '#ffffff')
+ *   color      {string}         Text color (default: white; dark on the warning variant)
  */
 export function Badge({ children, content, variant, count, background, color, className, ...rest }: {
     [x: string]: any;
@@ -25,7 +25,7 @@ export function Badge({ children, content, variant, count, background, color, cl
     variant?: string | undefined;
     count: any;
     background: any;
-    color?: string | undefined;
+    color: any;
     className?: string | undefined;
 }): any;
 export { Badge as MochiBadge };

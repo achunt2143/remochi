@@ -18,14 +18,4 @@ export default MochiDropdown;
  *   maxHeight    {number}   Max height of the menu in px (default: 200)
  *   className    {string}   Extra class on the root wrapper
  */
-declare function MochiDropdown({ options, value, onChange, label, placeholder, disabled, maxHeight, className, ...rest }: {
-    [x: string]: any;
-    options?: any[] | undefined;
-    value: any;
-    onChange: any;
-    label: any;
-    placeholder?: string | undefined;
-    disabled?: boolean | undefined;
-    maxHeight?: number | undefined;
-    className?: string | undefined;
-}): any;
+declare const MochiDropdown: any;

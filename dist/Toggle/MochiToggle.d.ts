@@ -16,21 +16,4 @@ export default MochiToggle;
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
  */
-export function MochiToggle({ value, checked, onChange, disabled, canAnimate, colorActive, colorInactive, onContent, offContent, className, style, onPointerDown: userOnPointerDown, onPointerMove: userOnPointerMove, onPointerUp: userOnPointerUp, onKeyDown: userOnKeyDown, ...rest }: {
-    [x: string]: any;
-    value?: boolean | undefined;
-    checked: any;
-    onChange?: (() => void) | undefined;
-    disabled?: boolean | undefined;
-    canAnimate?: boolean | undefined;
-    colorActive?: string | undefined;
-    colorInactive?: string | undefined;
-    onContent?: string | undefined;
-    offContent?: string | undefined;
-    className?: string | undefined;
-    style: any;
-    onPointerDown: any;
-    onPointerMove: any;
-    onPointerUp: any;
-    onKeyDown: any;
-}): any;
+export const MochiToggle: any;

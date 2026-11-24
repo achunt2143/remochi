@@ -20,14 +20,33 @@
  *                              child but the first (the base of the stack,
  *                              which has nothing behind it to reveal).
  *                              Default: false
+ *   hint      {ReactNode}     The clue shown while this panel is the stack's
+ *                              `upcoming` peek (RepanelStack's right sliver):
+ *                              one short word or number in the label voice,
+ *                              about 8 characters at most ("17", "3 NEW").
+ *                              It must match what opens. Not shown otherwise.
+ *   sequence  {{ index: number, label?: string }}
+ *                              For panels in a sequence (steps, pages, items):
+ *                              the peek shows `index` as Mochi Light numerals
+ *                              (zero-padded to 2, "04") above a short label,
+ *                              instead of `hint`. Not shown otherwise.
+ *   peekLabel {string}        The panel's name for the peek's accessible name
+ *                              ("Open <peekLabel>, <hint>"). Falls back to the
+ *                              Header's `content`, else "Open next panel".
+ *   peeking   {boolean}       Set by RepanelStack while this panel is the
+ *                              right peek; shows the clue. Default: false
  *   className {string}        Extra CSS classes
  *   children  {ReactNode}
  */
-export function Repanel({ width, style: variant, handle, className, children, ...rest }: {
+export function Repanel({ width, style: variant, handle, hint, sequence, peekLabel, peeking, className, children, ...rest }: {
     [x: string]: any;
     width?: number | undefined;
     style?: string | undefined;
     handle?: boolean | undefined;
+    hint: any;
+    sequence: any;
+    peekLabel: any;
+    peeking?: boolean | undefined;
     className?: string | undefined;
     children: any;
 }): any;

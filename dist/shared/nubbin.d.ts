@@ -10,12 +10,16 @@
  *   length       Box size along the line (defaults: 71 bump, 32 corner)
  *   depth        Box size across the line (defaults: 20 bump, 14 corner)
  *   peak         Bumps only: where the peak sits along the box (default 36)
+ *   radius       Corner caps only: radius in px of the border's corner the cap
+ *                sits on (default 0, a square one). The cap then reaches that
+ *                far into the box's neighbour, so the drawing overflows its
+ *                box; PopupPanel reads the radius from the panel's own corner.
  *   strokeWidth  Stroke weight (default 2)
  *   stroke       Stroke colour (default: --mochi-popup-border)
  *   fill         Fill colour, or 'none' for an outline (default 'none')
  *   shadow       Soft halo around the raised part, as the popup sprites had
  */
-export function Nubbin({ shape, direction, side, length, depth, peak, strokeWidth, stroke, fill, shadow, className, style, ...rest }: {
+export function Nubbin({ shape, direction, side, length, depth, peak, radius, strokeWidth, stroke, fill, shadow, className, style, ...rest }: {
     [x: string]: any;
     shape?: string | undefined;
     direction?: string | undefined;
@@ -23,6 +27,7 @@ export function Nubbin({ shape, direction, side, length, depth, peak, strokeWidt
     length: any;
     depth: any;
     peak?: number | undefined;
+    radius?: number | undefined;
     strokeWidth?: number | undefined;
     stroke?: string | undefined;
     fill?: string | undefined;

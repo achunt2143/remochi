@@ -7,7 +7,10 @@ export default ViewSelectButton;
  *
  * Props:
  *   - items: Array of { content: string, active?: boolean, disabled?: boolean }
- *   - onSelect: Callback(selectedItem, index) when selection changes
+ *   - onSelect: Callback(selectedItem, index, detail) when an item is chosen.
+ *     detail is { direction, from, to }: direction is 'forward' or 'back' by
+ *     the index change (null when the active item is chosen again), so
+ *     content can enter from the side of the segment chosen
  *   - decoratorLeft: Left bracket character (default: '(')
  *   - decoratorRight: Right bracket character (default: ')')
  *   - barClasses: CSS classes for bar styling (default: '')
@@ -16,7 +19,7 @@ export default ViewSelectButton;
  */
 declare function ViewSelectButton({ items, onSelect, decoratorLeft, decoratorRight, barClasses, decoratorClasses, variant, className, ...rest }: {
     [x: string]: any;
-    items?: any[] | undefined;
+    items?: never[] | undefined;
     onSelect?: (() => void) | undefined;
     decoratorLeft?: string | undefined;
     decoratorRight?: string | undefined;

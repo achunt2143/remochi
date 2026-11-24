@@ -39,7 +39,6 @@ export function resolveReveal(value: any, snapPoints: any, maxParents: any): any
 export function clampIndex(index: any, count: any, wrap?: boolean): number;
 /** Resolve/normalize the layout-affecting props into a stable config object. */
 export function resolveLayoutConfig({ snapPoints, maxVisiblePanels, peek, overlap, }?: {
-    snapPoints: any;
     maxVisiblePanels?: number | undefined;
     peek?: number | undefined;
     overlap?: number | undefined;
@@ -69,16 +68,18 @@ export function getVisibleParentCount({ reveal, activeIndex, config }: {
     config: any;
 }): number;
 /** The left inset (px) applied to the active panel to expose the parent columns. */
-export function getActiveInset({ reveal, activeIndex, config }: {
+export function getActiveInset({ reveal, activeIndex, config, pastPx }: {
     reveal: any;
     activeIndex: any;
     config: any;
+    pastPx?: number | undefined;
 }): number;
 /**
  * Compute the visual descriptor for a single panel.
  *
  * Returns:
- *   role        'active' | 'parent' | 'ahead' | 'hidden'
+ *   role        'active' | 'parent' | 'past' | 'ahead' | 'hidden'
+ *               ('past': the nearest parent, collapsed to its `pastPx` sliver)
  *   left        number (px) or CSS string — left offset from the viewport
  *   width       number (px) or CSS string (e.g. 'calc(100% - Npx)')
  *   opacity     0..1
@@ -91,7 +92,7 @@ export function getActiveInset({ reveal, activeIndex, config }: {
  * and not-yet-revealed 'parent' panels (beyond the current `reveal` depth)
  * are hidden.
  */
-export function getPanelDescriptor({ index, activeIndex, panelCount, reveal, config, isNarrow, narrowBehavior, }: {
+export function getPanelDescriptor({ index, activeIndex, panelCount, reveal, config, isNarrow, narrowBehavior, pastPx, }: {
     index: any;
     activeIndex: any;
     panelCount: any;
@@ -99,6 +100,7 @@ export function getPanelDescriptor({ index, activeIndex, panelCount, reveal, con
     config: any;
     isNarrow?: boolean | undefined;
     narrowBehavior?: string | undefined;
+    pastPx?: number | undefined;
 }): {
     role: string;
     left: string | number;
@@ -110,7 +112,7 @@ export function getPanelDescriptor({ index, activeIndex, panelCount, reveal, con
 } | {
     role: string;
     left: number;
-    width: number;
+    width: any;
     opacity: number;
     zIndex: number;
     interactive: boolean;
@@ -145,7 +147,7 @@ export function blendPanelDescriptors(dFrom: any, dTo: any, t: any, containerWid
  * The closing panel stays solid while it slides, and the panel it closes
  * into sits fully shown underneath it, like a webOS card swipe-back.
  */
-export function getClosePreviewDescriptor({ index, fromIndex, toIndex, progress, containerWidth, panelCount, reveal, config, isNarrow, narrowBehavior, }: {
+export function getClosePreviewDescriptor({ index, fromIndex, toIndex, progress, containerWidth, panelCount, reveal, config, isNarrow, narrowBehavior, pastPx, }: {
     index: any;
     fromIndex: any;
     toIndex: any;
@@ -156,6 +158,7 @@ export function getClosePreviewDescriptor({ index, fromIndex, toIndex, progress,
     config: any;
     isNarrow?: boolean | undefined;
     narrowBehavior?: string | undefined;
+    pastPx?: number | undefined;
 }): {
     left: any;
     width: any;

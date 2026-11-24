@@ -15,7 +15,7 @@ declare function ContentShifter({ children, position, isMenuOpen, menuWidth, men
     isMenuOpen?: boolean | undefined;
     menuWidth?: string | undefined;
     menuHeight?: string | undefined;
-    duration?: number | undefined;
+    duration: any;
     className?: string | undefined;
     style?: {} | undefined;
 }): any;

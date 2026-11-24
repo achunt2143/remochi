@@ -24,5 +24,5 @@ export namespace CALM_FRAMES {
     export { large_1 as large };
 }
 export const CALM_HOLD: 1000;
-export const CALM_FADE: 250;
+export const CALM_FADE: 150;
 import { SPINNERS } from './spinnerFrames';

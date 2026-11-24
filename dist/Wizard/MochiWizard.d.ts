@@ -12,7 +12,7 @@ export default MochiWizard;
  */
 declare function MochiWizard({ steps, step: controlledStep, onComplete, onCancel, onStepChange, completedSteps: completedStepsProp, onCompletedStepsChange, showStepNumbers, allowSkip, className, ...rest }: {
     [x: string]: any;
-    steps?: any[] | undefined;
+    steps?: never[] | undefined;
     step: any;
     onComplete: any;
     onCancel: any;
