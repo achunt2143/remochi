@@ -99,6 +99,41 @@ $mochi-panel-radius: 45px;
   }
 }
 
+// The clue on a peek (Repanel `hint` / `sequence`, drawn only while the stack
+// shows the panel as its right sliver): at the sliver's 16px inset, just
+// under the 64px Header bar whose nameplate the screen edge crops. Label
+// voice (Mochi Bold 12/16 uppercase 0.05em); a sequence's numerals are Mochi
+// Light at the header rung. It is cut to the sliver's visible width.
+.mochi-panel-clue {
+  position: absolute;
+  top: 72px;
+  left: 16px;
+  width: calc(var(--mochi-peek-width, 80px) - 20px);
+  pointer-events: none;
+  color: var(--mochi-text, #1a1a1a);
+  white-space: nowrap;
+
+  .mochi-panel-clue-number {
+    display: block;
+    font-family: "Mochi Light", sans-serif;
+    font-weight: normal;
+    font-size: 36px;
+    line-height: 32px;
+  }
+
+  .mochi-panel-clue-text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: "Mochi Bold", sans-serif;
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+}
+
 // ── FloatingPanel overrides ────────────────────────────────────────────────
 // The waterdrop (--mochi-floating-radius) on all corners; fills its
 // container completely. `fullBleed` is square with no shadow.

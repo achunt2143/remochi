@@ -119,6 +119,21 @@ function ShadowHandle({ panelWidth, panelHeight, edgeWidth }) {
  *                              child but the first (the base of the stack,
  *                              which has nothing behind it to reveal).
  *                              Default: false
+ *   hint      {ReactNode}     The clue shown while this panel is the stack's
+ *                              `upcoming` peek (RepanelStack's right sliver):
+ *                              one short word or number in the label voice,
+ *                              about 8 characters at most ("17", "3 NEW").
+ *                              It must match what opens. Not shown otherwise.
+ *   sequence  {{ index: number, label?: string }}
+ *                              For panels in a sequence (steps, pages, items):
+ *                              the peek shows `index` as Mochi Light numerals
+ *                              (zero-padded to 2, "04") above a short label,
+ *                              instead of `hint`. Not shown otherwise.
+ *   peekLabel {string}        The panel's name for the peek's accessible name
+ *                              ("Open <peekLabel>, <hint>"). Falls back to the
+ *                              Header's `content`, else "Open next panel".
+ *   peeking   {boolean}       Set by RepanelStack while this panel is the
+ *                              right peek; shows the clue. Default: false
  *   className {string}        Extra CSS classes
  *   children  {ReactNode}
  */
@@ -126,6 +141,10 @@ const Repanel = ({
   width     = 100,
   style: variant = 'default',
   handle    = false,
+  hint,
+  sequence,
+  peekLabel, // read by RepanelStack for the peek's name; never drawn or passed on
+  peeking   = false,
   className = '',
   children,
   ...rest
@@ -186,6 +205,18 @@ const Repanel = ({
           background and clips to the panel, so it never covers the bump. */}
       {haloed && panelSize && <ShadowHandle panelWidth={panelSize.w} panelHeight={panelSize.h} edgeWidth={edgeWidth} />}
       <div className="mochi-panel-body">{children}</div>
+      {peeking && (sequence || hint != null) && (
+        <div className="mochi-panel-clue" aria-hidden="true">
+          {sequence ? (
+            <>
+              <span className="mochi-panel-clue-number">{String(sequence.index).padStart(2, '0')}</span>
+              {sequence.label != null && <span className="mochi-panel-clue-text">{sequence.label}</span>}
+            </>
+          ) : (
+            <span className="mochi-panel-clue-text">{hint}</span>
+          )}
+        </div>
+      )}
       {handle && !haloed && (
         <Nubbin
           className="mochi-panel-handle-nubbin"

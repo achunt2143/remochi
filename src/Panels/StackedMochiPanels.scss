@@ -6,6 +6,7 @@
 //       .repanel__panel            one positioned shell per child
 //         .repanel__surface        hosts the child Repanel/FloatingPanel
 //         .repanel__grabber        reveal-depth hitbox (every panel but the first)
+//         .repanel__peek-button    a sliver's door (the past's, or the upcoming panel's)
 //
 // Layout/geometry (left, width, transform, opacity, z-index) is driven by
 // inline styles from stackedPanelsLayout.js. Every revealed panel — active
@@ -211,6 +212,91 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
   }
 
   // ======================================
+  // Peeks — where you came from, where you're going
+  // ======================================
+
+  // A parent column keeps its full width (--repanel-column) however little
+  // of it shows, and the shell crops it on the right, so the left sliver
+  // (keepPast) shows the leading edge of the real panel (its corner, the
+  // start of its nameplate, its rows) rather than a squeezed copy. The crop
+  // is a clip-path, open on the left and top/bottom, so the nubbin and its
+  // hitbox outside the shell still show.
+  &__panel[data-role='parent'],
+  &__panel[data-role='past'] {
+    clip-path: inset(-20px 0 -20px -60px);
+  }
+
+  &__panel[data-role='parent'] > &__surface,
+  &__panel[data-role='past'] > &__surface {
+    right: auto;
+    width: var(--repanel-column, 365px);
+  }
+
+  // The right sliver is a whole panel at the width it will have once open,
+  // set so far right that the screen edge crops it to --repanel-peek-px.
+  // Crisp: full opacity, no blur or dimming. It never goes narrower than a
+  // column, so a Header is cropped, never shrunk.
+  &__panel[data-role='peek'] {
+    min-width: var(--repanel-column, 365px);
+  }
+
+  // The front panel keeps its content clear of the right sliver, as parents
+  // do for the overlap.
+  &[data-peek='true'] &__panel[data-active='true'] > &__surface > .mochi-panel {
+    padding-right: var(--repanel-peek-px, 80px);
+  }
+
+  // Narrow: only the curve shows, so the clue is dropped.
+  &[data-width-class='narrow'] .mochi-panel-clue {
+    display: none;
+  }
+
+  // A sliver is one real button over its visible part, the panel's full
+  // height (well over 44px). Below the grabber (z-index 6), which stays live.
+  &__peek-button {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    width: var(--repanel-peek-px, 80px);
+    min-height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    // A horizontal drag is the gesture, so the browser leaves it to us.
+    touch-action: pan-y;
+    -webkit-appearance: none;
+    appearance: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--mochi-focus-ring, #357099);
+      outline-offset: -2px;
+    }
+  }
+
+  // A new prediction arrives from the right, the way forward goes. A
+  // prediction that is replaced leaves the same way (data-leaving). Opening
+  // is the stack's own left/width move: the same node keeps its Header.
+  &[data-animate='true'] &__panel[data-role='peek'] {
+    animation: repanel-peek-in $repanel-duration $repanel-easing backwards;
+  }
+
+  &[data-animate='true'] &__panel[data-role='peek']:not([data-no-transition='true']) {
+    transition:
+      left $repanel-duration $repanel-easing,
+      width $repanel-duration $repanel-easing,
+      opacity $repanel-duration $repanel-easing,
+      transform $repanel-duration $repanel-easing;
+  }
+
+  &__panel[data-leaving='true'] {
+    transform: translateX(var(--repanel-peek-px, 80px));
+  }
+
+  // ======================================
   // Narrow mode
   // ======================================
 
@@ -235,3 +321,6 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
   }
 }
 
+@keyframes repanel-peek-in {
+  from { transform: translateX(var(--repanel-peek-px, 80px)); }
+}

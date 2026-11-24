@@ -459,6 +459,12 @@ export interface RepanelProps {
   style?: 'default' | 'shadow' | React.CSSProperties;
   /** Draws a nubbin grabber accent at the bottom-left edge. `RepanelStack` sets this on every child but the first. */
   handle?: boolean;
+  /** The clue shown while this panel is `RepanelStack`'s `upcoming` peek: one short word or number, about 8 characters. */
+  hint?: React.ReactNode;
+  /** For panels in a sequence: the peek shows `index` as Mochi Light numerals (zero-padded to 2) above `label`, instead of `hint`. */
+  sequence?: { index: number; label?: string };
+  /** The panel's name for the peek's accessible name ("Open <peekLabel>, <hint>"). Falls back to the Header's `content`. */
+  peekLabel?: string;
   className?: string;
   [key: string]: any;
 }
@@ -505,7 +511,7 @@ export const MochiFloatingPanel: React.FC<FloatingPanelProps>;
  */
 
 /** Reason an active-index change was committed. */
-export type ActiveIndexChangeReason = 'grabber' | 'method';
+export type ActiveIndexChangeReason = 'grabber' | 'method' | 'controls' | 'peek';
 
 /** Reason a reveal change was committed. */
 export type RevealChangeReason = 'grabber' | 'method';
@@ -591,6 +597,15 @@ export interface StackedPanelsProps {
 
   /** Collapse to a narrow layout below `narrowFitWidth`. @default true */
   narrowFit?: boolean;
+  /**
+   * The predicted next panel (one keyed Repanel, or null): it waits as a sliver at the right edge.
+   * Tap, drag left or `next()` calls `onUpcomingOpen`; append the panel (same `key`) to your children.
+   */
+  upcoming?: React.ReactElement | null;
+  /** Called when the `upcoming` sliver is opened. Append that panel to your children (with a controlled `activeIndex`, set it too). */
+  onUpcomingOpen?: (detail: { upcoming: React.ReactElement; reason: string; previousIndex: number; panelCount: number; isNarrow: boolean }) => void;
+  /** Keep the panel you came from as a left sliver when the stack is collapsed to the front panel. @default true */
+  keepPast?: boolean;
   /** Root width (px) at/below which narrow mode activates. @default 768 */
   narrowFitWidth?: number;
   /** Narrow-mode layout. @default 'single' */

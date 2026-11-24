@@ -543,6 +543,12 @@ $mochi-faces: (
   // The longest a Reduced-motion fade may run.
   --mochi-duration-reduced: 150ms;
 
+  // The width of a peek (RepanelStack's slivers, left and right): the corner,
+  // the start of a nameplate and one clue; on a narrow stack only the curve.
+  // Plain px.
+  --mochi-peek-width:        80px;
+  --mochi-peek-width-narrow: 20px;
+
   // The spinner's three shapes: constants from the webOS guide, not for
   // retheming (Pyxis and apps read these as the one source). The drawn
   // Spinner doesn't read them: its frames carry about 40 in-between shades
@@ -739,6 +745,18 @@ $mochi-motion-selectors: list.join((
 @include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel:not([data-no-transition="true"])')) {
   transition-property: opacity !important;
   transition-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+
+// A peek: the sliver fades in place instead of arriving from the right, and
+// a replaced one fades out instead of leaving (Off is covered by the stack's
+// own selector in $mochi-motion-selectors).
+@include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-role="peek"]')) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+@include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-leaving="true"]')) {
+  transform: none !important;
+  opacity: 0 !important;
 }
 
 // Press: no 1.05 scale, no bracket spread, and the bar fades in at full width.

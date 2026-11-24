@@ -202,13 +202,24 @@ function columnStep(config) {
   return Math.max(1, config.peek);
 }
 
+/**
+ * Visible width (px) of the parent at `distance`, given its coverage. With
+ * `pastPx` (keepPast) the nearest parent never goes below that sliver: the
+ * panel you came from stays as a peek instead of leaving at 0 width.
+ */
+function parentStep(distance, coverage, step, pastPx) {
+  if (distance === 1 && pastPx > 0) return pastPx + (step - pastPx) * coverage;
+  return coverage * step;
+}
+
 /** The left inset (px) applied to the active panel to expose the parent columns. */
-export function getActiveInset({ reveal, activeIndex, config }) {
+export function getActiveInset({ reveal, activeIndex, config, pastPx = 0 }) {
   const maxParents = getMaxParents(activeIndex);
   const parentsFloat = getVisibleParentCount({ reveal, activeIndex, config });
   const step = columnStep(config);
+  const past = Math.min(pastPx, step);
   let total = 0;
-  for (let d = 1; d <= maxParents; d++) total += parentCoverage(d, parentsFloat, maxParents) * step;
+  for (let d = 1; d <= maxParents; d++) total += parentStep(d, parentCoverage(d, parentsFloat, maxParents), step, past);
   return total;
 }
 
@@ -221,7 +232,8 @@ function isSingleColumn(isNarrow, narrowBehavior) {
  * Compute the visual descriptor for a single panel.
  *
  * Returns:
- *   role        'active' | 'parent' | 'ahead' | 'hidden'
+ *   role        'active' | 'parent' | 'past' | 'ahead' | 'hidden'
+ *               ('past': the nearest parent, collapsed to its `pastPx` sliver)
  *   left        number (px) or CSS string — left offset from the viewport
  *   width       number (px) or CSS string (e.g. 'calc(100% - Npx)')
  *   opacity     0..1
@@ -242,6 +254,7 @@ export function getPanelDescriptor({
   config,
   isNarrow = false,
   narrowBehavior = 'single',
+  pastPx = 0,
 }) {
   const isActive = index === activeIndex;
 
@@ -250,12 +263,29 @@ export function getPanelDescriptor({
   // layout's 'ahead' role) and stack above it, so moving forward slides the
   // next panel in over the current one and closing slides the closing panel
   // back out to the right, instead of either crossfading in place.
+  // With `pastPx` the panel you came from stays behind it as a sliver, and
+  // the active panel starts where the sliver ends.
+  const step = columnStep(config);
+  const past = Math.min(pastPx, step);
+
   if (isSingleColumn(isNarrow, narrowBehavior)) {
     const ahead = index - activeIndex;
+    const keepsPast = past > 0 && activeIndex > 0;
+    if (keepsPast && ahead === -1) {
+      return {
+        role: 'past',
+        left: 0,
+        width: past + getOverlapPx(config),
+        opacity: 1,
+        zIndex: panelCount - 1,
+        interactive: true,
+        visible: true,
+      };
+    }
     return {
       role: isActive ? 'active' : ahead > 0 ? 'ahead' : 'hidden',
-      left: ahead > 0 ? '100%' : 0,
-      width: '100%',
+      left: ahead > 0 ? '100%' : isActive && keepsPast ? past : 0,
+      width: isActive && keepsPast ? `calc(100% - ${past}px)` : '100%',
       opacity: isActive ? 1 : 0,
       zIndex: ahead >= 0 ? panelCount + 10 + ahead : 0,
       interactive: isActive,
@@ -265,13 +295,14 @@ export function getPanelDescriptor({
 
   const maxParents = getMaxParents(activeIndex);
   const parentsFloat = getVisibleParentCount({ reveal, activeIndex, config });
-  const step = columnStep(config);
 
   // Cumulative width (px) of every shown parent strictly farther than `distance`
   // (i.e. positioned further left of it). Continuous in `reveal` — no jumps.
   const cumStep = (distance) => {
     let total = 0;
-    for (let d = distance + 1; d <= maxParents; d++) total += parentCoverage(d, parentsFloat, maxParents) * step;
+    for (let d = distance + 1; d <= maxParents; d++) {
+      total += parentStep(d, parentCoverage(d, parentsFloat, maxParents), step, past);
+    }
     return total;
   };
 
@@ -296,6 +327,18 @@ export function getPanelDescriptor({
   // next column (see the stylesheet's padding-right on parent panels).
   if (distance > 0) {
     const coverage = parentCoverage(distance, parentsFloat, maxParents);
+    // The nearest parent, collapsed, is the left sliver.
+    if (distance === 1 && past > 0) {
+      return {
+        role: coverage === 0 ? 'past' : 'parent',
+        left: cumStep(distance),
+        width: parentStep(distance, coverage, step, past) + getOverlapPx(config),
+        opacity: 1,
+        zIndex: panelCount - distance,
+        interactive: true,
+        visible: true,
+      };
+    }
     const shown = coverage > 0;
     return {
       role: 'parent',
@@ -380,8 +423,9 @@ export function getClosePreviewDescriptor({
   config,
   isNarrow = false,
   narrowBehavior = 'single',
+  pastPx = 0,
 }) {
-  const layout = { index, panelCount, reveal, config, isNarrow, narrowBehavior };
+  const layout = { index, panelCount, reveal, config, isNarrow, narrowBehavior, pastPx };
   const dFrom = getPanelDescriptor({ ...layout, activeIndex: fromIndex });
   const dTo = getPanelDescriptor({ ...layout, activeIndex: toIndex });
   const d = blendPanelDescriptors(dFrom, dTo, progress, containerWidth);
