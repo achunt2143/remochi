@@ -1,6 +1,7 @@
 import React, { useId, useLayoutEffect, useRef, useState } from 'react';
 import './MochiPanel.scss';
 import { Nubbin, bumpRise } from '../shared/nubbin';
+import Header from '../Headers/Header';
 
 // The grabber is a bump pointing left (see shared/nubbin.jsx), 43px tall
 // with its peak 36px down, so the panel's bottom edge cuts it off just past
@@ -134,6 +135,12 @@ function ShadowHandle({ panelWidth, panelHeight, edgeWidth }) {
  *                              Header's `content`, else "Open next panel".
  *   peeking   {boolean}       Set by RepanelStack while this panel is the
  *                              right peek; shows the clue. Default: false
+ *   door      {boolean}       Set by RepanelStack while this panel is the left
+ *                              sliver (keepPast). A peek (`peeking` or `door`)
+ *                              is a door, not a second panel: only its Header
+ *                              (cropped by the edge) is rendered, and the rest
+ *                              of the content appears, fading in, when the
+ *                              panel becomes the front panel. Default: false
  *   className {string}        Extra CSS classes
  *   children  {ReactNode}
  */
@@ -145,6 +152,7 @@ const Repanel = ({
   sequence,
   peekLabel, // read by RepanelStack for the peek's name; never drawn or passed on
   peeking   = false,
+  door      = false,
   className = '',
   children,
   ...rest
@@ -182,6 +190,17 @@ const Repanel = ({
     setEdgeWidth((prev) => (w > 0 && prev !== w ? w : prev));
   }, [handle]);
 
+  // A door shows only its Header. Children are keyed the same either way
+  // (Children.map), so the Header is the same node when the door opens.
+  const isDoor = peeking || door;
+  const [wasDoor, setWasDoor] = useState(isDoor);
+  const [arrived, setArrived] = useState(false);
+  if (isDoor !== wasDoor) {
+    setWasDoor(isDoor);
+    setArrived(wasDoor && !isDoor);
+  }
+  const shown = React.Children.map(children, (c) => (!isDoor || (React.isValidElement(c) && c.type === Header) ? c : null));
+
   return (
     <div
       {...rest}
@@ -197,6 +216,8 @@ const Repanel = ({
         'mochi-panel',
         `mochi-panel--${resolvedVariant}`,
         handle && 'mochi-panel--handle',
+        isDoor && 'mochi-panel--door',
+        arrived && 'mochi-panel--arrived',
         className,
       ].filter(Boolean).join(' ')}
       style={inlineStyle ? { width: resolvedWidth, ...inlineStyle } : { width: resolvedWidth }}
@@ -204,7 +225,7 @@ const Repanel = ({
       {/* Under the body, like the CSS halo it continues: the body has no
           background and clips to the panel, so it never covers the bump. */}
       {haloed && panelSize && <ShadowHandle panelWidth={panelSize.w} panelHeight={panelSize.h} edgeWidth={edgeWidth} />}
-      <div className="mochi-panel-body">{children}</div>
+      <div className="mochi-panel-body">{shown}</div>
       {peeking && (sequence || hint != null) && (
         <div className="mochi-panel-clue" aria-hidden="true">
           {sequence ? (

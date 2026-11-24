@@ -99,6 +99,17 @@ $mochi-panel-radius: 45px;
   }
 }
 
+// A panel that has been a door (RepanelStack's left sliver or right peek)
+// shows the rest of its content as it becomes the front panel: it fades in on
+// the arrival's easing. The Header was there all along and does not.
+.mochi-panel--arrived > .mochi-panel-body > :not(.mochi-header) {
+  animation: mochi-panel-arrive var(--mochi-duration-stack, 260ms) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1)) backwards;
+}
+
+@keyframes mochi-panel-arrive {
+  from { opacity: 0; }
+}
+
 // The clue on a peek (Repanel `hint` / `sequence`, drawn only while the stack
 // shows the panel as its right sliver): at the sliver's 16px inset, just
 // under the 64px Header bar whose nameplate the screen edge crops. Label

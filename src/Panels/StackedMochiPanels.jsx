@@ -1,8 +1,6 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect, useLayoutEffect } from 'react';
 import './StackedMochiPanels.scss';
-import './StackedMochiPanelsControls.scss';
 import { Repanel } from './Repanel';
-import { MochiButton } from '../Button/MochiButton';
 import Header from '../Headers/Header';
 import { SCREEN_NARROW } from '../shared/screens';
 import { useWidthClass } from '../shared/useWidthClass';
@@ -202,8 +200,6 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
     narrowFit = true,
     narrowFitWidth = SCREEN_NARROW,
     narrowBehavior = 'single',
-    controls = 'auto',
-    onControlsAction,
     upcoming = null,
     onUpcomingOpen,
     keepPast = true,
@@ -267,8 +263,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
   const closeRef = useRef(null);
 
   // ---- Narrow detection (the stack's own width, not the window's) --------
-  // Narrow is up to narrowFitWidth; wide (from SCREEN_WIDE) is what 'auto'
-  // controls key off.
+  // Narrow is up to narrowFitWidth.
   const widthClass = useWidthClass(rootRef, { narrow: narrowFitWidth });
   const isNarrow = narrowFit && widthClass === 'narrow';
   const peekPx = usePeekPx(rootRef, widthClass === 'narrow');
@@ -399,7 +394,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
     [panelCount, upcoming, activeIndex, isNarrow, onUpcomingOpen]
   );
 
-  // Forward is the same path whoever asks (next(), ▶, →, the sliver).
+  // Forward is the same path whoever asks (next(), →, the sliver).
   const goForward = useCallback(
     (reason) => {
       if (peekLive) openUpcoming(reason);
@@ -663,16 +658,6 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
     [activeIndex, commitActiveIndex, goForward]
   );
 
-  // ---- Visible controls: ◀ ▶ do what the gestures do ----------------------
-  const showControls = controls === 'always' || (controls === 'auto' && widthClass === 'wide');
-  const canBack = panelCount > 0 && (wrap ? panelCount > 1 : activeIndex > 0);
-  const canForward = panelCount > 0 && (wrap ? panelCount > 1 : activeIndex < panelCount - 1 || peekLive);
-  const onControl = (action) => () => {
-    if (action === 'back') commitActiveIndex(activeIndex - 1, 'controls');
-    else goForward('controls');
-    onControlsAction?.(action);
-  };
-
   // ---- Render ------------------------------------------------------------
   // The right sliver(s): the live prediction, and any replaced one on its
   // way out. Each is the panel's real width (what it will have once open),
@@ -713,7 +698,6 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           aria-hidden={gone ? true : undefined}
         >
           <div className="repanel__surface" ref={(el) => { if (el) el.inert = true; }}>{content}</div>
-          {false}
           {!gone && <PeekSliver side="future" label={label} onActivate={openUpcoming} />}
         </div>
       );
@@ -780,6 +764,12 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
             pointerEvents: d.interactive ? 'auto' : 'none',
           };
 
+          // The right peek sits beside the front panel, not over it: the
+          // front panel is laid out up to the peek's left edge.
+          if (peekLive && !closeDrag && d.role === 'active') {
+            style.width = `calc(${typeof d.width === 'number' ? `${d.width}px` : d.width} - ${peekPx}px)`;
+          }
+
           // The wholly first child (array index 0, the base of the stack —
           // nothing behind it to reveal) never gets a nubbin grabber. This
           // is fixed to the child's position in the `children` array, not
@@ -790,11 +780,16 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           // Repanel.jsx / MochiPanel.scss) — only a Repanel child knows how
           // to render it, so it's only cloned onto those, and never onto
           // the first child.
-          const content =
-            showGrabber && child.type === Repanel ? React.cloneElement(child, { handle: true }) : child;
-
           // The nearest parent, collapsed: the left sliver, a button back to it.
+          // Its Repanel shows only its surface, scallop and Header (`door`).
           const isPast = !closeDrag && d.role === 'past';
+          const doorProps = isPast && child.type === Repanel ? { door: true } : null;
+          const content =
+            showGrabber && child.type === Repanel
+              ? React.cloneElement(child, { handle: true, ...doorProps })
+              : doorProps
+                ? React.cloneElement(child, doorProps)
+                : child;
           const pastName = isPast ? peekPanelName(child) : null;
 
           return (
@@ -843,17 +838,6 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           );
         }), ...peekShells]}
       </div>
-
-      {showControls && (
-        <div className="repanel__controls">
-          <MochiButton aria-label="Back" disabled={!canBack} onClick={onControl('back')}>
-            ◀
-          </MochiButton>
-          <MochiButton aria-label="Forward" disabled={!canForward} onClick={onControl('forward')}>
-            ▶
-          </MochiButton>
-        </div>
-      )}
     </div>
   );
 });

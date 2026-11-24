@@ -23,6 +23,10 @@
 // is the "diff panels are both active and navigable" webOS/Mochi email-app
 // look, not a single dominant panel with dimmed, non-interactive spines.
 //
+// The collapsed past sliver (keepPast) and the right peek sit BESIDE the
+// active panel, never under it: only a revealed parent column tucks beneath
+// the next one.
+//
 // Parent columns show a fixed `peek` width, and each one also runs an
 // `overlap` distance further right, tucked beneath the next column — as in
 // Mochi's Panels.less (320px panes plus a 45px overlap), so the next
@@ -275,7 +279,8 @@ export function getPanelDescriptor({
       return {
         role: 'past',
         left: 0,
-        width: past + getOverlapPx(config),
+        // Beside the active panel, not under it: no overlap.
+        width: past,
         opacity: 1,
         zIndex: panelCount - 1,
         interactive: true,
@@ -332,7 +337,9 @@ export function getPanelDescriptor({
       return {
         role: coverage === 0 ? 'past' : 'parent',
         left: cumStep(distance),
-        width: parentStep(distance, coverage, step, past) + getOverlapPx(config),
+        // The overlap grows in with the column, so the collapsed sliver
+        // (coverage 0) sits beside the active panel rather than under it.
+        width: parentStep(distance, coverage, step, past) + getOverlapPx(config) * coverage,
         opacity: 1,
         zIndex: panelCount - distance,
         interactive: true,

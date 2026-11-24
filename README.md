@@ -20,7 +20,7 @@ See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for what's new in the latest release,
   - Popups with dynamic nubbin styling and positioning
   - Spinners (light and dark variants, small and large sizes), drawn in code
   - Headers, subheaders and labels, the type ladder from display down to section labels
-  - Stacked panels with a peek of the past on the left, the predicted next panel on the right, and visible ◀ ▶ controls on wide screens
+  - Stacked panels with a peek of the past on the left, the predicted next panel on the right
 
 ## Theming
 

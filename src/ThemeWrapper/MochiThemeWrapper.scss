@@ -760,6 +760,7 @@ $mochi-fade-selectors: (
 // Everything with a transition or keyframe, for Off.
 $mochi-motion-selectors: list.join((
   '.repanel[data-animate="true"] .repanel__panel:not([data-no-transition="true"])',
+  '.mochi-panel--arrived > .mochi-panel-body > :not(.mochi-header)',
   '.mochi-dialog-overlay',
   '.mochi-dialog',
   '.mochi-contextual-popup',
@@ -812,6 +813,12 @@ $mochi-motion-selectors: list.join((
 // panel would snap. Arriving panels fade the same way.
 @include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-role="active"]:not([data-no-transition="true"])')) {
   animation-name: mochi-fade-open !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: ease !important;
+}
+// The body of a panel that was a door fades in, shorter (Off is covered by
+// $mochi-motion-selectors).
+@include mochi-motion('reduced', ('.mochi-panel--arrived > .mochi-panel-body > :not(.mochi-header)')) {
   animation-duration: var(--mochi-duration-reduced, 150ms) !important;
   animation-timing-function: ease !important;
 }

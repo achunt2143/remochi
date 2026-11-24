@@ -287,6 +287,13 @@ Unchanged by the update. All in `src/Panels/`:
 6. Each sliver is a `<button>`, at least 44 px tall, named by its
    destination, after the panel's content in tab order.
 7. `--mochi-peek-width` (80 px) and `--mochi-peek-width-narrow` (20 px).
+8. A peek is a door, not a second panel. The right peek renders only its
+   surface, scallop, cropped Header and the one clue (in clear space under
+   the Header); the left sliver renders its surface, scallop and the start
+   of its Header. On a narrow stack both are 20 px of surface and scallop.
+   The front panel is laid out between the slivers, so no content sits
+   under a sliver and none of a sliver sits under the front panel. The
+   body appears as the peek becomes the front panel.
 
 Under Reduced, a peek opening is a fade in place: no slide, and the
 nameplate is simply there.
@@ -303,9 +310,9 @@ Unchanged by the update.
 - `useWidthClass(ref)` (new, `src/shared/`): a ResizeObserver returning
   `'narrow' | 'medium' | 'wide'`. RepanelStack switches on its own width,
   not the window's.
-- RepanelStack `controls` (`'auto' | 'always' | 'never'`): caps Buttons
-  ◀ ▶ at the bottom right, shown when wide on `'auto'`. They also give
-  narrow screens a keyboard way to close a panel.
+- RepanelStack stack controls (`controls`, ◀ ▶ caps Buttons) were dropped
+  by the user's call. The visible equals are the left sliver (back), the
+  right peek (forward) and the keyboard-operable grabber (Enter / Space).
 
 ---
 
@@ -351,7 +358,7 @@ Wizard the same way.
   remove it in 0.7.
 - **Types**: `Label`, `Header.size`, `ThemeWrapper.motion` / `contrast` /
   `transparency` / `ground`, `FloatingPanel.fullBleed`,
-  `RepanelStack.upcoming` / `onUpcomingOpen` / `keepPast` / `controls`,
+  `RepanelStack.upcoming` / `onUpcomingOpen` / `keepPast`,
   `Repanel.hint` / `sequence`, `useWidthClass`, `waterdropRadius`,
   `SCREEN_*`.
 - **Ground.** `--mochi-vignette`, opt-in through `ThemeWrapper
@@ -398,7 +405,7 @@ run long.
 5. The Mochi pane (section 1), then signature corners (section 2). Both
    change `nubbin.jsx`, so they go in this order.
 6. Type (section 3). Pointed (section 7).
-7. Width tokens, `useWidthClass` and controls (section 9).
+7. Width tokens and `useWidthClass` (section 9).
 8. Peeks (section 8).
 9. Types, docs, release notes. Rebuild `dist`. Re-sync the design system.
 
@@ -441,3 +448,6 @@ There is no unit test suite (`npm test` is a stub).
    apps get them without a host. Otherwise keep the guide's host-only
    approach through `tokens`.
 6. **`feat/panel-types`:** drop it (recommended)?
+7. **Stack controls** (`controls`, ◀ ▶): dropped by the user's call. The
+   visible equals are the left sliver (back), the right peek (forward) and
+   the keyboard-operable grabber.

@@ -8,6 +8,8 @@
 //         .repanel__grabber        reveal-depth hitbox (every panel but the first)
 //         .repanel__peek-button    a sliver's door (the past's, or the upcoming panel's)
 //
+// The slivers sit beside the front panel, never over or under it.
+//
 // Layout/geometry (left, width, transform, opacity, z-index) is driven by
 // inline styles from stackedPanelsLayout.js. Every revealed panel — active
 // or parent — is fully opaque and interactive; there is no dimming/scrim.
@@ -240,15 +242,19 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
     min-width: var(--repanel-column, 365px);
   }
 
-  // The front panel keeps its content clear of the right sliver, as parents
-  // do for the overlap.
-  &[data-peek='true'] &__panel[data-active='true'] > &__surface > .mochi-panel {
-    padding-right: var(--repanel-peek-px, 80px);
-  }
-
-  // Narrow: only the curve shows, so the clue is dropped.
+  // A peek is a door, not a second panel, and both slivers sit BESIDE the
+  // front panel: the stack lays the front panel out between them (see
+  // StackedMochiPanels.jsx and stackedPanelsLayout.js), so no content sits
+  // under a sliver and none of a sliver sits under the front panel. The
+  // Repanel renders only its Header while it is a door (its `door` and
+  // `peeking` props), so no body text shows on either.
+  //
+  // Narrow: only the surface and its curve show, so the Header (hidden, not
+  // removed, so it stays the same node) and the clue are dropped.
+  &[data-width-class='narrow'] &__panel[data-role='past'] .mochi-panel-body,
+  &[data-width-class='narrow'] &__panel[data-role='peek'] .mochi-panel-body,
   &[data-width-class='narrow'] .mochi-panel-clue {
-    display: none;
+    visibility: hidden;
   }
 
   // A sliver is one real button over its visible part, the panel's full
