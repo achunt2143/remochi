@@ -549,6 +549,13 @@ $mochi-faces: (
   --mochi-peek-width:        80px;
   --mochi-peek-width-narrow: 20px;
 
+  // The three screen widths (narrow up to 768, wide from 1280, medium
+  // between), mirroring SCREEN_NARROW / SCREEN_WIDE in src/shared/screens.js.
+  // Media queries can't read custom properties, so stylesheets repeat the
+  // number and JS reads the constants; these are for hosts and inspection.
+  --mochi-screen-narrow: 768px;
+  --mochi-screen-wide:   1280px;
+
   // The spinner's three shapes: constants from the webOS guide, not for
   // retheming (Pyxis and apps read these as the one source). The drawn
   // Spinner doesn't read them: its frames carry about 40 in-between shades
@@ -710,6 +717,12 @@ $mochi-fade-selectors: (
   '.mochi-list-item',
   '.mochi-item',
   '.mochi-gridlist-imageitem',
+  '.mochi-input',
+  '.mochi-textarea',
+  '.mochi-richtext',
+  '.mochi-date-cell',
+  '.mochi-dialog-close',
+  '.mochi-video-controls',
 );
 
 // Everything with a transition or keyframe, for Off.
@@ -730,9 +743,17 @@ $mochi-motion-selectors: list.join((
   '.mochi-button-bar',
   '.mochi-view-select-button-item .mochi-button-base',
   '.mochi-dropdown-arrow',
+  '.mochi-video-timeline > *',
+  '.mochi-input-decorator > textarea',
 ), $mochi-fade-selectors, comma);
 
 @keyframes mochi-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+// The same fade under another name, so an element whose animation-name
+// changes from one to the other (a peek becoming the active panel) restarts it.
+@keyframes mochi-fade-open {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
@@ -753,6 +774,14 @@ $mochi-motion-selectors: list.join((
 @include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-role="peek"]')) {
   animation-name: mochi-fade-in !important;
   animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+// Opening a peek (it becomes the active panel, same node) fades in place:
+// the stack's left/width move is cut under Reduced, so without this the
+// panel would snap. Arriving panels fade the same way.
+@include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-role="active"]:not([data-no-transition="true"])')) {
+  animation-name: mochi-fade-open !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: ease !important;
 }
 @include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-leaving="true"]')) {
   transform: none !important;
@@ -781,6 +810,8 @@ $mochi-motion-selectors: list.join((
   '.mochi-button-bar',
   '.mochi-view-select-button-item .mochi-button-base',
   '.mochi-dropdown-arrow',
+  '.mochi-video-timeline > *',
+  '.mochi-input-decorator > textarea',
 )) {
   transition: none !important;
 }

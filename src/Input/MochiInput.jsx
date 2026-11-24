@@ -1,7 +1,10 @@
 import styled from "styled-components";
 
 export const MochiInput = styled.input.attrs(props => ({
-  disabled: props.disabled
+  disabled: props.disabled,
+  // A stable hook for the motion modes (styled-components joins this with
+  // any className the caller passes).
+  className: 'mochi-input'
 }))`
   background: var(--mochi-field-bg, #fff);
   color: var(--mochi-field-text, #1a1a1a);
