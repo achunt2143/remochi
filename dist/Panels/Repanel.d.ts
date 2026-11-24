@@ -35,10 +35,16 @@
  *                              Header's `content`, else "Open next panel".
  *   peeking   {boolean}       Set by RepanelStack while this panel is the
  *                              right peek; shows the clue. Default: false
+ *   door      {boolean}       Set by RepanelStack while this panel is the left
+ *                              sliver (keepPast). A peek (`peeking` or `door`)
+ *                              is a door, not a second panel: only its Header
+ *                              (cropped by the edge) is rendered, and the rest
+ *                              of the content appears, fading in, when the
+ *                              panel becomes the front panel. Default: false
  *   className {string}        Extra CSS classes
  *   children  {ReactNode}
  */
-export function Repanel({ width, style: variant, handle, hint, sequence, peekLabel, peeking, className, children, ...rest }: {
+export function Repanel({ width, style: variant, handle, hint, sequence, peekLabel, peeking, door, className, children, ...rest }: {
     [x: string]: any;
     width?: number | undefined;
     style?: string | undefined;
@@ -47,6 +53,7 @@ export function Repanel({ width, style: variant, handle, hint, sequence, peekLab
     sequence: any;
     peekLabel: any;
     peeking?: boolean | undefined;
+    door?: boolean | undefined;
     className?: string | undefined;
     children: any;
 }): any;

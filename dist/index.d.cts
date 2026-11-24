@@ -495,6 +495,8 @@ interface RepanelProps {
   sequence?: { index: number; label?: string };
   /** The panel's name for the peek's accessible name ("Open <peekLabel>, <hint>"). Falls back to the Header's `content`. */
   peekLabel?: string;
+  /** Set by `RepanelStack` while this panel is the left sliver: only its Header is rendered, like a peek. */
+  door?: boolean;
   className?: string;
   [key: string]: any;
 }
@@ -543,7 +545,7 @@ declare const MochiFloatingPanel: React.FC<FloatingPanelProps>;
  */
 
 /** Reason an active-index change was committed. */
-type ActiveIndexChangeReason = 'grabber' | 'method' | 'controls' | 'peek';
+type ActiveIndexChangeReason = 'grabber' | 'method' | 'peek';
 
 /** Reason a reveal change was committed. */
 type RevealChangeReason = 'grabber' | 'method';
@@ -638,14 +640,6 @@ interface StackedPanelsProps {
   onUpcomingOpen?: (detail: { upcoming: React.ReactElement; reason: string; previousIndex: number; panelCount: number; isNarrow: boolean }) => void;
   /** Keep the panel you came from as a left sliver when the stack is collapsed to the front panel. @default true */
   keepPast?: boolean;
-  /**
-   * Visible ◀ ▶ caps Buttons at the bottom right that do what the gestures do:
-   * 'auto' shows them when the stack's own width is wide (1280px+), 'always'
-   * and 'never' force them. @default 'auto'
-   */
-  controls?: 'auto' | 'always' | 'never';
-  /** Called after a ◀ ▶ control is used. The stack has already moved (or called `onActiveIndexChange` / `onUpcomingOpen`). */
-  onControlsAction?: (action: 'back' | 'forward') => void;
   /** Root width (px) at/below which narrow mode activates. @default 768 */
   narrowFitWidth?: number;
   /** Narrow-mode layout. @default 'single' */
