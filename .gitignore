@@ -3,3 +3,4 @@
 *.tgz
 # nubbin-diff build output
 /scripts/nubbin-diff/out
+/scripts/spinner-diff/out
