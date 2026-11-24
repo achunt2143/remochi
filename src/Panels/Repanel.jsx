@@ -49,8 +49,9 @@ function ShadowHandle({ panelWidth, panelHeight }) {
   for (let u = 0; u <= HANDLE_LENGTH; u++) edge.push(`${(20 - bumpRise(u)).toFixed(2)},${bump + u}`);
   const outline = `M20,${top}L${edge.join('L')}L${right},${height}L${right},${top}Z`;
   const fadeOut = [
-    `linear-gradient(to left, transparent, #000 ${fade}px)`,
-    `linear-gradient(to bottom, transparent, #000 ${fade}px)`,
+    // Mask alpha only; the colour is never painted.
+    `linear-gradient(to left, transparent, #000 ${fade}px)`, // check-tokens: allow
+    `linear-gradient(to bottom, transparent, #000 ${fade}px)`, // check-tokens: allow
   ].join(', ');
   return (
     <svg

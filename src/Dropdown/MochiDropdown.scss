@@ -95,7 +95,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--mochi-primary, #4a8bc2);
+      outline: 2px solid var(--mochi-focus-ring, #357099);
       outline-offset: 1px;
     }
   }
@@ -138,14 +138,15 @@
       background: var(--mochi-hover);
     }
 
+    // Tint plus a ✓ in ink: the glyph, not the colour, says "selected".
     &.selected {
       background: var(--mochi-primary-soft);
-      color: var(--mochi-primary);
+      color: var(--mochi-text);
     }
   }
 
   &-check {
-    color: var(--mochi-primary);
+    color: currentColor;
     font-weight: 600;
   }
 

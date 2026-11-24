@@ -37,7 +37,7 @@ const PAIRS = [
   { fg: '--color-text-secondary', bg: '--color-surface', theme: 'both', min: 4.5, note: 'secondary text on surface' },
   { fg: '--mochi-button-text', bg: '--color-background', theme: 'both', min: 4.5, note: 'button label' },
   { fg: '--mochi-field-text', bg: '--mochi-field-bg', theme: 'both', min: 4.5, note: 'field text' },
-  { fg: '--color-primary', bg: '--color-surface', theme: 'light', min: 4.5, note: 'primary text on surface (3.64)', known: true },
+  { fg: '--color-primary', bg: '--color-surface', theme: 'light', min: 4.5, note: 'primary text on surface' },
   { fg: '--color-primary', bg: '--color-surface', theme: 'dark', min: 4.5, note: 'primary text on surface' },
 ];
 // added in phase B: live already, they SKIP (missing token) until the token exists.

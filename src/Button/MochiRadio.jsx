@@ -9,7 +9,7 @@ const MochiRadioLabel = styled.label`
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
   font-size: 1.08rem;
   font-style: italic;
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-text, #1a1a1a);
   padding: 6px 10px;
   opacity: ${({ disabled }) => (disabled ? "var(--mochi-disabled-opacity, 0.4)" : 1)};
   user-select: none;
@@ -36,8 +36,8 @@ const MochiRadioOuter = styled.span`
   background: ${({ $checked, disabled }) =>
     disabled
       ? $checked
-        ? "var(--mochi-accent-soft, var(--mochi-accent, var(--mochi-selected-soft, #ffdb86)))"
-        : "var(--mochi-selected-soft, #ffdb86)"
+        ? "var(--mochi-accent-soft, var(--mochi-accent, var(--mochi-selected-soft, rgba(255, 184, 13, 0.35))))"
+        : "var(--mochi-selected-soft, rgba(255, 184, 13, 0.35))"
       : $checked
       ? "var(--mochi-accent, var(--mochi-selected, #ffb80d))"
       : "var(--mochi-mark, #fff)"};
@@ -61,9 +61,9 @@ const MochiRadioOuter = styled.span`
   border: ${BORDER}px solid
     ${({ $checked, disabled }) =>
       disabled
-        ? "var(--mochi-border, #ddd)"
+        ? "var(--mochi-border, rgba(0, 0, 0, 0.12))"
         : $checked
-        ? "var(--mochi-text-muted, #a0a0a0)"
+        ? "var(--mochi-text-muted, #555555)"
         : "var(--mochi-toggle-track, #646464)"};
 `;
 

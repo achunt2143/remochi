@@ -33,9 +33,10 @@
     font-size: 10pt;
     text-transform: uppercase;
     padding: 10px;
-    /* #fff on a dark gradient is intentional — image caption always sits on a dark overlay */
-    color: #fff;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+    /* White on a dark gradient is intentional — image caption always sits on a
+       dark overlay; .7 keeps it at 7:1 even over a white photo. */
+    color: var(--mochi-overlay-ink, #ffffff);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -43,11 +44,10 @@
   }
 
   &.selected {
-    background: var(--mochi-primary);
+    background: var(--mochi-accent, #69cdff);
     padding: 3px;
-    box-shadow: 0 0 0 3px var(--mochi-primary);
     box-shadow:
-      0 0 0 3px var(--mochi-primary),
+      0 0 0 3px var(--mochi-accent, #69cdff),
       0 2px 8px var(--mochi-shadow, rgba(0, 0, 0, 0.15));
 
     img {
@@ -56,7 +56,7 @@
   }
 
   &:focus {
-    outline: 2px solid var(--mochi-primary);
+    outline: 2px solid var(--mochi-focus-ring, #357099);
     outline-offset: 2px;
   }
 

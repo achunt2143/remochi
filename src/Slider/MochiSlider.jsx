@@ -100,7 +100,7 @@ const PopupText = styled.div`
   top: -45px;
   transform: translate(calc(-10% + ${BUBBLE_W / 2}px - 50%), 0);
   width: max-content;
-  color: #fff;
+  color: #fff; /* check-tokens: allow — Mochi's own white-on-#69cdff bubble */
   font-size: 1rem;
   font-weight: 600;
   line-height: ${BUBBLE_H}px;

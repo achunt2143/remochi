@@ -13,8 +13,8 @@ import styled from "styled-components";
 const colorMap = {
   blue:   "var(--mochi-accent, #69cdff)",
   yellow: "var(--mochi-selected, #ffb80d)",
-  red:    "var(--mochi-error, #d32f2f)",
-  green:  "var(--mochi-success, #4caf50)",
+  red:    "var(--mochi-error, #c62828)",
+  green:  "var(--mochi-success, #388e3c)",
 };
 
 const Container = styled.div`

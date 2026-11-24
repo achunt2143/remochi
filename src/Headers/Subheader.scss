@@ -26,3 +26,10 @@
     min-width: 0;
   }
 }
+
+// Inside a panel the muted ink is the panel's own (the page-level muted grey
+// is under 4.5:1 on a dark panel).
+.mochi-panel .mochi-subheader,
+.mochi-panel .mochi-subheader .mochi-subheader-content {
+  color: var(--mochi-panel-text-muted, var(--mochi-text-muted, #555555));
+}

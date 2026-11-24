@@ -63,7 +63,7 @@ const MochiNumberInput = ({
       style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px', ...style }}
     >
       {label && (
-        <label style={{ fontSize: '0.9rem', color: 'var(--mochi-text-muted, #888)' }}>
+        <label style={{ fontSize: '0.9rem', color: 'var(--mochi-text-muted, #555555)' }}>
           {label}
         </label>
       )}
@@ -92,7 +92,7 @@ const MochiNumberInput = ({
         />
 
         {unit && (
-          <span style={{ color: 'var(--mochi-text-muted, #888)', fontSize: '0.9rem' }}>
+          <span style={{ color: 'var(--mochi-text-muted, #555555)', fontSize: '0.9rem' }}>
             {unit}
           </span>
         )}

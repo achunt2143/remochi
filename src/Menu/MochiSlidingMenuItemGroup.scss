@@ -3,27 +3,12 @@
 // ============================================================
 
 .mochi-sliding-menu-item-group {
-  --group-label-color:   var(--color-text-secondary, #666666);
-  --group-divider-color: var(--color-border, #e5e7eb);
+  --group-label-color:   var(--mochi-text-muted, #555555);
+  --group-divider-color: var(--mochi-border, rgba(0, 0, 0, 0.12));
 
   padding: 12px 0;
   display: flex;
   flex-direction: column;
-}
-
-// Dark overrides
-[data-mochi-theme='dark'] .mochi-sliding-menu-item-group,
-.mochi-theme-dark .mochi-sliding-menu-item-group {
-  --group-label-color:   #999999;
-  --group-divider-color: #444444;
-}
-
-// OS dark mode only when no ThemeWrapper has set a theme
-@media (prefers-color-scheme: dark) {
-  :root:not([data-mochi-theme]) .mochi-sliding-menu-item-group {
-    --group-label-color:   #999999;
-    --group-divider-color: #444444;
-  }
 }
 
 .mochi-sliding-menu-item-group-label {

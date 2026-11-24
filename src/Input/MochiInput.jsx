@@ -4,8 +4,8 @@ export const MochiInput = styled.input.attrs(props => ({
   disabled: props.disabled
 }))`
   background: var(--mochi-field-bg, #fff);
-  color: var(--mochi-field-text, #444);
-  border: 2px solid var(--mochi-field-border, #ccc);
+  color: var(--mochi-field-text, #1a1a1a);
+  border: 2px solid var(--mochi-field-border, rgba(0, 0, 0, 0.12));
   border-radius: var(--mochi-corner-field, 24px);
   font-size: 1.13rem;
   padding: 8px 22px;
@@ -21,12 +21,12 @@ export const MochiInput = styled.input.attrs(props => ({
   &:focus {
     border-color: var(--mochi-accent, #69cdff);
     background: var(--mochi-field-bg, #fff);
-    color: var(--mochi-field-text, #222);
+    color: var(--mochi-field-text, #1a1a1a);
     box-shadow: 0 0 0 3px var(--mochi-accent-soft, rgba(105,205,255,0.3));
   }
 
   &::placeholder {
-    color: var(--mochi-field-placeholder, #b3b3b3);
+    color: var(--mochi-field-placeholder, #888888);
     font-style: italic;
     opacity: 1;
   }

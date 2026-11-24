@@ -119,13 +119,13 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
 
         // Thin, theme-aware scrollbar.
         scrollbar-width: thin;
-        scrollbar-color: var(--mochi-border, #cccccc) transparent;
+        scrollbar-color: var(--mochi-border, rgba(0, 0, 0, 0.12)) transparent;
 
         &::-webkit-scrollbar {
           width: 8px;
         }
         &::-webkit-scrollbar-thumb {
-          background: var(--mochi-border, #cccccc);
+          background: var(--mochi-border, rgba(0, 0, 0, 0.12));
           border-radius: 6px;
         }
       }
@@ -176,7 +176,7 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
     outline: none;
 
     &:focus-visible {
-      outline: 2px solid var(--mochi-primary, #2f6fed);
+      outline: 2px solid var(--mochi-focus-ring, #357099);
       outline-offset: 2px;
       border-radius: 10px;
     }

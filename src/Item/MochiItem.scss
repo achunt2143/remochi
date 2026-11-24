@@ -36,11 +36,11 @@
   }
 
   &.selected {
-    background: var(--mochi-primary-soft);
-    border-color: var(--mochi-primary);
+    // Tint only, no outline; the bold title is the cue that survives greyscale.
+    background: var(--mochi-accent-soft, rgba(105, 205, 255, 0.15));
 
     .mochi-item-title {
-      color: var(--mochi-primary);
+      font-weight: 700;
     }
   }
 
@@ -93,7 +93,7 @@
   &-title {
     color: var(--mochi-text);
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;

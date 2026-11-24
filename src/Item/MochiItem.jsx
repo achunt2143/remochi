@@ -39,6 +39,7 @@ const MochiItem = ({
       } ${hoverable ? 'hoverable' : ''} ${onClick ? 'clickable' : ''} ${className}`}
       onClick={handleClick}
       role={onClick ? 'button' : undefined}
+      aria-pressed={onClick ? Boolean(selected) : undefined}
       tabIndex={onClick && !disabled ? 0 : undefined}
       onKeyDown={(e) => {
         userOnKeyDown?.(e);

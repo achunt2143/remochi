@@ -8,13 +8,20 @@ import './Badge.scss';
 // amber --mochi-selected accent (same as Radio/Toggle/Checkbox's checked
 // state), error/danger match --mochi-error (same as the warning Button).
 const VARIANT_COLORS = {
-  default: 'var(--mochi-primary, #69cdff)',
-  success: 'var(--mochi-success, #4caf50)',
+  default: 'var(--mochi-primary, #357099)',
+  success: 'var(--mochi-success, #388e3c)',
   warning: 'var(--mochi-selected, #ffb80d)',
-  error:   'var(--mochi-error, #f44336)',
-  danger:  'var(--mochi-error, #f44336)',
-  info:    'var(--mochi-info, #2196f3)',
+  error:   'var(--mochi-error, #c62828)',
+  danger:  'var(--mochi-error, #c62828)',
+  info:    'var(--mochi-info, #1565c0)',
 };
+
+// Default label ink: white, except on the amber warning fill where white is
+// 1.73:1 — that gets --mochi-on-selected-ink (#404040).
+const VARIANT_INK = {
+  warning: 'var(--mochi-on-selected-ink, #404040)',
+};
+const DEFAULT_INK = 'var(--mochi-primary-text, #ffffff)';
 
 /**
  * MochiBadge — faithful React port of mochi.Badge.
@@ -34,7 +41,7 @@ const VARIANT_COLORS = {
  *   variant    {string}         'default'|'success'|'warning'|'error'|'danger'|'info'
  *   count      {number}         If provided, renders a count pill after the label
  *   background {string}         Override background color (overrides variant)
- *   color      {string}         Text color (default: '#ffffff')
+ *   color      {string}         Text color (default: white; dark on the warning variant)
  */
 const Badge = ({
   children,
@@ -42,7 +49,7 @@ const Badge = ({
   variant    = 'default',
   count,
   background,
-  color      = '#ffffff',
+  color,
   className  = '',
   ...rest
 }) => {
@@ -62,7 +69,7 @@ const Badge = ({
     <div {...rest} className={['mochi-badge', className].filter(Boolean).join(' ')}>
       <div
         className={innerClass}
-        style={{ background: bg, color }}
+        style={{ background: bg, color: color || VARIANT_INK[variant] || DEFAULT_INK }}
       >
         {label}
         {count !== undefined && (

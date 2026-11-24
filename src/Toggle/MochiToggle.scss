@@ -35,7 +35,7 @@
 
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px var(--mochi-accent-soft, var(--mochi-selected-soft, rgba(255, 184, 13, 0.45)));
+    box-shadow: 0 0 0 3px var(--mochi-focus-ring, #357099);
   }
 
   &.disabled {
@@ -104,7 +104,7 @@
 // grey doesn't read well against amber, unlike the knob's darker shade.
 // The "off" label stays plain white in both themes.
 :root[data-mochi-theme='dark'] .mochi-toggle-content-on {
-  color: var(--mochi-toggle-knob, #404040);
+  color: var(--mochi-on-selected-ink, #404040);
 }
 
 /* Off label: right side, padding matching original margin: 0 0 -24px 24px; padding: 0 4px 0 2px */

@@ -63,8 +63,8 @@ const MochiPagination = ({
           ) : (
             <MochiButton
               key={page}
-              // 'dropdown' type uses the primary colour underline to mark the active page
-              type={page === currentPage ? 'dropdown' : 'normal'}
+              // `active` holds the Button's accent bar under the current page
+              className={page === currentPage ? 'active mochi-pagination-current' : undefined}
               onClick={() => go(page)}
               aria-label={`Page ${page}`}
               aria-current={page === currentPage ? 'page' : undefined}

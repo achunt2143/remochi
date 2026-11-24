@@ -75,7 +75,7 @@ const MochiDropdown = React.forwardRef(({
         <span className="mochi-dropdown-value">
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <span className={`mochi-dropdown-arrow ${isOpen ? 'open' : ''}`}>&#9660;</span>
+        <span className={`mochi-dropdown-arrow ${isOpen ? 'open' : ''}`}>{'\u25BC'}</span>
       </div>
 
       {/* mochi.Menu equivalent — contextual popup portal */}
@@ -108,6 +108,7 @@ const MochiDropdown = React.forwardRef(({
               aria-selected={isSelected}
               onClick={() => handleSelect(option)}
             >
+              {isSelected && <span className="mochi-menu-item-check" aria-hidden="true">✓</span>}
               {option.label}
             </div>
           );

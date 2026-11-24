@@ -4,7 +4,7 @@
   position: relative;
   display: inline-block;
   width: 100%;
-  background: #000;
+  background: var(--mochi-media-bg, #000000);
   border-radius: var(--mochi-radius, 8px);
   overflow: hidden;
 
@@ -47,7 +47,7 @@
 
 // ── MochiButton overrides inside the controls bar ────────────────────────────
 .mochi-video-btn {
-  color: #fff !important;
+  color: var(--mochi-overlay-ink, #ffffff) !important;
   padding: 0 4px;
 
   svg {
@@ -93,7 +93,7 @@
 // ── Time readout ──────────────────────────────────────────────────────────────
 .mochi-video-time {
   font-size: 0.78rem;
-  color: #fff;
+  color: var(--mochi-overlay-ink, #ffffff);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;

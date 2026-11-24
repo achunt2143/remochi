@@ -27,9 +27,9 @@ const Checkbox = ({
   // in Checkbox.scss) is the dark --mochi-toggle-track instead, so
   // unchecked reads as a dark ring around a light-grey fill, same pairing
   // Radio uses.
-  colorInactive = 'var(--mochi-mark, #fff)',
+  colorInactive = 'var(--mochi-mark, #ffffff)',
   colorActiveDisabled = 'var(--mochi-accent, var(--mochi-selected, #ffb80d))',
-  colorInactiveDisabled = '#fff',
+  colorInactiveDisabled = 'var(--mochi-mark, #ffffff)',
   className = '',
   style: styleProp,
   onClick: userOnClick,

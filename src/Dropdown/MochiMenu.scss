@@ -28,11 +28,11 @@
 .mochi-menu-scroller {
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--mochi-border, #ddd) transparent;
+  scrollbar-color: var(--mochi-border, rgba(0, 0, 0, 0.12)) transparent;
 
   &::-webkit-scrollbar        { width: 6px; }
   &::-webkit-scrollbar-track  { background: transparent; }
-  &::-webkit-scrollbar-thumb  { background: var(--mochi-border, #ddd); border-radius: 3px; }
+  &::-webkit-scrollbar-thumb  { background: var(--mochi-border, rgba(0, 0, 0, 0.12)); border-radius: 3px; }
 }
 
 // mochi.MenuItem
@@ -43,21 +43,24 @@
   font-weight: 500;
   line-height: 2;
   cursor: pointer;
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-text, #1a1a1a);
   -webkit-user-select: none;
   user-select: none;
   white-space: nowrap;
 
-  &:hover:not(.disabled) { background: var(--mochi-hover, #f5f5f5); border-radius: var(--mochi-corner-pill, 9999px); }
+  &:hover:not(.disabled) { background: var(--mochi-hover, rgba(0, 0, 0, 0.04)); border-radius: var(--mochi-corner-pill, 9999px); }
   &.selected {
     // --mochi-selected (not --mochi-primary): the fallback colors here
     // (#fff5d6/#ffb80d) were clearly written for the amber "selected"
     // accent, but --mochi-primary itself resolves to blue — same mismatch
     // as MochiRadio's checked fill (see the comment there).
-    background: var(--mochi-selected-soft, #fff5d6);
-    color: var(--mochi-selected, #ffb80d);
+    // Amber tint with ink text (amber text would be under 2:1) and a ✓ glyph
+    // (.mochi-menu-item-check) so selection also reads in greyscale.
+    background: var(--mochi-selected-soft, rgba(255, 184, 13, 0.35));
+    color: var(--mochi-text, #1a1a1a);
     border-radius: var(--mochi-corner-pill, 9999px);
   }
+  .mochi-menu-item-check { margin-right: 6px; font-style: normal; }
   &.disabled { opacity: var(--mochi-disabled-opacity, 0.4); cursor: default; }
 }
 
@@ -65,7 +68,7 @@
 .mochi-menu-divider {
   margin: 6px 0;
   padding: 0;
-  border-bottom: 1px solid var(--mochi-border, #aaa);
+  border-bottom: 1px solid var(--mochi-border, rgba(0, 0, 0, 0.12));
   &:hover { background: none; }
 }
 

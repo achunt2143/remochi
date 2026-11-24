@@ -8,15 +8,19 @@
   padding: 16px;
   flex-wrap: wrap;
 
-  // Active page button override — Button component renders .mochi-button;
-  // we layer an active background on top via a wrapper class.
-  .mochi-pagination-active .mochi-button {
-    color: var(--mochi-primary-text);
-    background-color: var(--mochi-primary);
-    border-radius: 8px;
+  // Current page: number in ink with the Button's accent press bar held under
+  // it (the Button's own `active` class), no filled chip. Bold plus the bar
+  // keep it distinct in greyscale.
+  .mochi-pagination-current {
+    > div > span:not(.mochi-underline) {
+      color: var(--mochi-text, #1a1a1a);
+      font-weight: bold;
+    }
 
-    .mochi-button-bar {
-      background-color: transparent;
+    // The bar stays put; the brackets don't spread as they do on press.
+    > div > span.mochi-bracket-left,
+    > div > span.mochi-bracket-right {
+      transform: none;
     }
   }
 

@@ -31,7 +31,7 @@ export const Panel = styled.div.attrs(({ className }) => ({
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
   padding: 6px;
   min-width: 150px;
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-text, #1a1a1a);
   font-size: 14px;
   box-sizing: border-box;
   outline: none;
@@ -42,7 +42,7 @@ export const Panel = styled.div.attrs(({ className }) => ({
 
   /* The panel takes focus when it opens; show it when opened from the keyboard. */
   &:focus-visible {
-    outline: 2px solid var(--mochi-primary, #4a8bc2);
+    outline: 2px solid var(--mochi-focus-ring, #357099);
     outline-offset: 2px;
   }
 
@@ -175,7 +175,7 @@ export const Panel = styled.div.attrs(({ className }) => ({
 
 export const PanelTitle = styled.div`
   font-weight: bold;
-  color: var(--mochi-text-muted, #646464);
+  color: var(--mochi-text-muted, #555555);
   padding: 24px 32px 0;
 `;
 

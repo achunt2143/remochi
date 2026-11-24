@@ -74,9 +74,9 @@ export const DARK_THEME_COLORS = {
 };
 
 export const LIGHT_THEME_COLORS = {
-  primary: '#4a8bc2',
-  primaryHover: '#5b9dd9',
-  primaryActive: '#3a7bb2',
+  primary: '#357099',
+  primaryHover: '#2f6490',
+  primaryActive: '#285780',
   secondary: '#6aaedb',
   secondaryHover: '#7ab8e8',
   secondaryActive: '#5a9ecb',

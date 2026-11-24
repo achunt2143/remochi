@@ -75,7 +75,7 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
     <div style={{ width: '252px', userSelect: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
         <MochiButton type="normal" onClick={() => setView(new Date(year, month - 1, 1))} aria-label="Previous month">‹</MochiButton>
-        <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--mochi-text, #333)' }}>
+        <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--mochi-text, #1a1a1a)' }}>
           {MONTHS[month]} {year}
         </span>
         <MochiButton type="normal" onClick={() => setView(new Date(year, month + 1, 1))} aria-label="Next month">›</MochiButton>
@@ -84,7 +84,7 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '4px' }}>
         {DAYS.map(d => (
           <div key={d} style={{ textAlign: 'center', fontSize: '0.75rem',
-            color: 'var(--mochi-text-faint, #aaa)', fontWeight: 600, padding: '2px 0' }}>
+            color: 'var(--mochi-text-faint, #888888)', fontWeight: 600, padding: '2px 0' }}>
             {d}
           </div>
         ))}
@@ -99,8 +99,8 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
               key={idx}
               style={{
                 ...cellBase,
-                color: sel ? '#fff' : !cell.cur || disabled ? 'var(--mochi-text-faint, #bbb)' : 'var(--mochi-text, #333)',
-                background: sel ? 'var(--mochi-primary, #43aae4)' : 'none',
+                color: sel ? 'var(--mochi-primary-text, #ffffff)' : !cell.cur || disabled ? 'var(--mochi-text-faint, #888888)' : 'var(--mochi-text, #1a1a1a)',
+                background: sel ? 'var(--mochi-primary, #357099)' : 'none',
                 fontWeight: sel ? 700 : 400,
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 opacity: disabled ? 'var(--mochi-disabled-opacity, 0.4)' : 1,
@@ -176,7 +176,7 @@ const MochiDateInput = ({
       style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px', ...style }}
     >
       {label && (
-        <label style={{ fontSize: '0.9rem', color: 'var(--mochi-text-muted, #888)' }}>
+        <label style={{ fontSize: '0.9rem', color: 'var(--mochi-text-muted, #555555)' }}>
           {label}
         </label>
       )}

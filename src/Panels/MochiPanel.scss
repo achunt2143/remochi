@@ -18,6 +18,9 @@ $mochi-panel-radius: 45px;
   // invisible against the dark-mode panel backgrounds below (measured
   // ~1:1 contrast for typical hardcoded dark-gray content text).
   color: var(--mochi-text, #1a1a1a);
+  // Caps Button labels on the panel use the panel's own ink: dark
+  // --mochi-button-text (#a0a0a0) is only 3.96:1 on the #404040 panel.
+  --mochi-button-text: var(--mochi-panel-button-text, #333333);
 
   // ── Default style (Overlay Base from Figma) ────────────────────────────
   &.mochi-panel--default {

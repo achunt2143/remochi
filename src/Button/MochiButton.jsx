@@ -19,10 +19,10 @@ import { FaChevronDown } from "react-icons/fa";
 // (--mochi-accent) unless the variant has its own color.
 const colors = {
   normal:      "var(--mochi-button-text, #333)",
-  warning:     "var(--mochi-error, #d34431)",
-  affirmative: "var(--mochi-success, #00dd11)",
-  blue:        "var(--mochi-primary, #35a8ee)",
-  dropdown:    "var(--mochi-primary, #6e9ebd)",
+  warning:     "var(--mochi-error, #c62828)",
+  affirmative: "var(--mochi-success, #388e3c)",
+  blue:        "var(--mochi-primary, #357099)",
+  dropdown:    "var(--mochi-primary, #357099)",
   bar:         "var(--mochi-accent, #69cdff)",
 };
 
@@ -133,11 +133,11 @@ const ButtonWrapper = styled.button`
 
   &:focus {
     outline: none;
-    ${({ $appearance }) => ($appearance === "drop" ? "" : "color: #222;")}
+    ${({ $appearance }) => ($appearance === "drop" ? "" : "color: var(--mochi-text, #1a1a1a);")}
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mochi-primary, #6e9ebd);
+    outline: 2px solid var(--mochi-focus-ring, #357099);
     outline-offset: 2px;
     border-radius: ${({ $appearance }) =>
       $appearance === "drop"

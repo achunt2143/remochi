@@ -5,7 +5,7 @@
   font-size: 14px;
   font-weight: bold;
   font-style: italic;
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-text, #1a1a1a);
   // Mochi's ListItem.less had padding: 0 0 48px 32px, which pins the label
   // to the top of a tall row. Center it in a 54px row instead (the webOS
   // tap-target size) and keep Mochi's 32px left inset.
