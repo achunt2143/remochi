@@ -3,9 +3,19 @@
  *
  * Three-part divider:  [left cap] [nubbin] [right cap]
  *
- * The left and right caps each grow to fill their half of the available
- * width. The nubbin sits fixed-size between them, centred on the
- * divider line.
+ * The nubbin sits fixed-size on the divider line, centred on `nubbinOffset`
+ * (the middle by default); the caps stretch from each end of the line to
+ * meet it.
+ *
+ * The parts are laid out absolutely from whole-pixel positions rather than
+ * as a flex row. With flexing caps the nubbin lands wherever the caps'
+ * widths put it, often on a fraction of a pixel, and the browser snaps its
+ * SVG stroke and the caps' background bars to device pixels independently,
+ * so at some widths and pixel ratios the stroke steps sideways where the
+ * line leaves the nubbin (the same seam PopupPanel's nubbin had; see
+ * PopupPanel's rounding). Here the root's length is measured, the nubbin's
+ * start is rounded to an integer, and each cap's inner edge is that same
+ * integer, so the bar and the stroke meet on a pixel boundary at any width.
  *
  * The 8 corner variants are the exception: a corner nubbin (borrowed from
  * Popup) IS the end of the line rather than a bump in the middle of it —
@@ -21,16 +31,18 @@
  *                            'bottom-left-down' | 'bottom-right-down'
  *                            'bottom-left-left' | 'bottom-right-right'
  *                 Default  : 'up'
- *   nubbinOffset  CSS left value to shift the nubbin from centre.
- *                 e.g. '50%' (default) | '120px' | 'calc(...)'
- *                 When '50%' the nubbin lands exactly in the middle.
+ *   nubbinOffset  Where along the line the nubbin's centre sits, measured
+ *                 from the line's start (left, or top when vertical): any
+ *                 CSS length, e.g. '50%' (default) | '120px' | 'calc(...)'.
+ *                 It's rounded to a whole pixel and kept on the line.
+ *                 Ignored by the corner variants, which sit at an end.
  *   orientation   'horizontal' (default) | 'vertical'
  *   thickness     Line thickness in px (default 2, matching the nubbin's
  *                 own stroke weight)
  *   className     Extra class string
  *   style         Inline style overrides on the root element
  */
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import './NubbinDivider.scss';
 
 import { Nubbin, NUBBIN_STROKE_COLOR } from '../shared/nubbin';
@@ -69,16 +81,6 @@ const NUB_INFO = {
   'bottom-right-right' : { shape: 'corner', direction: 'right', side: 'end',   w: 14, h: 32, align: 'left',  cornerSide: 'end' },
 };
 
-// Maps a nubbin's baseline edge to the flexbox cross-axis alignment that
-// flushes the caps against it (horizontal dividers cross on the vertical
-// axis, vertical dividers cross on the horizontal axis).
-const ALIGN_TO_FLEX = {
-  bottom: 'flex-end',
-  top: 'flex-start',
-  right: 'flex-end',
-  left: 'flex-start',
-};
-
 // The caps and the nubbin share one stroke colour (the popup border token,
 // #646464 in both themes), so they're literally the same fill where they
 // meet. Each cap is a flat-colour bar faded in with a mask, which stays
@@ -101,25 +103,87 @@ const NubbinDivider = ({
   const showStartCap = info.cornerSide !== 'start';
   const showEndCap   = info.cornerSide !== 'end';
 
+  // `len` runs along the line, `depth` across it (the nubbin's own height
+  // for a horizontal divider). Everything below is written in those terms
+  // and mapped onto left/top/width/height by `box`.
+  const len   = isHoriz ? info.w : info.h;
+  const depth = isHoriz ? info.h : info.w;
+  // The bar is a whole number of pixels thick too, so its far edge lands on
+  // a pixel boundary as well as the near one (which is the root's edge).
+  const bar   = Math.max(1, Math.round(thickness));
+
+  // The line's measured length and where `nubbinOffset` falls along it, both
+  // in CSS px. Measured in a layout effect (so it's applied before the first
+  // paint) and again whenever the root resizes. `probe` is a zero-size
+  // child placed at `nubbinOffset`, so the browser resolves any CSS length
+  // (%, px, calc) for us instead of this parsing it.
+  const rootRef = useRef(null);
+  const probeRef = useRef(null);
+  const [measured, setMeasured] = useState(null);
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const probe = probeRef.current;
+    if (!root || !probe) return undefined;
+    const measure = () => {
+      const r = root.getBoundingClientRect();
+      const p = probe.getBoundingClientRect();
+      const length = isHoriz ? r.width : r.height;
+      const at = isHoriz ? p.left - r.left : p.top - r.top;
+      setMeasured((m) => (m && m.length === length && m.at === at ? m : { length, at }));
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(root);
+    return () => ro.disconnect();
+  }, [isHoriz, nubbinOffset]);
+
+  // Where the nubbin starts along the line, as a CSS value. A corner
+  // nubbin is flush against its end (the right/bottom one uses the true end,
+  // fractional or not: it's flush against the box's corner, and the cap's
+  // inner edge is this same value, so they still share one edge). A bump
+  // sits centred on the offset, rounded to a whole pixel and kept on the
+  // line. Before the first measurement (server render) the same placement is
+  // written as a calc() so the first paint is already close.
+  let nubStart;
+  if (info.cornerSide === 'start') nubStart = 0;
+  else if (info.cornerSide === 'end') nubStart = measured ? measured.length - len : `calc(100% - ${len}px)`;
+  else if (measured) nubStart = Math.min(Math.max(Math.round(measured.at - len / 2), 0), Math.max(0, Math.round(measured.length) - len));
+  else nubStart = `calc(${nubbinOffset} - ${len / 2}px)`;
+  const px = (v) => (typeof v === 'number' ? `${v}px` : v);
+  const plus = (v, n) => (typeof v === 'number' ? `${v + n}px` : `calc(${v} + ${n}px)`);
+
+  // The cap hugs the nubbin's baseline edge, which has to be on the cross
+  // axis (top/bottom for a horizontal divider); a mismatched nubbin and
+  // orientation falls back to the far edge rather than collapsing the cap.
+  const edge = (isHoriz ? ['top', 'bottom'] : ['left', 'right']).includes(info.align)
+    ? info.align
+    : (isHoriz ? 'bottom' : 'right');
+
+  // Positions a cap from `from` (its start along the line) for `size`
+  // px, or out to the line's end when no size is given, hugging `edge` at
+  // thickness `thick`. Maps line/depth onto left/top/width/height.
+  const box = ({ from, size }, thick) => {
+    const a = isHoriz
+      ? { left: px(from), ...(size !== undefined ? { width: px(size) } : { right: 0 }) }
+      : { top: px(from), ...(size !== undefined ? { height: px(size) } : { bottom: 0 }) };
+    return { position: 'absolute', ...a, [edge]: 0, ...(isHoriz ? { height: thick } : { width: thick }) };
+  };
+
+  // The caps sit flush against the edge of this nubbin's own baseline
+  // stroke (see NUB_INFO's `align`) so the line exits the nubbin without a
+  // gap or a step, at the same thickness as that stroke.
+  const capStyle = { backgroundColor: CAP_COLOR };
+
   const rootStyle = {
     ...style,
     ...(isHoriz ? { height: info.h } : { width: info.w }),
   };
 
-  // Flush the caps against whichever edge this nubbin's own baseline
-  // stroke sits on, so the line exits the nubbin without a gap or a step
-  // (see ALIGN_TO_FLEX / NUB_INFO's `align`), sized to the same thickness
-  // as that stroke.
-  const capStyle = {
-    alignSelf: ALIGN_TO_FLEX[info.align],
-    backgroundColor: CAP_COLOR,
-    ...(isHoriz ? { height: thickness } : { width: thickness }),
-  };
-
   // Each cap fades transparent → opaque via mask, from its own outer edge
   // (the far end of the divider) toward the nubbin. "Left"/"right" here
   // follow the existing cap naming, which doubles as "first"/"second" in
-  // the vertical case (flex-direction: column stacks them top/bottom).
+  // the vertical case.
   const leftCapMask = isHoriz
     ? 'linear-gradient(to right, transparent 0%, black 100%)'
     : 'linear-gradient(to bottom, transparent 0%, black 100%)';
@@ -130,21 +194,34 @@ const NubbinDivider = ({
   return (
     <div
       {...rest}
+      ref={rootRef}
       className={['mochi-nubbin-divider', `mochi-nubbin-divider--${orientation}`, className]
         .filter(Boolean)
         .join(' ')}
       style={rootStyle}
     >
-      {/* Left / Top cap — stretches to fill its side. Omitted for a
-          corner nubbin anchored at this end (see showStartCap). */}
+      <span
+        ref={probeRef}
+        aria-hidden="true"
+        className="mochi-nubbin-divider__probe"
+        style={isHoriz ? { left: nubbinOffset } : { top: nubbinOffset }}
+      />
+
+      {/* Left / Top cap — runs from the line's start to the nubbin. Omitted
+          for a corner nubbin anchored at this end (see showStartCap). */}
       {showStartCap && (
         <div
           className="mochi-nubbin-divider__cap mochi-nubbin-divider__cap--left"
-          style={{ ...capStyle, WebkitMaskImage: leftCapMask, maskImage: leftCapMask }}
+          style={{
+            ...capStyle,
+            ...box({ from: 0, size: nubStart }, bar),
+            WebkitMaskImage: leftCapMask,
+            maskImage: leftCapMask,
+          }}
         />
       )}
 
-      {/* Nubbin — fixed size, centred on the line */}
+      {/* Nubbin — fixed size, whole-pixel start, full depth of the root */}
       <Nubbin
         shape={info.shape}
         direction={info.direction}
@@ -154,14 +231,21 @@ const NubbinDivider = ({
         stroke={CAP_COLOR}
         shadow
         className="mochi-nubbin-divider__nub"
+        style={isHoriz ? { left: px(nubStart), top: 0 } : { top: px(nubStart), left: 0 }}
       />
 
-      {/* Right / Bottom cap — stretches to fill its side. Omitted for a
-          corner nubbin anchored at this end (see showEndCap). */}
+      {/* Right / Bottom cap — runs from the nubbin's far edge to the line's
+          end. Omitted for a corner nubbin anchored at this end (see
+          showEndCap). */}
       {showEndCap && (
         <div
           className="mochi-nubbin-divider__cap mochi-nubbin-divider__cap--right"
-          style={{ ...capStyle, WebkitMaskImage: rightCapMask, maskImage: rightCapMask }}
+          style={{
+            ...capStyle,
+            ...box({ from: plus(nubStart, len) }, bar),
+            WebkitMaskImage: rightCapMask,
+            maskImage: rightCapMask,
+          }}
         />
       )}
     </div>

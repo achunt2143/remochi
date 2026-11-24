@@ -1,12 +1,12 @@
 // The drawn nubbins in context: PopupPanel opened in all four directions
 // (plus a corner placement), PopupPanel in all 8 corner placements over its
 // waterdrop corners, NubbinDivider with a bump and corner caps, Divider, and
-// Repanels inside a RepanelStack, and the Repanel grabber at 1px and 2px edge
-// widths.
+// Repanels inside a RepanelStack, the Repanel grabber at 1px and 2px edge
+// widths, and NubbinDivider / Divider at fractional lengths.
 //
-//   /scripts/nubbin-diff/out/context.html?view=popups|corners|grabber|static|halo&theme=light|dark
+//   /scripts/nubbin-diff/out/context.html?view=popups|corners|grabber|dividers|static|halo&theme=light|dark
 //
-// With &joints (popups, corners and grabber views), it checks that each
+// With &joints (popups, corners, grabber and dividers views), it checks that each
 // nubbin's line runs on from the border without a step, from its own 1x
 // snapshot; run.mjs does the same from real 1x and 2x screenshots (see
 // measureScreenshot), with &probe, which swaps the border colour for one that
@@ -131,6 +131,67 @@ function Grabbers() {
           <Repanel handle style={g.shadow ? 'shadow' : 'default'}><div style={{ padding: 20 }}>{g.id}</div></Repanel>
         </div>
       ))}
+    </div>
+  );
+}
+
+// NubbinDivider in all four directions and a corner variant of each kind,
+// and the plain Divider, at fractional lengths (a flex row of stretching caps
+// used to put the nubbin on a fraction of a pixel there, and the caps' bars
+// and its stroke snapped differently). `geo` is the nubbin's drawing (see
+// NUB_INFO in NubbinDivider.jsx) for the joint check; `offset` is a
+// nubbinOffset other than the middle. Containers sit at whole-pixel left/top
+// so only the divider's own layout is under test.
+const DIVIDER_LENGTHS = [301.5, 333.3];
+const bump = (direction) => ({ shape: 'bump', direction, side: 'start' });
+const ND_HORIZONTAL = [
+  { nubbin: 'up', geo: bump('up') },
+  { nubbin: 'down', geo: bump('down') },
+  { nubbin: 'top-left-up', geo: { shape: 'corner', direction: 'up', side: 'start' } },
+  { nubbin: 'top-right-up', geo: { shape: 'corner', direction: 'up', side: 'end' } },
+  { nubbin: 'up', geo: bump('up'), offset: '37.3%' },
+  { nubbin: 'down', geo: bump('down'), offset: '120.4px' },
+];
+const ND_VERTICAL = [
+  { nubbin: 'left', geo: bump('left') },
+  { nubbin: 'right', geo: bump('right') },
+  { nubbin: 'top-left-left', geo: { shape: 'corner', direction: 'left', side: 'start' } },
+  { nubbin: 'bottom-right-right', geo: { shape: 'corner', direction: 'right', side: 'end' } },
+];
+
+// The stroke is the popup border token; swap it for the probe colour (see
+// PROBE) so it contrasts with the background in both themes.
+function Dividers() {
+  return (
+    <div style={{ position: 'relative', height: H, '--mochi-popup-border': PROBE }}>
+      {DIVIDER_LENGTHS.flatMap((len, col) => [
+        ...ND_HORIZONTAL.map((c, row) => (
+          <div
+            key={`h${col}-${row}`}
+            data-nd={JSON.stringify({ ...c.geo, name: `${c.nubbin}${c.offset ? ` @${c.offset}` : ''} ${len}px` })}
+            style={{ position: 'absolute', left: 40 + col * 380, top: 40 + row * 60, width: len }}
+          >
+            <NubbinDivider nubbin={c.nubbin} {...(c.offset ? { nubbinOffset: c.offset } : {})} />
+          </div>
+        )),
+        <div key={`dh${col}`} data-divider={JSON.stringify({ orientation: 'horizontal', thickness: 4 })}
+          style={{ position: 'absolute', left: 40 + col * 380, top: 440, width: len }}>
+          <Divider />
+        </div>,
+        ...ND_VERTICAL.map((c, row) => (
+          <div
+            key={`v${col}-${row}`}
+            data-nd={JSON.stringify({ ...c.geo, name: `${c.nubbin} (vertical) ${len}px` })}
+            style={{ position: 'absolute', left: 820 + row * 80, top: col ? 400 : 40, height: len }}
+          >
+            <NubbinDivider nubbin={c.nubbin} orientation="vertical" />
+          </div>
+        )),
+        <div key={`dv${col}`} data-divider={JSON.stringify({ orientation: 'vertical', thickness: 4 })}
+          style={{ position: 'absolute', left: 1160, top: col ? 400 : 40, height: len }}>
+          <Divider orientation="vertical" />
+        </div>,
+      ])}
     </div>
   );
 }
@@ -418,6 +479,111 @@ function measureGrabberJoints(px, scale, originX = 0, originY = 0) {
   return results;
 }
 
+// NubbinDivider's joints: where its caps' bars meet the nubbin's baseline
+// stroke (both ends of a bump; the line end of a corner cap, whose other
+// side is a box corner). Two things can go wrong there. The bar and the
+// stroke can sit on different rows (an edge step across the line), measured
+// as the popups' joints are, on the SVG's own box. And, because the bar and
+// the nubbin are separate boxes along the line, a fractional length can leave
+// them snapped to different pixel columns, so a hairline gap (or a doubled
+// pixel) shows in the stroke itself as it crosses the joint: the stroke's
+// brightness along its own centre, within 2.5px of the joint, may not stray
+// from its median by more than JOINT_TOLERANCE of the stroke's contrast.
+// (Along the line the mask fades the cap by well under 1% a pixel, nothing
+// next to that.) The step reported is the worse of the two.
+// One NubbinDivider joint in `px`: `outside` and `inside` are sample
+// distances along the line (outside the nubbin, in the cap; inside it) and
+// `joint` is where the two meet. `rect` is the nubbin's top-left in px.
+function dividerJoint(px, scale, rect, geo, joint, outside, inside, towards) {
+  const mean = (xs) => xs.reduce((a, x) => a + x, 0) / xs.length;
+  const line = geo.depth - 1;
+  const lumAt = (u, v) => {
+    const [x, y] = frameToBox(u, v, geo);
+    const i = (Math.floor((rect.top + y) * scale) * px.width + Math.floor((rect.left + x) * scale)) * 4;
+    return (px.data[i] + px.data[i + 1] + px.data[i + 2]) / 3;
+  };
+  const edges = (samples) => samples.map((s) => strokeCentre(px, scale, geo, rect, s, 'v', line));
+  const out = edges(outside), ins = edges(inside);
+  const lo = mean(out.map((e) => e.lo)), hi = mean(out.map((e) => e.hi));
+  const step = Math.max(...ins.map((e) => Math.max(Math.abs(e.lo - lo), Math.abs(e.hi - hi))));
+  const border = (lo + hi) / 2, nubbin = mean(ins.map((e) => (e.lo + e.hi) / 2));
+  // The stroke's brightness along its centre across the joint, one sample
+  // per device pixel, taken on whichever side of the line's centre (it falls
+  // between two device rows at 1x) varies least.
+  const bg = lumAt(joint + 3 * towards + 0.5 / scale, geo.depth - 3.5);
+  const gap = Math.min(...[-0.5, 0.5].map((dv) => {
+    const xs = [];
+    for (let k = -2.5 * scale; k < 2.5 * scale; k++) xs.push(lumAt(joint + (k + 0.5) / scale, line + dv / scale));
+    const med = [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
+    return Math.max(...xs.map((x) => Math.abs(x - med))) / (Math.abs(med - bg) || 1);
+  }));
+  return { step, gap, border, nubbin };
+}
+
+function measureDividerJoints(px, scale, originX = 0, originY = 0) {
+  const results = [];
+  const near = [0.5, 1.5, 2.5];
+  for (const holder of document.querySelectorAll('[data-nd]')) {
+    const { name, ...p } = JSON.parse(holder.dataset.nd);
+    const vertical = p.direction === 'left' || p.direction === 'right';
+    const r = holder.querySelector('.mochi-nubbin-divider__nub').getBoundingClientRect();
+    const rect = { left: r.left - originX, top: r.top - originY };
+    const geo = { ...p, length: vertical ? r.height : r.width, depth: vertical ? r.width : r.height };
+    // [label, where along the line, border samples, nubbin samples, which way the line runs on]
+    const joints = p.shape === 'bump'
+      ? [['start', 0, near.map((d) => -d), near, -1], ['end', geo.length, near.map((d) => geo.length + d), near.map((d) => geo.length - d), 1]]
+      : [['line end', geo.length, near.map((d) => geo.length + d), near.map((d) => geo.length - d), 1]];
+    for (const [label, at, outside, inside, towards] of joints) {
+      const m = dividerJoint(px, scale, rect, geo, at, outside, inside, towards);
+      const worst = Math.max(m.step, m.gap);
+      results.push({
+        placement: `nubbin-divider ${name}`, joint: label, scale,
+        border: +m.border.toFixed(3), nubbin: +m.nubbin.toFixed(3), centreShift: +Math.abs(m.nubbin - m.border).toFixed(3),
+        gap: +m.gap.toFixed(3), step: +worst.toFixed(3), ok: worst <= JOINT_TOLERANCE,
+      });
+    }
+  }
+  // Divider has no stroke to step, but its two caps meet in the middle of a
+  // grooved line: a seam shows as a jump between the pixel columns (rows,
+  // vertically) either side of the join that the line doesn't make anywhere
+  // else. That jump, less the largest jump away from the join, as a share of
+  // the groove's own contrast, reads like an edge step in px (a column that
+  // is off by a fifth of a pixel is off by a fifth of the contrast).
+  for (const holder of document.querySelectorAll('[data-divider]')) {
+    const { orientation, thickness } = JSON.parse(holder.dataset.divider);
+    const horizontal = orientation === 'horizontal';
+    const r = holder.querySelector('.remochi-divider').getBoundingClientRect();
+    const length = horizontal ? r.width : r.height;
+    const origin = (horizontal ? r.left - originX : r.top - originY) * scale;
+    const cross = (horizontal ? r.top - originY : r.left - originX) * scale;
+    const lum = (a, c) => {
+      const x = horizontal ? a : c, y = horizontal ? c : a;
+      const i = (y * px.width + x) * 4;
+      return (px.data[i] + px.data[i + 1] + px.data[i + 2]) / 3;
+    };
+    const centre = Math.round(origin + (length * scale) / 2);
+    const rows = Array.from({ length: thickness * scale }, (_, k) => Math.round(cross) + k);
+    const jump = (a) => Math.max(...rows.map((c) => Math.abs(lum(a + 1, c) - lum(a, c))));
+    const at = (a) => jump(a);
+    const seam = Math.max(...[-2, -1, 0, 1].map((k) => at(centre + k)));
+    const away = Math.max(...[-8, -7, -6, -5, -4, 4, 5, 6, 7, 8].map((k) => at(centre + k)));
+    const bg = lum(centre - 40 * scale, Math.round(cross) - 3 * scale);
+    const contrast = Math.max(...rows.map((c) => Math.abs(lum(centre, c) - bg)));
+    const step = Math.max(0, seam - away) / (contrast || 1);
+    results.push({
+      placement: `divider ${orientation} ${+length.toFixed(1)}px`, joint: 'middle', scale,
+      border: 0, nubbin: 0, centreShift: 0, step: +step.toFixed(3), ok: step <= JOINT_TOLERANCE,
+    });
+  }
+  return results;
+}
+
+function measureView(data, scale, originX = 0, originY = 0) {
+  if (view === 'grabber') return measureGrabberJoints(data, scale, originX, originY);
+  if (view === 'dividers') return measureDividerJoints(data, scale, originX, originY);
+  return measureJoints(data, scale, originX, originY);
+}
+
 // For run.mjs (and checking by hand): measures a real screenshot of this
 // page. The page's own snapshot is only good for 1x: Chrome's rasterizing of
 // an SVG foreignObject at 2x isn't stable to a sub-pixel (the same border
@@ -433,9 +599,7 @@ async function measureScreenshot(src, scale, originX = 0, originY = 0) {
   const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0);
   const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  return view === 'grabber'
-    ? measureGrabberJoints(data, scale, originX, originY)
-    : measureJoints(data, scale, originX, originY);
+  return measureView(data, scale, originX, originY);
 }
 
 // Checks the checker: paints the right-pointing popup's border, with its
@@ -464,6 +628,31 @@ async function selfTestJoints(offsets = [0, 0.1, 0.2, 0.3, 0.4, 0.5], scale = 1)
   return out;
 }
 
+// The same for NubbinDivider's joint check: paints a bar and a nubbin tail
+// meeting on a horizontal line with the tail `across` px off the bar's row
+// and `gap` px of clear space between them, and returns the measured step.
+async function selfTestDividerJoints(cases = [[0, 0], [0.3, 0], [0, 1], [0, 0.5]], scale = 1) {
+  const out = {};
+  for (const [across, gap] of cases) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 300 * scale;
+    canvas.height = 80 * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#f5f5f5';
+    ctx.fillRect(0, 0, 300, 80);
+    ctx.fillStyle = '#666';
+    ctx.fillRect(10, 58, 100, 2);                          // the cap's bar
+    ctx.fillRect(110 + gap, 58 + across, 100, 2);          // the nubbin's tail
+    const geo = { shape: 'bump', direction: 'up', side: 'start', length: 71, depth: 20 };
+    const near = [0.5, 1.5, 2.5];
+    const px = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const m = dividerJoint(px, scale, { left: 110, top: 40 }, geo, 0, near.map((d) => -d), near, -1);
+    out[`across ${across}, gap ${gap}`] = +Math.max(m.step, m.gap).toFixed(3);
+  }
+  return out;
+}
+
 // Fallback without a screenshot: the page's own 1x snapshot. With `save`,
 // writes report/joints.json (run.mjs writes it from real screenshots
 // instead).
@@ -473,7 +662,7 @@ async function checkJoints(save = false) {
   await new Promise((r) => setTimeout(r, 100));
   const canvas = await snapshot(1);
   const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
-  const results = view === 'grabber' ? measureGrabberJoints(data, 1) : measureJoints(data, 1);
+  const results = measureView(data, 1);
   if (save) {
     const selfTest = { 1: await selfTestJoints(undefined, 1), 2: await selfTestJoints(undefined, 2) };
     const body = { source: 'in-page snapshot, 1x only', tolerance: JOINT_TOLERANCE, results, selfTest };
@@ -490,6 +679,7 @@ function App() {
     window.__capture = async () => { for (const s of [1, 2]) await capture(s); return true; };
     window.__jointTolerance = JOINT_TOLERANCE;
     window.__selfTestJoints = selfTestJoints;
+    window.__selfTestDividerJoints = selfTestDividerJoints;
     window.__snapshot = snapshot;
     // &still: no entrance animation, for looking at the page in a screenshot.
     if (params.has('still')) stopAnimations();
@@ -516,7 +706,7 @@ function App() {
   }, []);
   return (
     <MochiThemeWrapper theme={theme} style={{ width: W, height: H, overflow: 'hidden', background: 'var(--mochi-bg)' }}>
-      {view === 'popups' ? <Popups /> : view === 'corners' ? <Corners /> : view === 'grabber' ? <Grabbers /> : view === 'halo' ? <Halo /> : <Static />}
+      {view === 'popups' ? <Popups /> : view === 'corners' ? <Corners /> : view === 'grabber' ? <Grabbers /> : view === 'dividers' ? <Dividers /> : view === 'halo' ? <Halo /> : <Static />}
     </MochiThemeWrapper>
   );
 }

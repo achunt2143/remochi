@@ -37,19 +37,25 @@ try {
   // Joint check from real screenshots at device scale 1 and 2 (the page's
   // own snapshot isn't stable to a sub-pixel at 2x): the popups (all four
   // directions), the waterdrop popups in all 8 corner placements, and the
-  // Repanel grabber at 1px and 2px edges, light and dark. `probe` swaps the
+  // Repanel grabber at 1px and 2px edges, and NubbinDivider (four directions,
+  // corner caps, off-centre nubbins) and Divider at fractional lengths
+  // (301.5px, 333.3px), light and dark. `probe` swaps the
   // border colour for one that contrasts in either theme (see context.jsx).
   const joints = { source: 'Chromium screenshots, device scale 1 and 2', results: [], selfTest: {} };
-  const VIEWS = [['popups', 6], ['corners', 8], ['grabber', 0]];
+  // [view, selector to wait for, how many of them (null: at least one)]
+  const VIEWS = [
+    ['popups', '.mochi-popup-nubbin', 6], ['corners', '.mochi-popup-nubbin', 8], ['grabber', '[data-grabber]', null],
+    ['dividers', '[data-nd]', 20],
+  ];
   for (const scale of [1, 2]) {
     const context = await browser.newContext({ viewport: { width: 1200, height: 860 }, deviceScaleFactor: scale });
     for (const theme of ['light', 'dark']) {
-      for (const [view, nubbins] of VIEWS) {
+      for (const [view, selector, count] of VIEWS) {
         const shotPage = await context.newPage();
         await shotPage.goto(`${base}/context.html?view=${view}&theme=${theme}&probe`);
         await shotPage.waitForFunction(
-          (n) => window.__measureScreenshot && (n === 0 ? document.querySelectorAll('[data-grabber]').length > 0 : document.querySelectorAll('.mochi-popup-nubbin').length === n),
-          nubbins
+          ([sel, n]) => window.__measureScreenshot && (n === null ? document.querySelectorAll(sel).length > 0 : document.querySelectorAll(sel).length === n),
+          [selector, count]
         );
         await shotPage.evaluate(() => window.__stopAnimations());
         await shotPage.waitForTimeout(300);
@@ -59,6 +65,10 @@ try {
         if (view === 'popups' && theme === 'light') {
           joints.selfTest[scale] = await shotPage.evaluate((s) => window.__selfTestJoints(undefined, s), scale);
           joints.tolerance = await shotPage.evaluate(() => window.__jointTolerance);
+        }
+        if (view === 'dividers' && theme === 'light') {
+          joints.selfTestDivider ??= {};
+          joints.selfTestDivider[scale] = await shotPage.evaluate((s) => window.__selfTestDividerJoints(undefined, s), scale);
         }
         await shotPage.close();
       }

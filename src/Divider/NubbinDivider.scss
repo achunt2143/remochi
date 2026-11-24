@@ -1,5 +1,7 @@
 // NubbinDivider — [left cap] [nubbin] [right cap]
 //
+// (Laid out absolutely; see the note on the root below.)
+//
 // The nubbin (drawn in code, see shared/nubbin.jsx) is 71×20px with a 2px
 // baseline stroke flush against one edge (bottom for 'up', top for 'down',
 // etc. — see NUB_INFO's `align` in NubbinDivider.jsx). Each cap is a flat
@@ -10,13 +12,27 @@
 // nubbin since which edge is "flush" isn't the same for every one.
 
 .mochi-nubbin-divider {
-  display: flex;
+  // The parts are positioned absolutely from whole-pixel offsets computed
+  // in NubbinDivider.jsx (a flex row would put the nubbin on whatever
+  // fraction of a pixel the stretching caps leave it at).
+  position: relative;
   width: 100%;
   overflow: visible;      // let the nubbin overhang above the line
 
+  // A zero-size marker at `nubbinOffset`, measured to find where the nubbin
+  // goes; it never paints.
+  &__probe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   // ── Caps ──────────────────────────────────────────────────
   &__cap {
-    flex: 1 1 0;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
@@ -25,14 +41,13 @@
 
   // ── Nubbin ──────────────────────────────────────────────────
   &__nub {
-    flex: 0 0 auto;
+    position: absolute;
     display: block;
     pointer-events: none;
   }
 
   // ── Vertical orientation ──────────────────────────────────────
   &--vertical {
-    flex-direction: column;
     height: 100%;
     width: auto;
     overflow: visible;

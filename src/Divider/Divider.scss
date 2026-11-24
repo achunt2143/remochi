@@ -27,6 +27,12 @@
   }
 }
 
-// Caps sit flush next to each other — no gap, no overlap
+// Caps sit flush next to each other — no gap, no overlap. Unlike
+// NubbinDivider there's no stroke here to step: both caps carry the same
+// groove rows over the same whole-pixel thickness (the root's height or
+// width), and each fades to fully opaque at its inner end, so wherever the
+// halfway join lands (a fractional one included) the two sides are the same
+// colour and nothing snaps differently; the joint check in
+// scripts/nubbin-diff measures that at fractional lengths.
 .divider-cap-left  { flex: 0 0 50%; }
 .divider-cap-right { flex: 0 0 50%; }
