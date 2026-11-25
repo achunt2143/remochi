@@ -57,8 +57,26 @@ const TAPER_RAMP = [0.106, 0.167, 0.232, 0.318, 0.409, 0.516, 0.612, 0.735, 0.82
 
 // Soft shadow the sprites drew around the raised part of the stroke: a
 // blurred, translucent black copy of it, `spread` px wider and nudged
-// `offset` px away from the line.
+// `offset` px away from the line. It fell on the outside of the stroke only
+// (the sprites' inside is the box's own fill or the page, with no halo in
+// it): `Nubbin` masks the inside out, so a halo never fuzzes the edge from
+// both sides. Measured on the sprites' 2px strokes; a thinner stroke gets
+// the same shadow scaled down (see `shadowFor`), since a halo as wide and as
+// dark as the sprites' swamps a 1px line (the Repanel grabber's) and reads
+// as blur around it rather than a shadow under it.
 export const SHADOW = { blur: 1.2, opacity: 0.18, spread: 2, offset: -0.5 };
+
+// The shadow for a `strokeWidth` stroke: the sprites' own at 2px or more,
+// in proportion below that.
+export function shadowFor(strokeWidth) {
+  const k = Math.min(1, strokeWidth / NUBBIN_STROKE);
+  return {
+    blur: SHADOW.blur * k,
+    opacity: SHADOW.opacity * k,
+    width: strokeWidth + SHADOW.spread * k,
+    offset: SHADOW.offset * k,
+  };
+}
 
 // The colour every nubbin's stroke defaults to: the popup border, which is
 // #646464 in both themes (the sprites' own stroke, sampled: #646464/#666666).
@@ -126,9 +144,10 @@ function bumpPaths(geo) {
   // Only the raised part casts a shadow; the flat tails are the border the
   // bump sits on, which has its own.
   const reach = 3 * sigma;
+  const nudge = shadowFor(geo.strokeWidth).offset;
   const shadow = smoothPath(
     bumpPoints(geo, Math.max(0, peak - reach), Math.min(length, peak + reach))
-      .map(([u, v]) => map([u, v + SHADOW.offset]))
+      .map(([u, v]) => map([u, v + nudge]))
   );
   // ...fading in and out over its outer sigma, so it doesn't stop short.
   const fade = {
@@ -162,7 +181,8 @@ function cornerPaths(geo) {
   // ...and the fill steps out along the curve's square, below the box.
   const notch = below > 0 ? `L${pt(map([radius, depth]))}L${pt(map([radius, depth + below]))}` : '';
   const fill = `M${pt(map([side, depth + below]))}L${pt(map(p0))}C${curve}L${pt(map([length + 1, depth]))}${notch}Z`;
-  const drop = ([u, v]) => pt(map([u, v + SHADOW.offset]));
+  const nudge = shadowFor(strokeWidth).offset;
+  const drop = ([u, v]) => pt(map([u, v + nudge]));
   const shadow = `M${drop(p0)}C${drop(p1)} ${drop(p2)} ${drop(p3)}`;
   // Faded out as the ramp flattens into the line, so it doesn't stop short
   // at the end of the box.
@@ -189,7 +209,8 @@ function cornerPaths(geo) {
  *   strokeWidth  Stroke weight (default 2)
  *   stroke       Stroke colour (default: --mochi-popup-border)
  *   fill         Fill colour, or 'none' for an outline (default 'none')
- *   shadow       Soft halo around the raised part, as the popup sprites had
+ *   shadow       Soft halo outside the raised part, as the popup sprites had
+ *                (scaled down for strokes thinner than 2px; see shadowFor)
  */
 export function Nubbin({
   shape       = 'bump',
@@ -221,6 +242,7 @@ export function Nubbin({
     radius: isCorner ? Math.max(0, radius) : 0,
   };
   const paths = isCorner ? cornerPaths(geo) : bumpPaths(geo);
+  const halo = shadowFor(strokeWidth);
   const vertical = direction === 'left' || direction === 'right';
   const width = vertical ? geo.depth : geo.length;
   const height = vertical ? geo.length : geo.depth;
@@ -242,7 +264,7 @@ export function Nubbin({
         <>
           <defs>
             <filter id={`${id}-blur`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation={SHADOW.blur} />
+              <feGaussianBlur stdDeviation={halo.blur} />
             </filter>
             <linearGradient
               id={`${id}-fade`}
@@ -256,13 +278,16 @@ export function Nubbin({
             </linearGradient>
             <mask id={`${id}-mask`} maskUnits="userSpaceOnUse" x="0" y="0" width={width} height={height}>
               <rect width={width} height={height} fill={`url(#${id}-fade)`} />
+              {/* Black hides the shadow: the inside of the shape, so it falls
+                  on the outside of the stroke only, as the sprites' did. */}
+              <path d={paths.fill} fill="#000" />
             </mask>
           </defs>
           <path
             d={paths.shadow}
             filter={`url(#${id}-blur)`}
             mask={`url(#${id}-mask)`}
-            style={{ fill: 'none', stroke: `rgba(0, 0, 0, ${SHADOW.opacity})`, strokeWidth: strokeWidth + SHADOW.spread }}
+            style={{ fill: 'none', stroke: `rgba(0, 0, 0, ${halo.opacity})`, strokeWidth: halo.width }}
           />
         </>
       )}
@@ -279,14 +304,21 @@ export function Nubbin({
  * Inline style for one of Divider's tapered end caps: a 4-row groove in
  * `color` (top row darkest), faded out toward the cap's outer end. `end` is
  * 'start' for the left/top cap (fading toward the left/top) or 'end' for the
- * right/bottom one. The groove scales smoothly to any thickness.
+ * right/bottom one. The groove's rows scale with the thickness (whole pixels
+ * stay crisp: a multiple of 4 puts every row on whole pixels).
  */
 export function taperStyle({ orientation = 'horizontal', end = 'start', color = NUBBIN_STROKE_COLOR }) {
   const horizontal = orientation === 'horizontal';
-  const rows = TAPER_ROWS.map(
-    (opacity, i) =>
-      `color-mix(in srgb, ${color} ${fmt(opacity * 100)}%, transparent) ${fmt(((i + 0.5) / TAPER_ROWS.length) * 100)}%`
-  ).join(', ');
+  // Each row is a band with hard edges (two positions per stop), not a stop
+  // at its middle that the gradient blends into its neighbours: at 1x on the
+  // default 4px the two draw the same, but at 2x the blend gives every device
+  // row its own in-between value (a soft groove), where the bands put each
+  // CSS row's two device rows on the same colour, as the sprite's pixel rows
+  // were.
+  const rows = TAPER_ROWS.map((opacity, i) => {
+    const c = `color-mix(in srgb, ${color} ${fmt(opacity * 100)}%, transparent)`;
+    return `${c} ${fmt((i / TAPER_ROWS.length) * 100)}% ${fmt(((i + 1) / TAPER_ROWS.length) * 100)}%`;
+  }).join(', ');
   const fadeDir = horizontal ? (end === 'start' ? 'to right' : 'to left') : (end === 'start' ? 'to bottom' : 'to top');
   const fade = TAPER_RAMP.map((a, i) => `rgba(0, 0, 0, ${a}) ${i * 10}%`).join(', ');
   const mask = `linear-gradient(${fadeDir}, ${fade})`;
