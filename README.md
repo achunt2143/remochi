@@ -4,6 +4,8 @@ A modern React component library that brings the charming, nostalgic **Mochi** U
 
 See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for what's new in the latest release, and [docs/remochi-component-guide.md](./docs/remochi-component-guide.md) for usage examples of every component.
 
+To make an app built with remochi feel right, start with the [design guide](./docs/design-guide.md): type, colour, shape, panels, motion, screens and writing.
+
 ## Features
 
 - Authentic **Mochi visual style**: Rounded shapes, smooth animations, bright blues and warm yellows. A light pane, the scallop on edge-anchored panes and the waterdrop as an accent (the `Avatar`, the `Dialog`, `FloatingPanel` `shape="drop"`)
