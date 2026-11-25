@@ -1,3 +1,9 @@
+export function shadowFor(strokeWidth: any): {
+    blur: number;
+    opacity: number;
+    width: any;
+    offset: number;
+};
 /**
  * Nubbin
  *
@@ -17,7 +23,8 @@
  *   strokeWidth  Stroke weight (default 2)
  *   stroke       Stroke colour (default: --mochi-popup-border)
  *   fill         Fill colour, or 'none' for an outline (default 'none')
- *   shadow       Soft halo around the raised part, as the popup sprites had
+ *   shadow       Soft halo outside the raised part, as the popup sprites had
+ *                (scaled down for strokes thinner than 2px; see shadowFor)
  */
 export function Nubbin({ shape, direction, side, length, depth, peak, radius, strokeWidth, stroke, fill, shadow, className, style, ...rest }: {
     [x: string]: any;
@@ -39,7 +46,8 @@ export function Nubbin({ shape, direction, side, length, depth, peak, radius, st
  * Inline style for one of Divider's tapered end caps: a 4-row groove in
  * `color` (top row darkest), faded out toward the cap's outer end. `end` is
  * 'start' for the left/top cap (fading toward the left/top) or 'end' for the
- * right/bottom one. The groove scales smoothly to any thickness.
+ * right/bottom one. The groove's rows scale with the thickness (whole pixels
+ * stay crisp: a multiple of 4 puts every row on whole pixels).
  */
 export function taperStyle({ orientation, end, color }: {
     orientation?: string | undefined;
