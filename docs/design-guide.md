@@ -548,6 +548,5 @@ A few notes:
 
 ### Where to go next
 
-- [Component guide](./remochi-component-guide.md): props and examples for every component.
-- [IDENTITY.md](../IDENTITY.md): the full token tables.
+- [Component guide](./remochi-component-guide.md): props and examples for every component, and the full token tables.
 - [README](../README.md): installation and overview.
