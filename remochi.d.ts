@@ -222,8 +222,16 @@ export const NubbinDivider: React.FC<NubbinDividerProps>;
 // Dropdown
 // ---------------------------------------------------------------------------
 export interface DropdownOption {
-  value: string | number;
-  label: string;
+  /** The value passed to `onChange` when chosen. Not needed for `divider` and `sectionLabel` entries. */
+  value?: string | number;
+  /** Text shown for the option, or for a `sectionLabel` heading. */
+  label?: string;
+  /** Renders a horizontal rule instead of an option. Never selectable. */
+  divider?: boolean;
+  /** Renders `label` as a non-selectable section heading instead of an option. */
+  sectionLabel?: boolean;
+  /** Shows the option dimmed; clicking it does not choose it or close the menu. */
+  disabled?: boolean;
 }
 export interface DropdownProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
@@ -234,7 +242,6 @@ export interface DropdownProps
   placeholder?: string;
   disabled?: boolean;
   maxHeight?: number;
-  searchable?: boolean;
   className?: string;
 }
 /** Forwards its `ref` to the root `<div>`. */
@@ -405,7 +412,7 @@ export interface MochiSlidingMenuProps extends React.HTMLAttributes<HTMLElement>
   onOpenChange?: (open: boolean) => void;
   className?: string;
   style?: React.CSSProperties;
-  /** Slide animation duration in ms. @default 300 */
+  /** Slide animation duration in ms. @default follows `--mochi-duration-stack` (260ms) */
   duration?: number;
   /** Close on Escape key. @default true */
   closeOnEscape?: boolean;
@@ -754,7 +761,13 @@ export interface TableColumn<T = Record<string, any>> {
 }
 export interface TableProps<T = Record<string, any>>
   extends React.HTMLAttributes<HTMLDivElement> {
-  columns?: TableColumn<T>[];
+  /**
+   * Column definitions. Either all objects (use with `data`), or all plain
+   * strings used as headers (use with `rows`, arrays in column order). The
+   * shape is chosen by the first entry, so do not mix the two.
+   */
+  columns?: Array<TableColumn<T> | string>;
+  /** Row arrays in column order, for string `columns`. Takes precedence over `data`. */
   rows?: any[][];
   onRowClick?: (row: T) => void;
   data?: T[];

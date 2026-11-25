@@ -455,7 +455,7 @@ A read-only field that opens a calendar popup (portaled) to pick a day.
 />
 ```
 
-Notes: `value` seeds the initial selection; later changes to the prop do not update the field, so use a `key` to reset it. Days outside `minDate`/`maxDate` are disabled. The calendar has Previous/Next month buttons (labelled) and each day is a button labelled with its ISO date.
+Notes: `value` (string or `Date`) seeds the selection and follows later changes: when the prop changes, the selected day and the displayed month update to match, without calling `onChange`. Without a `value` prop the component keeps its own state. Days outside `minDate`/`maxDate` are disabled. The calendar has Previous/Next month buttons (labelled) and each day is a button labelled with its ISO date.
 
 ### Dropdown
 
@@ -483,7 +483,7 @@ A select-style trigger that opens a menu (portaled, below the trigger, flipping 
 />
 ```
 
-Notes: the trigger is `role="combobox"`; Space or Enter opens it and Escape closes it. The menu is a `listbox` of `option`s with a check on the selected one; Escape, choosing an option or clicking the trigger again closes it. The menu also accepts `{ divider: true }`, `{ sectionLabel: true, label }` and `disabled: true` entries at runtime, but these are not in the TypeScript `DropdownOption` type, so cast them in TS. The typings list a `searchable` prop that is not implemented; it has no effect.
+Notes: the trigger is `role="combobox"`; Space or Enter opens it and Escape closes it. The menu is a `listbox` of `option`s with a check on the selected one; Escape, choosing an option, clicking the trigger again or a pointer press anywhere outside the trigger and menu closes it (inside a `Dialog` or `PopupPanel`, a press on its content closes the menu without closing the surface). `DropdownOption` also takes `{ divider: true }`, `{ sectionLabel: true, label }` and `disabled: true` (a disabled option cannot be chosen and leaves the menu open). There is no `searchable` prop.
 
 ## Status, text and layout
 
@@ -693,7 +693,7 @@ const data: UserRow[] = [
 
 | Prop | Type | Default |
 | --- | --- | --- |
-| `columns` | `TableColumn<T>[]` (`{ key, label, width?, render?(value, row) }`) | `[]` |
+| `columns` | `Array<TableColumn<T> \| string>` (`{ key, label, width?, render?(value, row) }`, or plain header strings with `rows`) | `[]` |
 | `data` | `T[]` | `[]` |
 | `rows` | `any[][]` | – (array-of-arrays form; takes precedence over `data`) |
 | `onRowClick` | `(row: T) => void` | – |
@@ -701,7 +701,7 @@ const data: UserRow[] = [
 | `hoverable` | `boolean` | `true` |
 | `striped` | `boolean` | `false` |
 
-At runtime `columns` may also be plain strings paired with `rows` (`columns={['Name', 'Role']} rows={[['Alice', 'Engineer']]}`); the typings only declare the object form.
+`columns` may also be plain strings paired with `rows` (`columns={['Name', 'Role']} rows={[['Alice', 'Engineer']]}`). The first entry decides the shape, so do not mix strings and objects; `onRowClick` and `render` then receive the row array.
 
 ## Panels
 

@@ -9,7 +9,7 @@
  *   - Portal into document.body (position: fixed)
  *   - Positions below activator; flips above when viewport is tight
  *   - Scrollable inner list (maxHeight, default 200px)
- *   - Click-outside overlay closes the menu
+ *   - A pointerdown outside the menu and its trigger (anchorEl) closes the menu
  *   - Escape key closes the menu
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
@@ -79,13 +79,24 @@ const MochiMenu = ({
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
+  // Close on a pointerdown outside both the menu and its trigger. The trigger
+  // is excluded so its own click can toggle the menu instead of reopening it.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPointerDown = (e) => {
+      const anchor = anchorEl?.current ?? anchorEl;
+      if (menuRef.current?.contains(e.target)) return;
+      if (anchor?.contains?.(e.target)) return;
+      onClose?.();
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [isOpen, anchorEl, onClose]);
+
   if (!isOpen) return null;
 
   return createPortal(
     <>
-      {/* Transparent overlay — click outside to close */}
-      {/* <div className="mochi-menu-overlay" onClick={onClose} /> */}
-
       {/* Panel reuses the same styled-component as MochiPopupPanel:
           bg, border, border-radius, box-shadow, fadeIn animation.
           The 'mochi-menu' class adds no-nubbin override from MochiMenu.scss. */}

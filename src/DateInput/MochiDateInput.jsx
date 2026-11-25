@@ -1,5 +1,5 @@
 // MochiDateInput.jsx
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { MochiInput }      from '../Input/MochiInput';
 import './MochiDateInput.scss';
 import { MochiButton }     from '../Button/MochiButton';
@@ -14,6 +14,12 @@ const MONTHS = [
 
 function isoDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function toDate(v) {
+  if (!v) return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function formatDisplay(d) {
@@ -49,6 +55,13 @@ function sameDay(a, b) {
 function Calendar({ selected, onSelect, minDate, maxDate }) {
   const init = selected ?? new Date();
   const [view, setView] = useState(new Date(init.getFullYear(), init.getMonth(), 1));
+  // Follow the selection (e.g. a `value` prop that changed) to its month.
+  const selectedTime = selected ? selected.getTime() : null;
+  useEffect(() => {
+    if (selectedTime === null) return;
+    const s = new Date(selectedTime);
+    setView(new Date(s.getFullYear(), s.getMonth(), 1));
+  }, [selectedTime]);
   // Which arrow the month last changed by: the day grid arrives from that side.
   const [slide, setSlide] = useState(null);
 
@@ -147,7 +160,7 @@ const MochiDateInput = ({
   ...rest
 }) => {
   const [isOpen,   setIsOpen]   = useState(false);
-  const [selected, setSelected] = useState(value ? new Date(value) : null);
+  const [selected, setSelected] = useState(toDate(value));
   const triggerRef  = useRef(null);
   // anchorRectRef holds the DOMRect captured synchronously at click time,
   // before React re-renders or any side effects (like overflow:hidden) can
@@ -174,6 +187,15 @@ const MochiDateInput = ({
     setIsOpen(false);
     anchorRectRef.current = null;
   }, []);
+
+  // Follow later changes to the `value` prop (string or Date). Skips the first
+  // render (already seeded above) and never calls onChange.
+  const valueTime = toDate(value)?.getTime() ?? null;
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) { firstRender.current = false; return; }
+    setSelected(valueTime === null ? null : new Date(valueTime));
+  }, [valueTime]);
 
   const handleSelect = (date) => {
     setSelected(date);

@@ -85,6 +85,7 @@ This release brings remochi in line with the Mochi / webOS design guide and the 
 - **`Toggle` On position.** A `Toggle` released after a held press no longer rests its On knob 4px short of the track's end.
 - **Collapse animation.** Collapsing panels animate instead of snapping (see Motion).
 - **`Label`** no longer shrinks inside a `Repanel`'s flex column.
+- **`Dropdown` and `DateInput`; typings.** The `Dropdown` menu closes on a click outside it (its overlay was commented out); `DateInput` follows later changes to `value` (string or `Date`) without calling `onChange`. `DropdownOption` gains `divider`, `sectionLabel` and `disabled`, `Table` `columns` accepts plain strings, and the `SlidingMenu` `duration` default reads `--mochi-duration-stack` (260ms). The never-implemented `Dropdown` `searchable` prop is removed from the typings.
 
 ## Upgrading from 0.5.x
 
