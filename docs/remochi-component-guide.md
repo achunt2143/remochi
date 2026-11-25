@@ -830,6 +830,8 @@ Notes: the stack is `role="group"` with `aria-roledescription="stacked panels"`;
 
 ## Overlays
 
+Overlays stack. `Dialog`, `PopupPanel`, the `Dropdown` menu, the `DateInput` calendar and a modal `SlidingMenu` each register while open, and Escape or an outside press dismisses only the topmost one. `DateInput`'s `value`, `minDate` and `maxDate` accept a `Date`, a full ISO string, or a date-only `'YYYY-MM-DD'` string, which is read as a local calendar day.
+
 ### PopupPanel
 
 A contextual popup with a nubbin pointing at its anchor, portaled to `document.body` and positioned to stay on screen. Use it for quick actions tied to a control; use `Dialog` for an interruption.
@@ -921,7 +923,7 @@ Notes: it closes via its buttons, a click on the scrim or Escape, each by callin
 
 ### SlidingMenu
 
-An edge-anchored navigation drawer, with a content shifter that slides your page aside as it opens. Aliases: `MochiSlidingMenu`.
+An edge-anchored navigation drawer, with a content shifter that slides your page aside as it opens. Aliases: `MochiSlidingMenu`. It is a panel in the list voice: the panel material with a 1px `--mochi-pane-edge` on the side facing the page and a soft shadow cast away from the docked edge (`--mochi-drawer-shadow-color`), 320px wide on the left and right (85vw at most on a phone), the 24px field corner on the page side.
 
 | Prop | Type | Default |
 | --- | --- | --- |
@@ -933,18 +935,29 @@ An edge-anchored navigation drawer, with a content shifter that slides your page
 | `closeOnBackdropClick` | `boolean` | `true` |
 | `showBackdrop` | `boolean` | `true` |
 | `backdropColor` | `string` | theme-aware |
+| `title` | `ReactNode` | – |
+| `subtitle` | `string` | – |
+| `showCloseButton` | `boolean` | `false` |
 
-The menu is controlled when you pass `onOpenChange` (then you own `isOpen`); without it the menu keeps its own state. `SlidingMenu.ContentShifter` takes `position`, `isMenuOpen`, `menuWidth` (`'280px'`), `menuHeight` (`'auto'`), `duration`.
+The menu is controlled when you pass `onOpenChange` (then you own `isOpen`); without it the menu keeps its own state. `SlidingMenu.ContentShifter` takes `position`, `isMenuOpen`, `menuWidth` (`'min(320px, 85vw)'`), `menuHeight` (`'auto'`), `duration`.
 
-`SlidingMenuItem`: `children`, `icon`, `onClick`, `href` (renders a link), `isActive`, `badge` (`string | number`), `disabled`, `variant` (`'default' | 'danger' | 'success'`). `SlidingMenuItemGroup`: `children`, `label` (uppercase section heading), `divider` (rule below, default `false`).
+`title` is a `Header` nameplate on the 32px edge (it truncates and uppercases) and names the menu for assistive tech; `subtitle` sits under it in the `Subheader` voice. There is no close button by default, since the backdrop and Escape close the menu; `showCloseButton` adds one with a 44px hit area.
+
+`SlidingMenuItem`: `children`, `icon`, `onClick`, `href` (renders a link), `isActive`, `badge` (`string | number`, drawn as a `Badge` at the right edge), `disabled`, `variant` (`'default' | 'danger' | 'success'`). `SlidingMenuItemGroup`: `children`, `label` (Label voice: Mochi Bold 12, uppercase, 32px above and 8px below), `divider` (a hairline below the group, default `false`; groups are otherwise separated by 32px of space).
+
+Look: rows are 54px with the 32px inset and Mochi Medium bold italic labels; icons sit in a fixed 24px column in muted ink. The active row takes the accent-soft tint and a 3px by 20px accent bar on its leading edge; there is one bar, and it slides between rows. Disabled rows dim to `--mochi-disabled-opacity`; `danger` and `success` rows use `--mochi-panel-error` and `--mochi-panel-success` (4.5:1 on the panel). `top` and `bottom` menus are a sheet of rows (560px centred, full width on a phone, the 24px corner on the page side), not a bar of side-by-side items.
+
+Motion: Full slides the panel in from its own edge over `--mochi-duration-stack` on `--mochi-ease-forward`, and back out the same way; the backdrop fades; the active bar moves over `--mochi-duration-control`. Reduced fades the panel and backdrop (at most `--mochi-duration-reduced`) and the bar cuts to the new row; Off is instant.
+
+Accessibility: with a backdrop the menu is `role="dialog"` with `aria-modal` (without one, `role="navigation"`), labelled by `title` (else "Menu", or your own `aria-label`). Focus moves to the first enabled item on open and returns to the opener on close; Tab stays inside while the backdrop is shown; Escape closes (`closeOnEscape`) the topmost layer only. A closed menu is hidden, so nothing in it takes focus. The active item has `aria-current="page"`.
 
 ```jsx
 function Layout() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <SlidingMenu isOpen={open} onOpenChange={setOpen}>
-        <SlidingMenuItemGroup label="Navigate" divider>
+      <SlidingMenu title="Pyxis" isOpen={open} onOpenChange={setOpen}>
+        <SlidingMenuItemGroup label="Navigate">
           <SlidingMenuItem icon={<HomeIcon />} isActive>Home</SlidingMenuItem>
           <SlidingMenuItem badge={3} onClick={() => go('inbox')}>Inbox</SlidingMenuItem>
         </SlidingMenuItemGroup>

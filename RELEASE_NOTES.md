@@ -46,6 +46,7 @@ This release brings remochi in line with the Mochi / webOS design guide and the 
 ### Type
 
 - **`Label`.** Mochi Bold 12/16, uppercase, on the 32px edge, with `role="heading"` unless rendered as an `h1`–`h6`. `Table` column headers and `SlidingMenu` group labels take the label style.
+- **`SlidingMenu` face lift.** Panel material with a 1px `--mochi-pane-edge` and a softer shadow (`--mochi-drawer-shadow-color`), 320px wide; optional `title`, `subtitle` and `showCloseButton`; 54px list-voice rows with muted icons, a `Badge`, and one 3px accent bar that slides to the active row (`aria-current="page"`); Label-voice group labels with 32px of space between groups (a hairline only with `divider`); top and bottom menus are sheets of rows; the panel and backdrop fade out as well as in, Reduced fades, Off is instant. With a backdrop it is a modal dialog: focus moves in and returns, Tab stays inside. New `--mochi-panel-error` and `--mochi-panel-success` for danger and success rows. The `ContentShifter` `menuWidth` default is now `min(320px, 85vw)`.
 - **`Header size="display"`.** Mochi Light 72/64, uppercase. `Header` tracking stays `normal`.
 
 ### New components
@@ -86,6 +87,8 @@ This release brings remochi in line with the Mochi / webOS design guide and the 
 - **Collapse animation.** Collapsing panels animate instead of snapping (see Motion).
 - **`Label`** no longer shrinks inside a `Repanel`'s flex column.
 - **`Dropdown` and `DateInput`; typings.** The `Dropdown` menu closes on a click outside it (its overlay was commented out); `DateInput` follows later changes to `value` (string or `Date`) without calling `onChange`. `DropdownOption` gains `divider`, `sectionLabel` and `disabled`, `Table` `columns` accepts plain strings, and the `SlidingMenu` `duration` default reads `--mochi-duration-stack` (260ms). The never-implemented `Dropdown` `searchable` prop is removed from the typings.
+- **Escape and stacked overlays.** Escape closes only the topmost overlay, so a `Dropdown` menu or `DateInput` calendar open inside a `Dialog` closes first and a second Escape closes the `Dialog`. A scrim press with a menu open closes only the menu.
+- **`DateInput` dates.** `'YYYY-MM-DD'` strings in `value`, `minDate` and `maxDate` are read as local calendar days, so they no longer show the previous day west of UTC. `minDate` and `maxDate` strings now disable days as they should.
 
 ## Upgrading from 0.5.x
 

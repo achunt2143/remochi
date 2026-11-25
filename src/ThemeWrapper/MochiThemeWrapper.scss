@@ -304,6 +304,10 @@ $mochi-faces: (
   // (#a0a0a0) is only 3.96:1 on the dark panel, so panels read these.
   --mochi-panel-text-muted:  #c0c0c0;
   --mochi-panel-button-text: #b4b4b4;
+  // Error and success ink on a panel (the SlidingMenu's danger and success
+  // rows): --mochi-error and --mochi-success are 3:1 or less on the dark panel.
+  --mochi-panel-error:       #ff8a80;
+  --mochi-panel-success:     #81c784;
 
   // MochiButton's "normal" decorator/label text. A dedicated token rather
   // than reusing --mochi-text-muted: this button was previously hardcoded
@@ -427,6 +431,8 @@ $mochi-faces: (
   --mochi-surface-material:  var(--mochi-panel-bg);
   // Same as the page-level values; only dark mode needs a panel-specific one.
   --mochi-panel-text-muted:  var(--mochi-text-muted);
+  --mochi-panel-error:       var(--mochi-error);
+  --mochi-panel-success:     #2e7d32;
   --mochi-panel-button-text: var(--mochi-button-text);
 
   // MochiButton's original hardcoded light-mode value, preserved exactly
@@ -525,6 +531,9 @@ $mochi-faces: (
   // drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14)) (the front pane
   // --mochi-stack-shadow-front: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22))).
   --mochi-pane-edge-width: 1px;
+  // The colour of the SlidingMenu's shadow, cast away from the docked edge
+  // (it was rgba(0, 0, 0, 0.44) at 10px; the pane edge now does most of the work).
+  --mochi-drawer-shadow-color: rgba(0, 0, 0, 0.22);
   --mochi-stack-shadow: none;
 
   // Display font token — available everywhere (portals included) and
@@ -795,6 +804,7 @@ $mochi-motion-selectors: list.join((
   '.mochi-contextual-popup',
   '.mochi-sliding-menu',
   '.mochi-sliding-menu-backdrop',
+  '.mochi-sliding-menu-active-bar',
   '.mochi-sliding-menu-content-shifter',
   '.mochi-collapsable-toggle',
   '.mochi-collapsable-body',
@@ -1048,7 +1058,18 @@ $mochi-motion-selectors: list.join((
     visibility 0s linear 0s !important;
 }
 @include mochi-motion('reduced', ('.mochi-sliding-menu-backdrop')) {
-  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  transition:
+    opacity var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear var(--mochi-duration-reduced, 150ms) !important;
+}
+@include mochi-motion('reduced', ('.mochi-sliding-menu-backdrop.mochi-sliding-menu-backdrop--open')) {
+  transition:
+    opacity var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear 0s !important;
+}
+// The active bar cuts to the new row and fades in or out.
+@include mochi-motion('reduced', ('.mochi-sliding-menu-active-bar')) {
+  transition: opacity var(--mochi-duration-reduced, 150ms) ease !important;
 }
 
 // Off: every transition and keyframe above, instant.

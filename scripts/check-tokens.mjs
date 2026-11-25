@@ -45,6 +45,10 @@ PAIRS.push(
   { fg: '--mochi-panel-text-muted', bg: '--mochi-panel-bg', theme: 'both', min: 4.5, note: 'muted subheader in panel (phase B)' },
   { fg: '--mochi-focus-ring', bg: '--color-background', theme: 'both', min: 3.0, note: 'focus ring (phase B)' },
   { fg: '--mochi-text', bg: '--mochi-avatar-bg', theme: 'both', min: 4.5, note: 'avatar initials' },
+  // SlidingMenu: danger/success rows and the active bar on the panel.
+  { fg: '--mochi-panel-error', bg: '--mochi-panel-bg', theme: 'both', min: 4.5, note: 'SlidingMenu danger row on panel' },
+  { fg: '--mochi-panel-success', bg: '--mochi-panel-bg', theme: 'both', min: 4.5, note: 'SlidingMenu success row on panel' },
+  { fg: '--mochi-focus-ring', bg: '--mochi-panel-bg', theme: 'both', min: 3.0, note: 'SlidingMenu active bar on panel' },
 );
 
 const SPINNER_BASE = { circle: '#ff4a4a', square: '#69cdff', triangle: '#ffb80d' };

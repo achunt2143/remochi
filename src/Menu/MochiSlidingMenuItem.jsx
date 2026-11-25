@@ -1,18 +1,20 @@
 import React, { useCallback } from 'react';
 import './MochiSlidingMenuItem.scss';
+import { Badge } from '../Badge';
 
 /**
  * MochiSlidingMenuItem
  *
  * A single interactive row inside a MochiSlidingMenu.
- * Renders as an <a> when `href` is provided, otherwise a <button>.
+ * Renders as an <a> when `href` is provided, otherwise a <button>. The active
+ * row carries aria-current="page" (the menu's accent bar slides to it).
  *
  * @param {React.ReactNode} children     - Label text
  * @param {React.ReactNode} icon         - Optional leading icon
  * @param {Function}        onClick      - Click handler
  * @param {string}          href         - If provided renders an anchor tag
  * @param {boolean}         isActive     - Highlights the item as selected
- * @param {string|number}   badge        - Optional badge value
+ * @param {string|number}   badge        - Optional badge value (a Badge, right-aligned)
  * @param {string}          className
  * @param {object}          style
  * @param {boolean}         disabled
@@ -49,9 +51,9 @@ const MochiSlidingMenuItem = ({
 
   const content = (
     <>
-      {icon  && <span className="mochi-sliding-menu-item-icon">{icon}</span>}
+      {icon  && <span className="mochi-sliding-menu-item-icon" aria-hidden="true">{icon}</span>}
       <span className="mochi-sliding-menu-item-label">{children}</span>
-      {badge != null && <span className="mochi-sliding-menu-item-badge">{badge}</span>}
+      {badge != null && <Badge className="mochi-sliding-menu-item-badge" content={badge} />}
     </>
   );
 
@@ -61,6 +63,7 @@ const MochiSlidingMenuItem = ({
         data-testid="mochi-sliding-menu-item"
         {...rest}
         href={href}
+        aria-current={isActive ? 'page' : undefined}
         className={itemClass}
         style={style}
         onClick={handleClick}
@@ -75,6 +78,7 @@ const MochiSlidingMenuItem = ({
       type="button"
       data-testid="mochi-sliding-menu-item"
       {...rest}
+      aria-current={isActive ? 'page' : undefined}
       className={itemClass}
       style={style}
       onClick={handleClick}

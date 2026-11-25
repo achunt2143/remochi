@@ -420,8 +420,14 @@ export interface MochiSlidingMenuProps extends React.HTMLAttributes<HTMLElement>
   closeOnBackdropClick?: boolean;
   /** Override the backdrop CSS color. Defaults to a theme-aware value. */
   backdropColor?: string;
-  /** Show the backdrop overlay. @default true */
+  /** Show the backdrop overlay. With it the menu is a modal dialog (focus moves in and is trapped); without, a navigation landmark. @default true */
   showBackdrop?: boolean;
+  /** Nameplate at the top, on the 32px edge (a Header: truncates, uppercases). Also names the menu for assistive tech. */
+  title?: React.ReactNode;
+  /** A line under the title in the Subheader voice. */
+  subtitle?: string;
+  /** Add a 44px close button to the header. The backdrop and Escape already close the menu. @default false */
+  showCloseButton?: boolean;
 }
 /** MochiSlidingMenu.ContentShifter props */
 export interface MochiSlidingMenuContentShifterProps
@@ -429,7 +435,7 @@ export interface MochiSlidingMenuContentShifterProps
   children?: React.ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';
   isMenuOpen?: boolean;
-  /** Width of the left/right menu (CSS value). @default '280px' */
+  /** Width of the left/right menu (CSS value). @default 'min(320px, 85vw)' */
   menuWidth?: string;
   /** Height of the top/bottom menu (CSS value). @default 'auto' */
   menuHeight?: string;
@@ -452,7 +458,9 @@ export interface MochiSlidingMenuItemProps
   icon?: React.ReactNode;
   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   href?: string;
+  /** Marks the row (aria-current="page"); the menu's accent bar slides to it. */
   isActive?: boolean;
+  /** Shown as a Badge at the right edge of the row. */
   badge?: string | number;
   className?: string;
   style?: React.CSSProperties;
@@ -465,9 +473,9 @@ export const SlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
 export interface MochiSlidingMenuItemGroupProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
-  /** Section heading rendered in uppercase muted text. */
+  /** Section heading in the Label voice (Mochi Bold 12, uppercase). */
   label?: string;
-  /** Show a divider border below the group. @default false */
+  /** Draw a hairline below the group. Groups are otherwise separated by 32px of space. @default false */
   divider?: boolean;
   className?: string;
   style?: React.CSSProperties;

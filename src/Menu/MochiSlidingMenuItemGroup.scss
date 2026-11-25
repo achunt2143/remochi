@@ -2,24 +2,34 @@
 // MochiSlidingMenuItemGroup — Remochi Design System
 // ============================================================
 
+// Groups are separated by space, not rules: the label brings its own 32px
+// above; an unlabelled group takes the 32px itself.
 .mochi-sliding-menu-item-group {
-  --group-label-color:   var(--mochi-text-muted, #555555);
+  --group-label-color:   var(--mochi-text, #1a1a1a);
   --group-divider-color: var(--mochi-border, rgba(0, 0, 0, 0.12));
 
-  padding: 12px 0;
   display: flex;
   flex-direction: column;
+
+  &:not(.mochi-sliding-menu-item-group--labelled):not(:first-child) { margin-top: 32px; }
 }
 
+// The Label voice (see Label.scss): Mochi Bold 12, uppercase, on the 32px
+// edge, 32px above and 8px below. Muted ink, since the panel is the ground.
 .mochi-sliding-menu-item-group-label {
-  padding: 16px 16px 8px;
+  box-sizing: border-box;
+  margin: 32px 0 8px;
+  padding: 0 32px;
   color: var(--group-label-color);
-  // The `label` rung: Mochi Bold.
   font-family: "Mochi Bold", sans-serif;
   font-size: 12px;
   font-weight: bold;
+  line-height: 16px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   user-select: none;
   pointer-events: none;
 }
@@ -29,18 +39,17 @@
   flex-direction: column;
 }
 
-.mochi-sliding-menu-item-group--divider {
-  border-bottom: 1px solid var(--group-divider-color);
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .mochi-sliding-menu-item-group       { padding: 8px 0; }
-  .mochi-sliding-menu-item-group-label { padding: 12px 16px 6px; font-size: 11px; }
+// A hairline only when asked for, inset to the 32px edge.
+.mochi-sliding-menu-item-group--divider::after {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 16px 32px 0;
+  background-color: var(--group-divider-color);
 }
 
 // Accessibility
 @media (prefers-contrast: more) {
-  .mochi-sliding-menu-item-group--divider { border-bottom-width: 2px; }
-  .mochi-sliding-menu-item-group-label    { font-weight: 700; }
+  .mochi-sliding-menu-item-group--divider::after { height: 2px; }
+  .mochi-sliding-menu-item-group-label           { font-weight: 700; }
 }
