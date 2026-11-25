@@ -799,6 +799,7 @@ $mochi-motion-selectors: list.join((
 @include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel:not([data-no-transition="true"])')) {
   transition-property: opacity !important;
   transition-duration: var(--mochi-duration-reduced, 150ms) !important;
+  transition-delay: 0s !important;
 }
 
 // A peek: the sliver fades in place instead of arriving from the right, and

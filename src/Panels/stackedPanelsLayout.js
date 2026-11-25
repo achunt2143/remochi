@@ -430,6 +430,8 @@ export function getClosePreviewDescriptor({
   const dFrom = getPanelDescriptor({ ...layout, activeIndex: fromIndex });
   const dTo = getPanelDescriptor({ ...layout, activeIndex: toIndex });
   const d = blendPanelDescriptors(dFrom, dTo, progress, containerWidth);
-  if (isSingleColumn(isNarrow, narrowBehavior)) d.opacity = Math.max(dFrom.opacity, dTo.opacity);
+  // The closing panel stays solid as it slides out, wide or narrow; the
+  // stylesheet fades it only at the very end of the move (role 'ahead').
+  if (isSingleColumn(isNarrow, narrowBehavior) || index === fromIndex) d.opacity = Math.max(dFrom.opacity, dTo.opacity);
   return d;
 }

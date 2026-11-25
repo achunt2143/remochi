@@ -93,6 +93,16 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
       opacity $repanel-duration $repanel-easing;
   }
 
+  // A panel that closes (role ahead) slides out to the right fully opaque, the
+  // stack's edge cropping it, and only fades at the very end of the move: on
+  // the same curve as its slide it would be gone within a few frames.
+  &[data-animate='true'] &__panel[data-role='ahead']:not([data-no-transition='true']) {
+    transition:
+      left $repanel-duration $repanel-easing,
+      width $repanel-duration $repanel-easing,
+      opacity calc(#{$repanel-duration} * 0.2) linear calc(#{$repanel-duration} * 0.8);
+  }
+
   // ======================================
   // Surface — clips + hosts the child (always fully interactive)
   // ======================================
@@ -215,19 +225,27 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
   // Peeks — where you came from, where you're going
   // ======================================
 
-  // A parent column keeps its full width (--repanel-column) however little
-  // of it shows, and the shell crops it on the right, so the left sliver
-  // (keepPast) shows the leading edge of the real panel (its corner, the
-  // start of its nameplate, its rows) rather than a squeezed copy. The crop
-  // is a clip-path, open on the left and top/bottom, so the nubbin and its
-  // hitbox outside the shell still show.
-  &__panel[data-role='parent'],
-  &__panel[data-role='past'] {
-    clip-path: inset(-20px 0 -20px -60px);
+  // A panel keeps at least its full column width (--repanel-column) however
+  // little of it shows, and the shell crops it on the right, so the left
+  // sliver (keepPast) shows the leading edge of the real panel (its corner,
+  // the start of its nameplate, its rows) rather than a squeezed copy. The
+  // crop is a clip-path on every panel, open on the left and top/bottom, so
+  // the nubbin and its hitbox outside the shell still show. It is the same
+  // for every role, and the surface never changes width at a role change (it
+  // follows the shell down to the column), so a panel that collapses or
+  // grows is cropped by its animating shell instead of snapping to its
+  // final size. A narrow stack has no room for a column: its sliver shows
+  // only the curve, so there the surface keeps the column fixed.
+  &__panel:not([data-role='peek']) {
+    clip-path: inset(-30px 0 -30px -60px);
   }
 
-  &__panel[data-role='parent'] > &__surface,
-  &__panel[data-role='past'] > &__surface {
+  &:not([data-narrow='true']) &__panel > &__surface {
+    min-width: var(--repanel-column, 365px);
+  }
+
+  &[data-narrow='true'] &__panel[data-role='parent'] > &__surface,
+  &[data-narrow='true'] &__panel[data-role='past'] > &__surface {
     right: auto;
     width: var(--repanel-column, 365px);
   }
