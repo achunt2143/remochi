@@ -20,7 +20,7 @@ If you remember one thing: **every motion, accent and shape points at something.
 
 ## 2. Principles
 
-Eight rules. Each says why, then how.
+Nine rules. Each says why, then how.
 
 ### Short visits: make the few common things the fastest
 
@@ -69,6 +69,12 @@ How: things travel, they do not cut or fade in on the spot. A popup grows out of
 The language stays the same on every screen. The controls change with the space you have. A phone held in one hand and a wide monitor with a mouse need different ways to get around, not different systems.
 
 How: decide by the width a panel actually has, not by the device. Give every gesture a visible equal. See section 8.
+
+### Within reach of one hand
+
+On a touch screen, people often hold the device in one hand and work it with their thumb. A control they can't reach without shifting their grip is a control that slows them down.
+
+How: on narrow, touch-first layouts, put the controls people act with (confirm, cancel, the next step, a sheet's choices) in the lower part of the screen, toward the thumb. `Dialog` already does this: below 768px it becomes a bottom sheet with its buttons toward the thumb. Panels are the exception: a panel is a place, not a control, so it fills the height, and its grabber sits at the bottom-left, where a thumb can reach it. See section 8.
 
 ### Say it plainly
 
@@ -399,6 +405,7 @@ Remochi is one design, not one design stretched. Nameplates, colour jobs, the ti
 
 - **The common path first, at every width.** Extra width adds reach, never extra steps.
 - **Scale the reach, not just the size.** A path that costs a thumb flick should not cost an arm across a monitor. If it does, turn it into a control where the pointer already is.
+- **Controls within one thumb's reach on touch.** On narrow, touch-first layouts, the controls people act with sit in the lower part of the screen: a sheet's buttons, a flow's Next and Cancel, the choice that confirms. Don't park the main action in a top corner. Panels and their content fill the height; their grabber is at the bottom-left, within reach.
 - **Show more, do not stretch.** Use extra width to reveal more of the path (more parent columns, a week instead of a day, a wider peek), never to make a panel wider than its content.
 - **Nothing hides in an edge.** If an action matters, it is on screen at every width. Edges hold peeks, which are visible doors.
 - **Decide by the space you have.** Switch on the width the panel actually has, so a narrow window on a wide screen behaves as narrow.
