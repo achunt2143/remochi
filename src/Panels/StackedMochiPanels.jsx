@@ -661,7 +661,9 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
   // ---- Render ------------------------------------------------------------
   // The right sliver(s): the live prediction, and any replaced one on its
   // way out. Each is the panel's real width (what it will have once open),
-  // set so far right that only `peekPx` of it shows, cropped by the root.
+  // set so far right that only `peekPx` of it (plus the overlap, over the
+  // front panel's edge) shows, cropped by the root.
+  const overlapPx = getOverlapPx(config);
   const peekShells = [];
   if (peekLive || leaving.length) {
     const open = getPanelDescriptor({
@@ -689,7 +691,9 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           data-role="peek"
           data-leaving={gone ? 'true' : undefined}
           style={{
-            left: `calc(100% - ${peekPx}px)`,
+            // Over the front panel's right edge by the overlap, so its
+            // curve lies on the front panel like a stacked column's.
+            left: `calc(100% - ${peekPx + overlapPx}px)`,
             width: open.width,
             opacity: 1,
             zIndex: panelCount + 30,
@@ -725,8 +729,8 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       // --repanel-column is a parent's full width (peek plus that overlap),
       // which its surface keeps while only a sliver of it shows.
       style={{
-        '--repanel-overlap': `${getOverlapPx(config)}px`,
-        '--repanel-column': `${config.peek + getOverlapPx(config)}px`,
+        '--repanel-overlap': `${overlapPx}px`,
+        '--repanel-column': `${config.peek + overlapPx}px`,
         '--repanel-peek-px': `${peekPx}px`,
         ...rootStyle,
       }}
@@ -763,12 +767,6 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
             zIndex: d.zIndex,
             pointerEvents: d.interactive ? 'auto' : 'none',
           };
-
-          // The right peek sits beside the front panel, not over it: the
-          // front panel is laid out up to the peek's left edge.
-          if (peekLive && !closeDrag && d.role === 'active') {
-            style.width = `calc(${typeof d.width === 'number' ? `${d.width}px` : d.width} - ${peekPx}px)`;
-          }
 
           // The wholly first child (array index 0, the base of the stack —
           // nothing behind it to reveal) never gets a nubbin grabber. This

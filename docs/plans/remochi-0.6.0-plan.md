@@ -291,9 +291,12 @@ Unchanged by the update. All in `src/Panels/`:
    surface, scallop, cropped Header and the one clue (in clear space under
    the Header); the left sliver renders its surface, scallop and the start
    of its Header. On a narrow stack both are 20 px of surface and scallop.
-   The front panel is laid out between the slivers, so no content sits
-   under a sliver and none of a sliver sits under the front panel. The
-   body appears as the peek becomes the front panel.
+   Surfaces overlap the Mochi way, content never does: the right peek lies
+   over the front panel's right edge by the 45 px scallop (the same overlap
+   parent columns use), the front panel lies over a 45 px tucked strip of the
+   left sliver, and each curve reveals the surface beneath. The front panel
+   is padded clear of the peek, and the sliver's Header ends where the front
+   panel starts. The body appears as the peek becomes the front panel.
 
 Under Reduced, a peek opening is a fade in place: no slide, and the
 nameplate is simply there.

@@ -8,8 +8,6 @@
 //         .repanel__grabber        reveal-depth hitbox (every panel but the first)
 //         .repanel__peek-button    a sliver's door (the past's, or the upcoming panel's)
 //
-// The slivers sit beside the front panel, never over or under it.
-//
 // Layout/geometry (left, width, transform, opacity, z-index) is driven by
 // inline styles from stackedPanelsLayout.js. Every revealed panel — active
 // or parent — is fully opaque and interactive; there is no dimming/scrim.
@@ -242,12 +240,24 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
     min-width: var(--repanel-column, 365px);
   }
 
-  // A peek is a door, not a second panel, and both slivers sit BESIDE the
-  // front panel: the stack lays the front panel out between them (see
-  // StackedMochiPanels.jsx and stackedPanelsLayout.js), so no content sits
-  // under a sliver and none of a sliver sits under the front panel. The
-  // Repanel renders only its Header while it is a door (its `door` and
-  // `peeking` props), so no body text shows on either.
+  // A peek is a door, not a second panel. As the Mochi panes do, the
+  // surfaces overlap: the right peek lies over the front panel's right edge by
+  // --repanel-overlap, and the front panel lies over the left sliver's tucked
+  // strip, each curve showing the surface beneath. Content never overlaps: the
+  // front panel is padded clear of the right peek, and the left sliver's
+  // Header is cut off where the front panel starts. The Repanel renders only
+  // its Header while it is a door (its `door` and `peeking` props), so no body
+  // text shows on either.
+  &[data-peek='true'] &__panel[data-active='true'] > &__surface > .mochi-panel {
+    padding-right: calc(var(--repanel-peek-px, 80px) + var(--repanel-overlap, 0px));
+  }
+
+  // The tucked strip holds no content: the sliver's Header ends at its
+  // visible edge (the panel's 1px left border is not part of the body).
+  &__panel[data-role='past'] .mochi-panel-body {
+    clip-path: inset(0 calc(100% - var(--repanel-peek-px, 80px) + 1px) 0 0);
+  }
+
   //
   // Narrow: only the surface and its curve show, so the Header (hidden, not
   // removed, so it stays the same node) and the clue are dropped.
@@ -265,7 +275,7 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
     bottom: 0;
     left: 0;
     z-index: 1;
-    width: var(--repanel-peek-px, 80px);
+    width: calc(var(--repanel-peek-px, 80px) + var(--repanel-overlap, 0px));
     min-height: 44px;
     margin: 0;
     padding: 0;
@@ -299,7 +309,7 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
   }
 
   &__panel[data-leaving='true'] {
-    transform: translateX(var(--repanel-peek-px, 80px));
+    transform: translateX(calc(var(--repanel-peek-px, 80px) + var(--repanel-overlap, 0px)));
   }
 
   // ======================================
@@ -328,5 +338,5 @@ $repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 @keyframes repanel-peek-in {
-  from { transform: translateX(var(--repanel-peek-px, 80px)); }
+  from { transform: translateX(calc(var(--repanel-peek-px, 80px) + var(--repanel-overlap, 0px))); }
 }
