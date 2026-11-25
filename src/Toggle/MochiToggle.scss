@@ -36,7 +36,7 @@
   // The focus ring and the disabled dimming ease; the track colour joins
   // them under .mochi-toggle-animate below.
   transition:
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
     box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   &:focus-visible {
@@ -54,8 +54,8 @@
 /* Track colour travels with the knob — only when canAnimate is true */
 .mochi-toggle-animate {
   transition:
-    background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
     box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 }
 
@@ -76,10 +76,10 @@
   background-color: var(--mochi-toggle-knob, white);
   overflow: hidden;
   transition:
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    width var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    margin-left var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    width var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    margin-left var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease);
   pointer-events: none;
 
   .mochi-toggle-button:not(.mochi-toggle-animate) & {
@@ -99,7 +99,7 @@
 
 /* Label text — the two labels crossfade (opacity set inline) */
 .mochi-toggle-content {
-  transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
+  transition: opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease);
   position: absolute;
   top: 0;
   line-height: 24px;

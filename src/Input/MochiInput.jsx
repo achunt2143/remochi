@@ -16,11 +16,11 @@ export const MochiInput = styled.input.attrs(props => ({
   // The ring (outline-color and -offset from nothing) and the disabled
   // dimming ease too.
   transition:
-    box-shadow var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    background var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    box-shadow var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    background var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
     outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
     outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
   outline: 2px solid transparent;

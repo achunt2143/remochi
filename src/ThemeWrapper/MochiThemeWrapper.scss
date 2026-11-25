@@ -555,7 +555,11 @@ $mochi-faces: (
   --mochi-duration-arrive:  220ms;
   // A small control changing state (a checkbox ticking, a toggle flipping, a
   // chevron turning): quicker than an arrival, never blocking input.
-  --mochi-duration-control: 160ms;
+  --mochi-duration-control: 200ms;
+  // A Button held down: its accent bar growing in (the design guide's 0.3s).
+  // The brackets spread and the press settle on the arrive duration, and the
+  // scale on --transition-fast. Reduced and Off replace all three.
+  --mochi-duration-press:   300ms;
   // A focus ring easing in (outline-offset and colour from nothing), never
   // popping.
   --mochi-duration-focus:   120ms;

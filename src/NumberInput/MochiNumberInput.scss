@@ -21,7 +21,7 @@
 // Two names alternate, so a second press restarts the hiding.
 .mochi-number-moving-0,
 .mochi-number-moving-1 {
-  animation: mochi-number-hide var(--mochi-duration-control, 160ms) step-end;
+  animation: mochi-number-hide var(--mochi-duration-control, 200ms) step-end;
 }
 .mochi-number-moving-1 {
   animation-name: mochi-number-hide-b;
@@ -30,16 +30,16 @@
 @keyframes mochi-number-hide-b { from, to { color: transparent; } }
 
 .mochi-number-in-up {
-  animation: mochi-number-rise-in var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) backwards;
+  animation: mochi-number-rise-in var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) backwards;
 }
 .mochi-number-in-down {
-  animation: mochi-number-drop-in var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) backwards;
+  animation: mochi-number-drop-in var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) backwards;
 }
 .mochi-number-out-up {
-  animation: mochi-number-rise-out var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease) forwards;
+  animation: mochi-number-rise-out var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease) forwards;
 }
 .mochi-number-out-down {
-  animation: mochi-number-drop-out var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease) forwards;
+  animation: mochi-number-drop-out var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease) forwards;
 }
 
 @keyframes mochi-number-rise-in  { from { opacity: 0; transform: translateY(4px); }  to { opacity: 1; transform: none; } }

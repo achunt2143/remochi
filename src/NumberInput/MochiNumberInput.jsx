@@ -15,8 +15,8 @@ const noSpinStyle = {
   marginRight:      0,       // override MochiInput’s default right margin
 };
 
-// How long the number's move runs: --mochi-duration-control (160ms).
-const MOTION_MS = 160;
+// How long the number's move runs: --mochi-duration-control (200ms).
+const MOTION_MS = 200;
 
 const MochiNumberInput = ({
   value    = 0,

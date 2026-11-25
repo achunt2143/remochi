@@ -16,12 +16,25 @@
   color: var(--mochi-text, #1a1a1a);
   // No ring by default.
   box-shadow: var(--mochi-avatar-ring, none);
-  font-family: "Mochi Medium", sans-serif;
+  // Initials are the nameplate voice, like the Label (Mochi Bold, 0.05em
+  // tracking) below 56px; from 56px up they echo the Header (Mochi Light,
+  // normal tracking, see --display below). Both faces are declared as is,
+  // so nothing is synthesized.
+  font-family: "Mochi Bold", sans-serif;
   font-weight: bold;
+  letter-spacing: 0.05em;
   line-height: 1;
   text-transform: uppercase;
   text-align: center;
   user-select: none;
+}
+
+.mochi-avatar--display {
+  font-family: "Mochi Light", sans-serif;
+  font-weight: normal;
+  letter-spacing: normal;
+
+  .mochi-avatar-initials { margin-right: 0; }
 }
 
 .mochi-avatar-initials,
@@ -29,6 +42,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+// Tracking adds space after the last letter too; take it back so the
+// initials stay centred.
+.mochi-avatar-initials {
+  margin-right: -0.05em;
 }
 
 .mochi-avatar-image {
@@ -39,7 +58,7 @@
   object-fit: cover;
   // Fades in once loaded.
   opacity: 0;
-  transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+  transition: opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
 
   &.mochi-avatar-image--loaded { opacity: 1; }
 }

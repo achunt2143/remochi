@@ -62,7 +62,7 @@ const Badge = ({
     lastCount.current = count;
     if (was === undefined || count === undefined || was === count) return undefined;
     setLeaving({ value: was, key: Date.now() });
-    const timer = setTimeout(() => setLeaving(null), 160);
+    const timer = setTimeout(() => setLeaving(null), 200);
     return () => clearTimeout(timer);
   }, [count]);
 

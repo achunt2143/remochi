@@ -17,8 +17,8 @@
   user-select: none;
   border-radius: var(--mochi-corner-xs, 4px);
   transition:
-    background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
     box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   &:hover {
@@ -37,7 +37,7 @@
   font-size: 11px;
   line-height: 1;
   color: var(--mochi-text-muted, #555555);
-  transition: transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: transform var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
   flex-shrink: 0;
 }
 
@@ -59,8 +59,8 @@
   opacity: 0;
   transform: translateY(-4px);
   transition:
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) 40ms,
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) 40ms;
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) 20ms,
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) 20ms;
 
   .mochi-collapsable-body[style*="1fr"] & {
     opacity: 1;

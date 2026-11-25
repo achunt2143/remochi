@@ -28,10 +28,10 @@
   text-decoration: none;
   text-align: left;
   // The active row's tint (and ink) fades as the selection moves.
-  transition: background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-              color            var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-              transform        var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-              opacity          var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+  transition: background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+              color            var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+              transform        var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+              opacity          var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
               outline-color    var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
               outline-offset   var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
   // Resting ring is invisible; focus-visible eases it in (below).

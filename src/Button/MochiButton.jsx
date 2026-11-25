@@ -128,15 +128,16 @@ const ButtonWrapper = styled.button`
     $appearance === "drop"
       ? `var(--mochi-button-ink, ${textColor($variant)})`
       : textColor($variant)};
-  // The press leans in and settles back; disabled eases its opacity; the
-  // focus ring eases in (outline-colour and -offset from nothing).
+  // The press leans in and settles back (releasing eases over the arrive
+  // duration, never a snap); disabled eases its opacity; the focus ring
+  // eases in (outline-colour and -offset from nothing).
   outline: 2px solid transparent;
   outline-offset: 0;
   transition:
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    background var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    transform var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease),
+    background var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
     outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
     outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
@@ -153,15 +154,28 @@ const ButtonWrapper = styled.button`
         : "6px"};
   }
 
+  // Held: scales to 1.05 over --transition-fast (150ms).
   &:active:not(:disabled) {
     transform: scale(1.05);
+    transition:
+      transform var(--transition-fast, 150ms ease),
+      background var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+      border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+      opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+      outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+      outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
   }
 
   &:active:hover:not(:disabled),
   &.active:not(:disabled) {
+    // Held: the bar grows in over 0.3s and the brackets spread over the
+    // arrive duration; releasing settles back on the base transitions.
     > div > span.mochi-underline {
       transform: scaleX(1);
       opacity: 1;
+      transition:
+        transform var(--mochi-duration-press, 300ms) var(--mochi-ease-forward, ease),
+        opacity var(--mochi-duration-press, 300ms) var(--mochi-ease-forward, ease);
     }
 
     > div > span.mochi-bracket-left {
@@ -189,8 +203,9 @@ const UnderlineBar = styled.span`
   transform-origin: center;
   transform: scaleX(0);
   opacity: 0;
-  // The bar draws in on press and settles back on release.
-  transition: transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease), opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
+  // The bar grows in on press (see ButtonWrapper) and settles back on
+  // release over the arrive duration.
+  transition: transform var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease), opacity var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease);
   pointer-events: none;
 `;
 
@@ -203,7 +218,7 @@ const bracketStyle = css`
   vertical-align: middle;
   margin: 0 2px;
   display: inline-block;
-  transition: color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease), transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
+  transition: color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease), transform var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease);
 `;
 
 const Bracket = styled.span`

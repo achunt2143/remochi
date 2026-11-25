@@ -57,9 +57,9 @@ The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme
 
 ### Motion, contrast, and transparency
 
-Every motion has three forms. **Full** is as designed. **Reduced** is opacity only: a fade of at most `--mochi-duration-reduced` (150ms), with no travel, scale, blur or stagger. **Off** is instant. Drags always track exactly. The mode comes from the `motion` prop, a `data-motion="full|reduced|off"` attribute on `<html>` or a wrapper (a host such as Pyxis can set it), else `prefers-reduced-motion: reduce` (which means Reduced). Timing lives in tokens: `--mochi-ease-forward`, `--mochi-duration-stack` (260ms), `--mochi-ease-arrive`, `--mochi-duration-arrive` (220ms).
+Every motion has three forms. **Full** is as designed. **Reduced** is opacity only: a fade of at most `--mochi-duration-reduced` (150ms), with no travel, scale, blur or stagger. **Off** is instant. Drags always track exactly. The mode comes from the `motion` prop, a `data-motion="full|reduced|off"` attribute on `<html>` or a wrapper (a host such as Pyxis can set it), else `prefers-reduced-motion: reduce` (which means Reduced). Timing lives in tokens: `--mochi-ease-forward`, `--mochi-duration-stack` (260ms), `--mochi-ease-arrive`, `--mochi-duration-arrive` (220ms), `--mochi-duration-press` (300ms, a held `Button`'s accent bar).
 
-What animates in Full (all within 220ms; small state changes use `--mochi-duration-control`, 160ms):
+What animates in Full (all within 220ms; small state changes use `--mochi-duration-control`, 200ms):
 
 - `Checkbox`: the fill grows from the centre and the tick draws left to right; a held press leans to 0.92. `Radio`: the fill grows in and shrinks away when another is chosen; same press lean.
 - `Toggle`: the knob and track colour travel together, the On/Off labels crossfade and the knob squishes 4px toward its travel while held. `Slider`: the knob grows while held and the value bubble rises from it; the fill and knob track the pointer exactly, and key steps ease.
@@ -68,7 +68,7 @@ What animates in Full (all within 220ms; small state changes use `--mochi-durati
 - `Item`, `ListItem` and `GridList`: press and selection tints fade, and the `GridList` ring eases in. `Input`, `TextArea` and `RichText`: the focus border and 3px halo ease in.
 - `Wizard`: a completed step's tick draws and the progress between steps fills, and a step's content enters from the right going forward (Next, Skip) and from the left going back, 12px with a fade.
 - `NumberInput`: the figure moves with the change, rising in from 4px below on increment (the old one fades up and out) and the reverse on decrement. `DateInput`: changing month slides the day grid in 12px from the side of the arrow used, with a fade.
-- `Table`: the sort arrow turns over when the direction flips, the active header's colour eases, and the row tint fades. `Badge`: it fades and scales in from 0.9 when it appears, and a changed count crossfades (no bounce). `ProgressBar`: the fill eases on `--mochi-ease-forward`, 160ms for a short change and 220ms for a long one.
+- `Table`: the sort arrow turns over when the direction flips, the active header's colour eases, and the row tint fades. `Badge`: it fades and scales in from 0.9 when it appears, and a changed count crossfades (no bounce). `ProgressBar`: the fill eases on `--mochi-ease-forward`, 200ms for a short change and 220ms for a long one.
 - Focus rings (`Button`, `Toggle`, `Checkbox`, fields, `Dropdown`, `GridList`, menu rows and the rest) ease in over `--mochi-duration-focus` (120ms), and a control becoming enabled or disabled eases its opacity over the control duration. A `SlidingMenu` row's active tint fades while its hover tint stays instant.
 
 Under Reduced these become opacity fades with no scale or travel, and under Off they are instant.
@@ -267,7 +267,7 @@ const dropdownOptions = [
 
 ### Avatar
 
-`Avatar` is a person's or app's picture in the waterdrop shape, which scales with the size (`waterdropRadius`: 12/3 at 40px, the full 16/4 from about 56px). `size` is `'sm'` (24), `'md'` (40, default), `'lg'` (56), `'xl'` (96) or a number of px. Pass `src` (with `alt`) for a picture; `name` gives the initials (first letters of up to two words) and the accessible name, and `icon` is shown when there is neither. If the image fails to load it falls back to the initials or icon. The ref goes to the root.
+`Avatar` is a person's or app's picture in the waterdrop shape, which scales with the size (`waterdropRadius`: 12/3 at 40px, the full 16/4 from about 56px). `size` is `'sm'` (24), `'md'` (40, default), `'lg'` (56), `'xl'` (96) or a number of px. Pass `src` (with `alt`) for a picture; `name` gives the initials (first letters of up to two words, uppercase: Mochi Bold with 0.05em tracking below 56px, Mochi Light at normal tracking from 56px up, like the `Label` and the `Header`) and the accessible name, and `icon` is shown when there is neither. If the image fails to load it falls back to the initials or icon. The ref goes to the root.
 
 ```jsx
 <Avatar src="/ada.png" alt="Ada Lovelace" size="lg" />

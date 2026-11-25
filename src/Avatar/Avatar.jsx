@@ -3,6 +3,9 @@ import { waterdropRadius } from '../shared/waterdrop';
 import './Avatar.scss';
 
 const SIZES = { sm: 24, md: 40, lg: 56, xl: 96 };
+// From this size the initials are Mochi Light (the Header's face), below it
+// Mochi Bold (the Label's).
+const DISPLAY_FROM = 56;
 
 // First letters of up to two words: "Ada Lovelace" -> "AL", "ada" -> "A".
 function initialsOf(name) {
@@ -68,7 +71,7 @@ const Avatar = React.forwardRef(function Avatar({
     <span
       {...rest}
       ref={ref}
-      className={['mochi-avatar', className].filter(Boolean).join(' ')}
+      className={['mochi-avatar', px >= DISPLAY_FROM && 'mochi-avatar--display', className].filter(Boolean).join(' ')}
       style={rootStyle}
       {...(showImage ? {} : label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >

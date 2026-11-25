@@ -14,7 +14,7 @@ const MochiRadioLabel = styled.label.attrs({ className: "mochi-radio-label" })`
   opacity: ${({ disabled }) => (disabled ? "var(--mochi-disabled-opacity, 0.4)" : 1)};
   user-select: none;
   // Disabled dims, enabled restores: the opacity eases.
-  transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
+  transition: opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease);
 `;
 
 // The checked fill is a fixed amber "selected" accent (--mochi-selected),
@@ -46,9 +46,9 @@ const MochiRadioOuter = styled.span.attrs({ className: "mochi-radio-box" })`
   margin-right: 8px;
   box-sizing: border-box;
   transition:
-    background var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+    background var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
   position: relative;
 
   // A held press leans in.
@@ -88,8 +88,8 @@ const MochiRadioFill = styled.span.attrs({ className: "mochi-radio-fill" })`
   opacity: ${({ $checked, $hidden }) => ($checked && !$hidden ? 1 : 0)};
   transform: scale(${({ $checked }) => ($checked ? 1 : 0.6)});
   transition:
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
   pointer-events: none;
 `;
 
@@ -103,7 +103,7 @@ const CheckmarkSVG = styled.svg.attrs({ className: "mochi-radio-check" })`
   width: 20px;
   height: 20px;
   opacity: ${({ $checked }) => ($checked ? 1 : 0)};
-  transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+  transition: opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
   // --mochi-toggle-knob (not --mochi-mark): the checkmark sits on the
   // amber checked fill, and the light grey --mochi-mark uses for the
   // unchecked fill doesn't read well against that amber — the same dark

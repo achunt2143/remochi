@@ -80,7 +80,7 @@
   .mochi-menu-item-check {
     margin-right: 6px;
     font-style: normal;
-    animation: mochi-fade-in var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) 60ms backwards;
+    animation: mochi-fade-in var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) 20ms backwards;
   }
   &.disabled { opacity: var(--mochi-disabled-opacity, 0.4); cursor: default; }
 }

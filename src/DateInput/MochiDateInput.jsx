@@ -71,7 +71,7 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
     border: 'none',
     background: 'none',
     fontFamily: 'inherit',
-    transition: 'background var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease)',
+    transition: 'background var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease)',
   };
 
   const goMonth = (delta) => {

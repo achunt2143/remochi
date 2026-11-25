@@ -33,7 +33,7 @@ const Fill = styled.div.attrs({ className: "mochi-progress-fill" })`
   width: ${({ $value }) => Math.min(Math.max($value, 0), 100)}%;
   // A short change takes the control duration, a long one the arrive duration
   // (set by the component from the distance travelled); forward ease either way.
-  transition: width var(--fill-duration, var(--mochi-duration-control, 160ms)) var(--mochi-ease-forward, ease);
+  transition: width var(--fill-duration, var(--mochi-duration-control, 200ms)) var(--mochi-ease-forward, ease);
   will-change: width;
 `;
 
@@ -67,7 +67,7 @@ export const MochiProgressBar = ({
         style={{
           '--fill-duration': distance > LONG_CHANGE
             ? 'var(--mochi-duration-arrive, 220ms)'
-            : 'var(--mochi-duration-control, 160ms)',
+            : 'var(--mochi-duration-control, 200ms)',
         }}
       />
     </Container>

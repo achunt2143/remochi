@@ -46,7 +46,7 @@ const Fill = styled.div.attrs({ className: "mochi-slider-fill" })`
   width: ${({ $percent }) => $percent}%;
   // Tracks the pointer exactly while dragging; a key step or a tap on the
   // track eases.
-  transition: ${({ $active }) => $active ? "none" : "width var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease)"};
+  transition: ${({ $active }) => $active ? "none" : "width var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease)"};
   z-index: 1;
 `;
 
@@ -69,10 +69,10 @@ const Thumb = styled.div.attrs({ className: "mochi-slider-thumb" })`
       : `0 2px 10px ${ACCENT_SOFT}`};
   z-index: 2;
   transition:
-    left ${({ $active }) => $active ? "0s" : "var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease)"},
-    width var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    height var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    box-shadow var(--mochi-duration-control, 160ms);
+    left ${({ $active }) => $active ? "0s" : "var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease)"},
+    width var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    height var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-control, 200ms);
   ${({ $active, $color }) =>
     $active &&
     css`
@@ -111,7 +111,7 @@ const PopupText = styled.div.attrs({ className: "mochi-slider-bubble" })`
   pointer-events: none;
   z-index: 101;
   opacity: ${({ $shown }) => ($shown ? 1 : 0)};
-  transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+  transition: opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
 `;
 
 // Wraps the bubble's canvas and text, over the knob's own box. Always
@@ -123,8 +123,8 @@ const Bubble = styled.div.attrs({ className: "mochi-slider-bubble-wrap" })`
   opacity: ${({ $shown }) => ($shown ? 1 : 0)};
   transform: translateY(${({ $shown }) => ($shown ? 0 : "8px")});
   transition:
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
 `;
 
 const SliderRoot = styled.div`

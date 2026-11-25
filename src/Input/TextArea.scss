@@ -16,10 +16,10 @@
   outline: 2px solid transparent;
   outline-offset: 0;
   transition:
-    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    background var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    box-shadow var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    background var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
     outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
     outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 

@@ -76,8 +76,8 @@
 .mochi-checkbox-animate {
   transition:
     background-color 90ms linear,
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
-    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
     box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   .mochi-checkbox-tick {
@@ -96,7 +96,7 @@
   // The fill grows in from the centre. Only after the box has changed once,
   // so a checkbox that renders already checked doesn't pop on mount.
   &.mochi-checkbox-live.checked {
-    animation: mochi-checkbox-grow var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+    animation: mochi-checkbox-grow var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
   }
 }
 
