@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useLayoutEffect } from 'react';
 import './Badge.scss';
 
 // Variant → background color map. Themed via the same --mochi-* tokens
@@ -8,13 +8,20 @@ import './Badge.scss';
 // amber --mochi-selected accent (same as Radio/Toggle/Checkbox's checked
 // state), error/danger match --mochi-error (same as the warning Button).
 const VARIANT_COLORS = {
-  default: 'var(--mochi-primary, #69cdff)',
-  success: 'var(--mochi-success, #4caf50)',
+  default: 'var(--mochi-primary, #357099)',
+  success: 'var(--mochi-success, #388e3c)',
   warning: 'var(--mochi-selected, #ffb80d)',
-  error:   'var(--mochi-error, #f44336)',
-  danger:  'var(--mochi-error, #f44336)',
-  info:    'var(--mochi-info, #2196f3)',
+  error:   'var(--mochi-error, #c62828)',
+  danger:  'var(--mochi-error, #c62828)',
+  info:    'var(--mochi-info, #1565c0)',
 };
+
+// Default label ink: white, except on the amber warning fill where white is
+// 1.73:1 — that gets --mochi-on-selected-ink (#404040).
+const VARIANT_INK = {
+  warning: 'var(--mochi-on-selected-ink, #404040)',
+};
+const DEFAULT_INK = 'var(--mochi-primary-text, #ffffff)';
 
 /**
  * MochiBadge — faithful React port of mochi.Badge.
@@ -34,7 +41,7 @@ const VARIANT_COLORS = {
  *   variant    {string}         'default'|'success'|'warning'|'error'|'danger'|'info'
  *   count      {number}         If provided, renders a count pill after the label
  *   background {string}         Override background color (overrides variant)
- *   color      {string}         Text color (default: '#ffffff')
+ *   color      {string}         Text color (default: white; dark on the warning variant)
  */
 const Badge = ({
   children,
@@ -42,10 +49,23 @@ const Badge = ({
   variant    = 'default',
   count,
   background,
-  color      = '#ffffff',
+  color,
   className  = '',
   ...rest
 }) => {
+  // A changed count crossfades: the previous number stays on top, fading out
+  // (the new one fades in beneath), then goes. See .mochi-badge-count-old.
+  const lastCount = useRef(count);
+  const [leaving, setLeaving] = useState(null);
+  useLayoutEffect(() => {
+    const was = lastCount.current;
+    lastCount.current = count;
+    if (was === undefined || count === undefined || was === count) return undefined;
+    setLeaving({ value: was, key: Date.now() });
+    const timer = setTimeout(() => setLeaving(null), 200);
+    return () => clearTimeout(timer);
+  }, [count]);
+
   // Resolve label: children > content > empty
   const label = children ?? (content !== undefined ? String(content) : '');
   const isEmpty = label === '' && count === undefined;
@@ -62,11 +82,23 @@ const Badge = ({
     <div {...rest} className={['mochi-badge', className].filter(Boolean).join(' ')}>
       <div
         className={innerClass}
-        style={{ background: bg, color }}
+        style={{ background: bg, color: color || VARIANT_INK[variant] || DEFAULT_INK }}
       >
         {label}
         {count !== undefined && (
-          <span className="mochi-badge-count">{count}</span>
+          <span className="mochi-badge-count">
+            <span
+              key={count}
+              className={leaving ? 'mochi-badge-count-new' : undefined}
+            >
+              {count}
+            </span>
+            {leaving && (
+              <span key={leaving.key} className="mochi-badge-count-old" aria-hidden="true">
+                {leaving.value}
+              </span>
+            )}
+          </span>
         )}
       </div>
     </div>

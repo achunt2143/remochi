@@ -1,12 +1,16 @@
 /* MochiHeader — color from ThemeWrapper CSS variables */
 
 .mochi-header {
+  box-sizing: border-box;
   height: 64px;
   padding: 0px 32px;
   white-space: nowrap;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  color: var(--mochi-text, #1a1a1a);
 
   .mochi-header-content {
     // Mochi's Header.less face: Prelude Light (bundled Lato Light fallback).
@@ -15,28 +19,39 @@
     font-size: 36px;
     line-height: 32px;
     letter-spacing: var(--mochi-header-tracking, normal);
-    color: var(--mochi-text);
+    color: var(--mochi-text, #1a1a1a);
     padding-top: 30px;
+    padding-bottom: 2px;
     text-overflow: ellipsis;
     text-transform: uppercase;
     overflow: hidden;
     white-space: nowrap;
-    display: inline-block;
-    vertical-align: text-bottom;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .mochi-header-controls {
-    display: inline-block;
-    vertical-align: bottom;
-    padding-top: 2px;
-
-    &.mochi-header-controls-first {
-      padding-left: 56px;
-    }
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    padding-bottom: 4px;
 
     & > * {
-      display: inline-block;
+      flex-shrink: 0;
       white-space: nowrap;
+    }
+  }
+
+  // Display rung: Mochi Light 72/64, same 32px edge. The bar keeps the header
+  // pattern (30px above the line box, 2px below): 30 + 64 + 2 = 96px, so the
+  // text still stands on the bottom.
+  &.mochi-header--display {
+    height: 96px;
+
+    .mochi-header-content {
+      font-size: 72px;
+      line-height: 64px;
     }
   }
 }

@@ -12,8 +12,17 @@
   height: 100%;
   overflow: visible;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 4px;
+  // The selection ring eases in: its spread grows from 0 as the padding and
+  // fill arrive.
+  transition:
+    background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    padding var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  border-radius: var(--mochi-corner-xs, 4px);
 
   img {
     width: 100%;
@@ -33,9 +42,10 @@
     font-size: 10pt;
     text-transform: uppercase;
     padding: 10px;
-    /* #fff on a dark gradient is intentional — image caption always sits on a dark overlay */
-    color: #fff;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+    /* White on a dark gradient is intentional — image caption always sits on a
+       dark overlay; .7 keeps it at 7:1 even over a white photo. */
+    color: var(--mochi-overlay-ink, #ffffff);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -43,11 +53,10 @@
   }
 
   &.selected {
-    background: var(--mochi-primary);
+    background: var(--mochi-accent, #69cdff);
     padding: 3px;
-    box-shadow: 0 0 0 3px var(--mochi-primary);
     box-shadow:
-      0 0 0 3px var(--mochi-primary),
+      0 0 0 3px var(--mochi-accent, #69cdff),
       0 2px 8px var(--mochi-shadow, rgba(0, 0, 0, 0.15));
 
     img {
@@ -56,7 +65,7 @@
   }
 
   &:focus {
-    outline: 2px solid var(--mochi-primary);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: 2px;
   }
 

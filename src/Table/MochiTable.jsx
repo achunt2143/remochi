@@ -97,8 +97,11 @@ const MochiTable = ({
                 <div className="mochi-table-header-content">
                   <span>{col.label}</span>
                   {sortable && sortConfig.key === col.key && (
-                    <span className="mochi-table-sort-indicator">
-                      {sortConfig.direction === 'asc' ? '▲' : '▼'}
+                    <span
+                      className="mochi-table-sort-indicator"
+                      data-direction={sortConfig.direction}
+                    >
+                      ▲
                     </span>
                   )}
                 </div>

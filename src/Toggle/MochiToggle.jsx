@@ -18,7 +18,10 @@ import './MochiToggle.scss';
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
  */
-const MochiToggle = ({
+// Resting knob width — keep in step with .mochi-toggle-button-knob.
+const KNOB_WIDTH = 20;
+
+const MochiToggle = React.forwardRef(({
   value = false,
   checked,
   onChange = () => {},
@@ -37,10 +40,16 @@ const MochiToggle = ({
   onPointerUp: userOnPointerUp,
   onKeyDown: userOnKeyDown,
   ...rest
-}) => {
+}, ref) => {
   const resolvedValue = checked !== undefined ? checked : value;
   const [isOn, setIsOn] = useState(resolvedValue);
   const trackRef = useRef(null);
+  // The track is the root element; hand it to the caller's ref as well.
+  const setTrackRef = useCallback((node) => {
+    trackRef.current = node;
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  }, [ref]);
   const knobRef  = useRef(null);
 
   // Sync controlled prop (honors either checked or value)
@@ -53,8 +62,9 @@ const MochiToggle = ({
   const applyKnobPosition = useCallback((on) => {
     if (!trackRef.current || !knobRef.current) return;
     const trackW = trackRef.current.offsetWidth;
-    const knobW  = knobRef.current.offsetWidth;
-    const xPos   = on ? trackW - knobW - 4 : 0; // 4 = margin 2px * 2
+    // The knob's resting width, not its measured one: while the toggle is held
+    // the knob is squished 4px wider, and measuring that left On 4px short.
+    const xPos   = on ? trackW - KNOB_WIDTH - 4 : 0; // 4 = margin 2px * 2
     knobRef.current.style.transform = `translateX(${xPos}px)`;
   }, []);
 
@@ -116,6 +126,7 @@ const MochiToggle = ({
   const classes = [
     'mochi-toggle-button',
     canAnimate && 'mochi-toggle-animate',
+    isOn       && 'mochi-toggle-on',
     disabled   && 'disabled',
     className,
   ].filter(Boolean).join(' ');
@@ -123,7 +134,7 @@ const MochiToggle = ({
   return (
     <div
       {...rest}
-      ref={trackRef}
+      ref={setTrackRef}
       className={classes}
       style={{ backgroundColor: isOn ? colorActive : colorInactive, ...style }}
       role="switch"
@@ -153,7 +164,7 @@ const MochiToggle = ({
       {/* On label — left side, visible when on */}
       <span
         className="mochi-toggle-content mochi-toggle-content-on"
-        style={{ visibility: isOn ? 'visible' : 'hidden' }}
+        style={{ opacity: isOn ? 1 : 0 }}
       >
         {onContent || '\u00a0'}
       </span>
@@ -161,7 +172,7 @@ const MochiToggle = ({
       {/* Off label — right side, visible when off */}
       <span
         className="mochi-toggle-content mochi-toggle-content-off"
-        style={{ visibility: isOn ? 'hidden' : 'visible' }}
+        style={{ opacity: isOn ? 0 : 1 }}
       >
         {offContent || '\u00a0'}
       </span>
@@ -170,7 +181,9 @@ const MochiToggle = ({
       <span ref={knobRef} className="mochi-toggle-button-knob" />
     </div>
   );
-};
+});
+
+MochiToggle.displayName = 'MochiToggle';
 
 export { MochiToggle };
 export default MochiToggle;

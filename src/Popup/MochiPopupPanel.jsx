@@ -8,6 +8,8 @@ import {
   ButtonBar,
 } from "./MochiPopupPanel.styles";
 import { Button as MochiButton } from "../Button";
+import { Nubbin, BUMP, CORNER, NUBBIN_STROKE } from "../shared/nubbin";
+import { useEscapeLayer, hasLayerAbove } from "../shared/escapeStack";
 
 const VERT_FLUSH_MARGIN  = 100;
 const HORIZ_FLUSH_MARGIN = 100;
@@ -16,6 +18,57 @@ const LONG_POPUP         = 200;
 const MARGIN             = 8;
 const NUB_W              = 71;
 const NUB_SIDE           = 71;
+
+// The panel's own border and background (see Panel), so the nubbin reads
+// as part of the panel in either theme.
+const NUB_STROKE = "var(--mochi-panel-border, var(--mochi-popup-border, #646464))";
+const NUB_FILL   = "var(--mochi-surface-material, var(--mochi-panel-bg, #f5f5f5))";
+
+// Which nubbin a placement (Panel's position classes) gets: a bump pointing
+// at the anchor, or, for the corner placements, a corner cap whose tip sits
+// at the panel corner nearest it ('start' = left/top end of its box).
+function nubbinFor(classes) {
+  const has = (c) => classes.split(" ").includes(c);
+  if (has("vertical")) {
+    const direction = has("below") ? "up" : "down";
+    if (!has("corner")) return { shape: "bump", direction };
+    return { shape: "corner", direction, side: has("left") ? "end" : "start" };
+  }
+  const direction = has("left") ? "left" : "right";
+  if (!has("corner")) return { shape: "bump", direction };
+  return { shape: "corner", direction, side: has("high") ? "start" : "end" };
+}
+
+// The panel corner a corner cap sits on, as the computed-style property that
+// holds its radius (the cap stands in for that corner; see nubbin.jsx).
+function cornerRadiusProp(classes) {
+  const has = (c) => classes.split(" ").includes(c);
+  if (!has("corner")) return null;
+  if (has("vertical")) {
+    const top = has("below");
+    return `border${top ? "Top" : "Bottom"}${has("left") ? "Right" : "Left"}Radius`;
+  }
+  const high = has("high");
+  return `border${high ? "Top" : "Bottom"}${has("left") ? "Left" : "Right"}Radius`;
+}
+
+// Where a nubbin's tip is inside its own box (the box is `length` x `depth`
+// for up/down, transposed for left/right), in the same frame nubbin.jsx
+// draws in: u along the line, v across it, mapped the way its `toBox` does.
+function nubbinTip({ shape, direction, side }) {
+  const { length, depth } = shape === "bump" ? BUMP : CORNER;
+  let u = shape === "bump" ? BUMP.peak : CORNER.ramp[0][0];
+  const v = shape === "bump"
+    ? depth - NUBBIN_STROKE / 2 - BUMP.height
+    : CORNER.ramp[0][1];
+  if (shape === "corner" && side === "end") u = length - u;
+  switch (direction) {
+    case "down":  return [u, depth - v];
+    case "left":  return [v, u];
+    case "right": return [depth - v, u];
+    default:      return [u, v];
+  }
+}
 
 export function MochiPopupPanel({
   isOpen,
@@ -38,8 +91,18 @@ export function MochiPopupPanel({
   const computePosition = useCallback(() => {
     if (!panelRef.current) return;
 
-    const a = anchorRectProp ?? anchorEl?.current?.getBoundingClientRect();
-    if (!a) return;
+    const ar = anchorRectProp ?? anchorEl?.current?.getBoundingClientRect();
+    if (!ar) return;
+    // A plain { top, left, bottom, width, height } is accepted, so derive
+    // the edges it may leave out.
+    const a = {
+      top: ar.top,
+      left: ar.left,
+      width: ar.width,
+      height: ar.height,
+      bottom: ar.bottom ?? ar.top + ar.height,
+      right: ar.right ?? ar.left + ar.width,
+    };
 
     const pw    = panelRef.current.offsetWidth;
     const ph    = panelRef.current.offsetHeight;
@@ -173,13 +236,61 @@ export function MochiPopupPanel({
   useEffect(() => {
     if (!isOpen) return;
     window.addEventListener("resize", computePosition);
-    const onKeyDown = (e) => { if (e.key === "Escape") onClose?.(); };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("resize", computePosition);
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isOpen, onClose, computePosition]);
+    return () => window.removeEventListener("resize", computePosition);
+  }, [isOpen, computePosition]);
+
+  // Escape closes the popup only while it is the topmost layer.
+  const layerRef = useEscapeLayer(isOpen, onClose);
+  // A press that closes a layer above (e.g. a menu) must not also close this
+  // popup through the scrim click that follows it.
+  const pressedUnderLayer = useRef(false);
+
+  // Keep the panel on whole pixels. Its border is painted snapped to device
+  // pixels; the nubbin (an SVG) sits at `left/top: 100%` of a size that's
+  // fractional whenever the content is, and the two don't always snap the
+  // same way, which leaves a sub-pixel step where the border runs into the
+  // nubbin. Rounding the position (see panelStyle) and rounding the size up
+  // (by under a pixel) leaves nothing to snap.
+  const [wholeSize, setWholeSize] = useState(null);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    if (!pos || !el) { setWholeSize(null); return; }
+    const cs = getComputedStyle(el);
+    const w = Math.ceil(parseFloat(cs.width) - 0.01);
+    const h = Math.ceil(parseFloat(cs.height) - 0.01);
+    setWholeSize((prev) => (prev && prev.w === w && prev.h === h ? prev : { w, h }));
+  }, [pos]);
+
+  // A corner cap takes the radius of the panel corner it sits on. The popup
+  // squares that corner (see the styles), so this reads 0, but it is
+  // measured from the computed style, in the layout pass, so a rounder
+  // corner (a host's own styles) would still be joined cleanly and the cap
+  // is never painted with another radius.
+  const [cornerRadius, setCornerRadius] = useState(0);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    const prop = pos && el && cornerRadiusProp(pos.classes);
+    const r = prop ? parseFloat(getComputedStyle(el)[prop]) || 0 : 0;
+    setCornerRadius((prev) => (prev === r ? prev : r));
+  }, [pos, wholeSize]);
+
+  // The entrance scales from the nubbin's tip, so the popup grows out of the
+  // thing it points at. Measured from the drawn nubbin (relative to the
+  // panel's border box, undoing the entrance's own scale) and handed to the
+  // panel as custom properties.
+  const [origin, setOrigin] = useState(null);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    const nub = el?.querySelector(".mochi-popup-nubbin");
+    if (!pos || !el || !nub) { setOrigin(null); return; }
+    const panelRect = el.getBoundingClientRect();
+    const nubRect = nub.getBoundingClientRect();
+    const scale = el.offsetWidth ? panelRect.width / el.offsetWidth : 1;
+    const [tipX, tipY] = nubbinTip(nubbinFor(pos.classes));
+    const x = Math.round((nubRect.left - panelRect.left) / scale + tipX);
+    const y = Math.round((nubRect.top - panelRect.top) / scale + tipY);
+    setOrigin((prev) => (prev && prev.x === x && prev.y === y ? prev : { x, y }));
+  }, [pos, wholeSize]);
 
   useEffect(() => {
     if (pos) panelRef.current?.focus();
@@ -189,10 +300,15 @@ export function MochiPopupPanel({
   // the panel invisible so useLayoutEffect can read its dimensions.
   const panelStyle = pos
     ? {
-        top:  pos.top,
-        left: pos.left,
+        top:  Math.round(pos.top),
+        left: Math.round(pos.left),
+        ...(wholeSize && { minWidth: wholeSize.w, minHeight: wholeSize.h }),
         "--nubbin-h-offset": `${pos.nubHOff}px`,
         "--nubbin-v-offset": `${pos.nubVOff}px`,
+        ...(origin && {
+          "--popup-origin-x": `${origin.x}px`,
+          "--popup-origin-y": `${origin.y}px`,
+        }),
       }
     : { visibility: "hidden", top: 0, left: 0 };
 
@@ -204,7 +320,13 @@ export function MochiPopupPanel({
   return ReactDOM.createPortal(
     <Overlay
       $hidden={!isOpen}
-      onClick={(e) => isOpen && e.target === e.currentTarget && onClose?.()}
+      onPointerDownCapture={() => {
+        pressedUnderLayer.current = !!layerRef.current && hasLayerAbove(layerRef.current);
+      }}
+      onClick={(e) => {
+        if (pressedUnderLayer.current) { pressedUnderLayer.current = false; return; }
+        if (isOpen && e.target === e.currentTarget) onClose?.();
+      }}
       aria-modal={isOpen ? "true" : undefined}
       aria-hidden={!isOpen ? "true" : undefined}
       role="dialog"
@@ -223,11 +345,21 @@ export function MochiPopupPanel({
         {actions.length > 0 && (
           <ButtonBar>
             {actions.map(({ label, onClick, type }, idx) => (
-              <MochiButton key={idx} onClick={onClick} $type={type}>
+              <MochiButton key={idx} onClick={onClick} type={type}>
                 {label}
               </MochiButton>
             ))}
           </ButtonBar>
+        )}
+        {isOpen && pos && (
+          <Nubbin
+            {...nubbinFor(pos.classes)}
+            radius={cornerRadius}
+            className="mochi-popup-nubbin"
+            stroke={NUB_STROKE}
+            fill={NUB_FILL}
+            shadow
+          />
         )}
       </Panel>
     </Overlay>,

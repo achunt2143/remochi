@@ -9,12 +9,13 @@
  *   - Portal into document.body (position: fixed)
  *   - Positions below activator; flips above when viewport is tight
  *   - Scrollable inner list (maxHeight, default 200px)
- *   - Click-outside overlay closes the menu
+ *   - A pointerdown outside the menu and its trigger (anchorEl) closes the menu
  *   - Escape key closes the menu
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Panel } from '../Popup/MochiPopupPanel.styles.jsx';
+import { useEscapeLayer } from '../shared/escapeStack';
 import './MochiMenu.scss';
 
 const MARGIN = 4; // px gap between activator bottom and menu top
@@ -55,7 +56,8 @@ const MochiMenu = ({
     if (left + minWidth > innerW - MARGIN) left = Math.max(MARGIN, innerW - minWidth - MARGIN);
     if (left < MARGIN) left = MARGIN;
 
-    setStyle({ position: 'fixed', top, left, width: minWidth, maxWidth: 'none', visibility: 'visible' });
+    // The menu grows from the edge that meets the trigger.
+    setStyle({ position: 'fixed', top, left, width: minWidth, maxWidth: 'none', visibility: 'visible', transformOrigin: up ? 'bottom center' : 'top center' });
   }, [anchorEl]);
 
   useEffect(() => {
@@ -71,20 +73,27 @@ const MochiMenu = ({
     };
   }, [isOpen, adjustPosition]);
 
+  // Escape closes the menu only while it is the topmost layer.
+  useEscapeLayer(isOpen, onClose);
+
+  // Close on a pointerdown outside both the menu and its trigger. The trigger
+  // is excluded so its own click can toggle the menu instead of reopening it.
   useEffect(() => {
     if (!isOpen) return;
-    const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
+    const onPointerDown = (e) => {
+      const anchor = anchorEl?.current ?? anchorEl;
+      if (menuRef.current?.contains(e.target)) return;
+      if (anchor?.contains?.(e.target)) return;
+      onClose?.();
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [isOpen, anchorEl, onClose]);
 
   if (!isOpen) return null;
 
   return createPortal(
     <>
-      {/* Transparent overlay — click outside to close */}
-      {/* <div className="mochi-menu-overlay" onClick={onClose} /> */}
-
       {/* Panel reuses the same styled-component as MochiPopupPanel:
           bg, border, border-radius, box-shadow, fadeIn animation.
           The 'mochi-menu' class adds no-nubbin override from MochiMenu.scss. */}

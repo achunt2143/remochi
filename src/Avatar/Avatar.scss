@@ -1,0 +1,64 @@
+/* MochiAvatar */
+
+.mochi-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  vertical-align: middle;
+  // Neutral ground and ink (the panel hover grey and the theme's text, 4.5:1
+  // checked by check:tokens). The radius is set per size by the component
+  // (waterdropRadius), so the drop scales with the avatar.
+  background: var(--mochi-avatar-bg, var(--mochi-panel-hover, #ececec));
+  color: var(--mochi-text, #1a1a1a);
+  // No ring by default.
+  box-shadow: var(--mochi-avatar-ring, none);
+  // Initials are the nameplate voice, like the Label (Mochi Bold, 0.05em
+  // tracking) below 56px; from 56px up they echo the Header (Mochi Light,
+  // normal tracking, see --display below). Both faces are declared as is,
+  // so nothing is synthesized.
+  font-family: "Mochi Bold", sans-serif;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-align: center;
+  user-select: none;
+}
+
+.mochi-avatar--display {
+  font-family: "Mochi Light", sans-serif;
+  font-weight: normal;
+  letter-spacing: normal;
+
+  .mochi-avatar-initials { margin-right: 0; }
+}
+
+.mochi-avatar-initials,
+.mochi-avatar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Tracking adds space after the last letter too; take it back so the
+// initials stay centred.
+.mochi-avatar-initials {
+  margin-right: -0.05em;
+}
+
+.mochi-avatar-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  // Fades in once loaded.
+  opacity: 0;
+  transition: opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
+
+  &.mochi-avatar-image--loaded { opacity: 1; }
+}

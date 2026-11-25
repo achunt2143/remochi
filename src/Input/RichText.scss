@@ -3,7 +3,7 @@
 .mochi-richtext {
   font-family: "Mochi Medium", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: var(--font-size-base, 14px);
-  color: var(--mochi-field-text, #4b4b4b);
+  color: var(--mochi-field-text, #1a1a1a);
   font-style: italic;
   line-height: 1.6;
   min-height: 50px;
@@ -14,17 +14,26 @@
   white-space: pre-wrap;
   background: var(--mochi-field-bg, #fff);
   border: 1px solid var(--mochi-field-border, rgba(0,0,0,0.12));
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  transition:
+    background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   &:focus {
-    outline: none;
     background-color: var(--mochi-primary-soft, rgba(105,205,255,0.05));
-    // Mochi's focused-field border (InputDecorator.less: #69cdff).
+    // Mochi's focused-field border (InputDecorator.less: #69cdff), with the
+    // same 3px halo the Input and TextArea have; it spreads in from 0.
     border-color: var(--mochi-accent, #69cdff);
+    box-shadow: 0 0 0 3px var(--mochi-accent-soft, rgba(105,205,255,0.3));
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mochi-primary, #5b9dd9);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: 1px;
   }
 
@@ -39,10 +48,9 @@
   &::-webkit-scrollbar-track { margin: 4px 0; background: transparent; border-radius: 10px; }
   &::-webkit-scrollbar-thumb {
     height: 10px;
-    background-color: var(--mochi-text-muted, #7d7d7d);
+    background-color: var(--mochi-text-muted, #555555);
     border-radius: 10px;
-    transition: background-color 0.2s ease;
-    &:hover { background-color: var(--mochi-text, #5d5d5d); }
+    &:hover { background-color: var(--mochi-text, #1a1a1a); }
   }
 
   strong, b   { font-weight: bold; }
@@ -60,7 +68,7 @@
   blockquote {
     margin: 8px 0;
     padding-left: 12px;
-    border-left: 3px solid var(--mochi-border, #ccc);
+    border-left: 3px solid var(--mochi-border, rgba(0, 0, 0, 0.12));
   }
 
   ul, ol { margin: 8px 0; padding-left: 24px; }

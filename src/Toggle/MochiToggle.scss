@@ -33,9 +33,15 @@
     height: 54px;
   }
 
+  // The focus ring and the disabled dimming ease; the track colour joins
+  // them under .mochi-toggle-animate below.
+  transition:
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
+
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px var(--mochi-accent-soft, var(--mochi-selected-soft, rgba(255, 184, 13, 0.45)));
+    box-shadow: 0 0 0 3px var(--mochi-focus-ring, #357099);
   }
 
   &.disabled {
@@ -45,12 +51,12 @@
   }
 }
 
-/* Background-color animation — only when canAnimate is true */
+/* Track colour travels with the knob — only when canAnimate is true */
 .mochi-toggle-animate {
-  -webkit-transition: background-color 0.1s linear;
-  -moz-transition: background-color 0.1s linear;
-  -o-transition: background-color 0.1s linear;
-  transition: background-color 0.1s linear;
+  transition:
+    background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 }
 
 /* White sliding knob */
@@ -62,13 +68,18 @@
   left: 2px;
   width: 20px;
   height: 20px;
-  border-radius: 10px;
+  // Half the knob's 20px height: intrinsic geometry, so the pill token.
+  border-radius: var(--mochi-corner-pill, 9999px);
   // Plain white reads as too stark in dark mode — --mochi-toggle-knob is a
   // dedicated dark grey there instead, matching --mochi-panel-bg's tone
   // (see MochiThemeWrapper.scss).
   background-color: var(--mochi-toggle-knob, white);
   overflow: hidden;
-  transition: transform 0.1s linear, background-color 0.1s linear;
+  transition:
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    width var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    margin-left var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease);
   pointer-events: none;
 
   .mochi-toggle-button:not(.mochi-toggle-animate) & {
@@ -76,8 +87,19 @@
   }
 }
 
-/* Label text */
+// A held press squishes the knob 4px toward where it will travel: right
+// from Off, left from On (it grows back from its far edge, so it stays inside
+// the pill).
+.mochi-toggle-animate:active:not(.disabled) .mochi-toggle-button-knob {
+  width: 24px;
+}
+.mochi-toggle-animate.mochi-toggle-on:active:not(.disabled) .mochi-toggle-button-knob {
+  margin-left: -4px;
+}
+
+/* Label text — the two labels crossfade (opacity set inline) */
 .mochi-toggle-content {
+  transition: opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease);
   position: absolute;
   top: 0;
   line-height: 24px;
@@ -104,7 +126,7 @@
 // grey doesn't read well against amber, unlike the knob's darker shade.
 // The "off" label stays plain white in both themes.
 :root[data-mochi-theme='dark'] .mochi-toggle-content-on {
-  color: var(--mochi-toggle-knob, #404040);
+  color: var(--mochi-on-selected-ink, #404040);
 }
 
 /* Off label: right side, padding matching original margin: 0 0 -24px 24px; padding: 0 4px 0 2px */

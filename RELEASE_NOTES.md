@@ -1,3 +1,136 @@
+# Remochi v0.6.0 — 2026-11-25
+
+This release brings remochi in line with the Mochi / webOS design guide and the Pyxis identity: a lighter pane, peeks and width classes on `RepanelStack`, signature corners (the waterdrop as an accent), a new `Avatar` and `Label`, colour jobs with contrast floors and greyscale cues, three motion modes (Full, Reduced, Off), and high-contrast and reduced-transparency modes. It also carries the work from the fix branch that 0.5.1 never shipped: nubbins, divider caps and the grabber are drawn in code, and the `Spinner` is an SVG. The PNG and GIF sprites are gone from `src`.
+
+**This release has visible and behavior changes — see [Upgrading from 0.5.x](#upgrading-from-05x) before bumping.**
+
+## Highlights
+
+### Design system alignment
+
+- **A lighter Mochi pane.** Panes draw a 1px left edge in the new `--mochi-pane-edge`; `--mochi-pane-edge-width` sets the width. `RepanelStack` casts no shadow by default (`--mochi-stack-shadow`, `--mochi-stack-shadow-front`). The base pane in a stack is full-bleed: square, no edge, no shadow.
+- **Screen tokens and width classes.** New `SCREEN_NARROW` (768), `SCREEN_WIDE` (1280) and `useWidthClass(ref)`, which classes an element by its own width. `RepanelStack` decides narrow from its own width. `--mochi-screen-narrow` and `--mochi-screen-wide` mirror the constants.
+
+### Panels and peeks
+
+- **Peeks.** `RepanelStack` `upcoming` / `onUpcomingOpen` show the predicted next panel as a right sliver (`--mochi-peek-width`, 80px; `--mochi-peek-width-narrow`, 20px). `keepPast` (default `true`) keeps a left sliver of the panel you came from when it collapses. `Repanel` takes `hint`, `sequence` and `peekLabel` for one clue while peeking. Slivers are buttons with an accessible name and are at least 44px tall.
+- **A peek is a door, not a second panel.** The right peek shows only its corner, its cropped `Header` and one clue; the left sliver shows its corner and the start of its `Header`; on a narrow stack both are only the curve. The `Header` stays the same node when a peek opens.
+- **Peeks overlap the front panel the Mochi way.** The right peek lies over the front panel's right edge by the 45px scallop, and the front panel's curve lies over the left sliver, each showing the surface beneath. The front panel pads its content clear of the peek, and the left sliver clips its `Header` to the visible part.
+- **Keyboard grabber.** The grabber answers Enter and Space like a double-click, and its label says what it does.
+
+### Shape and corners
+
+- **The waterdrop is an accent.** `--mochi-drop-radius` (`16px 4px 16px 16px`, top-right nearly sharp) is reserved for special purposes: the new `Avatar`, the `Dialog` (the one interruption; its phone sheet keeps the drop's top corners) and `FloatingPanel` `shape="drop"`. `PopupPanel` already points with its nubbin, so it and the `Dropdown` menu keep the 24px field corner; `FloatingPanel` keeps its 16px corner; the `SlidingMenu` rounds the side facing the page at 24px.
+- **`--mochi-floating-radius`.** It has no default, like `--mochi-accent`. Set it (for example to `var(--mochi-drop-radius)`, as Pyxis does) and every floating surface follows. `PopupPanel` corner nubbins take the radius of the corner they sit on; with the default radius that corner is square.
+- **`waterdropRadius(size)` and the SCSS `waterdrop($size)`** scale the drop with size. The remaining off-ladder radii moved onto the corner ladder, with a new `--mochi-corner-xs` (4px).
+- **`FloatingPanel` `shape`.** `shape="round"` (default) or `"drop"`; `fullBleed` still wins.
+- **Nubbins, divider caps and the grabber drawn in code.** From the fix branch: there is no bitmap chrome, so it follows a radius or a stroke width. The grabber draws its stroke at the pane's edge width and casts no shadow, so its line matches the straight edge exactly; the popup and divider nubbins keep their shadow, which now paints outside the shape only and scales with the stroke.
+
+### Colour and contrast
+
+- **Colour jobs.** One `--mochi-focus-ring` for every focused control. Light `--color-primary` darkens to `#357099` (text is 5.3:1 on white), and the light focus ring is the primary rather than the accent blue.
+- **Contrast floors.** `--mochi-panel-text-muted` and panel-scoped button ink pass 4.5:1 on dark panels; `GridList` captions meet 7:1 over imagery; warning `Badge`s use dark ink.
+- **Greyscale cues.** A selected `Item`, `Dropdown` option and `Pagination` page carry a cue that reads in greyscale (weight, a check, an accent bar) instead of a primary outline or a white-on-blue chip.
+- **No bare hex colours remain in components**, and `var()` fallbacks match the light theme. `SlidingMenu` drops its foreign palette for the `mochi-*` aliases.
+
+### Motion
+
+- **Full, Reduced, Off.** Motion tokens (`--mochi-ease-forward`, `--mochi-duration-stack`, `--mochi-ease-arrive`, `--mochi-duration-arrive`, `--mochi-duration-press`, `--mochi-duration-control`, `--mochi-duration-focus`, `--mochi-duration-reduced`) replace the literals, and the phone sheet no longer exits slower than it arrives. The mode is `data-motion="full|reduced|off"` on `<html>` (as Pyxis sets it) or on a `ThemeWrapper`, else `prefers-reduced-motion`. Reduced is an opacity fade of at most 150ms with no travel, scale or stagger; Off is instant; drags always track exactly. The theme crossfade follows the mode too.
+- **Controls animate state changes** over `--mochi-duration-control` (200ms) or the arrive duration, never longer than 220ms. `Checkbox` (the fill grows in and the tick draws), `Radio` (the fill grows, and shrinks away when another is chosen), `Toggle` (the label crossfades and the knob squishes while held), `Slider` (the value bubble rises from the knob), `Pagination` (one accent bar slides between pages), `Dropdown` (the menu grows from the trigger edge, the chevron turns), `Collapsable`, `Item` / `ListItem` / `GridList` tints, `Input` / `TextArea` / `RichText` focus halos, `Wizard` (the tick draws and the progress fills) and the `DateInput` selected day. `RichText` now shows the same 3px focus halo as `Input`.
+- **Directional change.** `NumberInput`'s figure rises in on increment and drops in on decrement; the `DateInput` day grid and `Wizard` step content slide a short way in from the side you moved toward; the `Table` sort arrow turns over; a `Badge` fades and scales in from 0.9 and its count crossfades; `ProgressBar` eases on `--mochi-ease-forward`. Every focus ring eases in over `--mochi-duration-focus` (120ms), and disabled controls ease their dimming.
+- **A held `Button`** follows the guide: the accent bar grows in over 300ms (`--mochi-duration-press`), the brackets spread over 220ms, the scale to 1.05 takes 150ms, and release settles back over 220ms. The stray `transition: all` and hard-coded timings are on the motion tokens.
+- **Pointed motion.** `PopupPanel` grows from its nubbin tip. `ViewSelectButton`'s bar travels between segments, and `onSelect` gets a third argument, `{ direction: 'forward' | 'back' | null, from, to }`.
+- **Stack panels animate as they collapse.** A column's surface no longer snaps to a fixed width when its role changes, so opening, closing and collapsing all move on the forward curve. A closing front panel stays opaque while it slides out and fades only at the end.
+- **`Spinner`.** It crossfades in 150ms and shows a still mark under Off. Under Reduced it runs a calm cycle.
+
+### Type
+
+- **`Label`.** Mochi Bold 12/16, uppercase, on the 32px edge, with `role="heading"` unless rendered as an `h1`–`h6`. `Table` column headers and `SlidingMenu` group labels take the label style.
+- **`SlidingMenu` face lift.** Panel material with a 1px `--mochi-pane-edge` and a softer shadow (`--mochi-drawer-shadow-color`), 320px wide; optional `title`, `subtitle` and `showCloseButton`; 54px list-voice rows with muted icons, a `Badge`, and one 3px accent bar that slides to the active row (`aria-current="page"`); Label-voice group labels with 32px of space between groups (a hairline only with `divider`); top and bottom menus are sheets of rows; the panel and backdrop fade out as well as in, Reduced fades, Off is instant. With a backdrop it is a modal dialog: focus moves in and returns, Tab stays inside. New `--mochi-panel-error` and `--mochi-panel-success` for danger and success rows. The `ContentShifter` `menuWidth` default is now `min(320px, 85vw)`.
+- **`Header size="display"`.** Mochi Light 72/64, uppercase. `Header` tracking stays `normal`.
+
+### New components
+
+- **`Avatar`.** A person's or app's picture in the waterdrop shape, scaling with size (`sm` 24, `md` 40, `lg` 56, `xl` 96, or a number of px; 12/3 at 40px, the full 16/4 from about 56px). Props: `src`, `alt`, `name` (initials fallback and accessible name) and `icon`. It falls back to the initials or icon when the image fails to load, and the image fades in. Initials are uppercase, in Mochi Bold with 0.05em tracking below 56px and Mochi Light at normal tracking from 56px up (the `Label` and `Header` voices). New `--mochi-avatar-bg` (the panel hover grey) and `--mochi-avatar-ring` (none).
+- **`Label`.** See Type.
+
+### Accessibility modes
+
+- **`ThemeWrapper` gains `motion`, `contrast` and `transparency`.** `contrast` is `'system' | 'standard' | 'more'`; `transparency` is `'system' | 'standard' | 'reduced'`.
+- **High contrast** (`prefers-contrast: more` or `data-mochi-contrast="more"`) takes ink to pure black or white and surfaces solid, and the scrim is solid with no blur.
+- **Reduced transparency** (`prefers-reduced-transparency` or `data-mochi-transparency="reduced"`) makes the scrim and `--mochi-surface-material` solid.
+
+### Theming
+
+- **Portaled surfaces use the wrapper's font.** `Dialog`, `PopupPanel` and the `Dropdown` menu render outside the `ThemeWrapper`, so they read `--mochi-font-body` (Prelude by default) instead of the host page's body font. The wrapper writes `data-font-family` on `<html>` so `fontFamily` reaches them.
+- **Ground.** `ThemeWrapper` `ground="vignette"` shades the edges of the area it covers with `--mochi-vignette` (an inset shadow, 30% black in light and 50% in dark). The default, `plain`, changes nothing.
+
+### Build and tooling
+
+- **`npm run check:tokens`.** Fails on a bare hex in `src`, warns when a `var()` fallback disagrees with the light theme, and checks the guide's contrast floors (4.5:1 text, 7:1 over translucent grounds, 3:1 focus rings and control borders) and that the spinner's base fills equal the `--mochi-spinner-*` constants.
+- **`scripts/nubbin-diff` and `scripts/spinner-diff`** are the pixel-diff harnesses that compare the drawn nubbins and the SVG `Spinner` with the old sprites and GIFs, with cases for the 1px grabber, the waterdrop corner caps and divider joints. `npm run nubbin-diff` and `npm run spinner-diff` run them.
+- **Sprites removed.** The PNG sprites and spinner GIFs are no longer used at runtime; they live on as the harnesses' fixtures. The `Spinner` is drawn as SVG from the traced GIFs, so `SpinnerProps` now extends SVG attributes.
+- **`forwardRef`.** `Button`, `Dropdown` and `Toggle` forward their ref to the root element.
+- **Copy.** Default copy uses a real ellipsis ("Loading…", "Select an option…", "Select date…").
+- **Updated TypeScript declarations.** `Label`, `Avatar`, `Header.size`, `ThemeWrapper` `motion` / `contrast` / `transparency` / `ground`, `FloatingPanel.fullBleed` / `shape`, `RepanelStack` `upcoming` / `onUpcomingOpen` / `keepPast`, `Repanel` `hint` / `sequence` / `peekLabel`, the `ViewSelectButton` `onSelect` detail, ref types, `useWidthClass`, `SCREEN_*` and `waterdropRadius`, with doc comments on the main 0.6.0 tokens. The unused `src/Button/Button.jsx` stub is deprecated and goes in 0.7.
+
+### Fixes
+
+- **`PopupPanel` actions** now pass `type` to `Button`. It passed `$type`, which was never read, so every action was `normal`.
+- **`Item` ARIA.** A clickable `Item` sets `aria-pressed` from `selected`.
+- **Focus rings.** `Input` and the `Dropdown` trigger show the focus ring on keyboard focus.
+- **`PopupPanel` position.** It derives `right` and `bottom` from `anchorRect` when they are missing; horizontal and corner placements computed a `NaN` left.
+- **Portal fonts.** Portaled surfaces no longer fall back to the host page's font (see Theming).
+- **`NubbinDivider` joints.** The nubbin and caps are positioned from a measured, rounded offset instead of flexing, so the stroke and the caps' bars meet on the same device pixel at any width and pixel ratio. `nubbinOffset`, which the flex layout ignored, is honored.
+- **Crisp nubbins.** The nubbin shadow was sized for the sprites' 2px stroke and also fell inside the stroke, so the 1px grabber curve and `NubbinDivider` read as a smear. It now paints outside the shape only and scales with the stroke width, and the popup nubbin joins its border without a sub-pixel step.
+- **`Toggle` On position.** A `Toggle` released after a held press no longer rests its On knob 4px short of the track's end.
+- **Collapse animation.** Collapsing panels animate instead of snapping (see Motion).
+- **`Label`** no longer shrinks inside a `Repanel`'s flex column.
+- **`Dropdown` and `DateInput`; typings.** The `Dropdown` menu closes on a click outside it (its overlay was commented out); `DateInput` follows later changes to `value` (string or `Date`) without calling `onChange`. `DropdownOption` gains `divider`, `sectionLabel` and `disabled`, `Table` `columns` accepts plain strings, and the `SlidingMenu` `duration` default reads `--mochi-duration-stack` (260ms). The never-implemented `Dropdown` `searchable` prop is removed from the typings.
+- **Escape and stacked overlays.** Escape closes only the topmost overlay, so a `Dropdown` menu or `DateInput` calendar open inside a `Dialog` closes first and a second Escape closes the `Dialog`. A scrim press with a menu open closes only the menu.
+- **`DateInput` dates.** `'YYYY-MM-DD'` strings in `value`, `minDate` and `maxDate` are read as local calendar days, so they no longer show the previous day west of UTC. `minDate` and `maxDate` strings now disable days as they should.
+
+## Upgrading from 0.5.x
+
+| Change | What to do |
+| --- | --- |
+| Panes draw a 1px left-only edge (it was 2px on the top and left in #666), and `RepanelStack` casts no shadow. The base pane is square with no edge. | To restore the old look: `--mochi-pane-edge-width: 2px; --mochi-pane-edge: #666;` and `--mochi-stack-shadow: drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14)); --mochi-stack-shadow-front: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22));`. |
+| The waterdrop corner is an accent (`--mochi-drop-radius`): the `Dialog` and the new `Avatar` wear it, and `FloatingPanel` can with `shape="drop"`. The `Dropdown` menu, `PopupPanel` and `FloatingPanel` keep their 0.5 corners; the `SlidingMenu` rounds the page side at 24px. | Nothing. To put the drop on every floating surface, set `--mochi-floating-radius: var(--mochi-drop-radius)` through `tokens`; pass `fullBleed` to `FloatingPanel` for square. |
+| `RepanelStack` keeps a left sliver of the panel you came from when a panel collapses (`keepPast` defaults to `true`). | Pass `keepPast={false}` for the old collapse to 0 width. |
+| Light `--color-primary` is darker, `#357099` (text now 5.3:1 on white), and the light focus ring is the primary rather than the accent blue. | Override `--color-primary` / `--mochi-focus-ring` through `tokens` to restore. |
+| Selected `Item` is no longer outlined: it gets an accent tint and bold title. The `Dropdown` selected option gets a check, and the `Pagination` current page is ink with an accent bar instead of white on blue. `GridList` selection uses `--mochi-accent`. | None, unless you styled these selectors. |
+| `Badge` `variant="warning"` uses dark ink (`#404040`) instead of white on amber. | Pass `color` to choose the ink. |
+| Reduced motion now fades (opacity, at most 150ms) instead of switching animation off, and `data-motion` is read from `<html>` as well as a `ThemeWrapper`. | Use `motion="off"` (or `data-motion="off"`) for instant, or `motion="full"` to ignore `prefers-reduced-motion`. |
+| Controls animate their state changes, and a held `Button` animates over 300ms (`--mochi-duration-press`). | Set `motion="off"` or override the `--mochi-duration-*` tokens. |
+| `Table` column headers use the label style (Mochi Bold 12, uppercase), and `SlidingMenu` group labels are Mochi Bold. The `SlidingMenu` active row, success and error colours come from the `mochi-*` tokens. | Override the tokens, or the `.mochi-table-header` styles. |
+| Copy changed: "Loading…" (a real ellipsis), "Select an option…", and one wording for the `DateInput` placeholder ("Select date…"). | Update any text matching on the old strings. |
+| The PNG and GIF sprites are removed from `src` (nubbins, divider caps and the grabber are drawn in code), and `Spinner` renders an `<svg>`, not an `<img>`. | Nothing, unless you deep-imported the images or styled the spinner as an `img`. |
+| `npm run check:tokens` is new. | Run it in CI to keep bare hex colours out of `src`. |
+
+Notes for integrators:
+
+- `RepanelStack` and `Repanel` pass their children through `React.Children.map`, so children remount once on the first render after you upgrade (local state in them resets once).
+- `ThemeWrapper` writes `data-font-family` on `<html>`, as well as the motion and accessibility attributes, and restores the previous value on unmount.
+- `data-motion`, `data-mochi-contrast` and `data-mochi-transparency` on `<html>` are read by every component, not only inside a `ThemeWrapper`. A `<html data-motion>` you set yourself survives `motion="system"`.
+- `SpinnerProps` extends SVG attributes, not `<img>` attributes.
+- `Avatar`, `Label`, `useWidthClass`, `SCREEN_NARROW`, `SCREEN_WIDE` and `waterdropRadius` are new exports. `onSelect` on `ViewSelectButton` gets a third argument; existing handlers keep working.
+
+---
+
+# Remochi v0.5.1 — 2026-11-15
+
+This patch release adds dark-mode `--mochi-*` dialog tokens and `Dialog.tone`, fixes `Repanel` / `FloatingPanel` corner clipping while keeping the grabber nubbin unclipped, and moves `Header` and `Subheader` to pure CSS-flex sizing without stale JS resize state.
+
+## Highlights
+
+- **`Dialog` dark-mode tokens, `tone`, and focus/a11y fixes.** `ThemeWrapper` now defines `--mochi-dialog-bg`, `--mochi-dialog-ring`, `--mochi-overlay`, `--mochi-warning`, and `--mochi-font-display` across light and dark themes (synced onto `:root` for portaled dialogs). `Dialog` adds `tone?: 'normal' | 'warning' | 'error'` (default `'normal'`, applying `.mochi-dialog--warning` / `.mochi-dialog--error` and `data-tone`), updates scrim/ring/bottom-sheet styling, falls back to focusing the dialog element itself (`dialogRef.current`) when no focusable child is present, and sets `type="button"` and `aria-hidden="true"` on the close button glyph.
+- **`Repanel` curve clipping without clipping `.mochi-panel-handle-nubbin`.** `Repanel` now wraps `{children}` in `.mochi-panel-body` (`border-radius: inherit; overflow: hidden;`) while keeping `.mochi-panel-handle-nubbin` outside it, and `RepanelStack` delegates vertical scrolling to `.mochi-panel-body` so scrolled content stays clipped to the panel's 45px top-left curve.
+- **`FloatingPanel` corner clipping.** `.mochi-floating-panel` sets `display: block` and `overflow: hidden` so child content clips to its rounded corners.
+- **CSS-flex `Header` and `Subheader` sizing.** Removed `useState`/`adjustContent()` `window` resize listeners and inline width/`maxWidth` styles from `Header` and `Subheader` in favor of CSS flex truncation (`flex: 1 1 auto; min-width: 0;` / `width: 100%; min-width: 0;`), and switched `Header`'s control check to `React.Children.toArray(children).length > 0`.
+- **TypeScript declarations.** Added `DialogProps['tone']`, widened `RepanelProps['width']` to `number | string`, and added `StackedPanelsProps['style']` in `remochi.d.ts` and `dist/` declarations.
+
+---
+
 # Remochi v0.5.0 — 2026-11-12
 
 This release exposes theme and surface/shape customization tokens, adds shaped `Button` and controlled `Wizard.step` options, ensures `...rest` DOM prop forwarding across components, and guards `MochiButton` text measurement in headless test environments.

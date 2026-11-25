@@ -5,42 +5,113 @@
 // ============================================================
 
 // --- Tokens -------------------------------------------------
-// Same chrome as the phone Dialog / PopupPanel: theme surface, the
-// Mochi popup border (#646464 in both themes) and its drop shadow. The
-// --mochi-* tokens already follow the theme, so no per-theme blocks.
+// Light, not chrome: the panel material (what Repanel and Dialog are made
+// of), a 1px pane edge on the side facing the page and a soft shadow cast
+// away from the docked edge. The --mochi-* tokens already follow the theme,
+// so no per-theme blocks.
 .mochi-sliding-menu {
-  --sliding-menu-duration:  var(--animation-duration, 300ms);
-  --sliding-menu-ease:      cubic-bezier(0.16, 1, 0.3, 1);
-  --sliding-menu-width:     280px;
-  --sliding-menu-radius:    24px;
+  // --animation-duration is only set when the `duration` prop is given.
+  --sliding-menu-duration:  var(--animation-duration, var(--mochi-duration-stack, 260ms));
+  --sliding-menu-ease:      var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
+  // The pane column; on a phone it leaves a strip of the page showing.
+  --sliding-menu-width:     min(320px, 85vw);
+  // Plain rounded corners (the field corner) on the side facing the page; the
+  // flush side is square.
+  --sliding-menu-radius:    var(--mochi-corner-field, 24px);
 
-  --sliding-menu-bg:        var(--mochi-surface, #ffffff);
-  --sliding-menu-text:      var(--mochi-text, #333333);
-  --sliding-menu-border:    var(--mochi-popup-border, #646464);
+  --sliding-menu-bg:        var(--mochi-surface-material, var(--mochi-panel-bg, #f5f5f5));
+  --sliding-menu-text:      var(--mochi-text, #1a1a1a);
+  --sliding-menu-edge:      var(--mochi-pane-edge, #cccccc);
+  --sliding-menu-edge-w:    var(--mochi-pane-edge-width, 1px);
+  --sliding-menu-shadow:    var(--mochi-drawer-shadow-color, rgba(0, 0, 0, 0.22));
   --sliding-menu-scrollbar: var(--mochi-border, rgba(0, 0, 0, 0.2));
   --backdrop-color:         var(--mochi-overlay, rgba(0, 0, 0, 0.5));
-}
-
-// System dark-mode fallback — only when no ThemeWrapper has set a theme
-@media (prefers-color-scheme: dark) {
-  :root:not([data-mochi-theme]) .mochi-sliding-menu {
-    --sliding-menu-bg:        #2a2a2a;
-    --sliding-menu-text:      #ffffff;
-    --sliding-menu-scrollbar: rgba(255, 255, 255, 0.2);
-  }
 }
 
 // --- Base panel ----------------------------------------------
 .mochi-sliding-menu {
   position: fixed;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
   background-color: var(--sliding-menu-bg);
   color: var(--sliding-menu-text);
+  overflow: hidden;
+  outline: none;
+  // The panel slides in from its own edge. Closed, it is also hidden (after
+  // the slide, so the exit is seen) so nothing in it can take focus.
+  visibility: hidden;
+  transition:
+    transform  var(--sliding-menu-duration) var(--sliding-menu-ease),
+    visibility 0s linear var(--sliding-menu-duration);
+
+  &.mochi-sliding-menu--open {
+    visibility: visible;
+    transition:
+      transform  var(--sliding-menu-duration) var(--sliding-menu-ease),
+      visibility 0s linear 0s;
+  }
+}
+
+.mochi-sliding-menu-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+// The title stays put; the list scrolls under it.
+.mochi-sliding-menu-header,
+.mochi-sliding-menu-subheader { flex-shrink: 0; }
+
+.mochi-sliding-menu-subheader {
+  // Tighter than the page subheader: it sits under the nameplate.
+  height: 32px;
+  .mochi-subheader-content { padding-top: 6px; }
+  &,
+  .mochi-subheader-content { color: var(--mochi-panel-text-muted, var(--mochi-text-muted, #555555)); }
+}
+
+// Optional close button: a 44px hit area, a 20px glyph.
+.mochi-sliding-menu-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -8px -12px -8px 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--mochi-panel-text-muted, var(--mochi-text-muted, #555555));
+  cursor: pointer;
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  transition: background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+              outline-color    var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+              outline-offset   var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
+
+  &:hover { background-color: var(--mochi-hover, rgba(0, 0, 0, 0.04)); transition: none; }
+  &:active { background-color: var(--mochi-active, rgba(0, 0, 0, 0.08)); }
+  &:focus-visible {
+    outline-color: var(--mochi-focus-ring, #357099);
+    outline-offset: -2px;
+  }
+}
+
+// --- The list ------------------------------------------------
+// Where the rows live and scroll. The active bar is positioned in here.
+.mochi-sliding-menu-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  transition:
-    transform var(--sliding-menu-duration) var(--sliding-menu-ease),
-    opacity   var(--sliding-menu-duration) var(--sliding-menu-ease);
+  padding: 8px 0 32px;
   -webkit-overflow-scrolling: touch;
 
   // Scrollbar
@@ -54,25 +125,42 @@
     border-radius: 3px;
     &:hover { filter: brightness(1.2); }
   }
+
+  // A row after a group (not inside one) gets the group gap too.
+  > .mochi-sliding-menu-item-group + .mochi-sliding-menu-item { margin-top: 32px; }
 }
 
-.mochi-sliding-menu-inner {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
+// The accent bar: 3px wide, 20px tall, rounded, on the leading edge of the
+// active row. One element that slides to the new row (top and height on the
+// forward curve); it fades when nothing is active.
+.mochi-sliding-menu-active-bar {
+  position: absolute;
+  left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background-color: var(--bar-color, var(--mochi-focus-ring, #357099));
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition:
+    top     var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1)),
+    height  var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
+
+  &.mochi-sliding-menu-active-bar--visible { opacity: 1; }
 }
 
 // --- Positions -----------------------------------------------
-// Docked to one screen edge: border only on the edge facing the page,
-// rounded corners on that side, shadow cast away from the docked edge.
+// Docked to one screen edge: a 1px pane edge only on the side facing the
+// page, rounded corners on that side, shadow cast away from the docked edge.
 .mochi-sliding-menu--left {
   top: 0; left: 0;
   height: 100vh;
+  height: 100dvh;
   width: var(--sliding-menu-width);
-  border-right: 2px solid var(--sliding-menu-border);
+  border-right: var(--sliding-menu-edge-w) solid var(--sliding-menu-edge);
   border-radius: 0 var(--sliding-menu-radius) var(--sliding-menu-radius) 0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.44);
+  box-shadow: 8px 0 24px var(--sliding-menu-shadow);
   transform: translateX(-100%);
   &.mochi-sliding-menu--open { transform: translateX(0); }
 }
@@ -80,62 +168,67 @@
 .mochi-sliding-menu--right {
   top: 0; right: 0;
   height: 100vh;
+  height: 100dvh;
   width: var(--sliding-menu-width);
-  border-left: 2px solid var(--sliding-menu-border);
+  border-left: var(--sliding-menu-edge-w) solid var(--sliding-menu-edge);
   border-radius: var(--sliding-menu-radius) 0 0 var(--sliding-menu-radius);
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.44);
+  box-shadow: -8px 0 24px var(--sliding-menu-shadow);
   transform: translateX(100%);
   &.mochi-sliding-menu--open { transform: translateX(0); }
 }
 
+// Top and bottom read as a sheet: a centred column of rows (full width on a
+// phone), not a bar of side-by-side items.
 .mochi-sliding-menu--top {
   top: 0; left: 0; right: 0;
-  width: 100%;
-  height: auto;
+  margin: 0 auto;
+  width: 560px;
+  max-width: 100%;
   max-height: 80vh;
-  border-bottom: 2px solid var(--sliding-menu-border);
+  border-bottom: var(--sliding-menu-edge-w) solid var(--sliding-menu-edge);
   border-radius: 0 0 var(--sliding-menu-radius) var(--sliding-menu-radius);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
+  box-shadow: 0 8px 24px var(--sliding-menu-shadow);
   transform: translateY(-100%);
   &.mochi-sliding-menu--open { transform: translateY(0); }
-  .mochi-sliding-menu-inner {
-    flex-direction: row;
-    align-items: center;
-    padding: 16px 24px;
-  }
 }
 
-// Matches the phone Dialog sheet exactly.
 .mochi-sliding-menu--bottom {
   bottom: 0; left: 0; right: 0;
-  width: 100%;
-  height: auto;
+  margin: 0 auto;
+  width: 560px;
+  max-width: 100%;
   max-height: 80vh;
-  border-top: 2px solid var(--sliding-menu-border);
+  border-top: var(--sliding-menu-edge-w) solid var(--sliding-menu-edge);
   border-radius: var(--sliding-menu-radius) var(--sliding-menu-radius) 0 0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.44);
+  box-shadow: 0 -8px 24px var(--sliding-menu-shadow);
   transform: translateY(100%);
   &.mochi-sliding-menu--open { transform: translateY(0); }
-  .mochi-sliding-menu-inner {
-    flex-direction: row;
-    align-items: center;
-    padding: 16px 24px max(16px, env(safe-area-inset-bottom));
-  }
+  // Clear of the home indicator.
+  .mochi-sliding-menu-list { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 }
 
 // --- Backdrop ------------------------------------------------
+// Always mounted (while showBackdrop), so it fades out as well as in.
 .mochi-sliding-menu-backdrop {
   position: fixed;
   inset: 0;
   z-index: 999;
   background-color: var(--backdrop-color, rgba(0, 0, 0, 0.4));
   cursor: pointer;
-  animation: mochiBackdropFadeIn var(--sliding-menu-duration, 300ms)
-             cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity    var(--animation-duration, var(--mochi-duration-stack, 260ms)) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1)),
+    visibility 0s linear var(--animation-duration, var(--mochi-duration-stack, 260ms));
 
-  @keyframes mochiBackdropFadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+  &.mochi-sliding-menu-backdrop--open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity    var(--animation-duration, var(--mochi-duration-stack, 260ms)) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1)),
+      visibility 0s linear 0s;
   }
 }
 
@@ -147,26 +240,21 @@
 }
 
 // --- Responsive ----------------------------------------------
+// A phone's bottom sheet is full width, its rounded top the side facing the
+// page; the rows sit at the thumb.
 @media (max-width: 768px) {
-  .mochi-sliding-menu--left,
-  .mochi-sliding-menu--right  { --sliding-menu-width: 75vw; }
   .mochi-sliding-menu--top,
-  .mochi-sliding-menu--bottom { max-height: 70vh; }
+  .mochi-sliding-menu--bottom { width: 100%; max-height: 70vh; }
 }
 
 // --- Accessibility -------------------------------------------
-@media (prefers-reduced-motion: reduce) {
-  .mochi-sliding-menu,
-  .mochi-sliding-menu-backdrop {
-    transition: none;
-    animation: none;
-  }
-}
+// Reduced and Off motion: see MochiThemeWrapper.scss.
+// (High contrast: the theme turns the pane edge to ink; it gets thicker here.)
 
 @media (prefers-contrast: more) {
   .mochi-sliding-menu {
-    border-width: 2px;
-    box-shadow: 0 0 0 1px var(--sliding-menu-text);
+    --sliding-menu-edge-w: 2px;
+    box-shadow: none;
   }
 }
 

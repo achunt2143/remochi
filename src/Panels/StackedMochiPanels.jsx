@@ -1,6 +1,9 @@
-import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect, useLayoutEffect } from 'react';
 import './StackedMochiPanels.scss';
 import { Repanel } from './Repanel';
+import Header from '../Headers/Header';
+import { SCREEN_NARROW } from '../shared/screens';
+import { useWidthClass } from '../shared/useWidthClass';
 import {
   DEFAULT_SNAP_POINTS,
   DEFAULT_MAX_VISIBLE_PANELS,
@@ -27,6 +30,80 @@ const CLOSE_COMMIT_THRESHOLD = 0.45;
 const FLICK_MAX_DURATION_MS = 300;
 const FLICK_MIN_DISTANCE_PX = 24;
 const FLICK_VELOCITY_PX_MS = 0.5;
+
+// Dragging a peek's sliver this far toward its panel opens it (right) or
+// steps back to it (left); a tap does the same.
+const PEEK_DRAG_PX = 24;
+// How long a replaced prediction stays mounted while it leaves to the right
+// (a little over --mochi-duration-stack; Off and Reduced cut it sooner).
+const PEEK_LEAVE_MS = 300;
+// --mochi-peek-width / --mochi-peek-width-narrow, if the theme isn't there.
+const PEEK_PX = 80;
+const PEEK_PX_NARROW = 20;
+
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+// The sliver's px width: the stack's own token (a host can tune it), by the
+// stack's width class.
+function usePeekPx(ref, narrow) {
+  const fallback = narrow ? PEEK_PX_NARROW : PEEK_PX;
+  const [px, setPx] = useState(fallback);
+  useIsoLayoutEffect(() => {
+    const el = ref.current;
+    const v = el ? parseFloat(getComputedStyle(el).getPropertyValue(narrow ? '--mochi-peek-width-narrow' : '--mochi-peek-width')) : NaN;
+    setPx(v > 0 ? v : fallback);
+  }, [ref, narrow, fallback]);
+  return px;
+}
+
+// What the right sliver opens, for its accessible name: the Repanel's
+// `peekLabel`, else the Header's content if it is plainly in the element.
+function peekPanelName(element) {
+  const props = element.props || {};
+  if (props.peekLabel) return props.peekLabel;
+  const header = React.Children.toArray(props.children).find(
+    (c) => React.isValidElement(c) && c.type === Header && typeof c.props.content === 'string' && c.props.content
+  );
+  return header ? header.props.content : null;
+}
+
+// One sliver's door: a real button, tap or drag toward its panel (`dir`: -1
+// drags left, +1 drags right), over the panel's full height (so well over 44px).
+function PeekSliver({ side, label, onActivate }) {
+  const startX = useRef(null);
+  const dragged = useRef(false);
+  const dir = side === 'past' ? 1 : -1;
+  return (
+    <button
+      type="button"
+      className={`repanel__peek-button repanel__peek-button--${side}`}
+      aria-label={label}
+      onPointerDown={(e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        startX.current = e.clientX;
+        dragged.current = false;
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch (_) {
+          /* no-op */
+        }
+      }}
+      onPointerMove={(e) => {
+        if (startX.current == null || (e.clientX - startX.current) * dir < PEEK_DRAG_PX) return;
+        startX.current = null;
+        dragged.current = true;
+        onActivate('drag');
+      }}
+      onPointerUp={() => { startX.current = null; }}
+      onPointerCancel={() => { startX.current = null; }}
+      onClick={() => {
+        // The click after a drag has already been acted on.
+        if (dragged.current) dragged.current = false;
+        else onActivate('tap');
+      }}
+    />
+  );
+}
 
 /**
  * RepanelStack — a webOS/Mochi stacked panel workspace.
@@ -65,6 +142,43 @@ const FLICK_VELOCITY_PX_MS = 0.5;
  * exception: the nubbin grabber is visual and lives on the `Repanel` child
  * itself (its `handle` prop) — this wrapper only clones that prop onto
  * every child but the first and provides an invisible hitbox over each one.
+ *
+ * Where you came from, where you're going. The stack never leaves the person
+ * alone at an edge:
+ *   - The PAST peeks from the left. With `keepPast` (default), the panel
+ *     behind the front one stays as a sliver (--mochi-peek-width, 80px;
+ *     --mochi-peek-width-narrow, 20px on a narrow stack) when the stack is
+ *     collapsed to the front panel, instead of leaving at 0 width: its
+ *     scallop corner, the start of its nameplate and the leading edge of its
+ *     rows. Its grabber stays live, and the sliver is a button named "Back
+ *     to <name>": tap it or drag it right and it steps back, as `prev()`.
+ *   - The FUTURE peeks from the right. When the app passes `upcoming` (one
+ *     Repanel, or null for nothing), it waits as a sliver at the right edge
+ *     over the front panel: its scallop corner, its real Header cropped by
+ *     the edge, and the Repanel's `hint` or `sequence`. The sliver is a button
+ *     named "Open <name>, <hint>". Tapping it, dragging it left, or `next()`
+ *     opens it the same way `next()` moves forward. A new prediction slides
+ *     the old sliver off to the right and the new one in from the right.
+ *     Peeks are crisp: full opacity, no blur.
+ *
+ * The stack can't own your list of panels, so opening is a hand-off:
+ * `onUpcomingOpen` is called, and you append the panel to your children, with
+ * the same `key` as `upcoming` so the very panel you saw (and its Header)
+ * carries on from the sliver instead of being rebuilt. The stack then makes
+ * it the front panel, and it slides in from where the sliver was.
+ *
+ *   const [panels, setPanels] = useState([list]);
+ *   const next = predict(selection); // a Repanel with a key, or null
+ *   <RepanelStack
+ *     upcoming={next}
+ *     onUpcomingOpen={() => setPanels((p) => [...p, next])}
+ *   >
+ *     {panels}
+ *   </RepanelStack>
+ *
+ * (With a controlled `activeIndex`, also set it to the new last index in
+ * `onUpcomingOpen`; the stack only moves an uncontrolled index itself.) The
+ * peek shows only while the front panel is the last child.
  */
 
 const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
@@ -84,8 +198,11 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
     wrap = false,
     animate = true,
     narrowFit = true,
-    narrowFitWidth = 768,
+    narrowFitWidth = SCREEN_NARROW,
     narrowBehavior = 'single',
+    upcoming = null,
+    onUpcomingOpen,
+    keepPast = true,
     className = '',
     style: rootStyle,
     ...rest
@@ -139,36 +256,18 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
   const [closeDrag, setCloseDrag] = useState(null);
 
   // ---- Transient gesture state -------------------------------------------
-  const [isNarrow, setIsNarrow] = useState(false);
   const [isRevealDragging, setIsRevealDragging] = useState(false);
 
   const rootRef = useRef(null);
   const grabRef = useRef(null);
   const closeRef = useRef(null);
 
-  // ---- Narrow detection (observe the root width) -------------------------
-  useEffect(() => {
-    if (!narrowFit) {
-      setIsNarrow(false);
-      return undefined;
-    }
-    const el = rootRef.current;
-    if (!el) return undefined;
-
-    const check = () => setIsNarrow(el.getBoundingClientRect().width <= narrowFitWidth);
-    check();
-
-    if (typeof ResizeObserver !== 'undefined') {
-      const ro = new ResizeObserver(check);
-      ro.observe(el);
-      return () => ro.disconnect();
-    }
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', check);
-      return () => window.removeEventListener('resize', check);
-    }
-    return undefined;
-  }, [narrowFit, narrowFitWidth]);
+  // ---- Narrow detection (the stack's own width, not the window's) --------
+  // Narrow is up to narrowFitWidth.
+  const widthClass = useWidthClass(rootRef, { narrow: narrowFitWidth });
+  const isNarrow = narrowFit && widthClass === 'narrow';
+  const peekPx = usePeekPx(rootRef, widthClass === 'narrow');
+  const pastPx = keepPast ? peekPx : 0;
 
   // ---- Whether the wholly first child is among the currently-visible -----
   // panels. It never carries a nubbin (see the map loop below), so when
@@ -198,8 +297,9 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       config,
       isNarrow,
       narrowBehavior,
+      pastPx,
     }).visible;
-  }, [isNarrow, panelCount, activeIndex, closeDrag, reveal, config, narrowBehavior]);
+  }, [isNarrow, panelCount, activeIndex, closeDrag, reveal, config, narrowBehavior, pastPx]);
 
   // ---- Commit helpers ----------------------------------------------------
   const commitActiveIndex = useCallback(
@@ -238,19 +338,84 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
     [committedReveal, config.snapPoints, activeIndex, isRevealControlled, isNarrow, onRevealChange]
   );
 
+  // ---- Peeks -------------------------------------------------------------
+  // The right sliver shows only from the last panel (there is nothing to
+  // peek at when the stack isn't at its end). Its key is the one the
+  // consumer's panel will carry once appended, so the same node continues.
+  const upcomingShown =
+    !!upcoming && React.isValidElement(upcoming) && !wrap && panelCount > 0 && activeIndex === panelCount - 1;
+  const peekKey = upcoming && upcoming.key != null ? `.$${upcoming.key}` : '.$__peek';
+  const peekConsumed = (key) => panels.some((p) => p.key === key);
+  const peekLive = upcomingShown && !peekConsumed(peekKey);
+
+  // A replaced prediction stays mounted for a moment, leaving to the right.
+  const [leaving, setLeaving] = useState([]);
+  const [shownKey, setShownKey] = useState(null);
+  const shownPeekRef = useRef(null);
+  const liveKey = peekLive ? peekKey : null;
+  if (liveKey !== shownKey) {
+    // Adjusted during render (not in an effect) so the old sliver is never
+    // unmounted and remounted: it is the same node, now leaving.
+    setShownKey(liveKey);
+    const gone = shownPeekRef.current;
+    if (shownKey && gone && !peekConsumed(shownKey)) setLeaving((l) => [...l, gone]);
+  }
+  useEffect(() => {
+    shownPeekRef.current = peekLive ? { key: peekKey, element: upcoming } : null;
+  });
+  useEffect(() => {
+    if (!leaving.length) return undefined;
+    const t = setTimeout(() => setLeaving([]), PEEK_LEAVE_MS);
+    return () => clearTimeout(t);
+  }, [leaving]);
+
+  // Opening the right sliver: ask the consumer to append the panel; once it
+  // is there, it becomes the front panel (uncontrolled index).
+  const [opening, setOpening] = useState(null);
+  const [openedFrom, setOpenedFrom] = useState(null);
+  if (opening != null && panelCount > opening) {
+    setOpening(null);
+    if (!isIndexControlled) {
+      setIndexState(clampIndex(panelCount - 1, panelCount, wrap));
+      setOpenedFrom(activeIndex);
+    }
+  }
+  useEffect(() => {
+    if (openedFrom == null) return;
+    setOpenedFrom(null);
+    onActiveIndexChange?.(activeIndex, { previousIndex: openedFrom, reason: 'peek', panelCount, isNarrow });
+  }, [openedFrom, activeIndex, panelCount, isNarrow, onActiveIndexChange]);
+
+  const openUpcoming = useCallback(
+    (reason) => {
+      setOpening(panelCount);
+      onUpcomingOpen?.({ upcoming, reason, previousIndex: activeIndex, panelCount, isNarrow });
+    },
+    [panelCount, upcoming, activeIndex, isNarrow, onUpcomingOpen]
+  );
+
+  // Forward is the same path whoever asks (next(), →, the sliver).
+  const goForward = useCallback(
+    (reason) => {
+      if (peekLive) openUpcoming(reason);
+      else commitActiveIndex(activeIndex + 1, reason);
+    },
+    [peekLive, openUpcoming, commitActiveIndex, activeIndex]
+  );
+
   // ---- Imperative API ----------------------------------------------------
   React.useImperativeHandle(
     ref,
     () => ({
       setActiveIndex: (index) => commitActiveIndex(index, 'method'),
-      next: () => commitActiveIndex(activeIndex + 1, 'method'),
+      next: () => goForward('method'),
       prev: () => commitActiveIndex(activeIndex - 1, 'method'),
       setReveal: (value) => commitReveal(value, 'method'),
       expand: () => commitReveal(bounds.max, 'method'),
       collapse: () => commitReveal(bounds.min, 'method'),
       getState: () => ({ activeIndex, reveal: committedReveal, panelCount, isNarrow }),
     }),
-    [commitActiveIndex, commitReveal, activeIndex, committedReveal, panelCount, isNarrow, bounds]
+    [commitActiveIndex, goForward, commitReveal, activeIndex, committedReveal, panelCount, isNarrow, bounds]
   );
 
   // ---- Grabber: a PARENT panel's nubbin adjusts reveal only — grow/shrink
@@ -456,7 +621,16 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
   );
 
   const onGrabberKeyDown = useCallback(
-    (e) => {
+    (idx) => (e) => {
+      // Enter / Space is the keyboard equal of the double-click: close the
+      // active panel, or jump back to a parent.
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        const target = idx === activeIndex ? activeIndex - 1 : idx;
+        if (target >= 0 && target !== activeIndex) commitActiveIndex(target, 'grabber');
+        return;
+      }
       if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         e.preventDefault();
         commitReveal(stepSnap(committedReveal, config.snapPoints, +1), 'method');
@@ -465,7 +639,7 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
         commitReveal(stepSnap(committedReveal, config.snapPoints, -1), 'method');
       }
     },
-    [committedReveal, config.snapPoints, commitReveal]
+    [committedReveal, config.snapPoints, commitReveal, activeIndex, commitActiveIndex]
   );
 
   // ---- Root keyboard navigation (panels) ---------------------------------
@@ -475,16 +649,65 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       if (e.target.closest('.repanel__surface') || e.target.closest('.repanel__grabber')) return;
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        commitActiveIndex(activeIndex + 1, 'method');
+        goForward('method');
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         commitActiveIndex(activeIndex - 1, 'method');
       }
     },
-    [activeIndex, commitActiveIndex]
+    [activeIndex, commitActiveIndex, goForward]
   );
 
   // ---- Render ------------------------------------------------------------
+  // The right sliver(s): the live prediction, and any replaced one on its
+  // way out. Each is the panel's real width (what it will have once open),
+  // set so far right that only `peekPx` of it (plus the overlap, over the
+  // front panel's edge) shows, cropped by the root.
+  const overlapPx = getOverlapPx(config);
+  const peekShells = [];
+  if (peekLive || leaving.length) {
+    const open = getPanelDescriptor({
+      index: panelCount,
+      activeIndex: panelCount,
+      panelCount: panelCount + 1,
+      reveal: committedReveal,
+      config,
+      isNarrow,
+      narrowBehavior,
+      pastPx,
+    });
+    const entries = leaving.filter((l) => l.key !== peekKey).map((l) => ({ ...l, gone: true }));
+    if (peekLive) entries.push({ key: peekKey, element: upcoming });
+    entries.forEach(({ key, element, gone }) => {
+      const name = peekPanelName(element);
+      const clue = typeof element.props.hint === 'string' || typeof element.props.hint === 'number' ? element.props.hint : null;
+      const label = `${name ? `Open ${name}` : 'Open next panel'}${clue != null && clue !== '' ? `, ${clue}` : ''}`;
+      const content =
+        element.type === Repanel ? React.cloneElement(element, { key, peeking: true, handle: true }) : React.cloneElement(element, { key });
+      peekShells.push(
+        <div
+          key={key}
+          className="repanel__panel"
+          data-role="peek"
+          data-leaving={gone ? 'true' : undefined}
+          style={{
+            // Over the front panel's right edge by the overlap, so its
+            // curve lies on the front panel like a stacked column's.
+            left: `calc(100% - ${peekPx + overlapPx}px)`,
+            width: open.width,
+            opacity: 1,
+            zIndex: panelCount + 30,
+            pointerEvents: gone ? 'none' : 'auto',
+          }}
+          aria-hidden={gone ? true : undefined}
+        >
+          <div className="repanel__surface" ref={(el) => { if (el) el.inert = true; }}>{content}</div>
+          {!gone && <PeekSliver side="future" label={label} onActivate={openUpcoming} />}
+        </div>
+      );
+    });
+  }
+
   return (
     <div
       ref={rootRef}
@@ -494,6 +717,8 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       data-narrow-behavior={isNarrow ? narrowBehavior : undefined}
       data-dragging={isRevealDragging ? 'true' : undefined}
       data-first-child-visible={isFirstChildVisible ? 'true' : 'false'}
+      data-width-class={widthClass}
+      data-peek={peekLive ? 'true' : undefined}
       role="group"
       aria-roledescription="stacked panels"
       onKeyDown={onRootKeyDown}
@@ -501,10 +726,17 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
       // How far each parent column runs beneath the next one; the
       // stylesheet pads parent Repanels by this much so their content
       // isn't hidden there.
-      style={{ '--repanel-overlap': `${getOverlapPx(config)}px`, ...rootStyle }}
+      // --repanel-column is a parent's full width (peek plus that overlap),
+      // which its surface keeps while only a sliver of it shows.
+      style={{
+        '--repanel-overlap': `${overlapPx}px`,
+        '--repanel-column': `${config.peek + overlapPx}px`,
+        '--repanel-peek-px': `${peekPx}px`,
+        ...rootStyle,
+      }}
     >
       <div className="repanel__viewport">
-        {panels.map((child, idx) => {
+        {[...panels.map((child, idx) => {
           let d;
           let isActive;
           if (closeDrag) {
@@ -519,10 +751,11 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
               config,
               isNarrow,
               narrowBehavior,
+              pastPx,
             });
             isActive = closeDrag.progress < 0.5 ? idx === closeDrag.fromIndex : idx === closeDrag.toIndex;
           } else {
-            d = getPanelDescriptor({ index: idx, activeIndex, panelCount, reveal, config, isNarrow, narrowBehavior });
+            d = getPanelDescriptor({ index: idx, activeIndex, panelCount, reveal, config, isNarrow, narrowBehavior, pastPx });
             isActive = idx === activeIndex;
           }
           const noTransition = isRevealDragging || !!closeDrag;
@@ -545,8 +778,17 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
           // Repanel.jsx / MochiPanel.scss) — only a Repanel child knows how
           // to render it, so it's only cloned onto those, and never onto
           // the first child.
+          // The nearest parent, collapsed: the left sliver, a button back to it.
+          // Its Repanel shows only its surface, scallop and Header (`door`).
+          const isPast = !closeDrag && d.role === 'past';
+          const doorProps = isPast && child.type === Repanel ? { door: true } : null;
           const content =
-            showGrabber && child.type === Repanel ? React.cloneElement(child, { handle: true }) : child;
+            showGrabber && child.type === Repanel
+              ? React.cloneElement(child, { handle: true, ...doorProps })
+              : doorProps
+                ? React.cloneElement(child, doorProps)
+                : child;
+          const pastName = isPast ? peekPanelName(child) : null;
 
           return (
             <div
@@ -559,20 +801,20 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
               style={style}
               aria-hidden={!d.visible && !isActive ? true : undefined}
             >
-              <div className="repanel__surface">{content}</div>
+              <div className="repanel__surface" ref={(el) => { if (el) el.inert = isPast; }}>{content}</div>
 
               {showGrabber && (
                 <div
                   className="repanel__grabber"
                   role="slider"
-                  aria-label={idx === activeIndex ? 'Reveal depth or close panel' : 'Reveal depth'}
+                  aria-label={idx === activeIndex ? 'Close panel' : 'Show more panels'}
                   aria-orientation="horizontal"
                   aria-valuemin={bounds.min}
                   aria-valuemax={bounds.max}
                   aria-valuenow={committedReveal}
                   tabIndex={0}
                   onPointerDown={onGrabberPointerDown(idx)}
-                  onKeyDown={onGrabberKeyDown}
+                  onKeyDown={onGrabberKeyDown(idx)}
                   onDoubleClick={onGrabberDoubleClick(idx)}
                   // No tap-to-close: the grabber holds pointer capture, so
                   // the browser fires `click` after every drag (including a
@@ -582,9 +824,17 @@ const RepanelStack = React.forwardRef(function RepanelStack(props, ref) {
                   onClick={(e) => e.stopPropagation()}
                 />
               )}
+
+              {isPast && (
+                <PeekSliver
+                  side="past"
+                  label={`Back to ${pastName || 'previous panel'}`}
+                  onActivate={() => commitActiveIndex(activeIndex - 1, 'peek')}
+                />
+              )}
             </div>
           );
-        })}
+        }), ...peekShells]}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@
 //       .repanel__panel            one positioned shell per child
 //         .repanel__surface        hosts the child Repanel/FloatingPanel
 //         .repanel__grabber        reveal-depth hitbox (every panel but the first)
+//         .repanel__peek-button    a sliver's door (the past's, or the upcoming panel's)
 //
 // Layout/geometry (left, width, transform, opacity, z-index) is driven by
 // inline styles from stackedPanelsLayout.js. Every revealed panel — active
@@ -25,8 +26,11 @@
 // the component still reads correctly outside a ThemeWrapper). No :root
 // overrides live here.
 
-$repanel-duration: 260ms;
-$repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
+// Forward travel: the shared motion tokens (MochiThemeWrapper.scss), with the
+// same values as fallbacks outside a ThemeWrapper. Reduced and Off are
+// handled there too.
+$repanel-duration: var(--mochi-duration-stack, 260ms);
+$repanel-easing: var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1));
 
 // ========================================
 // Root / viewport
@@ -68,12 +72,16 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
     overflow: visible;
     will-change: left, width, opacity, transform;
 
-    // Soft shadow that reads as separation between overlapping shells.
-    filter: drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14));
+    // Light, not chrome: no shadow between overlapping shells by default
+    // (--mochi-stack-shadow: none). A host brings the 0.5 look back with
+    //   --mochi-stack-shadow: drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14));
+    //   --mochi-stack-shadow-front: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22));
+    filter: var(--mochi-stack-shadow, none);
 
     &[data-active='true'] {
-      // The front panel sits proud of the stack.
-      filter: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22));
+      // The front panel sits proud of the stack, when the host asks for
+      // shadows (it follows --mochi-stack-shadow otherwise).
+      filter: var(--mochi-stack-shadow-front, var(--mochi-stack-shadow, none));
     }
   }
 
@@ -83,6 +91,16 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
       left $repanel-duration $repanel-easing,
       width $repanel-duration $repanel-easing,
       opacity $repanel-duration $repanel-easing;
+  }
+
+  // A panel that closes (role ahead) slides out to the right fully opaque, the
+  // stack's edge cropping it, and only fades at the very end of the move: on
+  // the same curve as its slide it would be gone within a few frames.
+  &[data-animate='true'] &__panel[data-role='ahead']:not([data-no-transition='true']) {
+    transition:
+      left $repanel-duration $repanel-easing,
+      width $repanel-duration $repanel-easing,
+      opacity calc(#{$repanel-duration} * 0.2) linear calc(#{$repanel-duration} * 0.8);
   }
 
   // ======================================
@@ -99,30 +117,36 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
     // their own background if they want one.
     background: transparent;
 
-    // Let a child Repanel/FloatingPanel fill the shell without imposing its
-    // own fixed height, so tall content scrolls the surface rather than
-    // clipping.
+    // Keep each panel shell matched to the surface viewport height so
+    // .mochi-panel-body owns scrolling and clips scrolled content to the
+    // panel's curved border-radius without pushing .mochi-panel-handle-nubbin
+    // off-screen.
     > * {
       box-sizing: border-box;
       min-height: 100%;
     }
 
     > .mochi-panel {
-      height: auto;
+      height: 100%;
       min-height: 100%;
       width: 100%;
-    }
 
-    // Thin, theme-aware scrollbar.
-    scrollbar-width: thin;
-    scrollbar-color: var(--mochi-border, #cccccc) transparent;
+      > .mochi-panel-body {
+        overflow-x: hidden;
+        overflow-y: auto;
 
-    &::-webkit-scrollbar {
-      width: 8px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: var(--mochi-border, #cccccc);
-      border-radius: 6px;
+        // Thin, theme-aware scrollbar.
+        scrollbar-width: thin;
+        scrollbar-color: var(--mochi-border, rgba(0, 0, 0, 0.12)) transparent;
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: var(--mochi-border, rgba(0, 0, 0, 0.12));
+          border-radius: var(--mochi-corner-pill, 9999px);
+        }
+      }
     }
   }
 
@@ -136,10 +160,16 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
     padding-right: var(--repanel-overlap, 0px);
   }
 
-  // The base of the stack has nothing behind it, so it keeps a square
-  // corner (Mochi Panels.less: .mochi-base-panel).
+  // The base of the stack has nothing behind it, so it is full-bleed:
+  // square (Mochi Panels.less: .mochi-base-panel), no edge, no shadow.
+  &__panel[data-first-child='true'] {
+    filter: none;
+  }
+
   &__panel[data-first-child='true'] > &__surface > .mochi-panel {
     border-top-left-radius: 0;
+    border-left-width: 0;
+    box-shadow: none;
   }
 
   // ======================================
@@ -170,9 +200,9 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
     outline: none;
 
     &:focus-visible {
-      outline: 2px solid var(--mochi-primary, #2f6fed);
+      outline: 2px solid var(--mochi-focus-ring, #357099);
       outline-offset: 2px;
-      border-radius: 10px;
+      border-radius: var(--mochi-corner-sm, 10px);
     }
 
     // Invisible 54px-square touch target (webOS TouchPad standard, per
@@ -189,6 +219,115 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
       width: 54px;
       height: 54px;
     }
+  }
+
+  // ======================================
+  // Peeks — where you came from, where you're going
+  // ======================================
+
+  // A panel keeps at least its full column width (--repanel-column) however
+  // little of it shows, and the shell crops it on the right, so the left
+  // sliver (keepPast) shows the leading edge of the real panel (its corner,
+  // the start of its nameplate, its rows) rather than a squeezed copy. The
+  // crop is a clip-path on every panel, open on the left and top/bottom, so
+  // the nubbin and its hitbox outside the shell still show. It is the same
+  // for every role, and the surface never changes width at a role change (it
+  // follows the shell down to the column), so a panel that collapses or
+  // grows is cropped by its animating shell instead of snapping to its
+  // final size. A narrow stack has no room for a column: its sliver shows
+  // only the curve, so there the surface keeps the column fixed.
+  &__panel:not([data-role='peek']) {
+    clip-path: inset(-30px 0 -30px -60px);
+  }
+
+  &:not([data-narrow='true']) &__panel > &__surface {
+    min-width: var(--repanel-column, 365px);
+  }
+
+  &[data-narrow='true'] &__panel[data-role='parent'] > &__surface,
+  &[data-narrow='true'] &__panel[data-role='past'] > &__surface {
+    right: auto;
+    width: var(--repanel-column, 365px);
+  }
+
+  // The right sliver is a whole panel at the width it will have once open,
+  // set so far right that the screen edge crops it to --repanel-peek-px.
+  // Crisp: full opacity, no blur or dimming. It never goes narrower than a
+  // column, so a Header is cropped, never shrunk.
+  &__panel[data-role='peek'] {
+    min-width: var(--repanel-column, 365px);
+  }
+
+  // A peek is a door, not a second panel. As the Mochi panes do, the
+  // surfaces overlap: the right peek lies over the front panel's right edge by
+  // --repanel-overlap, and the front panel lies over the left sliver's tucked
+  // strip, each curve showing the surface beneath. Content never overlaps: the
+  // front panel is padded clear of the right peek, and the left sliver's
+  // Header is cut off where the front panel starts. The Repanel renders only
+  // its Header while it is a door (its `door` and `peeking` props), so no body
+  // text shows on either.
+  &[data-peek='true'] &__panel[data-active='true'] > &__surface > .mochi-panel {
+    padding-right: calc(var(--repanel-peek-px, 80px) + var(--repanel-overlap, 0px));
+  }
+
+  // The tucked strip holds no content: the sliver's Header ends at its
+  // visible edge (the panel's 1px left border is not part of the body).
+  &__panel[data-role='past'] .mochi-panel-body {
+    clip-path: inset(0 calc(100% - var(--repanel-peek-px, 80px) + 1px) 0 0);
+  }
+
+  //
+  // Narrow: only the surface and its curve show, so the Header (hidden, not
+  // removed, so it stays the same node) and the clue are dropped.
+  &[data-width-class='narrow'] &__panel[data-role='past'] .mochi-panel-body,
+  &[data-width-class='narrow'] &__panel[data-role='peek'] .mochi-panel-body,
+  &[data-width-class='narrow'] .mochi-panel-clue {
+    visibility: hidden;
+  }
+
+  // A sliver is one real button over its visible part, the panel's full
+  // height (well over 44px). Below the grabber (z-index 6), which stays live.
+  &__peek-button {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    width: calc(var(--repanel-peek-px, 80px) + var(--repanel-overlap, 0px));
+    min-height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    // A horizontal drag is the gesture, so the browser leaves it to us.
+    touch-action: pan-y;
+    -webkit-appearance: none;
+    appearance: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--mochi-focus-ring, #357099);
+      outline-offset: -2px;
+    }
+  }
+
+  // A new prediction arrives from the right, the way forward goes. A
+  // prediction that is replaced leaves the same way (data-leaving). Opening
+  // is the stack's own left/width move: the same node keeps its Header.
+  &[data-animate='true'] &__panel[data-role='peek'] {
+    animation: repanel-peek-in $repanel-duration $repanel-easing backwards;
+  }
+
+  &[data-animate='true'] &__panel[data-role='peek']:not([data-no-transition='true']) {
+    transition:
+      left $repanel-duration $repanel-easing,
+      width $repanel-duration $repanel-easing,
+      opacity $repanel-duration $repanel-easing,
+      transform $repanel-duration $repanel-easing;
+  }
+
+  &__panel[data-leaving='true'] {
+    transform: translateX(calc(var(--repanel-peek-px, 80px) + var(--repanel-overlap, 0px)));
   }
 
   // ======================================
@@ -216,12 +355,6 @@ $repanel-easing: cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
-// ========================================
-// Reduced motion
-// ========================================
-
-@media (prefers-reduced-motion: reduce) {
-  .repanel[data-animate='true'] .repanel__panel:not([data-no-transition='true']) {
-    transition: none;
-  }
+@keyframes repanel-peek-in {
+  from { transform: translateX(calc(var(--repanel-peek-px, 80px) + var(--repanel-overlap, 0px))); }
 }

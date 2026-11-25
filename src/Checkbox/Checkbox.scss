@@ -8,8 +8,9 @@
   display: inline-block;
   vertical-align: middle;
 
-  // Original uses 13px — creates the distinctive pill/rounded-square shape
-  border-radius: 13px;
+  // Original uses 13px, which on a 22px box is already a full round: the pill
+  // token draws the same shape.
+  border-radius: var(--mochi-corner-pill, 9999px);
   // Same dark grey as Toggle's own track (--mochi-toggle-track) — Radio's
   // unchecked border matches this token too, so both controls' "off state"
   // read as one consistent dark-border/light-grey-fill look.
@@ -34,16 +35,30 @@
   }
 }
 
-// Checked state: image covers the box, border removed, 2px inset padding
-// mirrors `.mochi-checkbox[checked]` from original
+// Checked state: border removed, 2px inset padding mirrors
+// `.mochi-checkbox[checked]` from original. The tick is the child
+// .mochi-checkbox-tick (below), not a background image, so it can draw in.
 .mochi-checkbox.checked {
-  // Inline SVG replicates the visual of checkbox.png (white tick on transparent)
+  padding: 2px;
+  border-width: 0;
+}
+
+// The tick (replicates the visual of checkbox.png: white tick on
+// transparent). It fills the padding box and is clipped from the right, so
+// checking reveals it left to right, a beat after the fill starts.
+.mochi-checkbox-tick {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='5,12 9,16 17,7'></polyline></svg>");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100%;
-  padding: 2px;
-  border-width: 0;
+  clip-path: inset(0 100% 0 0);
+}
+
+.mochi-checkbox.checked .mochi-checkbox-tick {
+  clip-path: inset(0 0 0 0);
 }
 
 // Dark mode: same dark-grey tick as Radio's checkmark (--mochi-toggle-knob)
@@ -52,16 +67,42 @@
 // background-image data URI can't reference CSS custom properties, so the
 // color is duplicated here as the literal #404040 (--mochi-toggle-knob's
 // dark-mode value).
-:root[data-mochi-theme='dark'] .mochi-checkbox.checked {
+:root[data-mochi-theme='dark'] .mochi-checkbox-tick {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22' fill='none' stroke='%23404040' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='5,12 9,16 17,7'></polyline></svg>");
 }
 
-// Animation class — only animates background-color as per original spec
+// Animation class. Unchecking is the quick way back: the fill fades and the
+// tick wipes out in 90ms. Checking (below) grows the fill and draws the tick.
 .mochi-checkbox-animate {
-  -webkit-transition: background-color 0.1s linear;
-  -moz-transition: background-color 0.1s linear;
-  -o-transition: background-color 0.1s linear;
-  transition: background-color 0.1s linear;
+  transition:
+    background-color 90ms linear,
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
+
+  .mochi-checkbox-tick {
+    transition: clip-path 90ms var(--mochi-ease-arrive, ease);
+  }
+
+  &.checked .mochi-checkbox-tick {
+    transition: clip-path 120ms var(--mochi-ease-arrive, ease) 50ms;
+  }
+
+  // A held press leans in.
+  &:active:not(.disabled) {
+    transform: scale(0.92);
+  }
+
+  // The fill grows in from the centre. Only after the box has changed once,
+  // so a checkbox that renders already checked doesn't pop on mount.
+  &.mochi-checkbox-live.checked {
+    animation: mochi-checkbox-grow var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
+  }
+}
+
+@keyframes mochi-checkbox-grow {
+  from { transform: scale(0.6); }
+  to   { transform: scale(1); }
 }
 
 .mochi-checkbox.disabled {
@@ -70,8 +111,8 @@
   cursor: default;
 }
 
-// Focus ring — accent or amber to match the active color family
+// Focus ring — the shared --mochi-focus-ring
 .mochi-checkbox:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--mochi-accent-soft, var(--mochi-selected-soft, rgba(255, 184, 13, 0.4)));
+  box-shadow: 0 0 0 3px var(--mochi-focus-ring, #357099);
 }

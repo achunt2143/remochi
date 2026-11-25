@@ -1,6 +1,28 @@
 import * as React from 'react';
 
 // ---------------------------------------------------------------------------
+// Avatar
+// ---------------------------------------------------------------------------
+interface AvatarProps
+  extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'> {
+  /** Image URL. If it fails to load, the avatar falls back to the initials or `icon`. */
+  src?: string;
+  /** Image alt text and accessible name. Default: `name`. */
+  alt?: string;
+  /** Initials fallback (first letters of up to two words) and accessible name. */
+  name?: string;
+  /** Shown when there is no image and no `name`. */
+  icon?: React.ReactNode;
+  /** 'sm' 24px, 'md' 40px, 'lg' 56px, 'xl' 96px, or a number of px. The waterdrop corner scales with it (`waterdropRadius`). Default: 'md'. */
+  size?: 'sm' | 'md' | 'lg' | 'xl' | number;
+  className?: string;
+  style?: React.CSSProperties;
+}
+/** A person's or app's picture in the waterdrop shape. The ref goes to the root. */
+declare const Avatar: React.ForwardRefExoticComponent<AvatarProps & React.RefAttributes<HTMLSpanElement>>;
+declare const MochiAvatar: React.ForwardRefExoticComponent<AvatarProps & React.RefAttributes<HTMLSpanElement>>;
+
+// ---------------------------------------------------------------------------
 // Badge
 // ---------------------------------------------------------------------------
 interface BadgeProps
@@ -35,7 +57,10 @@ interface ButtonProps
   /** Button label. Default: 'Button'. */
   children?: React.ReactNode;
 }
-declare const Button: React.FC<ButtonProps>;
+/** Forwards its `ref` to the root `<button>`. */
+declare const Button: React.ForwardRefExoticComponent<
+  ButtonProps & React.RefAttributes<HTMLButtonElement>
+>;
 
 interface RadioProps
   extends Omit<React.LabelHTMLAttributes<HTMLLabelElement>, 'onChange'> {
@@ -56,7 +81,12 @@ interface ViewSelectButtonItem {
 interface ViewSelectButtonProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   items?: ViewSelectButtonItem[];
-  onSelect?: (item: ViewSelectButtonItem, index: number) => void;
+  /** Called when a segment is chosen. `detail.direction` says which way the choice moved ('forward' to a later segment, 'back' to an earlier one, `null` for the same one), so content can enter from that side. */
+  onSelect?: (
+    item: ViewSelectButtonItem,
+    index: number,
+    detail: { direction: 'forward' | 'back' | null; from: number; to: number }
+  ) => void;
   decoratorLeft?: string;
   decoratorRight?: string;
   barClasses?: string;
@@ -141,6 +171,8 @@ interface DialogProps
   showCloseButton?: boolean;
   /** Card width: 320px, 420px (default) or 600px, capped to the viewport. */
   size?: 'small' | 'medium' | 'large';
+  /** Optional tone accent for warning or error dialogs. @default 'normal' */
+  tone?: 'normal' | 'warning' | 'error';
   /** Custom footer buttons; replaces the type-based defaults. */
   actions?: { label: React.ReactNode; onClick?: () => void; type?: ButtonProps['type'] }[];
   className?: string;
@@ -190,8 +222,16 @@ declare const NubbinDivider: React.FC<NubbinDividerProps>;
 // Dropdown
 // ---------------------------------------------------------------------------
 interface DropdownOption {
-  value: string | number;
-  label: string;
+  /** The value passed to `onChange` when chosen. Not needed for `divider` and `sectionLabel` entries. */
+  value?: string | number;
+  /** Text shown for the option, or for a `sectionLabel` heading. */
+  label?: string;
+  /** Renders a horizontal rule instead of an option. Never selectable. */
+  divider?: boolean;
+  /** Renders `label` as a non-selectable section heading instead of an option. */
+  sectionLabel?: boolean;
+  /** Shows the option dimmed; clicking it does not choose it or close the menu. */
+  disabled?: boolean;
 }
 interface DropdownProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
@@ -202,10 +242,12 @@ interface DropdownProps
   placeholder?: string;
   disabled?: boolean;
   maxHeight?: number;
-  searchable?: boolean;
   className?: string;
 }
-declare const Dropdown: React.FC<DropdownProps>;
+/** Forwards its `ref` to the root `<div>`. */
+declare const Dropdown: React.ForwardRefExoticComponent<
+  DropdownProps & React.RefAttributes<HTMLDivElement>
+>;
 
 // ---------------------------------------------------------------------------
 // Headers
@@ -213,9 +255,25 @@ declare const Dropdown: React.FC<DropdownProps>;
 interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   content?: string;
   children?: React.ReactNode;
+  /** 'header' (Mochi Light 36/32, default) or 'display' (Mochi Light 72/64, uppercase; at most once per screen). */
+  size?: 'header' | 'display';
   customClasses?: string;
 }
 declare const Header: React.FC<HeaderProps>;
+
+interface LabelProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, 'content'> {
+  /** Label text in title case (it is uppercased with CSS). */
+  content?: string;
+  /** Label text, used when `content` is empty. */
+  children?: React.ReactNode;
+  /** Element to render. @default 'div' */
+  as?: React.ElementType;
+  /** `aria-level` when `as` is not an h1-h6 element. @default 3 */
+  level?: number;
+}
+/** The label rung of the type ladder: Mochi Bold 12/16, uppercase, on the 32px edge. Names a section inside a panel; renders with `role="heading"`. */
+declare const Label: React.FC<LabelProps>;
 
 interface SubheaderProps extends React.HTMLAttributes<HTMLDivElement> {
   content?: string;
@@ -226,7 +284,10 @@ declare const Subheader: React.FC<SubheaderProps>;
 // Input
 // ---------------------------------------------------------------------------
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
-declare const Input: React.ComponentType<InputProps>;
+/** Forwards its `ref` to the `<input>`. */
+declare const Input: React.ForwardRefExoticComponent<
+  InputProps & React.RefAttributes<HTMLInputElement>
+>;
 
 interface RichTextProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'onFocus' | 'onBlur'> {
@@ -351,7 +412,7 @@ interface MochiSlidingMenuProps extends React.HTMLAttributes<HTMLElement> {
   onOpenChange?: (open: boolean) => void;
   className?: string;
   style?: React.CSSProperties;
-  /** Slide animation duration in ms. @default 300 */
+  /** Slide animation duration in ms. @default follows `--mochi-duration-stack` (260ms) */
   duration?: number;
   /** Close on Escape key. @default true */
   closeOnEscape?: boolean;
@@ -359,8 +420,14 @@ interface MochiSlidingMenuProps extends React.HTMLAttributes<HTMLElement> {
   closeOnBackdropClick?: boolean;
   /** Override the backdrop CSS color. Defaults to a theme-aware value. */
   backdropColor?: string;
-  /** Show the backdrop overlay. @default true */
+  /** Show the backdrop overlay. With it the menu is a modal dialog (focus moves in and is trapped); without, a navigation landmark. @default true */
   showBackdrop?: boolean;
+  /** Nameplate at the top, on the 32px edge (a Header: truncates, uppercases). Also names the menu for assistive tech. */
+  title?: React.ReactNode;
+  /** A line under the title in the Subheader voice. */
+  subtitle?: string;
+  /** Add a 44px close button to the header. The backdrop and Escape already close the menu. @default false */
+  showCloseButton?: boolean;
 }
 /** MochiSlidingMenu.ContentShifter props */
 interface MochiSlidingMenuContentShifterProps
@@ -368,7 +435,7 @@ interface MochiSlidingMenuContentShifterProps
   children?: React.ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';
   isMenuOpen?: boolean;
-  /** Width of the left/right menu (CSS value). @default '280px' */
+  /** Width of the left/right menu (CSS value). @default 'min(320px, 85vw)' */
   menuWidth?: string;
   /** Height of the top/bottom menu (CSS value). @default 'auto' */
   menuHeight?: string;
@@ -391,7 +458,9 @@ interface MochiSlidingMenuItemProps
   icon?: React.ReactNode;
   onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   href?: string;
+  /** Marks the row (aria-current="page"); the menu's accent bar slides to it. */
   isActive?: boolean;
+  /** Shown as a Badge at the right edge of the row. */
   badge?: string | number;
   className?: string;
   style?: React.CSSProperties;
@@ -404,9 +473,9 @@ declare const SlidingMenuItem: React.FC<MochiSlidingMenuItemProps>;
 interface MochiSlidingMenuItemGroupProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
-  /** Section heading rendered in uppercase muted text. */
+  /** Section heading in the Label voice (Mochi Bold 12, uppercase). */
   label?: string;
-  /** Show a divider border below the group. @default false */
+  /** Draw a hairline below the group. Groups are otherwise separated by 32px of space. @default false */
   divider?: boolean;
   className?: string;
   style?: React.CSSProperties;
@@ -451,12 +520,20 @@ declare const Pagination: React.FC<PaginationProps>;
 // ---------------------------------------------------------------------------
 interface RepanelProps {
   children?: React.ReactNode;
-  /** Percentage width of the panel within its row, e.g. 25, 33, 50. */
-  width?: number;
+  /** Width as a percentage number (e.g. 25, 33, 50) or any valid CSS width string (e.g. '30%', '320px'). */
+  width?: number | string;
   /** Visual style variant or inline CSS styles. */
   style?: 'default' | 'shadow' | React.CSSProperties;
   /** Draws a nubbin grabber accent at the bottom-left edge. `RepanelStack` sets this on every child but the first. */
   handle?: boolean;
+  /** The clue shown while this panel is `RepanelStack`'s `upcoming` peek: one short word or number, about 8 characters. */
+  hint?: React.ReactNode;
+  /** For panels in a sequence: the peek shows `index` as Mochi Light numerals (zero-padded to 2) above `label`, instead of `hint`. */
+  sequence?: { index: number; label?: string };
+  /** The panel's name for the peek's accessible name ("Open <peekLabel>, <hint>"). Falls back to the Header's `content`. */
+  peekLabel?: string;
+  /** Set by `RepanelStack` while this panel is the left sliver: only its Header is rendered, like a peek. */
+  door?: boolean;
   className?: string;
   [key: string]: any;
 }
@@ -467,6 +544,10 @@ interface FloatingPanelProps {
   children?: React.ReactNode;
   /** Visual style variant or inline CSS styles. */
   style?: 'default' | 'shadow' | React.CSSProperties;
+  /** 'drop' takes the waterdrop accent (`--mochi-drop-radius`, `16px 4px 16px 16px`); 'round' the corner `--mochi-floating-radius` (else `--mochi-corner`, 16px). Default: 'round'. */
+  shape?: 'round' | 'drop';
+  /** Square corners, no edge and no shadow, for a panel that is the whole surface rather than sitting on something; wins over `shape`. Default: false. */
+  fullBleed?: boolean;
   className?: string;
   [key: string]: any;
 }
@@ -503,7 +584,7 @@ declare const MochiFloatingPanel: React.FC<FloatingPanelProps>;
  */
 
 /** Reason an active-index change was committed. */
-type ActiveIndexChangeReason = 'grabber' | 'method';
+type ActiveIndexChangeReason = 'grabber' | 'method' | 'peek';
 
 /** Reason a reveal change was committed. */
 type RevealChangeReason = 'grabber' | 'method';
@@ -589,12 +670,22 @@ interface StackedPanelsProps {
 
   /** Collapse to a narrow layout below `narrowFitWidth`. @default true */
   narrowFit?: boolean;
+  /**
+   * The predicted next panel (one keyed Repanel, or null): it waits as a sliver at the right edge.
+   * Tap, drag left or `next()` calls `onUpcomingOpen`; append the panel (same `key`) to your children.
+   */
+  upcoming?: React.ReactElement | null;
+  /** Called when the `upcoming` sliver is opened. Append that panel to your children (with a controlled `activeIndex`, set it too). */
+  onUpcomingOpen?: (detail: { upcoming: React.ReactElement; reason: string; previousIndex: number; panelCount: number; isNarrow: boolean }) => void;
+  /** Keep the panel you came from as a left sliver when the stack is collapsed to the front panel. @default true */
+  keepPast?: boolean;
   /** Root width (px) at/below which narrow mode activates. @default 768 */
   narrowFitWidth?: number;
   /** Narrow-mode layout. @default 'single' */
   narrowBehavior?: NarrowBehavior;
 
   className?: string;
+  style?: React.CSSProperties;
 }
 
 declare const RepanelStack: React.ForwardRefExoticComponent<
@@ -657,10 +748,12 @@ declare const Slider: React.FC<SliderProps>;
 // ---------------------------------------------------------------------------
 // Spinner
 // ---------------------------------------------------------------------------
-interface SpinnerProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+/** The Spinner is drawn in code as an `<svg>`; other props go to it. */
+interface SpinnerProps extends Omit<React.SVGAttributes<SVGSVGElement>, 'size'> {
   active?: boolean;
   styleType?: 'light' | 'dark';
   size?: 'normal' | 'large';
+  /** Accessible label. @default 'Loading…' */
   alt?: string;
 }
 declare const Spinner: React.FC<SpinnerProps>;
@@ -676,7 +769,13 @@ interface TableColumn<T = Record<string, any>> {
 }
 interface TableProps<T = Record<string, any>>
   extends React.HTMLAttributes<HTMLDivElement> {
-  columns?: TableColumn<T>[];
+  /**
+   * Column definitions. Either all objects (use with `data`), or all plain
+   * strings used as headers (use with `rows`, arrays in column order). The
+   * shape is chosen by the first entry, so do not mix the two.
+   */
+  columns?: Array<TableColumn<T> | string>;
+  /** Row arrays in column order, for string `columns`. Takes precedence over `data`. */
   rows?: any[][];
   onRowClick?: (row: T) => void;
   data?: T[];
@@ -762,7 +861,63 @@ interface ThemeWrapperProps extends React.HTMLAttributes<HTMLDivElement> {
    * else the bundled Lato) or 'Lato' (bundled Lato only). Default: 'Prelude'.
    */
   fontFamily?: string;
-  /** CSS custom property overrides applied inline on the wrapper and synced to `:root` when `syncHtml` is enabled. */
+  /**
+   * Motion mode, written as `data-motion` (on `<html>` too with `syncHtml`).
+   * 'full' is as designed; 'reduced' is an opacity fade of at most
+   * `--mochi-duration-reduced` (150ms) with no travel, scale or stagger;
+   * 'off' is instant. 'system' writes nothing, so a host's own
+   * `<html data-motion>` or `prefers-reduced-motion` decides. Drags always
+   * track exactly. @default 'system'
+   */
+  motion?: 'system' | 'full' | 'reduced' | 'off';
+  /**
+   * 'more' takes ink to pure black/white, edges to full ink and surfaces solid
+   * (`data-mochi-contrast`); 'standard' opts out of `prefers-contrast`.
+   * 'system' follows the OS. @default 'system'
+   */
+  contrast?: 'system' | 'standard' | 'more';
+  /**
+   * 'reduced' makes the Dialog scrim and `--mochi-surface-material` solid and
+   * drops the scrim's blur (`data-mochi-transparency`); 'standard' opts out of
+   * `prefers-reduced-transparency`. 'system' follows the OS. @default 'system'
+   */
+  transparency?: 'system' | 'standard' | 'reduced';
+  /**
+   * 'vignette' shades the edges of the area the wrapper covers with an inset
+   * `--mochi-vignette` shadow (class `mochi-ground--vignette`); 'plain' draws
+   * nothing. @default 'plain'
+   */
+  ground?: 'plain' | 'vignette';
+  /**
+   * CSS custom property overrides applied inline on the wrapper and synced to
+   * `:root` when `syncHtml` is enabled. The main public tokens added in 0.6.0:
+   *
+   * - Pane: `--mochi-pane-edge`, `--mochi-pane-edge-width` (1px; 2px for the
+   *   0.5 look), `--mochi-stack-shadow`, `--mochi-stack-shadow-front` (both
+   *   `none`), `--mochi-panel-text-muted`
+   * - Shape: `--mochi-drop-radius` (the waterdrop accent, `16px 4px 16px 16px`:
+   *   Avatar, Dialog, FloatingPanel `shape="drop"`), `--mochi-dialog-radius`
+   *   (defaults to the drop), `--mochi-floating-radius` (no default, like
+   *   `--mochi-accent`: PopupPanel, the Dropdown menu and FloatingPanel each
+   *   keep their own ladder corner until a host sets it, e.g. to
+   *   `var(--mochi-drop-radius)`, to retune them all), `--mochi-corner-xs`
+   *   (4px) and the rest of the `--mochi-corner-*` ladder
+   * - Avatar: `--mochi-avatar-bg` (the panel hover grey), `--mochi-avatar-ring`
+   *   (none)
+   * - Colour: `--mochi-focus-ring` (the one focus ring), `--mochi-overlay`,
+   *   `--mochi-surface-material`
+   * - Motion: `--mochi-ease-forward`, `--mochi-duration-stack` (260ms),
+   *   `--mochi-ease-arrive`, `--mochi-duration-arrive` (220ms),
+   *   `--mochi-duration-reduced` (150ms)
+   * - Screens: `--mochi-peek-width` (80px), `--mochi-peek-width-narrow`
+   *   (20px), `--mochi-screen-narrow` (768px) and `--mochi-screen-wide`
+   *   (1280px; informational, media queries can't read them)
+   * - Font: `--mochi-font-body` (the wrapper's resolved `fontFamily`; portaled
+   *   surfaces read it)
+   * - Spinner: `--mochi-spinner-circle`, `-square`, `-triangle` and their
+   *   `-outline` values are fixed constants from the webOS guide, not for
+   *   retheming
+   */
   tokens?: Record<string, string | number>;
   className?: string;
 }
@@ -797,7 +952,10 @@ interface ToggleProps
   onContent?: string;
   offContent?: string;
 }
-declare const Toggle: React.FC<ToggleProps>;
+/** Forwards its `ref` to the root `<div>` (the track). */
+declare const Toggle: React.ForwardRefExoticComponent<
+  ToggleProps & React.RefAttributes<HTMLDivElement>
+>;
 
 // ---------------------------------------------------------------------------
 // Wizard
@@ -839,5 +997,28 @@ interface WizardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 declare const Wizard: React.FC<WizardProps>;
 
-export { Badge, Button, Checkbox, Collapsable, CollapsableFooter, CollapsableHeader, CollapsableItem, DARK_THEME_COLORS, DateInput, Dialog, Divider, Dropdown, FloatingPanel, GridList, GridListImageItem, Header, Input, Item, LIGHT_THEME_COLORS, List, ListHeader, ListItem, MochiBadge, MochiFloatingPanel, MochiSlidingMenu, MochiSlidingMenuContentShifter, MochiSlidingMenuItem, MochiSlidingMenuItemGroup, MochiStackedPanels, NubbinDivider, NumberInput, Pagination, PopupPanel, ProgressBar, Radio, Repanel, RepanelStack, RichText, Slider, SlidingMenu, SlidingMenuContentShifter, SlidingMenuItem, SlidingMenuItemGroup, Spinner, StackedMochiPanels, Subheader, Table, TextArea, ThemeContext, ThemeWrapper, Toggle, Video, ViewSelectButton, Wizard, useTheme };
-export type { ActiveIndexChangeDetail, ActiveIndexChangeReason, BadgeProps, ButtonProps, CheckboxChangeEvent, CheckboxProps, CollapsableProps, DateInputProps, DialogProps, DividerProps, DropdownOption, DropdownProps, FloatingPanelProps, GridListImageItemProps, GridListProps, HeaderProps, InputProps, ItemProps, ListHeaderProps, ListItemProps, ListProps, MochiSlidingMenuContentShifterProps, MochiSlidingMenuItemGroupProps, MochiSlidingMenuItemProps, MochiSlidingMenuProps, NarrowBehavior, NubbinDividerNubbin, NubbinDividerProps, NumberInputProps, PaginationProps, PopupAction, PopupPanelProps, ProgressBarProps, RadioProps, RepanelProps, ResolvedTheme, RevealChangeDetail, RevealChangeReason, RichTextProps, SliderProps, SpinnerProps, StackedPanelsMethods, StackedPanelsProps, SubheaderProps, TableColumn, TableProps, TextAreaProps, ThemeColors, ThemeContextValue, ThemeMode, ThemeWrapperProps, ToggleChangeEvent, ToggleProps, VideoProps, ViewSelectButtonItem, ViewSelectButtonProps, WizardNavigationDetail, WizardProps, WizardStep };
+// ---------------------------------------------------------------------------
+// Screens and shape helpers
+// ---------------------------------------------------------------------------
+/** Widest "narrow" screen, in px (768). Mirrors `--mochi-screen-narrow`. */
+declare const SCREEN_NARROW: number;
+/** Narrowest "wide" screen, in px (1280). Mirrors `--mochi-screen-wide`. */
+declare const SCREEN_WIDE: number;
+
+/**
+ * Classes an element by its own width (not the window's): 'narrow' up to
+ * `narrow`, 'wide' from `wide`, 'medium' between. Reads 'medium' until measured.
+ */
+declare function useWidthClass(
+  ref: React.RefObject<HTMLElement | null>,
+  options?: { narrow?: number; wide?: number }
+): 'narrow' | 'medium' | 'wide';
+
+/**
+ * The waterdrop corner scaled to the surface's short side in px, as a CSS
+ * `border-radius` string (e.g. `'16px 4px 16px 16px'` from about 56px up).
+ */
+declare function waterdropRadius(size: number): string;
+
+export { Avatar, Badge, Button, Checkbox, Collapsable, CollapsableFooter, CollapsableHeader, CollapsableItem, DARK_THEME_COLORS, DateInput, Dialog, Divider, Dropdown, FloatingPanel, GridList, GridListImageItem, Header, Input, Item, LIGHT_THEME_COLORS, Label, List, ListHeader, ListItem, MochiAvatar, MochiBadge, MochiFloatingPanel, MochiSlidingMenu, MochiSlidingMenuContentShifter, MochiSlidingMenuItem, MochiSlidingMenuItemGroup, MochiStackedPanels, NubbinDivider, NumberInput, Pagination, PopupPanel, ProgressBar, Radio, Repanel, RepanelStack, RichText, SCREEN_NARROW, SCREEN_WIDE, Slider, SlidingMenu, SlidingMenuContentShifter, SlidingMenuItem, SlidingMenuItemGroup, Spinner, StackedMochiPanels, Subheader, Table, TextArea, ThemeContext, ThemeWrapper, Toggle, Video, ViewSelectButton, Wizard, useTheme, useWidthClass, waterdropRadius };
+export type { ActiveIndexChangeDetail, ActiveIndexChangeReason, AvatarProps, BadgeProps, ButtonProps, CheckboxChangeEvent, CheckboxProps, CollapsableProps, DateInputProps, DialogProps, DividerProps, DropdownOption, DropdownProps, FloatingPanelProps, GridListImageItemProps, GridListProps, HeaderProps, InputProps, ItemProps, LabelProps, ListHeaderProps, ListItemProps, ListProps, MochiSlidingMenuContentShifterProps, MochiSlidingMenuItemGroupProps, MochiSlidingMenuItemProps, MochiSlidingMenuProps, NarrowBehavior, NubbinDividerNubbin, NubbinDividerProps, NumberInputProps, PaginationProps, PopupAction, PopupPanelProps, ProgressBarProps, RadioProps, RepanelProps, ResolvedTheme, RevealChangeDetail, RevealChangeReason, RichTextProps, SliderProps, SpinnerProps, StackedPanelsMethods, StackedPanelsProps, SubheaderProps, TableColumn, TableProps, TextAreaProps, ThemeColors, ThemeContextValue, ThemeMode, ThemeWrapperProps, ToggleChangeEvent, ToggleProps, VideoProps, ViewSelectButtonItem, ViewSelectButtonProps, WizardNavigationDetail, WizardProps, WizardStep };

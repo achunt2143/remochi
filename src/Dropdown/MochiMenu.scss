@@ -1,13 +1,5 @@
 /* MochiMenu — contextual popup used by MochiDropdown */
 
-// Full-screen transparent overlay (autoDismiss tap target)
-// .mochi-menu-overlay {
-//   position: fixed;
-//   inset: 0;
-//   z-index: 999;
-//   background: transparent;
-// }
-
 // Suppress nubbin — menus never have a nubbin arrow
 .mochi-contextual-popup.mochi-menu::after {
   display: none;
@@ -22,17 +14,33 @@
 .mochi-contextual-popup.mochi-menu {
   background: var(--mochi-surface-material, var(--mochi-panel-bg, var(--mochi-surface)));
   border-color: var(--mochi-panel-border, var(--mochi-popup-border, #646464));
+  // The field corner (Panel reads the same tokens; stated here so the menu
+  // keeps it if its base panel changes).
+  border-radius: var(--mochi-floating-radius, var(--mochi-corner-field, 24px));
+}
+
+// Grows from the trigger edge (MochiMenu sets transform-origin to top or
+// bottom): a short scaleY with a fade, instead of the popup's scale from the
+// middle. Reduced swaps in a plain fade and Off cuts it, via
+// .mochi-contextual-popup in the motion lists.
+.mochi-contextual-popup.mochi-menu {
+  animation-name: mochi-menu-grow;
+}
+
+@keyframes mochi-menu-grow {
+  from { opacity: 0; transform: scaleY(0.96); }
+  to   { opacity: 1; transform: scaleY(1); }
 }
 
 // Scrollable inner container
 .mochi-menu-scroller {
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--mochi-border, #ddd) transparent;
+  scrollbar-color: var(--mochi-border, rgba(0, 0, 0, 0.12)) transparent;
 
   &::-webkit-scrollbar        { width: 6px; }
   &::-webkit-scrollbar-track  { background: transparent; }
-  &::-webkit-scrollbar-thumb  { background: var(--mochi-border, #ddd); border-radius: 3px; }
+  &::-webkit-scrollbar-thumb  { background: var(--mochi-border, rgba(0, 0, 0, 0.12)); border-radius: 3px; }
 }
 
 // mochi.MenuItem
@@ -43,20 +51,28 @@
   font-weight: 500;
   line-height: 2;
   cursor: pointer;
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-text, #1a1a1a);
   -webkit-user-select: none;
   user-select: none;
   white-space: nowrap;
 
-  &:hover:not(.disabled) { background: var(--mochi-hover, #f5f5f5); border-radius: var(--mochi-corner-pill, 9999px); }
+  &:hover:not(.disabled) { background: var(--mochi-hover, rgba(0, 0, 0, 0.04)); border-radius: var(--mochi-corner-pill, 9999px); }
   &.selected {
     // --mochi-selected (not --mochi-primary): the fallback colors here
     // (#fff5d6/#ffb80d) were clearly written for the amber "selected"
     // accent, but --mochi-primary itself resolves to blue — same mismatch
     // as MochiRadio's checked fill (see the comment there).
-    background: var(--mochi-selected-soft, #fff5d6);
-    color: var(--mochi-selected, #ffb80d);
+    // Amber tint with ink text (amber text would be under 2:1) and a ✓ glyph
+    // (.mochi-menu-item-check) so selection also reads in greyscale.
+    background: var(--mochi-selected-soft, rgba(255, 184, 13, 0.35));
+    color: var(--mochi-text, #1a1a1a);
     border-radius: var(--mochi-corner-pill, 9999px);
+  }
+  // The ✓ fades in a beat after the menu opens.
+  .mochi-menu-item-check {
+    margin-right: 6px;
+    font-style: normal;
+    animation: mochi-fade-in var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) 20ms backwards;
   }
   &.disabled { opacity: var(--mochi-disabled-opacity, 0.4); cursor: default; }
 }
@@ -65,7 +81,7 @@
 .mochi-menu-divider {
   margin: 6px 0;
   padding: 0;
-  border-bottom: 1px solid var(--mochi-border, #aaa);
+  border-bottom: 1px solid var(--mochi-border, rgba(0, 0, 0, 0.12));
   &:hover { background: none; }
 }
 

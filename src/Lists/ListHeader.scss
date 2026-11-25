@@ -5,6 +5,11 @@
   font-size: 18pt;
   font-weight: bold;
   font-style: italic;
-  color: var(--mochi-text, #323232);
+  color: var(--mochi-text, #1a1a1a);
   padding: 16px 32px;
+}
+
+// Inside a panel the header reads the panel's muted ink, same as Subheader.
+.mochi-panel .mochi-list-header {
+  color: var(--mochi-panel-text-muted, var(--mochi-text-muted, #555555));
 }

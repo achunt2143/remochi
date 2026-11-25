@@ -5,7 +5,7 @@
   font-size: 14px;
   font-weight: bold;
   font-style: italic;
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-text, #1a1a1a);
   // Mochi's ListItem.less had padding: 0 0 48px 32px, which pins the label
   // to the top of a tall row. Center it in a 54px row instead (the webOS
   // tap-target size) and keep Mochi's 32px left inset.
@@ -18,10 +18,15 @@
   -webkit-user-select: none;
   user-select: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease);
 
   &:hover {
     background-color: var(--mochi-hover);
+  }
+
+  // The tap tint fades in while held and out on release.
+  &:active {
+    background-color: var(--mochi-active, rgba(0, 0, 0, 0.08));
   }
 
   &.mochi-highlight {

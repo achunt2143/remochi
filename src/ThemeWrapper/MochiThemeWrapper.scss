@@ -89,16 +89,10 @@ $mochi-faces: (
 @include mochi-font-face('Mochi Lato', bold-italic,   700, italic, false);
 
 .mochi-theme-wrapper {
-  font-family: 'Prelude', sans-serif;
+  // The body family is a token (--mochi-font-body, see the :root block and
+  // the data-font-family rules below) so portaled surfaces can read it too.
+  font-family: var(--mochi-font-body, 'Prelude', sans-serif);
   transition: background-color 0.3s ease, color 0.3s ease;
-
-  &[data-font-family='Lato'] {
-    font-family: 'Mochi Lato', sans-serif;
-  }
-
-  &[data-font-family='Prelude'] {
-    font-family: 'Prelude', sans-serif;
-  }
 
   // ============================================
   // Typography scale
@@ -163,6 +157,12 @@ $mochi-faces: (
   // section sizes to its content.
   &--root {
     min-height: 100vh;
+  }
+
+  // Opt-in ground (ground="vignette"): an inset shade at the edges of the
+  // area the wrapper covers.
+  &.mochi-ground--vignette {
+    box-shadow: var(--mochi-vignette);
   }
 
   // Theme colors themselves are NOT defined here (see the top-level
@@ -256,6 +256,7 @@ $mochi-faces: (
   --color-info:       #2196f3;
   --color-info-bg:    rgba(33, 150, 243, 0.15);
   --mochi-success:    var(--color-success);
+  --mochi-warning:    var(--color-warning);
   --mochi-info:       var(--color-info);
 
   // --------------------------------------------------
@@ -293,9 +294,20 @@ $mochi-faces: (
   // Repanel — solid card vs. inset-shadow variant, per the Figma spec.
   --mochi-panel-bg:          #404040;
   --mochi-panel-border:      #333333;
+  // The pane's 1px left edge (and the grabber's line out of it): light, not
+  // chrome. Width is --mochi-pane-edge-width on :root.
+  --mochi-pane-edge:         #333333;
   --mochi-panel-shadow-bg:   #1a1a1a;
   --mochi-panel-shadow-tint: #606060;
   --mochi-surface-material:  var(--mochi-panel-bg);
+  // Muted ink and caps-button ink inside .mochi-panel: --mochi-text-muted
+  // (#a0a0a0) is only 3.96:1 on the dark panel, so panels read these.
+  --mochi-panel-text-muted:  #c0c0c0;
+  --mochi-panel-button-text: #b4b4b4;
+  // Error and success ink on a panel (the SlidingMenu's danger and success
+  // rows): --mochi-error and --mochi-success are 3:1 or less on the dark panel.
+  --mochi-panel-error:       #ff8a80;
+  --mochi-panel-success:     #81c784;
 
   // MochiButton's "normal" decorator/label text. A dedicated token rather
   // than reusing --mochi-text-muted: this button was previously hardcoded
@@ -329,19 +341,29 @@ $mochi-faces: (
   // rather than a subtle highlight. This is a solid, slightly lighter
   // shade of --mochi-panel-bg (#404040) instead.
   --mochi-panel-hover: #4d4d4d;
+  // The Avatar's ground: the panel hover grey.
+  --mochi-avatar-bg: var(--mochi-panel-hover);
 
   // Slider's unfilled track. Mochi only defined a light look (#a2a2a2);
   // in dark mode that's brighter than the text it sits beside, so this
   // uses the same neutral "off" grey as --mochi-toggle-track instead.
   --mochi-slider-track: #646464;
+
+  // Dialog / modal surface, hairline ring, and scrim overlay
+  --mochi-dialog-bg:   #333333;
+  --mochi-dialog-ring: rgba(255, 255, 255, 0.14);
+  --mochi-overlay:     rgba(4, 6, 14, 0.56);
+  --mochi-vignette:    inset 0 0 169px rgba(0, 0, 0, 0.5);
 }
 
 :root[data-mochi-theme='light'],
 [data-mochi-theme='light'],
 .mochi-theme-light {
-  --color-primary:        #4a8bc2;
-  --color-primary-hover:  #5b9dd9;
-  --color-primary-active: #3a7bb2;
+  // Darkened from #4a8bc2 (3.64:1 on white) because primary colours text;
+  // #357099 is 4.9:1 on --color-background. Hover/active stay in the family.
+  --color-primary:        #357099;
+  --color-primary-hover:  #2f6490;
+  --color-primary-active: #285780;
 
   --color-secondary:        #6aaedb;
   --color-secondary-hover:  #7ab8e8;
@@ -367,6 +389,7 @@ $mochi-faces: (
   --color-info:       #1565c0;
   --color-info-bg:    rgba(21, 101, 192, 0.1);
   --mochi-success:    var(--color-success);
+  --mochi-warning:    var(--color-warning);
   --mochi-info:       var(--color-info);
 
   // --------------------------------------------------
@@ -381,7 +404,7 @@ $mochi-faces: (
   --mochi-primary:      var(--color-primary);
   --mochi-primary-hover: var(--color-primary-hover);
   --mochi-primary-text: #ffffff;
-  --mochi-primary-soft: rgba(74, 139, 194, 0.12);
+  --mochi-primary-soft: rgba(53, 112, 153, 0.12);
   --mochi-error:        var(--color-error);
   --mochi-hover:  rgba(0, 0, 0, 0.04);
   --mochi-active: rgba(0, 0, 0, 0.08);
@@ -402,9 +425,15 @@ $mochi-faces: (
 
   --mochi-panel-bg:          #f5f5f5;
   --mochi-panel-border:      #666666;
+  --mochi-pane-edge:         #cccccc;
   --mochi-panel-shadow-bg:   #f5f5f5;
   --mochi-panel-shadow-tint: rgba(0, 0, 0, 0.3);
   --mochi-surface-material:  var(--mochi-panel-bg);
+  // Same as the page-level values; only dark mode needs a panel-specific one.
+  --mochi-panel-text-muted:  var(--mochi-text-muted);
+  --mochi-panel-error:       var(--mochi-error);
+  --mochi-panel-success:     #2e7d32;
+  --mochi-panel-button-text: var(--mochi-button-text);
 
   // MochiButton's original hardcoded light-mode value, preserved exactly
   // (see the dark block's comment on this same token).
@@ -416,11 +445,22 @@ $mochi-faces: (
   --mochi-toggle-knob:  #ffffff;
   --mochi-mark:         #ffffff;
   --mochi-panel-hover:  #ececec;
+  --mochi-avatar-bg:    var(--mochi-panel-hover);
 
   // Slider's unfilled track — Mochi's own #a2a2a2 (Slider.less/
   // ProgressBar.less). It previously reused --mochi-hover (4% black),
   // which left the track barely visible.
   --mochi-slider-track: #a2a2a2;
+
+  // Dialog / modal surface, hairline ring, and scrim overlay
+  --mochi-dialog-bg:   #f5f5f5;
+  --mochi-dialog-ring: rgba(0, 0, 0, 0.10);
+  --mochi-overlay:     rgba(8, 10, 24, 0.36);
+  --mochi-vignette:    inset 0 0 169px rgba(0, 0, 0, 0.3);
+
+  // The accent (#69cdff) is only 1.64:1 on the light ground, under the 3:1
+  // a focus ring needs, so light rings follow primary (5.3:1) instead.
+  --mochi-focus-ring: var(--mochi-primary);
 }
 
 // ============================================
@@ -435,6 +475,14 @@ $mochi-faces: (
 :root {
   --mochi-selected:      #ffb80d;
   --mochi-selected-soft: rgba(255, 184, 13, 0.35);
+  // Ink on the amber --mochi-selected fill (warning Badge, …): #404040 is
+  // 5.98:1 on it in both themes, unlike --mochi-toggle-knob (white in light).
+  --mochi-on-selected-ink: #404040;
+  // Ink over imagery (GridList captions, video controls), always on a dark
+  // scrim, so white in both themes.
+  --mochi-overlay-ink: #ffffff;
+  // Letterbox behind video, black in both themes.
+  --mochi-media-bg: #000000;
 
   // Toggle's own "off" track color (see MochiToggle.jsx's colorInactive
   // default) — also used as Radio/Checkbox's unselected/unchecked fill so
@@ -454,15 +502,588 @@ $mochi-faces: (
      keep their 0.4.0 fallback colors (#69cdff / #ffb80d). */
 
   /* Corner radius & scallop defaults (overridable via CSS or ThemeWrapper tokens) */
+  --mochi-corner-xs:    4px;
   --mochi-corner:       16px;
   --mochi-corner-sm:    10px;
   --mochi-corner-field: 24px;
   --mochi-corner-pill:  9999px;
   --mochi-scallop:      45px 0 0 0;
 
+  // The two signature corners (the rest sit on the ladder above): the
+  // scallop for panes anchored to an edge, and the waterdrop (top-right
+  // nearly sharp), an accent kept for special purposes: the Avatar, the
+  // Dialog (the one interruption) and FloatingPanel shape="drop". A popup
+  // already points with its nubbin, so it keeps the field corner.
+  // --mochi-dialog-radius (not declared either) defaults to it in the Dialog
+  // itself, so a drop set on a wrapper reaches it. For a surface smaller than
+  // ~56px use waterdropRadius(size) (shared/waterdrop.js) so the corner
+  // follows its size.
+  --mochi-drop-radius: 16px 4px 16px 16px;
+  // --mochi-floating-radius is not declared, like --mochi-accent: each
+  // floating surface (PopupPanel, the Dropdown menu, FloatingPanel) falls
+  // back to its own ladder corner. A host that sets it (for example to
+  // var(--mochi-drop-radius), as the Pyxis shell does) retunes all of them
+  // at once.
+
+  // The pane's edge: a 1px hairline on its left, no drop shadow between
+  // stacked panes. The 0.5 look is --mochi-pane-edge-width: 2px,
+  // --mochi-pane-edge: #666666 and --mochi-stack-shadow:
+  // drop-shadow(-6px 0 14px rgba(0, 0, 0, 0.14)) (the front pane
+  // --mochi-stack-shadow-front: drop-shadow(-10px 0 26px rgba(0, 0, 0, 0.22))).
+  --mochi-pane-edge-width: 1px;
+  // The colour of the SlidingMenu's shadow, cast away from the docked edge
+  // (it was rgba(0, 0, 0, 0.44) at 10px; the pane edge now does most of the work).
+  --mochi-drawer-shadow-color: rgba(0, 0, 0, 0.22);
+  --mochi-stack-shadow: none;
+
+  // Display font token — available everywhere (portals included) and
+  // overridable via CSS or ThemeWrapper tokens.
+  --mochi-font-display: "Mochi Light", "Prelude", sans-serif;
+
+  // Body font token — what the wrapper's fontFamily resolves to. Portaled
+  // surfaces (Dialog, Popup, Dropdown menu) sit outside the wrapper and
+  // read it as their inherited base; the wrapper mirrors its fontFamily
+  // onto <html> as data-font-family (see the rules after this block).
+  --mochi-font-body: 'Prelude', sans-serif;
+
   // Mochi dims every disabled control to the same 40%
   // (@mochi-disabled-opacity in mochi-variables.less).
   --mochi-disabled-opacity: 0.4;
+
+  // One focus ring for every control; follows the accent unless the host
+  // sets it (#69cdff when no accent is declared).
+  --mochi-focus-ring: var(--mochi-accent, #69cdff);
+
+  // Motion. Components read these for Full; the Reduced and Off blocks at
+  // the end of this file replace them with a short fade and with nothing.
+  // Forward travel (the stack, SlidingMenu) and arrival (Dialog, Popup) each
+  // have one curve and one duration, and an exit never outlasts its entrance.
+  --mochi-ease-forward:     cubic-bezier(0.16, 1, 0.3, 1);
+  --mochi-duration-stack:   260ms;
+  --mochi-ease-arrive:      cubic-bezier(0.22, 1, 0.36, 1);
+  --mochi-duration-arrive:  220ms;
+  // A small control changing state (a checkbox ticking, a toggle flipping, a
+  // chevron turning): quicker than an arrival, never blocking input.
+  --mochi-duration-control: 200ms;
+  // A Button held down: its accent bar growing in (the design guide's 0.3s).
+  // The brackets spread and the press settle on the arrive duration, and the
+  // scale on --transition-fast. Reduced and Off replace all three.
+  --mochi-duration-press:   300ms;
+  // A focus ring easing in (outline-offset and colour from nothing), never
+  // popping.
+  --mochi-duration-focus:   120ms;
+  // The longest a Reduced-motion fade may run.
+  --mochi-duration-reduced: 150ms;
+
+  // The width of a peek (RepanelStack's slivers, left and right): the corner,
+  // the start of a nameplate and one clue; on a narrow stack only the curve.
+  // Plain px.
+  --mochi-peek-width:        80px;
+  --mochi-peek-width-narrow: 20px;
+
+  // The three screen widths (narrow up to 768, wide from 1280, medium
+  // between), mirroring SCREEN_NARROW / SCREEN_WIDE in src/shared/screens.js.
+  // Media queries can't read custom properties, so stylesheets repeat the
+  // number and JS reads the constants; these are for hosts and inspection.
+  --mochi-screen-narrow: 768px;
+  --mochi-screen-wide:   1280px;
+
+  // The spinner's three shapes: constants from the webOS guide, not for
+  // retheming (Pyxis and apps read these as the one source). The drawn
+  // Spinner doesn't read them: its frames carry about 40 in-between shades
+  // from the morph, so it keeps its traced fills, whose base three equal
+  // these (check:tokens asserts that).
+  --mochi-spinner-circle:           #ff4a4a;
+  --mochi-spinner-square:           #69cdff;
+  --mochi-spinner-triangle:         #ffb80d;
+  --mochi-spinner-circle-outline:   #a12c2c;
+  --mochi-spinner-square-outline:   #33647c;
+  --mochi-spinner-triangle-outline: #5d4305;
+}
+
+:root[data-font-family='Lato'],
+.mochi-theme-wrapper[data-font-family='Lato'] {
+  --mochi-font-body: 'Mochi Lato', sans-serif;
+}
+
+:root[data-font-family='Prelude'],
+.mochi-theme-wrapper[data-font-family='Prelude'] {
+  --mochi-font-body: 'Prelude', sans-serif;
+}
+
+// ============================================
+// Accessibility settings beat materials
+// ============================================
+// High contrast takes ink to pure black/white, edges to full ink, the
+// scrim and the panel material solid; reduced transparency makes the scrim
+// and the material solid. Each applies from the OS preference (when the
+// ThemeWrapper prop is 'system', no attribute is written) or from
+// data-mochi-contrast="more" / data-mochi-transparency="reduced" on <html>
+// or a wrapper; "standard" opts out of the OS preference. Declared after
+// the theme blocks so they win on equal specificity, and the material and
+// scrim are !important so a host's `tokens` (inline style) can't undo them.
+
+@mixin mochi-a11y-selectors($theme, $attr, $value) {
+  $plain: ':root[data-mochi-theme="#{$theme}"][#{$attr}="#{$value}"], '
+          + '[data-mochi-theme="#{$theme}"][#{$attr}="#{$value}"], '
+          + '.mochi-theme-#{$theme}[#{$attr}="#{$value}"], '
+          // A nested wrapper that sets nothing follows the mode set above it.
+          + '[#{$attr}="#{$value}"] [data-mochi-theme="#{$theme}"]:not([#{$attr}]), '
+          + '[#{$attr}="#{$value}"] .mochi-theme-#{$theme}:not([#{$attr}])';
+  $system: ':root[data-mochi-theme="#{$theme}"]:not([#{$attr}]), '
+           + '[data-mochi-theme="#{$theme}"]:not([#{$attr}]), '
+           + '.mochi-theme-#{$theme}:not([#{$attr}])';
+  @at-root #{$plain} { @content; }
+  @if $attr == 'data-mochi-contrast' {
+    @media (prefers-contrast: more) { @at-root #{$system} { @content; } }
+  } @else {
+    @media (prefers-reduced-transparency: reduce) { @at-root #{$system} { @content; } }
+  }
+}
+
+// The solid scrim both modes use, per theme (the values live once).
+$mochi-solid-overlay: (dark: #050608, light: #cfd0d6);
+
+@mixin mochi-contrast-more($theme, $ink) {
+  @include mochi-a11y-selectors($theme, 'data-mochi-contrast', 'more') {
+    --color-text:           #{$ink};
+    --color-text-secondary: #{$ink};
+    --color-text-muted:     #{$ink};
+    --mochi-panel-text-muted:  #{$ink};
+    --mochi-panel-button-text: #{$ink};
+    --mochi-button-text:       #{$ink};
+    --mochi-field-text:        #{$ink};
+    --mochi-field-placeholder: #{$ink};
+
+    --color-border:       #{$ink};
+    --color-border-light: #{$ink};
+    --mochi-popup-border: #{$ink};
+    --mochi-panel-border: #{$ink};
+    --mochi-pane-edge:    #{$ink};
+    --mochi-field-border: #{$ink};
+    --mochi-dialog-ring:  #{$ink};
+
+    --mochi-overlay:          #{map.get($mochi-solid-overlay, $theme)} !important;
+    --mochi-surface-material: var(--mochi-panel-bg) !important;
+  }
+}
+
+@mixin mochi-transparency-reduced($theme) {
+  @include mochi-a11y-selectors($theme, 'data-mochi-transparency', 'reduced') {
+    --mochi-overlay:          #{map.get($mochi-solid-overlay, $theme)} !important;
+    --mochi-surface-material: var(--mochi-panel-bg) !important;
+  }
+}
+
+@include mochi-contrast-more('dark', #ffffff);
+@include mochi-contrast-more('light', #000000);
+@include mochi-transparency-reduced('dark');
+@include mochi-transparency-reduced('light');
+
+// The Dialog scrim drops its blur under reduced transparency and under
+// high contrast.
+[data-mochi-transparency='reduced'] .mochi-dialog-overlay.open,
+[data-mochi-contrast='more'] .mochi-dialog-overlay.open {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root:not([data-mochi-transparency]) .mochi-dialog-overlay.open {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root:not([data-mochi-contrast]) .mochi-dialog-overlay.open {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+// ============================================
+// Motion: Full, Reduced, Off
+// ============================================
+// Every motion has three forms. Full is as designed (the component's own
+// rules). Reduced is opacity only: a fade of at most --mochi-duration-
+// reduced, no travel, scale, blur or stagger. Off is instant.
+//
+// The mode comes from data-motion="full|reduced|off" on <html> or on a
+// ThemeWrapper element (Pyxis sets it on <html>), else from
+// prefers-reduced-motion: reduce, which means Reduced. A wrapper's
+// attribute beats <html>'s: the <html> rules below step aside for anything
+// inside a wrapper that sets its own (which is also why "full" needs no
+// rules of its own). With nested wrappers, the outer wrapper's rules still
+// apply inside an inner one that sets a different mode.
+//
+// Scoped to remochi's own class names, never `*`, so the host app's
+// content is left alone. !important because these must also beat
+// styled-components, inline transitions and higher-specificity rules.
+//
+// Pointer-driven transforms are not listed here and stay exact in every
+// mode: the stack while dragging (data-no-transition), the Slider knob
+// (its left/width stay on the drag's own timing) and the Toggle knob.
+
+@mixin mochi-motion($mode, $selectors) {
+  $scoped: ();
+  @each $s in $selectors {
+    $scoped: list.append($scoped, '.mochi-theme-wrapper[data-motion="#{$mode}"] #{$s}', comma);
+    $scoped: list.append($scoped, ':root[data-motion="#{$mode}"] #{$s}:not(.mochi-theme-wrapper[data-motion] #{$s})', comma);
+  }
+  @at-root #{$scoped} { @content; }
+  @if $mode == 'reduced' {
+    @media (prefers-reduced-motion: reduce) {
+      $system: ();
+      @each $s in $selectors {
+        $system: list.append($system, ':root:not([data-motion]) #{$s}:not(.mochi-theme-wrapper[data-motion] #{$s})', comma);
+      }
+      @at-root #{$system} { @content; }
+    }
+  }
+}
+
+// Reduced: a colour or opacity fade, no transform.
+@mixin mochi-fade-only {
+  transition-property: opacity, background-color, color, border-color, outline-color !important;
+  transition-duration: var(--mochi-duration-reduced, 150ms) !important;
+  transition-delay: 0s !important;
+}
+
+// Elements that only fade a colour or opacity in Full: clamped under Reduced.
+$mochi-fade-selectors: (
+  '.mochi-theme-wrapper',
+  '.mochi-sliding-menu-item',
+  '.mochi-button',
+  '.mochi-button .mochi-bracket-left',
+  '.mochi-button .mochi-bracket-right',
+  '.mochi-button .mochi-underline',
+  '.mochi-view-select-button-item',
+  '.mochi-button-decorator',
+  '.mochi-collapsable-header',
+  '.mochi-toggle-button',
+  '.mochi-toggle-animate',
+  '.mochi-toggle-animate .mochi-toggle-button-knob',
+  '.mochi-toggle-content',
+  '.mochi-checkbox-animate',
+  '.mochi-checkbox-tick',
+  '.mochi-radio-label',
+  '.mochi-radio-box',
+  '.mochi-radio-fill',
+  '.mochi-radio-check',
+  '.mochi-slider-bubble',
+  '.mochi-slider-bubble-wrap',
+  '.mochi-wizard-step-indicator',
+  '.mochi-wizard-step-label',
+  '.mochi-wizard-step-connector',
+  '.mochi-wizard-step-connector-fill',
+  '.mochi-dropdown-trigger',
+  '.mochi-dropdown-option',
+  '.mochi-dropdown-search-input',
+  '.mochi-table tbody tr',
+  '.mochi-table-header',
+  '.mochi-list-item',
+  '.mochi-item',
+  '.mochi-item-icon',
+  '.mochi-gridlist-imageitem',
+  '.mochi-input',
+  '.mochi-textarea',
+  '.mochi-richtext',
+  '.mochi-date-cell',
+  '.mochi-dialog-close',
+  '.mochi-video-controls',
+  '.mochi-avatar-image',
+);
+
+// Everything with a transition or keyframe, for Off.
+$mochi-motion-selectors: list.join((
+  '.repanel[data-animate="true"] .repanel__panel:not([data-no-transition="true"])',
+  '.mochi-panel--arrived > .mochi-panel-body > :not(.mochi-header)',
+  '.mochi-dialog-overlay',
+  '.mochi-dialog',
+  '.mochi-contextual-popup',
+  '.mochi-sliding-menu',
+  '.mochi-sliding-menu-backdrop',
+  '.mochi-sliding-menu-active-bar',
+  '.mochi-sliding-menu-content-shifter',
+  '.mochi-collapsable-toggle',
+  '.mochi-collapsable-body',
+  '.mochi-collapsable-content',
+  '.mochi-slider-fill',
+  '.mochi-slider-thumb',
+  '.mochi-progress-fill',
+  '.mochi-button-bar',
+  '.mochi-pagination-bar',
+  '.mochi-view-select-button-item .mochi-button-base',
+  '.mochi-dropdown-arrow',
+  '.mochi-menu-item-check',
+  '.mochi-wizard-step-check',
+  '.mochi-video-timeline > *',
+  '.mochi-input-decorator > textarea',
+  '.mochi-table-sort-indicator',
+  '.mochi-badge-inner',
+  '.mochi-badge-count-new',
+  '.mochi-badge-count-old',
+  '.mochi-date-grid-next',
+  '.mochi-date-grid-prev',
+  '.mochi-wizard-enter-right',
+  '.mochi-wizard-enter-left',
+  '.mochi-number-moving-0',
+  '.mochi-number-moving-1',
+  '.mochi-number-in-up',
+  '.mochi-number-in-down',
+  '.mochi-number-out-up',
+  '.mochi-number-out-down',
+), $mochi-fade-selectors, comma);
+
+@keyframes mochi-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+// The same fade under another name, so an element whose animation-name
+// changes from one to the other (a peek becoming the active panel) restarts it.
+@keyframes mochi-fade-open {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@include mochi-motion('reduced', $mochi-fade-selectors) {
+  @include mochi-fade-only;
+}
+
+// The stack: panels fade; they no longer slide or resize between slots.
+@include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel:not([data-no-transition="true"])')) {
+  transition-property: opacity !important;
+  transition-duration: var(--mochi-duration-reduced, 150ms) !important;
+  transition-delay: 0s !important;
+}
+
+// A peek: the sliver fades in place instead of arriving from the right, and
+// a replaced one fades out instead of leaving (Off is covered by the stack's
+// own selector in $mochi-motion-selectors).
+@include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-role="peek"]')) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+// Opening a peek (it becomes the active panel, same node) fades in place:
+// the stack's left/width move is cut under Reduced, so without this the
+// panel would snap. Arriving panels fade the same way.
+@include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-role="active"]:not([data-no-transition="true"])')) {
+  animation-name: mochi-fade-open !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: ease !important;
+}
+// The body of a panel that was a door fades in, shorter (Off is covered by
+// $mochi-motion-selectors).
+@include mochi-motion('reduced', ('.mochi-panel--arrived > .mochi-panel-body > :not(.mochi-header)')) {
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: ease !important;
+}
+@include mochi-motion('reduced', ('.repanel[data-animate="true"] .repanel__panel[data-leaving="true"]')) {
+  transform: none !important;
+  opacity: 0 !important;
+}
+
+// Press: no 1.05 scale, no bracket spread, and the bar fades in at full width.
+@include mochi-motion('reduced', ('.mochi-button:active:not(:disabled)')) {
+  transform: none !important;
+}
+@include mochi-motion('reduced', ('.mochi-button .mochi-bracket-left', '.mochi-button .mochi-bracket-right')) {
+  transform: none !important;
+}
+@include mochi-motion('reduced', ('.mochi-button .mochi-underline')) {
+  transform: scaleX(1) !important;
+}
+
+// Things that travel or resize cut instead (their state still changes).
+@include mochi-motion('reduced', (
+  '.mochi-sliding-menu-content-shifter',
+  '.mochi-collapsable-toggle',
+  '.mochi-collapsable-body',
+  '.mochi-slider-fill',
+  '.mochi-slider-thumb',
+  '.mochi-progress-fill',
+  '.mochi-button-bar',
+  '.mochi-pagination-bar',
+  '.mochi-view-select-button-item .mochi-button-base',
+  '.mochi-dropdown-arrow',
+  '.mochi-video-timeline > *',
+  '.mochi-input-decorator > textarea',
+  '.mochi-table-sort-indicator',
+)) {
+  transition: none !important;
+}
+
+// Controls that lean or grow when pressed or changed: no scale, no squish.
+@include mochi-motion('reduced', (
+  '.mochi-checkbox-animate:active:not(.disabled)',
+  '.mochi-radio-box:active',
+  '.mochi-item.clickable:active:not(.disabled)',
+  '.mochi-slider-bubble-wrap',
+)) {
+  transform: none !important;
+}
+@include mochi-motion('reduced', ('.mochi-toggle-animate .mochi-toggle-button-knob')) {
+  width: 20px !important;
+  margin-left: 0 !important;
+}
+@include mochi-motion('reduced', ('.mochi-radio-fill')) {
+  transform: none !important;
+}
+
+// Checkbox: the fill fades in place; the tick fades instead of wiping.
+@include mochi-motion('reduced', ('.mochi-checkbox-live.checked')) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: ease !important;
+}
+@include mochi-motion('reduced', ('.mochi-checkbox-tick')) {
+  clip-path: none !important;
+  opacity: 0;
+}
+@include mochi-motion('reduced', ('.mochi-checkbox.checked .mochi-checkbox-tick')) {
+  opacity: 1;
+}
+
+// Wizard: the progress fades in rather than filling, and the tick fades
+// rather than wiping.
+@include mochi-motion('reduced', ('.mochi-wizard-step-connector-fill')) {
+  transform: none !important;
+  opacity: 0;
+}
+@include mochi-motion('reduced', ('.mochi-wizard-step.completed .mochi-wizard-step-connector-fill')) {
+  opacity: 1;
+}
+
+// Keyframe entrances of small marks (a step's tick, the Dropdown's selected
+// ✓, the DateInput's selected day): a plain fade, no delay.
+@include mochi-motion('reduced', (
+  '.mochi-wizard-step-check',
+  '.mochi-menu-item-check',
+  '.mochi-date-cell-selected',
+  '.mochi-badge-inner',
+  '.mochi-badge-count-new',
+  '.mochi-number-in-up',
+  '.mochi-number-in-down',
+)) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-delay: 0s !important;
+  animation-timing-function: ease !important;
+}
+
+// Entrances that slide a short way (the DateInput's day grid, a Wizard step's
+// content): the same fade, in place.
+@include mochi-motion('reduced', (
+  '.mochi-date-grid-next',
+  '.mochi-date-grid-prev',
+  '.mochi-wizard-enter-right',
+  '.mochi-wizard-enter-left',
+)) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: ease !important;
+}
+
+// NumberInput: the figure that leaves fades in place (no rise or drop), and
+// the input's own text stays hidden only as long as that fade.
+@include mochi-motion('reduced', ('.mochi-number-out-up', '.mochi-number-out-down')) {
+  animation-name: mochi-number-fade-out !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: linear !important;
+}
+@include mochi-motion('reduced', ('.mochi-number-moving-0', '.mochi-number-moving-1')) {
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+
+// Badge: the count that leaves fades for no longer than Reduced allows.
+@include mochi-motion('reduced', ('.mochi-badge-count-old')) {
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+
+// Collapsable content: opacity only, no 4px rise.
+@include mochi-motion('reduced', ('.mochi-collapsable-content')) {
+  transform: none !important;
+  transition-property: opacity !important;
+  transition-duration: var(--mochi-duration-reduced, 150ms) !important;
+  transition-delay: 0s !important;
+}
+
+// Dialog: the card fades (no rise, no scale, and the phone sheet no longer
+// slides), the scrim fades its colour, and the overlay stays long enough
+// to show the card's fade out.
+@include mochi-motion('reduced', ('.mochi-dialog-overlay')) {
+  transition:
+    background-color var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear var(--mochi-duration-reduced, 150ms) !important;
+}
+@include mochi-motion('reduced', ('.mochi-dialog-overlay.open')) {
+  transition:
+    background-color var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear 0s !important;
+}
+@include mochi-motion('reduced', ('.mochi-dialog-overlay .mochi-dialog')) {
+  opacity: 0;
+  transform: none !important;
+  transition: opacity var(--mochi-duration-reduced, 150ms) ease !important;
+}
+@include mochi-motion('reduced', ('.mochi-dialog-overlay.open .mochi-dialog')) {
+  opacity: 1;
+  transform: none !important;
+}
+
+// PopupPanel (and so the Dropdown menu): a fade, not a fade and scale.
+@include mochi-motion('reduced', ('.mochi-contextual-popup')) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+
+// SlidingMenu: the panel fades in place instead of sliding in from its edge;
+// the backdrop already only fades.
+@include mochi-motion('reduced', ('.mochi-sliding-menu')) {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: none !important;
+  transition:
+    opacity var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear var(--mochi-duration-reduced, 150ms) !important;
+}
+@include mochi-motion('reduced', ('.mochi-sliding-menu.mochi-sliding-menu--open')) {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear 0s !important;
+}
+@include mochi-motion('reduced', ('.mochi-sliding-menu-backdrop')) {
+  transition:
+    opacity var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear var(--mochi-duration-reduced, 150ms) !important;
+}
+@include mochi-motion('reduced', ('.mochi-sliding-menu-backdrop.mochi-sliding-menu-backdrop--open')) {
+  transition:
+    opacity var(--mochi-duration-reduced, 150ms) ease,
+    visibility 0s linear 0s !important;
+}
+// The active bar cuts to the new row and fades in or out.
+@include mochi-motion('reduced', ('.mochi-sliding-menu-active-bar')) {
+  transition: opacity var(--mochi-duration-reduced, 150ms) ease !important;
+}
+
+// Off: every transition and keyframe above, instant.
+@include mochi-motion('off', $mochi-motion-selectors) {
+  transition: none !important;
+  animation: none !important;
+}
+// ...and the copies that exist only to animate (a Badge's old count, the
+// NumberInput's two figures) aren't shown at all.
+@include mochi-motion('off', (
+  '.mochi-badge-count-old',
+  '.mochi-number-ghost',
+)) {
+  display: none !important;
 }
 
 // ============================================

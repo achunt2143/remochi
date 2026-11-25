@@ -74,7 +74,10 @@ function restingWidth(itemEl) {
  * 
  * Props:
  *   - items: Array of { content: string, active?: boolean, disabled?: boolean }
- *   - onSelect: Callback(selectedItem, index) when selection changes
+ *   - onSelect: Callback(selectedItem, index, detail) when an item is chosen.
+ *     detail is { direction, from, to }: direction is 'forward' or 'back' by
+ *     the index change (null when the active item is chosen again), so
+ *     content can enter from the side of the segment chosen
  *   - decoratorLeft: Left bracket character (default: '(')
  *   - decoratorRight: Right bracket character (default: ')')
  *   - barClasses: CSS classes for bar styling (default: '')
@@ -140,7 +143,14 @@ const ViewSelectButton = ({
         setBarStyle((prev) =>
           prev.width === width && prev.left === left
             ? prev
-            : { width, left, transition: 'all 0.3s ease' }
+            : {
+                width,
+                left,
+                // The bar slides from the old segment to the new one.
+                transition:
+                  'left var(--mochi-duration-stack, 260ms) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1)), ' +
+                  'width var(--mochi-duration-stack, 260ms) var(--mochi-ease-forward, cubic-bezier(0.16, 1, 0.3, 1))',
+              }
         );
       }
     }
@@ -148,8 +158,10 @@ const ViewSelectButton = ({
 
   const handleItemClick = (index) => {
     if (!items[index].disabled) {
+      const from = activeIndex;
+      const direction = index > from ? 'forward' : index < from ? 'back' : null;
       setActiveIndex(index);
-      onSelect(items[index], index);
+      onSelect(items[index], index, { direction, from, to: index });
     }
   };
 

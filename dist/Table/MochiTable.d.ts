@@ -14,7 +14,7 @@ export default MochiTable;
  */
 declare function MochiTable({ columns, rows, onRowClick, data, sortable, hoverable, striped, className, ...rest }: {
     [x: string]: any;
-    columns?: any[] | undefined;
+    columns?: never[] | undefined;
     rows: any;
     onRowClick: any;
     data: any;

@@ -1,38 +1,198 @@
-import React from "react";
-import styled from "styled-components";
+import React, { useEffect, useRef, useState } from "react";
 
-// Use the static imported URLs directly
-import lightSpinnerSmall from "./spinners/spinner-light.gif";
-import lightSpinnerLarge from "./spinners/spinner-large-light.gif";
-import darkSpinnerSmall from "./spinners/spinner-dark.gif";
-import darkSpinnerLarge from "./spinners/spinner-large-dark.gif";
+import {
+  SPINNERS,
+  OUTLINE,
+  OUTLINE_VAR,
+  OUTLINE_WIDTH,
+  MAX_PIECES,
+  CALM_FRAMES,
+  CALM_HOLD,
+  CALM_FADE,
+  framePieces,
+} from "./spinnerArt";
 
-// $-prefixed (transient) so styled-components doesn't forward it to the
-// <img> as a boolean DOM attribute.
-const SpinnerImg = styled.img`
-  display: ${({ $active }) => ($active ? "inline-block" : "none")};
-`;
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+
+const MOTION_MODES = ["full", "reduced", "off"];
+
+function systemMotion() {
+  return typeof window !== "undefined" && !!window.matchMedia && window.matchMedia(REDUCED_MOTION).matches
+    ? "reduced"
+    : "full";
+}
+
+// "full" | "reduced" | "off": the nearest data-motion on the spinner's
+// ancestors (a ThemeWrapper, else <html>) wins, and the OS preference
+// stands in when none is set, so "full" beats an OS request for reduced.
+// Read live, like the media query.
+function useMotionMode(ref) {
+  const [mode, setMode] = useState(systemMotion);
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const query = window.matchMedia ? window.matchMedia(REDUCED_MOTION) : null;
+    const update = () => {
+      const set = ref.current?.closest("[data-motion]")?.getAttribute("data-motion");
+      setMode(MOTION_MODES.includes(set) ? set : systemMotion());
+    };
+    update();
+    query?.addEventListener("change", update);
+    const observer = typeof MutationObserver !== "undefined" ? new MutationObserver(update) : null;
+    observer?.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-motion"],
+      subtree: true,
+    });
+    return () => {
+      query?.removeEventListener("change", update);
+      observer?.disconnect();
+    };
+  }, [ref]);
+  return mode;
+}
+
+/**
+ * The spinner's drawing for one frame: a pool of paths, so the animation can
+ * rewrite them in place. Self-contained (inline styles only) so it also
+ * renders to static markup.
+ */
+export const SpinnerArt = ({ size = "normal", styleType = "light", frame = 0, pathRef, svgRef, calmStep, still, style, ...rest }) => {
+  const kind = size === "large" ? "large" : "normal";
+  const spec = SPINNERS[kind];
+  const outline = `var(${OUTLINE_VAR}, ${OUTLINE[kind][styleType === "dark" ? "dark" : "light"]})`;
+  const group = (pieces, key, layerStyle) => (
+    <g
+      key={key}
+      strokeWidth={kind === "large" ? OUTLINE_WIDTH * 0.7 : OUTLINE_WIDTH}
+      strokeLinejoin="round"
+      paintOrder="stroke"
+      style={{ stroke: outline, ...layerStyle }}
+    >
+      {pieces}
+    </g>
+  );
+  const body = calmStep === undefined
+    ? group(
+        Array.from({ length: MAX_PIECES }, (_, i) => {
+          const piece = framePieces(kind, frame)[i];
+          return (
+            <path
+              key={i}
+              ref={pathRef ? (el) => pathRef(i, el) : undefined}
+              d={piece?.d}
+              fill={piece?.fill}
+              display={piece ? undefined : "none"}
+            />
+          );
+        }),
+        "art",
+      )
+    : // reduced motion: one layer per held keyframe, crossfaded by opacity
+      // (no fade at all when `still`)
+      CALM_FRAMES[kind].map((f, k) =>
+        group(
+          framePieces(kind, f).map((piece, i) => <path key={i} d={piece.d} fill={piece.fill} />),
+          k,
+          { opacity: k === calmStep ? 1 : 0, transition: still ? "none" : `opacity ${CALM_FADE}ms ease-in-out` },
+        ),
+      );
+  return (
+    <svg
+      {...rest}
+      ref={svgRef}
+      width={spec.width}
+      height={spec.height}
+      viewBox={`0 0 ${spec.width} ${spec.height}`}
+      style={{ overflow: "visible", ...style }}
+    >
+      {body}
+    </svg>
+  );
+};
 
 /**
  * Props:
  * - active: boolean — show or hide spinner
  * - styleType: "light" | "dark" (default: "light")
  * - size: "normal" | "large" (default: "normal")
+ * - alt: accessible label (default: "Loading…")
+ *
+ * Drawn and animated in code. Under Reduced motion (`data-motion="reduced"`,
+ * or `prefers-reduced-motion: reduce` when none is set) it stops morphing and
+ * instead holds each of the three shapes for a second, with a soft crossfade
+ * between them. Under Off (`data-motion="off"`) it shows the circle, still.
  */
 export const Spinner = ({
   active = true,
   styleType = "light",
   size = "normal",
-  alt = "Loading...",
+  alt = "Loading…",
+  style,
   ...rest
 }) => {
-  let src;
+  const kind = size === "large" ? "large" : "normal";
+  const svgRef = useRef(null);
+  const mode = useMotionMode(svgRef);
+  const reduced = mode !== "full";
+  const still = mode === "off";
+  const paths = useRef([]);
+  const [calmStep, setCalmStep] = useState(0);
 
-  if (styleType === "dark") {
-    src = size === "large" ? darkSpinnerLarge : darkSpinnerSmall;
-  } else {
-    src = size === "large" ? lightSpinnerLarge : lightSpinnerSmall;
-  }
+  // Reduced motion: step calmly through the three shapes, in place.
+  useEffect(() => {
+    if (!active || mode !== "reduced") return undefined;
+    setCalmStep(0);
+    const id = setInterval(() => setCalmStep((k) => (k + 1) % CALM_FRAMES[kind].length), CALM_HOLD + CALM_FADE);
+    return () => clearInterval(id);
+  }, [active, mode, kind]);
 
-  return <SpinnerImg {...rest} src={src} alt={alt} $active={active} />;
+  useEffect(() => {
+    const show = (index) => {
+      const pieces = framePieces(kind, index);
+      paths.current.forEach((el, i) => {
+        if (!el) return;
+        const piece = pieces[i];
+        if (piece) {
+          el.setAttribute("d", piece.d);
+          el.setAttribute("fill", piece.fill);
+          el.removeAttribute("display");
+        } else {
+          el.setAttribute("display", "none");
+        }
+      });
+    };
+    if (!active || reduced) return undefined;
+    const { frames, delay } = SPINNERS[kind];
+    let raf;
+    let shown = -1;
+    const start = performance.now();
+    const tick = (now) => {
+      const index = Math.floor((now - start) / delay) % frames.length;
+      if (index !== shown) {
+        shown = index;
+        show(index);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active, reduced, kind]);
+
+  return (
+    <SpinnerArt
+      {...rest}
+      calmStep={still ? 0 : reduced ? calmStep : undefined}
+      still={still}
+      svgRef={svgRef}
+      role="img"
+      aria-label={alt}
+      size={kind}
+      styleType={styleType}
+      pathRef={(i, el) => { paths.current[i] = el; }}
+      style={{
+        display: active ? "inline-block" : "none",
+        ...style,
+      }}
+    />
+  );
 };

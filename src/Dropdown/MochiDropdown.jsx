@@ -22,17 +22,17 @@ import './MochiDropdown.scss';
  *   maxHeight    {number}   Max height of the menu in px (default: 200)
  *   className    {string}   Extra class on the root wrapper
  */
-const MochiDropdown = ({
+const MochiDropdown = React.forwardRef(({
   options = [],
   value,
   onChange,
   label,
-  placeholder = 'Select an option',
+  placeholder = 'Select an option…',
   disabled = false,
   maxHeight = 200,
   className = '',
   ...rest
-}) => {
+}, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -51,7 +51,7 @@ const MochiDropdown = ({
   };
 
   return (
-    <div {...rest} className={['mochi-dropdown', className].filter(Boolean).join(' ')}>
+    <div {...rest} ref={ref} className={['mochi-dropdown', className].filter(Boolean).join(' ')}>
       {label && <label className="mochi-dropdown-label">{label}</label>}
 
       {/* Activator — mirrors mochi.MenuDecorator activating control */}
@@ -69,13 +69,13 @@ const MochiDropdown = ({
         tabIndex={disabled ? -1 : 0}
         onKeyDown={(e) => {
           if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); handleTrigger(); }
-          if (e.key === 'Escape') setIsOpen(false);
+          // Escape is handled by the menu's escape layer (see MochiMenu).
         }}
       >
         <span className="mochi-dropdown-value">
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <span className={`mochi-dropdown-arrow ${isOpen ? 'open' : ''}`}>&#9660;</span>
+        <span className={`mochi-dropdown-arrow ${isOpen ? 'open' : ''}`}>{'\u25BC'}</span>
       </div>
 
       {/* mochi.Menu equivalent — contextual popup portal */}
@@ -108,6 +108,7 @@ const MochiDropdown = ({
               aria-selected={isSelected}
               onClick={() => handleSelect(option)}
             >
+              {isSelected && <span className="mochi-menu-item-check" aria-hidden="true">✓</span>}
               {option.label}
             </div>
           );
@@ -115,6 +116,8 @@ const MochiDropdown = ({
       </MochiMenu>
     </div>
   );
-};
+});
+
+MochiDropdown.displayName = 'MochiDropdown';
 
 export default MochiDropdown;

@@ -3,11 +3,12 @@ export default MochiSlidingMenuItemGroup;
  * MochiSlidingMenuItemGroup
  *
  * Groups related MochiSlidingMenuItems under an optional label heading.
- * Optionally renders a divider below the group.
+ * Groups are separated by space (32px); a hairline is drawn below the group
+ * only when `divider` is set.
  *
  * @param {React.ReactNode} children  - MochiSlidingMenuItem elements
- * @param {string}          label     - Section heading text (uppercase, muted)
- * @param {boolean}         divider   - Show a border after the group
+ * @param {string}          label     - Section heading (the Label voice: Mochi Bold 12, uppercase)
+ * @param {boolean}         divider   - Draw a hairline below the group (default: space only)
  * @param {string}          className
  * @param {object}          style
  */

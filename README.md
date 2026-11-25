@@ -4,9 +4,12 @@ A modern React component library that brings the charming, nostalgic **Mochi** U
 
 See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for what's new in the latest release, and [docs/remochi-component-guide.md](./docs/remochi-component-guide.md) for usage examples of every component.
 
+To make an app built with remochi feel right, start with the [design guide](./docs/design-guide.md): type, colour, shape, panels, motion, screens and writing.
+
 ## Features
 
-- Authentic **Mochi visual style**: Rounded shapes, smooth animations, bright blues and warm yellows
+- Authentic **Mochi visual style**: Rounded shapes, smooth animations, bright blues and warm yellows. A light pane, the scallop on edge-anchored panes and the waterdrop as an accent (the `Avatar`, the `Dialog`, `FloatingPanel` `shape="drop"`)
+- **Motion that answers a question**: Full, Reduced (a fade of 150ms at most) and Off, set by `ThemeWrapper`'s `motion` prop, `data-motion` on `<html>` or the OS, with high-contrast and reduced-transparency modes to match
 - Clean React components built with **functional components** and **hooks**
 - Fully **accessible** with keyboard support and ARIA attributes
 - Flexible customization of colors, sizes, and behaviors via props and styles
@@ -17,7 +20,13 @@ See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for what's new in the latest release,
   - Sliders with animated bubble popups and smooth dragging
   - Progress bars with fluid fill animations and color options
   - Popups with dynamic nubbin styling and positioning
-  - Spinners (light and dark variants, small and large sizes)
+  - Spinners (light and dark variants, small and large sizes), drawn in code
+  - Headers, subheaders and labels, the type ladder from display down to section labels
+  - Stacked panels with a peek of the past on the left, the predicted next panel on the right
+
+## Theming
+
+Wrap your app in `ThemeWrapper` for light and dark themes. Its `tokens` prop overrides `--mochi-*` custom properties, such as `--mochi-accent`, `--mochi-drop-radius`, `--mochi-floating-radius` (unset by default; set it to `var(--mochi-drop-radius)` for waterdrop floating surfaces), `--mochi-pane-edge` and `--mochi-focus-ring`. `motion`, `contrast` and `transparency` set the accessibility modes. Run `npm run check:tokens` to keep bare hex colours out of component styles. See the [component guide](./docs/remochi-component-guide.md) and [IDENTITY.md](./IDENTITY.md).
 
 ## Installation
 

@@ -25,7 +25,16 @@
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
-  transition: all 0.15s ease;
+  // Named properties, not `all`: the hover tint, disabled dimming and the
+  // focus ring ease; nothing else changes on its own.
+  transition:
+    background-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
+  outline: 2px solid transparent;
+  outline-offset: 0;
   border: none;
   background-color: transparent;
 
@@ -33,7 +42,7 @@
     display: inline-block;
     font-family: "Mochi Bold Oblique", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: inherit;
-    color: var(--mochi-text, #323232);
+    color: var(--mochi-text, #1a1a1a);
     font-style: oblique;
     font-weight: bold;
     margin: 0;
@@ -42,7 +51,8 @@
     line-height: 34px;
     height: 34px;
     vertical-align: middle;
-    transition: letter-spacing 0.1s ease-in-out;
+    // The press spreads the letters and release settles them back.
+    transition: letter-spacing var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease);
   }
 
   &:active:hover:not([aria-disabled="true"]) {
@@ -57,14 +67,13 @@
   }
 
   &:focus {
-    outline: none;
     box-shadow: inset 0 0 0 2px var(--mochi-primary-soft, rgba(105, 205, 255, 0.3));
   }
 
   // The soft :focus tint above is barely visible; keyboard focus gets a
   // solid ring (inset, since items sit edge to edge).
   &:focus-visible {
-    outline: 2px solid var(--mochi-primary, #69cdff);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: -2px;
   }
 
@@ -89,12 +98,12 @@
   font-family: "Mochi Bold", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--mochi-text-muted, #4b4b4b);
+  color: var(--mochi-text-muted, #555555);
   display: inline-block;
   vertical-align: middle;
   margin: 0 4px;
   padding: 0;
-  transition: color 0.2s ease;
+  transition: color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease);
 
   &.mochi-button-decorator-left,
   &.mochi-button-decorator-right {
@@ -108,14 +117,14 @@
   /* warning — maps to --color-error (red) */
   &.mochi-button-warning {
     .mochi-button-bar {
-      background-color: var(--color-error, #ff4a4a);
+      background-color: var(--color-error, #c62828);
     }
     .mochi-button-decorator {
-      color: var(--color-error, #ff4a4a);
+      color: var(--color-error, #c62828);
     }
     .mochi-view-select-button-item {
       .mochi-button-base {
-        color: var(--color-error, #ff4a4a);
+        color: var(--color-error, #c62828);
       }
       &:hover:not([aria-disabled="true"]) {
         background-color: var(--color-error-bg, rgba(255, 74, 74, 0.1));
@@ -126,14 +135,14 @@
   /* affirmative — maps to --color-success (green) */
   &.mochi-button-affirmative {
     .mochi-button-bar {
-      background-color: var(--color-success, #00dd11);
+      background-color: var(--color-success, #388e3c);
     }
     .mochi-button-decorator {
-      color: var(--color-success, #00dd11);
+      color: var(--color-success, #388e3c);
     }
     .mochi-view-select-button-item {
       .mochi-button-base {
-        color: var(--color-success, #00dd11);
+        color: var(--color-success, #388e3c);
       }
       &:hover:not([aria-disabled="true"]) {
         background-color: var(--color-success-bg, rgba(0, 221, 17, 0.1));
@@ -144,14 +153,14 @@
   /* blue — maps to --mochi-primary (blue) */
   &.mochi-button-blue {
     .mochi-button-bar {
-      background-color: var(--mochi-primary, #35a8ee);
+      background-color: var(--mochi-primary, #357099);
     }
     .mochi-button-decorator {
-      color: var(--mochi-primary, #35a8ee);
+      color: var(--mochi-primary, #357099);
     }
     .mochi-view-select-button-item {
       .mochi-button-base {
-        color: var(--mochi-primary, #35a8ee);
+        color: var(--mochi-primary, #357099);
       }
       &:hover:not([aria-disabled="true"]) {
         background-color: var(--mochi-hover);

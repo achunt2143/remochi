@@ -1,3 +1,6 @@
 /node_modules
 /package-lock.json
 *.tgz
+# nubbin-diff build output
+/scripts/nubbin-diff/out
+/scripts/spinner-diff/out

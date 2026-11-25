@@ -1,0 +1,47 @@
+// The waterdrop corner, scaled to the size of the thing wearing it.
+//
+// SCSS twin of waterdropRadius() in waterdrop.js; both use the same scale,
+// so keep them in step. The guide's waterdrop is `16 4 16 16` (top-right
+// nearly sharp) on a floating surface, but corners follow size: 40px gets
+// `12 3 12 12`, 20px gets `7 2 7 7`, and the full drop starts at about 56px.
+// Between those points the radii are interpolated, below 20px they stay
+// proportional to the size, and no corner is bigger than half the short side.
+//
+//   @use '../shared/waterdrop' as *;
+//   .bubble { border-radius: waterdrop(36px); }
+
+@use 'sass:math';
+@use 'sass:list';
+
+// [short side, big corner, small corner] at each point the guide gives.
+$-waterdrop-scale: (0 0 0), (20 7 2), (40 12 3), (56 16 4);
+
+// `$size` is the short side, in px or unitless. Returns a border-radius
+// value in px.
+@function waterdrop($size) {
+  $s: $size;
+  @if not math.is-unitless($size) {
+    $s: math.div($size, 1px);
+  }
+  $s: math.max(0, $s);
+  $big: list.nth(list.nth($-waterdrop-scale, -1), 2);
+  $small: list.nth(list.nth($-waterdrop-scale, -1), 3);
+  @for $i from 2 through list.length($-waterdrop-scale) {
+    $to: list.nth($-waterdrop-scale, $i);
+    $from: list.nth($-waterdrop-scale, $i - 1);
+    @if $s <= list.nth($to, 1) {
+      $t: math.div($s - list.nth($from, 1), list.nth($to, 1) - list.nth($from, 1));
+      $big: list.nth($from, 2) + (list.nth($to, 2) - list.nth($from, 2)) * $t;
+      $small: list.nth($from, 3) + (list.nth($to, 3) - list.nth($from, 3)) * $t;
+      @return -waterdrop-corners($s, $big, $small);
+    }
+  }
+  @return -waterdrop-corners($s, $big, $small);
+}
+
+@function -waterdrop-corners($s, $big, $small) {
+  $cap: math.div($s, 2);
+  $big: math.min($big, $cap) * 1px;
+  $small: math.min($small, $cap) * 1px;
+  @return $big $small $big $big;
+}

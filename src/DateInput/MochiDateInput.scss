@@ -1,2 +1,31 @@
-/* intentionally empty — MochiDateInput composes MochiInput + MochiPopupPanel.
-   All styling is inherited from those components. */
+/* MochiDateInput composes MochiInput + MochiPopupPanel; the rest of its
+   styling comes from those components. */
+
+// The selected day's fill grows in from the centre when the calendar opens
+// or a month with the selection comes into view.
+.mochi-date-cell-selected {
+  animation: mochi-date-cell-fill var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) 20ms backwards;
+}
+
+@keyframes mochi-date-cell-fill {
+  from { transform: scale(0.6); }
+  to   { transform: scale(1); }
+}
+
+// Changing month slides the day grid in from the side of the arrow used: the
+// next month from the right, the previous from the left.
+.mochi-date-grid-next {
+  animation: mochi-date-grid-from-right var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) backwards;
+}
+.mochi-date-grid-prev {
+  animation: mochi-date-grid-from-left var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) backwards;
+}
+
+@keyframes mochi-date-grid-from-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mochi-date-grid-from-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}

@@ -1,44 +1,53 @@
 // NubbinDivider — [left cap] [nubbin] [right cap]
 //
-// The nubbin image (e.g. up.png) is 71×20px with a crisp, fully-opaque ~2px
-// baseline stroke sitting flush against one edge (bottom for 'up', top for
-// 'down', etc. — see NUB_INFO's `align` in NubbinDivider.jsx). The caps are
-// NOT the div-left/right.png images the plain Divider uses — those are a
-// much lighter, softer gray, and stretching that tiny 4px-tall PNG to any
-// other size blurs it further, so next to the nubbin's bold solid stroke
-// they always read as washed out. Instead each cap is a flat `CAP_COLOR`
-// fill (matching the nubbin's own stroke color exactly) faded in via
+// (Laid out absolutely; see the note on the root below.)
+//
+// The nubbin (drawn in code, see shared/nubbin.jsx) is 71×20px with a 2px
+// baseline stroke flush against one edge (bottom for 'up', top for 'down',
+// etc. — see NUB_INFO's `align` in NubbinDivider.jsx). Each cap is a flat
+// `CAP_COLOR` fill (the nubbin's own stroke colour) faded in via
 // `mask-image` — see NubbinDivider.jsx — which stays crisp at any
-// thickness and has no color mismatch where it meets the nubbin. Size and
+// thickness and has no colour mismatch where it meets the nubbin. Size and
 // alignment (`align-self`, per NUB_INFO's `align`) are set inline per
 // nubbin since which edge is "flush" isn't the same for every one.
 
 .mochi-nubbin-divider {
-  display: flex;
+  // The parts are positioned absolutely from whole-pixel offsets computed
+  // in NubbinDivider.jsx (a flex row would put the nubbin on whatever
+  // fraction of a pixel the stretching caps leave it at).
+  position: relative;
   width: 100%;
   overflow: visible;      // let the nubbin overhang above the line
 
+  // A zero-size marker at `nubbinOffset`, measured to find where the nubbin
+  // goes; it never paints.
+  &__probe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   // ── Caps ──────────────────────────────────────────────────
   &__cap {
-    flex: 1 1 0;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
   }
 
-  // ── Nubbin image ────────────────────────────────────────────
+  // ── Nubbin ──────────────────────────────────────────────────
   &__nub {
-    flex: 0 0 auto;
+    position: absolute;
     display: block;
     pointer-events: none;
-    user-select: none;
-    -webkit-user-drag: none;
   }
 
   // ── Vertical orientation ──────────────────────────────────────
   &--vertical {
-    flex-direction: column;
     height: 100%;
     width: auto;
     overflow: visible;

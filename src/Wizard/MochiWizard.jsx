@@ -46,6 +46,16 @@ const MochiWizard = ({
   const isLastStep = currentStep === steps.length - 1;
   const currentStepData = steps[currentStep];
 
+  // The step's content enters from the side it came from: from the right
+  // going forward (Next, Skip), from the left going back (Back, a jump
+  // back). Derived from the step itself, so a controlled wizard gets it too.
+  const [shownStep, setShownStep] = useState(currentStep);
+  const [enterFrom, setEnterFrom] = useState(null);
+  if (currentStep !== shownStep) {
+    setEnterFrom(currentStep > shownStep ? 'right' : 'left');
+    setShownStep(currentStep);
+  }
+
   const commitCompleted = (next, reason, to) => {
     if (sameSteps(next, completedSteps)) return;
     if (!isCompletionControlled) setTrackedSteps(next);
@@ -136,20 +146,30 @@ const MochiWizard = ({
                 )}
               </div>
               <div className="mochi-wizard-step-label">{step.label}</div>
-              {index < steps.length - 1 && <div className="mochi-wizard-step-connector" />}
+              {index < steps.length - 1 && (
+                <div className="mochi-wizard-step-connector">
+                  <span className="mochi-wizard-step-connector-fill" />
+                </div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
       <div className="mochi-wizard-content">
-        {currentStepData.title && (
-          <h2 className="mochi-wizard-title">{currentStepData.title}</h2>
-        )}
-        {currentStepData.description && (
-          <p className="mochi-wizard-description">{currentStepData.description}</p>
-        )}
-        <div className="mochi-wizard-body">{currentStepData.content}</div>
+        {/* Keyed by step so a change remounts it and the entrance runs. */}
+        <div
+          key={currentStep}
+          className={enterFrom ? `mochi-wizard-step-content mochi-wizard-enter-${enterFrom}` : 'mochi-wizard-step-content'}
+        >
+          {currentStepData.title && (
+            <h2 className="mochi-wizard-title">{currentStepData.title}</h2>
+          )}
+          {currentStepData.description && (
+            <p className="mochi-wizard-description">{currentStepData.description}</p>
+          )}
+          <div className="mochi-wizard-body">{currentStepData.content}</div>
+        </div>
       </div>
 
       <div className="mochi-wizard-actions">

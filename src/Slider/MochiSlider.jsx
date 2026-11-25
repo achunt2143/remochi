@@ -36,7 +36,7 @@ const Track = styled.div`
   }
 `;
 
-const Fill = styled.div`
+const Fill = styled.div.attrs({ className: "mochi-slider-fill" })`
   position: absolute;
   top: 0;
   left: 0;
@@ -44,11 +44,13 @@ const Fill = styled.div`
   border-radius: var(--mochi-corner-pill, 9999px);
   background-color: ${({ $color }) => $color || ACCENT};
   width: ${({ $percent }) => $percent}%;
-  transition: ${({ $active }) => $active ? "none" : "width 0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0)"};
+  // Tracks the pointer exactly while dragging; a key step or a tap on the
+  // track eases.
+  transition: ${({ $active }) => $active ? "none" : "width var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease)"};
   z-index: 1;
 `;
 
-const Thumb = styled.div`
+const Thumb = styled.div.attrs({ className: "mochi-slider-thumb" })`
   position: absolute;
   top: 50%;
   left: ${({ $percent }) => $percent}%;
@@ -67,10 +69,10 @@ const Thumb = styled.div`
       : `0 2px 10px ${ACCENT_SOFT}`};
   z-index: 2;
   transition:
-    left ${({ $active }) => $active ? "0s" : "0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0)"},
-    width 0.18s cubic-bezier(0.43, 0.59, 0.39, 0.88),
-    height 0.18s cubic-bezier(0.43, 0.59, 0.39, 0.88),
-    box-shadow 0.19s;
+    left ${({ $active }) => $active ? "0s" : "var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease)"},
+    width var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    height var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-control, 200ms);
   ${({ $active, $color }) =>
     $active &&
     css`
@@ -94,13 +96,13 @@ const Thumb = styled.div`
   }
 `;
 
-const PopupText = styled.div`
+const PopupText = styled.div.attrs({ className: "mochi-slider-bubble" })`
   position: absolute;
   left: 100%;
   top: -45px;
   transform: translate(calc(-10% + ${BUBBLE_W / 2}px - 50%), 0);
   width: max-content;
-  color: #fff;
+  color: #fff; /* check-tokens: allow — Mochi's own white-on-#69cdff bubble */
   font-size: 1rem;
   font-weight: 600;
   line-height: ${BUBBLE_H}px;
@@ -109,7 +111,20 @@ const PopupText = styled.div`
   pointer-events: none;
   z-index: 101;
   opacity: ${({ $shown }) => ($shown ? 1 : 0)};
-  transition: opacity 0.18s;
+  transition: opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
+`;
+
+// Wraps the bubble's canvas and text, over the knob's own box. Always
+// mounted, so it can rise from the knob on press and fade away on release.
+const Bubble = styled.div.attrs({ className: "mochi-slider-bubble-wrap" })`
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: ${({ $shown }) => ($shown ? 1 : 0)};
+  transform: translateY(${({ $shown }) => ($shown ? 0 : "8px")});
+  transition:
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    transform var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease);
 `;
 
 const SliderRoot = styled.div`
@@ -276,14 +291,12 @@ export const MochiSlider = ({
             startDrag(e);
           }}
         >
-          {active && (
-            <>
-              <BubbleCanvas color={bubbleColor} />
-              <PopupText $shown={active}>
-                {internalVal}{min === 0 && max === 100 ? '%' : ''}
-              </PopupText>
-            </>
-          )}
+          <Bubble $shown={active}>
+            <BubbleCanvas color={bubbleColor} />
+            <PopupText $shown={active}>
+              {internalVal}{min === 0 && max === 100 ? '%' : ''}
+            </PopupText>
+          </Bubble>
         </Thumb>
       </Track>
     </SliderRoot>

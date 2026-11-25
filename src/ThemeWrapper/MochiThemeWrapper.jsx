@@ -74,9 +74,9 @@ export const DARK_THEME_COLORS = {
 };
 
 export const LIGHT_THEME_COLORS = {
-  primary: '#4a8bc2',
-  primaryHover: '#5b9dd9',
-  primaryActive: '#3a7bb2',
+  primary: '#357099',
+  primaryHover: '#2f6490',
+  primaryActive: '#285780',
   secondary: '#6aaedb',
   secondaryHover: '#7ab8e8',
   secondaryActive: '#5a9ecb',
@@ -120,6 +120,18 @@ export const ThemeContext = createContext({
 
 export const useTheme = () => useContext(ThemeContext);
 
+// Accessibility-mode props and the attribute each writes. 'system' writes
+// nothing, so the OS preference (and a host's own <html> attribute) stands.
+const MODE_ATTRS = [
+  ['data-motion', ['full', 'reduced', 'off']],
+  ['data-mochi-contrast', ['standard', 'more']],
+  ['data-mochi-transparency', ['standard', 'reduced']],
+];
+
+function modeValue(value, allowed) {
+  return allowed.includes(value) ? value : undefined;
+}
+
 const MochiThemeWrapper = ({
   children,
   theme: controlledTheme,
@@ -127,6 +139,10 @@ const MochiThemeWrapper = ({
   onThemeChange,
   storageKey = null,
   syncHtml,
+  motion = 'system',
+  contrast = 'system',
+  transparency = 'system',
+  ground = 'plain',
   fontFamily = 'Prelude',
   tokens,
   style,
@@ -194,6 +210,45 @@ const MochiThemeWrapper = ({
   );
 
   const prevHtmlTokensRef = useRef([]);
+
+  const modeAttrs = {
+    'data-motion': modeValue(motion, MODE_ATTRS[0][1]),
+    'data-mochi-contrast': modeValue(contrast, MODE_ATTRS[1][1]),
+    'data-mochi-transparency': modeValue(transparency, MODE_ATTRS[2][1]),
+  };
+
+  // Mirror each mode attribute onto <html> too, so portaled components
+  // (Dialog, Popup, Dropdown menu) follow. Only what this wrapper wrote is
+  // removed again: a host's own <html data-motion> survives motion='system'.
+  useIsomorphicLayoutEffect(() => {
+    if (!shouldSyncHtml || typeof document === 'undefined') return undefined;
+    const html = document.documentElement;
+    const written = [];
+    for (const [attr] of MODE_ATTRS) {
+      const value = modeAttrs[attr];
+      if (value !== undefined) {
+        html.setAttribute(attr, value);
+        written.push(attr);
+      }
+    }
+    return () => {
+      for (const attr of written) html.removeAttribute(attr);
+    };
+  }, [shouldSyncHtml, modeAttrs['data-motion'], modeAttrs['data-mochi-contrast'], modeAttrs['data-mochi-transparency']]);
+
+  // Mirror fontFamily onto <html> as well: --mochi-font-body follows
+  // data-font-family (see MochiThemeWrapper.scss), so portaled surfaces use
+  // the wrapper's face. Restores whatever the host had on unmount.
+  useIsomorphicLayoutEffect(() => {
+    if (!shouldSyncHtml || typeof document === 'undefined') return undefined;
+    const html = document.documentElement;
+    const previous = html.getAttribute('data-font-family');
+    html.setAttribute('data-font-family', fontFamily);
+    return () => {
+      if (previous === null) html.removeAttribute('data-font-family');
+      else html.setAttribute('data-font-family', previous);
+    };
+  }, [shouldSyncHtml, fontFamily]);
 
   // Synchronize document.documentElement attribute & CSS custom property tokens
   useIsomorphicLayoutEffect(() => {
@@ -289,9 +344,10 @@ const MochiThemeWrapper = ({
   return (
     <ThemeContext.Provider value={contextValue}>
       <div
-        className={`mochi-theme-wrapper ${shouldSyncHtml ? 'mochi-theme-wrapper--root ' : ''}mochi-theme-${resolvedTheme} ${className}`}
+        className={`mochi-theme-wrapper ${shouldSyncHtml ? 'mochi-theme-wrapper--root ' : ''}mochi-theme-${resolvedTheme}${ground === 'vignette' ? ' mochi-ground--vignette' : ''} ${className}`}
         data-mochi-theme={resolvedTheme}
         data-font-family={fontFamily}
+        {...modeAttrs}
         style={mergedStyle}
         {...rest}
       >

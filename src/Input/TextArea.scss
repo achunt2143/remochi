@@ -5,7 +5,7 @@
   width: 100%;
   font-family: "Mochi Medium", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: var(--font-size-base, 14px);
-  color: var(--mochi-field-text, #4b4b4b);
+  color: var(--mochi-field-text, #1a1a1a);
   font-style: italic;
   line-height: 1.6;
   background: var(--mochi-field-bg, #fff);
@@ -13,8 +13,15 @@
   border-radius: var(--radius-md, 6px);
   padding: 8px 12px;
   resize: vertical;
-  outline: none;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  transition:
+    border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    background var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   // Mochi's focused-field border (InputDecorator.less: #69cdff).
   &:focus {
@@ -24,7 +31,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mochi-primary, #5b9dd9);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: 1px;
   }
 
@@ -42,10 +49,9 @@
   &::-webkit-scrollbar-track { margin: 4px 0; background: transparent; border-radius: 10px; }
   &::-webkit-scrollbar-thumb {
     height: 10px;
-    background-color: var(--mochi-text-muted, #7d7d7d);
+    background-color: var(--mochi-text-muted, #555555);
     border-radius: 10px;
-    transition: background-color 0.2s ease;
-    &:hover { background-color: var(--mochi-text, #5d5d5d); }
+    &:hover { background-color: var(--mochi-text, #1a1a1a); }
   }
 }
 
@@ -60,9 +66,8 @@
   overflow: auto;
   font-size: var(--font-size-base, 14px);
   font-style: italic;
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-text, #1a1a1a);
   cursor: pointer;
-  transition: cursor 0.2s ease;
 
   &:focus  { cursor: text; outline: none; }
   &:disabled { cursor: default; opacity: var(--mochi-disabled-opacity, 0.4); }

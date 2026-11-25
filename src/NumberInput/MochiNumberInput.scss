@@ -1,3 +1,50 @@
-/* intentionally empty — MochiNumberInput composes MochiButton + MochiInput;
-   all styling comes from those components. This file is kept as a no-op
-   to avoid breaking any import that may reference it. */
+// The number moves in the direction of the change (see MochiNumberInput.jsx):
+// an increment rises in from below while the old figure fades up and out; a
+// decrement is the reverse. Two copies lie over the input, which hides its
+// own text for the same duration.
+.mochi-number-field {
+  position: relative;
+  display: inline-flex;
+}
+
+.mochi-number-ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.13rem;
+  color: var(--mochi-field-text, #1a1a1a);
+  pointer-events: none;
+}
+
+// Two names alternate, so a second press restarts the hiding.
+.mochi-number-moving-0,
+.mochi-number-moving-1 {
+  animation: mochi-number-hide var(--mochi-duration-control, 200ms) step-end;
+}
+.mochi-number-moving-1 {
+  animation-name: mochi-number-hide-b;
+}
+@keyframes mochi-number-hide   { from, to { color: transparent; } }
+@keyframes mochi-number-hide-b { from, to { color: transparent; } }
+
+.mochi-number-in-up {
+  animation: mochi-number-rise-in var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) backwards;
+}
+.mochi-number-in-down {
+  animation: mochi-number-drop-in var(--mochi-duration-control, 200ms) var(--mochi-ease-arrive, ease) backwards;
+}
+.mochi-number-out-up {
+  animation: mochi-number-rise-out var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease) forwards;
+}
+.mochi-number-out-down {
+  animation: mochi-number-drop-out var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease) forwards;
+}
+
+@keyframes mochi-number-rise-in  { from { opacity: 0; transform: translateY(4px); }  to { opacity: 1; transform: none; } }
+@keyframes mochi-number-drop-in  { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes mochi-number-rise-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px); } }
+@keyframes mochi-number-drop-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(4px); } }
+// Reduced: the same two copies, a plain crossfade.
+@keyframes mochi-number-fade-out { from { opacity: 1; } to { opacity: 0; } }

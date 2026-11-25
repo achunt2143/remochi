@@ -19,10 +19,10 @@ import { FaChevronDown } from "react-icons/fa";
 // (--mochi-accent) unless the variant has its own color.
 const colors = {
   normal:      "var(--mochi-button-text, #333)",
-  warning:     "var(--mochi-error, #d34431)",
-  affirmative: "var(--mochi-success, #00dd11)",
-  blue:        "var(--mochi-primary, #35a8ee)",
-  dropdown:    "var(--mochi-primary, #6e9ebd)",
+  warning:     "var(--mochi-error, #c62828)",
+  affirmative: "var(--mochi-success, #388e3c)",
+  blue:        "var(--mochi-primary, #357099)",
+  dropdown:    "var(--mochi-primary, #357099)",
   bar:         "var(--mochi-accent, #69cdff)",
 };
 
@@ -128,16 +128,25 @@ const ButtonWrapper = styled.button`
     $appearance === "drop"
       ? `var(--mochi-button-ink, ${textColor($variant)})`
       : textColor($variant)};
-  outline: none;
-  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  // The press leans in and settles back (releasing eases over the arrive
+  // duration, never a snap); disabled eases its opacity; the focus ring
+  // eases in (outline-colour and -offset from nothing).
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  transition:
+    transform var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease),
+    background var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+    outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   &:focus {
-    outline: none;
-    ${({ $appearance }) => ($appearance === "drop" ? "" : "color: #222;")}
+    ${({ $appearance }) => ($appearance === "drop" ? "" : "color: var(--mochi-text, #1a1a1a);")}
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mochi-primary, #6e9ebd);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: 2px;
     border-radius: ${({ $appearance }) =>
       $appearance === "drop"
@@ -145,15 +154,28 @@ const ButtonWrapper = styled.button`
         : "6px"};
   }
 
+  // Held: scales to 1.05 over --transition-fast (150ms).
   &:active:not(:disabled) {
     transform: scale(1.05);
+    transition:
+      transform var(--transition-fast, 150ms ease),
+      background var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+      border-color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+      opacity var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease),
+      outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+      outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
   }
 
   &:active:hover:not(:disabled),
   &.active:not(:disabled) {
+    // Held: the bar grows in over 0.3s and the brackets spread over the
+    // arrive duration; releasing settles back on the base transitions.
     > div > span.mochi-underline {
       transform: scaleX(1);
       opacity: 1;
+      transition:
+        transform var(--mochi-duration-press, 300ms) var(--mochi-ease-forward, ease),
+        opacity var(--mochi-duration-press, 300ms) var(--mochi-ease-forward, ease);
     }
 
     > div > span.mochi-bracket-left {
@@ -181,7 +203,9 @@ const UnderlineBar = styled.span`
   transform-origin: center;
   transform: scaleX(0);
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  // The bar grows in on press (see ButtonWrapper) and settles back on
+  // release over the arrive duration.
+  transition: transform var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease), opacity var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease);
   pointer-events: none;
 `;
 
@@ -194,7 +218,7 @@ const bracketStyle = css`
   vertical-align: middle;
   margin: 0 2px;
   display: inline-block;
-  transition: color 0.2s, transform 0.15s ease;
+  transition: color var(--mochi-duration-control, 200ms) var(--mochi-ease-forward, ease), transform var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease);
 `;
 
 const Bracket = styled.span`
@@ -225,7 +249,7 @@ const DropdownIcon = styled(FaChevronDown)`
 
 // ── component ────────────────────────────────────────────────────────────────
 
-export function MochiButton({
+export const MochiButton = React.forwardRef(function MochiButton({
   children = "Button",
   type = "normal",      // visual variant: normal | warning | affirmative | blue | disabled | dropdown
   appearance = "caps",  // visual framing: caps (classic brackets/bar) | drop (shaped pill/drop button)
@@ -233,7 +257,7 @@ export function MochiButton({
   disabled: disabledProp = false,
   className = "",
   ...props
-}) {
+}, ref) {
   // `type` is this component's visual variant, not the native button type.
   // Passing it through made every Button inside a <form> submit it (an
   // unrecognized type falls back to "submit"), so the native type always
@@ -265,6 +289,7 @@ export function MochiButton({
     <ButtonWrapper
       data-appearance={resolvedAppearance}
       {...props}
+      ref={ref}
       className={['mochi-button', `mochi-button--${resolvedAppearance}`, className]
         .filter(Boolean)
         .join(' ')}
@@ -290,4 +315,4 @@ export function MochiButton({
       </TextContainer>
     </ButtonWrapper>
   );
-}
+});

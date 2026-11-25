@@ -3,7 +3,7 @@ export function MochiPopupPanel({ isOpen, title, children, actions, onClose, anc
     isOpen: any;
     title: any;
     children: any;
-    actions?: any[] | undefined;
+    actions?: never[] | undefined;
     onClose: any;
     anchorEl: any;
     anchorRect: any;

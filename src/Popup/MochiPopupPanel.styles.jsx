@@ -1,54 +1,4 @@
 import styled, { keyframes } from "styled-components";
-import bottomLeftCornerDown   from "./nubbinImages/bottom-left-corner-down.png";
-import bottomLeftCornerLeft   from "./nubbinImages/bottom-left-corner-left.png";
-import bottomRightCornerDown  from "./nubbinImages/bottom-right-corner-down.png";
-import bottomRightCornerRight from "./nubbinImages/bottom-right-corner-right.png";
-import down            from "./nubbinImages/down.png";
-import up              from "./nubbinImages/up.png";
-import left            from "./nubbinImages/left.png";
-import right           from "./nubbinImages/right.png";
-import topLeftCornerLeft   from "./nubbinImages/top-left-corner-left.png";
-import topLeftCornerUp     from "./nubbinImages/top-left-corner-up.png";
-import topRightCornerRight from "./nubbinImages/top-right-corner-right.png";
-import topRightCornerUp   from "./nubbinImages/top-right-corner-up.png";
-import bottomLeftCornerDownDark   from "./nubbinImages/dark/bottom-left-corner-down.png";
-import bottomLeftCornerLeftDark   from "./nubbinImages/dark/bottom-left-corner-left.png";
-import bottomRightCornerDownDark  from "./nubbinImages/dark/bottom-right-corner-down.png";
-import bottomRightCornerRightDark from "./nubbinImages/dark/bottom-right-corner-right.png";
-import downDark            from "./nubbinImages/dark/down.png";
-import upDark              from "./nubbinImages/dark/up.png";
-import leftDark            from "./nubbinImages/dark/left.png";
-import rightDark           from "./nubbinImages/dark/right.png";
-import topLeftCornerLeftDark   from "./nubbinImages/dark/top-left-corner-left.png";
-import topLeftCornerUpDark     from "./nubbinImages/dark/top-left-corner-up.png";
-import topRightCornerRightDark from "./nubbinImages/dark/top-right-corner-right.png";
-import topRightCornerUpDark    from "./nubbinImages/dark/top-right-corner-up.png";
-
-// Dark-mode nubbins — the light images recolored the way Repanel's
-// left-shadow.png was: alpha untouched, fill → dark --mochi-surface
-// (#2a2a2a), stroke kept at --mochi-popup-border (#646464, both themes),
-// shadow kept black like the panel's box-shadow. The panel is portaled to
-// document.body, so its colors come from the :root theme attribute; the
-// images key off that same attribute rather than React context so the
-// nubbin always matches the body it's attached to.
-const DARK_NUBBINS = [
-  ["&.vertical.below",              upDark],
-  ["&.vertical.above",              downDark],
-  ["&.vertical.below.left.corner",  topRightCornerUpDark],
-  ["&.vertical.below.right.corner", topLeftCornerUpDark],
-  ["&.vertical.above.left.corner",  bottomRightCornerDownDark],
-  ["&.vertical.above.right.corner", bottomLeftCornerDownDark],
-  ["&.horizontal.left",             leftDark],
-  ["&.horizontal.right",            rightDark],
-  ["&.horizontal.left.high.corner", topLeftCornerLeftDark],
-  ["&.horizontal.right.high.corner", topRightCornerRightDark],
-  ["&.horizontal.left.low.corner",  bottomLeftCornerLeftDark],
-  ["&.horizontal.right.low.corner", bottomRightCornerRightDark],
-];
-const darkNubbinRules = DARK_NUBBINS.map(
-  ([selector, image]) =>
-    `:root[data-mochi-theme='dark'] ${selector}::after { background-image: url(${image}); }`
-).join("\n");
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: scale(0.97); }
@@ -77,28 +27,34 @@ export const Panel = styled.div.attrs(({ className }) => ({
   position: fixed;
   background: var(--mochi-surface-material, var(--mochi-panel-bg, #f5f5f5));
   border: 2px solid var(--mochi-panel-border, var(--mochi-popup-border, #646464));
-  border-radius: var(--mochi-corner-field, 24px);
+  /* The field corner, uniform: a popup points with its nubbin, so no sharp
+     corner of its own. A host's --mochi-floating-radius retunes it. */
+  border-radius: var(--mochi-floating-radius, var(--mochi-corner-field, 24px));
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
   padding: 6px;
   min-width: 150px;
-  color: var(--mochi-text, #4b4b4b);
+  color: var(--mochi-text, #1a1a1a);
+  font-family: var(--mochi-font-body, 'Prelude', sans-serif);
   font-size: 14px;
   box-sizing: border-box;
   outline: none;
   pointer-events: auto;
   z-index: 1000;
-  animation: ${fadeIn} 0.22s ease forwards;
+  /* Grows from the nubbin's tip (MochiPopupPanel measures it); a fade only
+     under Reduced motion, none under Off (see MochiThemeWrapper.scss). */
+  transform-origin: var(--popup-origin-x, 50%) var(--popup-origin-y, 50%);
+  animation: ${fadeIn} var(--mochi-duration-arrive, 220ms) var(--mochi-ease-arrive, ease) forwards;
   max-width: 320px;
 
   /* The panel takes focus when it opens; show it when opened from the keyboard. */
   &:focus-visible {
-    outline: 2px solid var(--mochi-primary, #4a8bc2);
+    outline: 2px solid var(--mochi-focus-ring, #357099);
     outline-offset: 2px;
   }
 
   /* ────────────────────────────────────────────────────────────────
      VERTICAL POPUP MARGIN OFFSETS
-     Extra space so the nubbin image doesn't overlap the panel border.
+     Extra space so the nubbin doesn't overlap the panel border.
   ──────────────────────────────────────────────────────────────── */
   &.vertical.below { margin-top:  20px; }
   &.vertical.above { margin-top: -10px; }
@@ -111,6 +67,8 @@ export const Panel = styled.div.attrs(({ className }) => ({
 
   /* ────────────────────────────────────────────────────────────────
      CORNER BORDER-RADIUS ZEROING
+     The corner a corner-placement nubbin sits on is square, as the
+     original Mochi popup has it; the cap stands in for it.
   ──────────────────────────────────────────────────────────────── */
   &.vertical.below.left.corner   { border-top-right-radius:    0; }
   &.vertical.below.right.corner  { border-top-left-radius:     0; }
@@ -122,142 +80,115 @@ export const Panel = styled.div.attrs(({ className }) => ({
   &.horizontal.right.low.corner  { border-bottom-right-radius: 0; }
 
   /* ────────────────────────────────────────────────────────────────
-     NUBBIN ::after rules
+     NUBBIN
+     Drawn in code (see shared/nubbin.jsx) and rendered by
+     MochiPopupPanel as the panel's last child. Each rule places the
+     nubbin's box so its line runs exactly over the panel's border: the
+     bump's flat tails and the corner caps' straight edges sit on the
+     border and their fill covers it under the shape, so the two read as
+     one stroke. Colours come from the same tokens as the panel's own
+     border and background, so light and dark need nothing extra.
+
+     A corner placement's cap stands in for the panel's corner there. That
+     corner is zeroed above, and MochiPopupPanel hands the cap the radius it
+     measures (0 here); were the corner ever round, the cap would reach over
+     the curve to meet the straight border.
   ──────────────────────────────────────────────────────────────── */
-  &::after {
-    content: '';
+  & > .mochi-popup-nubbin {
     position: absolute;
-    display: block;
+    pointer-events: none;
   }
 
   /* vertical below — nub points UP */
-  &.vertical.below::after {
+  &.vertical.below > .mochi-popup-nubbin {
     top: 0;
     margin-top: -20px;
     left: var(--nubbin-h-offset, 34%);
-    width: 71px;
-    height: 20px;
-    background: transparent url(${up}) no-repeat;
   }
 
   /* vertical above — nub points DOWN */
-  &.vertical.above::after {
+  &.vertical.above > .mochi-popup-nubbin {
     top: 100%;
     left: var(--nubbin-h-offset, 34%);
-    width: 71px;
-    height: 20px;
-    background: transparent url(${down}) no-repeat;
   }
 
   /* vertical below + left corner — nub at top-right */
-  &.vertical.below.left.corner::after {
+  &.vertical.below.left.corner > .mochi-popup-nubbin {
     top: 0;
     left: 100%;
     margin-top: -14px;
     margin-left: -30px;
-    width: 71px;
-    height: 20px;
-    background: transparent url(${topRightCornerUp}) no-repeat;
   }
 
   /* vertical below + right corner — nub at top-left */
-  &.vertical.below.right.corner::after {
+  &.vertical.below.right.corner > .mochi-popup-nubbin {
     top: 0;
     left: 0;
     margin-left: -2px;
     margin-top: -14px;
-    width: 71px;
-    height: 20px;
-    background: transparent url(${topLeftCornerUp}) no-repeat;
   }
 
   /* vertical above + left corner — nub at bottom-right */
-  &.vertical.above.left.corner::after {
+  &.vertical.above.left.corner > .mochi-popup-nubbin {
     top: 100%;
     left: 100%;
     margin-left: -30px;
-    width: 71px;
-    height: 20px;
-    background: transparent url(${bottomRightCornerDown}) no-repeat;
   }
 
   /* vertical above + right corner — nub at bottom-left */
-  &.vertical.above.right.corner::after {
+  &.vertical.above.right.corner > .mochi-popup-nubbin {
     top: 100%;
     left: 0;
     margin-left: -2px;
-    width: 71px;
-    height: 20px;
-    background: transparent url(${bottomLeftCornerDown}) no-repeat;
   }
 
   /* horizontal left — popup right of anchor, nub points LEFT */
-  &.horizontal.left::after {
+  &.horizontal.left > .mochi-popup-nubbin {
     left: 0;
     margin-left: -20px;
     top: var(--nubbin-v-offset, 35%);
-    width: 20px;
-    height: 71px;
-    background: transparent url(${left}) no-repeat;
   }
 
   /* horizontal right — popup left of anchor, nub points RIGHT */
-  &.horizontal.right::after {
+  &.horizontal.right > .mochi-popup-nubbin {
     left: 100%;
     top: var(--nubbin-v-offset, 35%);
-    width: 20px;
-    height: 71px;
-    background: transparent url(${right}) no-repeat;
   }
 
   /* horizontal left + high corner — nub at top-left */
-  &.horizontal.left.high.corner::after {
+  &.horizontal.left.high.corner > .mochi-popup-nubbin {
     top: 0;
     left: 0;
     margin-top: -2px;
     margin-left: -14px;
-    width: 20px;
-    height: 71px;
-    background: transparent url(${topLeftCornerLeft}) no-repeat;
   }
 
   /* horizontal right + high corner — nub at top-right */
-  &.horizontal.right.high.corner::after {
+  &.horizontal.right.high.corner > .mochi-popup-nubbin {
     top: 0;
     left: 100%;
     margin-top: -2px;
-    width: 20px;
-    height: 71px;
-    background: transparent url(${topRightCornerRight}) no-repeat;
   }
 
   /* horizontal left + low corner — nub at bottom-left */
-  &.horizontal.left.low.corner::after {
+  &.horizontal.left.low.corner > .mochi-popup-nubbin {
     top: 100%;
     left: 0;
     margin-top: -30px;
     margin-left: -14px;
-    width: 20px;
-    height: 71px;
-    background: transparent url(${bottomLeftCornerLeft}) no-repeat;
   }
 
   /* horizontal right + low corner — nub at bottom-right */
-  &.horizontal.right.low.corner::after {
+  &.horizontal.right.low.corner > .mochi-popup-nubbin {
     top: 100%;
     left: 100%;
     margin-top: -30px;
-    width: 20px;
-    height: 71px;
-    background: transparent url(${bottomRightCornerRight}) no-repeat;
   }
-
-  ${darkNubbinRules}
 `;
 
 export const PanelTitle = styled.div`
   font-weight: bold;
-  color: var(--mochi-text-muted, #646464);
+  color: var(--mochi-text-muted, #555555);
   padding: 24px 32px 0;
 `;
 

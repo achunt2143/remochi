@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './Checkbox.scss';
 
 /**
@@ -27,9 +27,9 @@ const Checkbox = ({
   // in Checkbox.scss) is the dark --mochi-toggle-track instead, so
   // unchecked reads as a dark ring around a light-grey fill, same pairing
   // Radio uses.
-  colorInactive = 'var(--mochi-mark, #fff)',
+  colorInactive = 'var(--mochi-mark, #ffffff)',
   colorActiveDisabled = 'var(--mochi-accent, var(--mochi-selected, #ffb80d))',
-  colorInactiveDisabled = '#fff',
+  colorInactiveDisabled = 'var(--mochi-mark, #ffffff)',
   className = '',
   style: styleProp,
   onClick: userOnClick,
@@ -37,16 +37,23 @@ const Checkbox = ({
   ...rest
 }) => {
   const [isChecked, setIsChecked] = useState(checked);
+  // True once the box has changed state: only then does checking animate, so
+  // one that renders already checked doesn't pop on mount.
+  const [live, setLive] = useState(false);
+  const mounted = useRef(false);
 
   // Keep internal state in sync when controlled prop changes
   useEffect(() => {
     setIsChecked(checked);
+    if (mounted.current) setLive(true);
+    mounted.current = true;
   }, [checked]);
 
   const handleToggle = useCallback(() => {
     if (disabled) return;
     const next = !isChecked;
     setIsChecked(next);
+    setLive(true);
     onChange({ checked: next, value: next });
   }, [isChecked, disabled, onChange]);
 
@@ -60,6 +67,7 @@ const Checkbox = ({
     isChecked  && 'checked',
     disabled   && 'disabled',
     canAnimate && 'mochi-checkbox-animate',
+    live       && 'mochi-checkbox-live',
     className,
   ].filter(Boolean).join(' ');
 
@@ -91,7 +99,9 @@ const Checkbox = ({
           handleToggle();
         }
       }}
-    />
+    >
+      <span className="mochi-checkbox-tick" aria-hidden="true" />
+    </div>
   );
 };
 

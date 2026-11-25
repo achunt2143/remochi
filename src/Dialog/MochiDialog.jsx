@@ -7,6 +7,7 @@ import './MochiDialog.scss';
 import { Button as MochiButton } from '../Button';
 import { Input as MochiInput } from '../Input';
 import { Divider } from '../Divider';
+import { useEscapeLayer, hasLayerAbove } from '../shared/escapeStack';
 
 const MochiDialog = ({
   isOpen = false,
@@ -30,27 +31,24 @@ const MochiDialog = ({
   onPromptChange,
   // Custom actions: [{ label, onClick, type? }]
   actions,
+  tone = 'normal',        // 'normal' | 'warning' | 'error'
   ...rest
 }) => {
   const dialogRef = useRef(null);
   const titleId = useId();
 
-  // Keyboard + scroll-lock management
+  // Escape closes only the topmost layer (a menu or popover open inside the
+  // dialog goes first).
+  const layerRef = useEscapeLayer(isOpen, onClose);
+  // A press that lands while a layer above is open (it closes that layer on
+  // pointerdown) must not also close the dialog through the scrim click.
+  const pressedUnderLayer = useRef(false);
+
+  // Scroll lock
   useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen && onClose) onClose();
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
-    };
-  }, [isOpen, onClose]);
+    if (isOpen) document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
 
   // Focus trap: move focus into dialog when opened
   useEffect(() => {
@@ -58,11 +56,16 @@ const MochiDialog = ({
       const focusable = dialogRef.current.querySelector(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      focusable?.focus();
+      (focusable || dialogRef.current).focus();
     }
   }, [isOpen]);
 
+  const handleOverlayPointerDown = useCallback(() => {
+    pressedUnderLayer.current = !!layerRef.current && hasLayerAbove(layerRef.current);
+  }, [layerRef]);
+
   const handleOverlayClick = useCallback((e) => {
+    if (pressedUnderLayer.current) { pressedUnderLayer.current = false; return; }
     if (e.target === e.currentTarget && onClose) onClose();
   }, [onClose]);
 
@@ -114,16 +117,20 @@ const MochiDialog = ({
     return null;
   };
 
+  const toneClass = tone && tone !== 'normal' ? ` mochi-dialog--${tone}` : '';
+
   const dialog = (
     <div
       className={`mochi-dialog-overlay${isOpen ? ' open' : ''}`}
+      onPointerDownCapture={handleOverlayPointerDown}
       onClick={handleOverlayClick}
       aria-hidden={!isOpen}
     >
       <div
         {...rest}
         ref={dialogRef}
-        className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type}${className ? ` ${className}` : ''}`}
+        className={`mochi-dialog mochi-dialog-${size} mochi-dialog-${type}${toneClass}${className ? ` ${className}` : ''}`}
+        data-tone={tone}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
@@ -134,11 +141,12 @@ const MochiDialog = ({
             <h2 id={titleId} className="mochi-dialog-title">{title}</h2>
             {showCloseButton && (
               <button
+                type="button"
                 className="mochi-dialog-close"
                 onClick={onClose}
                 aria-label="Close dialog"
               >
-                &times;
+                <span aria-hidden="true">&times;</span>
               </button>
             )}
           </div>

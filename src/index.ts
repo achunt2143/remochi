@@ -1,3 +1,4 @@
+export * from './Avatar';
 export * from './Badge';
 export * from './Button';
 export * from './Checkbox';
@@ -23,3 +24,6 @@ export * from './Table';
 export * from './ThemeWrapper';
 export * from './Toggle';
 export * from './Wizard';
+export { SCREEN_NARROW, SCREEN_WIDE } from './shared/screens';
+export { useWidthClass } from './shared/useWidthClass';
+export { waterdropRadius } from './shared/waterdrop';

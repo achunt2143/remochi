@@ -1,14 +1,15 @@
 import React from 'react';
 import './Divider.scss';
-import capLeftImage  from './div-img/div-left.png';
-import capRightImage from './div-img/div-right.png';
+import { taperStyle } from '../shared/nubbin';
 
 /**
  * Divider
  *
  * Two-cap divider: the left cap fills the left half, the right cap fills the
  * right half, and they meet seamlessly in the centre. No repeating middle
- * section. Both caps stretch to cover their half via background-size: 100% 100%.
+ * section. Each cap is a grooved line that tapers out toward its own end,
+ * drawn with CSS gradients (see shared/nubbin.jsx's taperStyle) in the
+ * popup border colour, so it follows the theme and scales to any thickness.
  *
  * Props:
  *   orientation  'horizontal' | 'vertical'  (default 'horizontal')
@@ -40,11 +41,11 @@ const Divider = ({
     >
       <div
         className="divider-cap divider-cap-left"
-        style={{ backgroundImage: `url('${capLeftImage}')` }}
+        style={taperStyle({ orientation, end: 'start' })}
       />
       <div
         className="divider-cap divider-cap-right"
-        style={{ backgroundImage: `url('${capRightImage}')` }}
+        style={taperStyle({ orientation, end: 'end' })}
       />
     </div>
   );

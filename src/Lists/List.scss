@@ -19,7 +19,7 @@
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
     background: var(--mochi-border, rgba(0,0,0,0.2));
-    border-radius: 4px;
+    border-radius: var(--mochi-corner-xs, 4px);
     &:hover { background: var(--mochi-text-muted, rgba(0,0,0,0.4)); }
   }
 }

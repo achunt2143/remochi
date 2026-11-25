@@ -2,37 +2,34 @@
 // MochiSlidingMenuItemGroup — Remochi Design System
 // ============================================================
 
+// Groups are separated by space, not rules: the label brings its own 32px
+// above; an unlabelled group takes the 32px itself.
 .mochi-sliding-menu-item-group {
-  --group-label-color:   var(--color-text-secondary, #666666);
-  --group-divider-color: var(--color-border, #e5e7eb);
+  --group-label-color:   var(--mochi-text, #1a1a1a);
+  --group-divider-color: var(--mochi-border, rgba(0, 0, 0, 0.12));
 
-  padding: 12px 0;
   display: flex;
   flex-direction: column;
+
+  &:not(.mochi-sliding-menu-item-group--labelled):not(:first-child) { margin-top: 32px; }
 }
 
-// Dark overrides
-[data-mochi-theme='dark'] .mochi-sliding-menu-item-group,
-.mochi-theme-dark .mochi-sliding-menu-item-group {
-  --group-label-color:   #999999;
-  --group-divider-color: #444444;
-}
-
-// OS dark mode only when no ThemeWrapper has set a theme
-@media (prefers-color-scheme: dark) {
-  :root:not([data-mochi-theme]) .mochi-sliding-menu-item-group {
-    --group-label-color:   #999999;
-    --group-divider-color: #444444;
-  }
-}
-
+// The Label voice (see Label.scss): Mochi Bold 12, uppercase, on the 32px
+// edge, 32px above and 8px below. Muted ink, since the panel is the ground.
 .mochi-sliding-menu-item-group-label {
-  padding: 16px 16px 8px;
+  box-sizing: border-box;
+  margin: 32px 0 8px;
+  padding: 0 32px;
   color: var(--group-label-color);
+  font-family: "Mochi Bold", sans-serif;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: bold;
+  line-height: 16px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   user-select: none;
   pointer-events: none;
 }
@@ -42,18 +39,17 @@
   flex-direction: column;
 }
 
-.mochi-sliding-menu-item-group--divider {
-  border-bottom: 1px solid var(--group-divider-color);
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .mochi-sliding-menu-item-group       { padding: 8px 0; }
-  .mochi-sliding-menu-item-group-label { padding: 12px 16px 6px; font-size: 11px; }
+// A hairline only when asked for, inset to the 32px edge.
+.mochi-sliding-menu-item-group--divider::after {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 16px 32px 0;
+  background-color: var(--group-divider-color);
 }
 
 // Accessibility
 @media (prefers-contrast: more) {
-  .mochi-sliding-menu-item-group--divider { border-bottom-width: 2px; }
-  .mochi-sliding-menu-item-group-label    { font-weight: 700; }
+  .mochi-sliding-menu-item-group--divider::after { height: 2px; }
+  .mochi-sliding-menu-item-group-label           { font-weight: 700; }
 }
