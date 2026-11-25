@@ -9,6 +9,7 @@ import {
 } from "./MochiPopupPanel.styles";
 import { Button as MochiButton } from "../Button";
 import { Nubbin, BUMP, CORNER, NUBBIN_STROKE } from "../shared/nubbin";
+import { useEscapeLayer, hasLayerAbove } from "../shared/escapeStack";
 
 const VERT_FLUSH_MARGIN  = 100;
 const HORIZ_FLUSH_MARGIN = 100;
@@ -235,13 +236,14 @@ export function MochiPopupPanel({
   useEffect(() => {
     if (!isOpen) return;
     window.addEventListener("resize", computePosition);
-    const onKeyDown = (e) => { if (e.key === "Escape") onClose?.(); };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("resize", computePosition);
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isOpen, onClose, computePosition]);
+    return () => window.removeEventListener("resize", computePosition);
+  }, [isOpen, computePosition]);
+
+  // Escape closes the popup only while it is the topmost layer.
+  const layerRef = useEscapeLayer(isOpen, onClose);
+  // A press that closes a layer above (e.g. a menu) must not also close this
+  // popup through the scrim click that follows it.
+  const pressedUnderLayer = useRef(false);
 
   // Keep the panel on whole pixels. Its border is painted snapped to device
   // pixels; the nubbin (an SVG) sits at `left/top: 100%` of a size that's
@@ -318,7 +320,13 @@ export function MochiPopupPanel({
   return ReactDOM.createPortal(
     <Overlay
       $hidden={!isOpen}
-      onClick={(e) => isOpen && e.target === e.currentTarget && onClose?.()}
+      onPointerDownCapture={() => {
+        pressedUnderLayer.current = !!layerRef.current && hasLayerAbove(layerRef.current);
+      }}
+      onClick={(e) => {
+        if (pressedUnderLayer.current) { pressedUnderLayer.current = false; return; }
+        if (isOpen && e.target === e.currentTarget) onClose?.();
+      }}
       aria-modal={isOpen ? "true" : undefined}
       aria-hidden={!isOpen ? "true" : undefined}
       role="dialog"

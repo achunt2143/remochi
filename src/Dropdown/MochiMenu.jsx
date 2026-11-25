@@ -15,6 +15,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Panel } from '../Popup/MochiPopupPanel.styles.jsx';
+import { useEscapeLayer } from '../shared/escapeStack';
 import './MochiMenu.scss';
 
 const MARGIN = 4; // px gap between activator bottom and menu top
@@ -72,12 +73,8 @@ const MochiMenu = ({
     };
   }, [isOpen, adjustPosition]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
+  // Escape closes the menu only while it is the topmost layer.
+  useEscapeLayer(isOpen, onClose);
 
   // Close on a pointerdown outside both the menu and its trigger. The trigger
   // is excluded so its own click can toggle the menu instead of reopening it.

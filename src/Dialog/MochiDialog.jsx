@@ -7,6 +7,7 @@ import './MochiDialog.scss';
 import { Button as MochiButton } from '../Button';
 import { Input as MochiInput } from '../Input';
 import { Divider } from '../Divider';
+import { useEscapeLayer, hasLayerAbove } from '../shared/escapeStack';
 
 const MochiDialog = ({
   isOpen = false,
@@ -36,22 +37,18 @@ const MochiDialog = ({
   const dialogRef = useRef(null);
   const titleId = useId();
 
-  // Keyboard + scroll-lock management
+  // Escape closes only the topmost layer (a menu or popover open inside the
+  // dialog goes first).
+  const layerRef = useEscapeLayer(isOpen, onClose);
+  // A press that lands while a layer above is open (it closes that layer on
+  // pointerdown) must not also close the dialog through the scrim click.
+  const pressedUnderLayer = useRef(false);
+
+  // Scroll lock
   useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen && onClose) onClose();
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
-    };
-  }, [isOpen, onClose]);
+    if (isOpen) document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
 
   // Focus trap: move focus into dialog when opened
   useEffect(() => {
@@ -63,7 +60,12 @@ const MochiDialog = ({
     }
   }, [isOpen]);
 
+  const handleOverlayPointerDown = useCallback(() => {
+    pressedUnderLayer.current = !!layerRef.current && hasLayerAbove(layerRef.current);
+  }, [layerRef]);
+
   const handleOverlayClick = useCallback((e) => {
+    if (pressedUnderLayer.current) { pressedUnderLayer.current = false; return; }
     if (e.target === e.currentTarget && onClose) onClose();
   }, [onClose]);
 
@@ -120,6 +122,7 @@ const MochiDialog = ({
   const dialog = (
     <div
       className={`mochi-dialog-overlay${isOpen ? ' open' : ''}`}
+      onPointerDownCapture={handleOverlayPointerDown}
       onClick={handleOverlayClick}
       aria-hidden={!isOpen}
     >

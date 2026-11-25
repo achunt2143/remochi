@@ -16,8 +16,22 @@ function isoDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+// A date-only 'YYYY-MM-DD' string is a calendar day, so it is read as a LOCAL
+// date (`new Date('2024-01-15')` would be UTC midnight, the 14th west of UTC).
+// Strings with a time part and Date objects keep their instant.
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
 function toDate(v) {
   if (!v) return null;
+  if (typeof v === 'string') {
+    const m = DATE_ONLY.exec(v.trim());
+    if (m) {
+      const y = +m[1], mo = +m[2] - 1, d = +m[3];
+      const local = new Date(y, mo, d);
+      // new Date(y, ...) maps years 0-99 to 19xx, and rolls 02-31 over.
+      local.setFullYear(y);
+      return local.getMonth() === mo && local.getDate() === d ? local : null;
+    }
+  }
   const d = new Date(v);
   return isNaN(d.getTime()) ? null : d;
 }
@@ -69,9 +83,11 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
   const month = view.getMonth();
   const cells = buildGrid(year, month);
 
+  const min = toDate(minDate);
+  const max = toDate(maxDate);
   const isDisabled = (date) => {
-    if (minDate && date < minDate) return true;
-    if (maxDate && date > maxDate) return true;
+    if (min && date < min) return true;
+    if (max && date > max) return true;
     return false;
   };
 
