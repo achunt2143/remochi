@@ -69,7 +69,7 @@ const MochiDropdown = React.forwardRef(({
         tabIndex={disabled ? -1 : 0}
         onKeyDown={(e) => {
           if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); handleTrigger(); }
-          if (e.key === 'Escape') setIsOpen(false);
+          // Escape is handled by the menu's escape layer (see MochiMenu).
         }}
       >
         <span className="mochi-dropdown-value">
