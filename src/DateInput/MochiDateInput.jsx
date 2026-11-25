@@ -1,6 +1,7 @@
 // MochiDateInput.jsx
 import React, { useState, useRef, useCallback } from 'react';
 import { MochiInput }      from '../Input/MochiInput';
+import './MochiDateInput.scss';
 import { MochiButton }     from '../Button/MochiButton';
 import { MochiPopupPanel } from '../Popup/MochiPopupPanel';
 
@@ -97,7 +98,7 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
           return (
             <button
               key={idx}
-              className="mochi-date-cell"
+              className={sel ? 'mochi-date-cell mochi-date-cell-selected' : 'mochi-date-cell'}
               style={{
                 ...cellBase,
                 color: sel ? 'var(--mochi-primary-text, #ffffff)' : !cell.cur || disabled ? 'var(--mochi-text-faint, #888888)' : 'var(--mochi-text, #1a1a1a)',

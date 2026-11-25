@@ -33,18 +33,26 @@ const MochiRadioOuter = styled.span.attrs({ className: "mochi-radio-box" })`
   // — the same light-grey-inside/dark-border pairing Checkbox uses, so
   // both controls read the same "off state" look and stay visually
   // distinct from each other.
+  // The checked fill is the child MochiRadioFill, which grows over this
+  // resting fill; a disabled radio paints its checked colour here instead.
   background: ${({ $checked, disabled }) =>
     disabled
       ? $checked
         ? "var(--mochi-accent-soft, var(--mochi-accent, var(--mochi-selected-soft, rgba(255, 184, 13, 0.35))))"
         : "var(--mochi-selected-soft, rgba(255, 184, 13, 0.35))"
-      : $checked
-      ? "var(--mochi-accent, var(--mochi-selected, #ffb80d))"
       : "var(--mochi-mark, #fff)"};
   margin-right: 8px;
   box-sizing: border-box;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color var(--mochi-duration-control, 160ms),
+    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
   position: relative;
+
+  // A held press leans in.
+  &:active {
+    transform: ${({ disabled }) => (disabled ? "none" : "scale(0.92)")};
+  }
 
   // Invisible 54px tap target (webOS TouchPad standard, per the HIG's
   // "Laying Out Content and Controls") centered on the 30px circle; a tap
@@ -67,14 +75,33 @@ const MochiRadioOuter = styled.span.attrs({ className: "mochi-radio-box" })`
         : "var(--mochi-toggle-track, #646464)"};
 `;
 
+// The amber fill grows in from the centre when checked and shrinks away when
+// another radio in the group takes over. It sits inside the border, over the
+// resting fill, so the checked circle looks exactly as it did.
+const MochiRadioFill = styled.span.attrs({ className: "mochi-radio-fill" })`
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--mochi-accent, var(--mochi-selected, #ffb80d));
+  opacity: ${({ $checked, $hidden }) => ($checked && !$hidden ? 1 : 0)};
+  transform: scale(${({ $checked }) => ($checked ? 1 : 0.6)});
+  transition:
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
+    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+  pointer-events: none;
+`;
+
 const MochiRadioInput = styled.input.attrs({ type: "radio" })`
   display: none;
 `;
 
-const CheckmarkSVG = styled.svg`
-  display: ${({ $checked }) => ($checked ? "block" : "none")};
+const CheckmarkSVG = styled.svg.attrs({ className: "mochi-radio-check" })`
+  position: relative;
+  display: block;
   width: 20px;
   height: 20px;
+  opacity: ${({ $checked }) => ($checked ? 1 : 0)};
+  transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
   // --mochi-toggle-knob (not --mochi-mark): the checkmark sits on the
   // amber checked fill, and the light grey --mochi-mark uses for the
   // unchecked fill doesn't read well against that amber — the same dark
@@ -100,6 +127,7 @@ const MochiRadio = ({
       disabled={disabled}
     />
     <MochiRadioOuter $checked={checked} disabled={disabled}>
+      <MochiRadioFill $checked={checked} $hidden={disabled} />
       <CheckmarkSVG $checked={checked} viewBox="0 0 18 14" aria-hidden={!checked}>
         <polyline
           points="4,8 8,12 14,4"

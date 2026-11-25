@@ -58,6 +58,17 @@ The demo keeps the app inside `ThemeWrapper` and reads `theme` plus `toggleTheme
 
 Every motion has three forms. **Full** is as designed. **Reduced** is opacity only: a fade of at most `--mochi-duration-reduced` (150ms), with no travel, scale, blur or stagger. **Off** is instant. Drags always track exactly. The mode comes from the `motion` prop, a `data-motion="full|reduced|off"` attribute on `<html>` or a wrapper (a host such as Pyxis can set it), else `prefers-reduced-motion: reduce` (which means Reduced). Timing lives in tokens: `--mochi-ease-forward`, `--mochi-duration-stack` (260ms), `--mochi-ease-arrive`, `--mochi-duration-arrive` (220ms).
 
+What animates in Full (all within 220ms; small state changes use `--mochi-duration-control`, 160ms):
+
+- `Checkbox`: the fill grows from the centre and the tick draws left to right; a held press leans to 0.92. `Radio`: the fill grows in and shrinks away when another is chosen; same press lean.
+- `Toggle`: the knob and track colour travel together, the On/Off labels crossfade and the knob squishes 4px toward its travel while held. `Slider`: the knob grows while held and the value bubble rises from it; the fill and knob track the pointer exactly, and key steps ease.
+- `Pagination`: one accent bar slides to the current page. `ViewSelectButton`: its bar travels between segments.
+- `Dropdown`: the chevron turns 180 degrees, the menu grows from the trigger edge and the selected check fades in. `Collapsable`: the chevron turns and the content eases open on grid rows. `DateInput`: the selected day's fill grows in.
+- `Item`, `ListItem` and `GridList`: press and selection tints fade, and the `GridList` ring eases in. `Input`, `TextArea` and `RichText`: the focus border and 3px halo ease in.
+- `Wizard`: a completed step's tick draws and the progress between steps fills.
+
+Under Reduced these become opacity fades with no scale or travel, and under Off they are instant.
+
 `contrast="more"` (or `prefers-contrast: more`) takes ink to pure black or white and surfaces solid. `transparency="reduced"` (or `prefers-reduced-transparency`) makes the Dialog scrim and `--mochi-surface-material` solid. High contrast makes scrims solid as well. `"standard"` opts out of the OS preference; the default `"system"` follows it.
 
 Portaled surfaces (`Dialog`, `PopupPanel`, the `Dropdown` menu) follow the wrapper's font through `--mochi-font-body`, which `fontFamily` sets and the root wrapper syncs to `<html>`.

@@ -55,7 +55,8 @@ const MochiMenu = ({
     if (left + minWidth > innerW - MARGIN) left = Math.max(MARGIN, innerW - minWidth - MARGIN);
     if (left < MARGIN) left = MARGIN;
 
-    setStyle({ position: 'fixed', top, left, width: minWidth, maxWidth: 'none', visibility: 'visible' });
+    // The menu grows from the edge that meets the trigger.
+    setStyle({ position: 'fixed', top, left, width: minWidth, maxWidth: 'none', visibility: 'visible', transformOrigin: up ? 'bottom center' : 'top center' });
   }, [anchorEl]);
 
   useEffect(() => {

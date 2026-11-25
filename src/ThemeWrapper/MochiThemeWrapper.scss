@@ -548,6 +548,9 @@ $mochi-faces: (
   --mochi-duration-stack:   260ms;
   --mochi-ease-arrive:      cubic-bezier(0.22, 1, 0.36, 1);
   --mochi-duration-arrive:  220ms;
+  // A small control changing state (a checkbox ticking, a toggle flipping, a
+  // chevron turning): quicker than an arrival, never blocking input.
+  --mochi-duration-control: 160ms;
   // The longest a Reduced-motion fade may run.
   --mochi-duration-reduced: 150ms;
 
@@ -739,9 +742,18 @@ $mochi-fade-selectors: (
   '.mochi-collapsable-header',
   '.mochi-toggle-animate',
   '.mochi-toggle-animate .mochi-toggle-button-knob',
+  '.mochi-toggle-content',
   '.mochi-checkbox-animate',
+  '.mochi-checkbox-tick',
   '.mochi-radio-box',
+  '.mochi-radio-fill',
+  '.mochi-radio-check',
   '.mochi-slider-bubble',
+  '.mochi-slider-bubble-wrap',
+  '.mochi-wizard-step-indicator',
+  '.mochi-wizard-step-label',
+  '.mochi-wizard-step-connector',
+  '.mochi-wizard-step-connector-fill',
   '.mochi-dropdown-trigger',
   '.mochi-dropdown-option',
   '.mochi-table tbody tr',
@@ -774,8 +786,11 @@ $mochi-motion-selectors: list.join((
   '.mochi-slider-thumb',
   '.mochi-progress-fill',
   '.mochi-button-bar',
+  '.mochi-pagination-bar',
   '.mochi-view-select-button-item .mochi-button-base',
   '.mochi-dropdown-arrow',
+  '.mochi-menu-item-check',
+  '.mochi-wizard-step-check',
   '.mochi-video-timeline > *',
   '.mochi-input-decorator > textarea',
 ), $mochi-fade-selectors, comma);
@@ -848,12 +863,67 @@ $mochi-motion-selectors: list.join((
   '.mochi-slider-thumb',
   '.mochi-progress-fill',
   '.mochi-button-bar',
+  '.mochi-pagination-bar',
   '.mochi-view-select-button-item .mochi-button-base',
   '.mochi-dropdown-arrow',
   '.mochi-video-timeline > *',
   '.mochi-input-decorator > textarea',
 )) {
   transition: none !important;
+}
+
+// Controls that lean or grow when pressed or changed: no scale, no squish.
+@include mochi-motion('reduced', (
+  '.mochi-checkbox-animate:active:not(.disabled)',
+  '.mochi-radio-box:active',
+  '.mochi-item.clickable:active:not(.disabled)',
+  '.mochi-slider-bubble-wrap',
+)) {
+  transform: none !important;
+}
+@include mochi-motion('reduced', ('.mochi-toggle-animate .mochi-toggle-button-knob')) {
+  width: 20px !important;
+  margin-left: 0 !important;
+}
+@include mochi-motion('reduced', ('.mochi-radio-fill')) {
+  transform: none !important;
+}
+
+// Checkbox: the fill fades in place; the tick fades instead of wiping.
+@include mochi-motion('reduced', ('.mochi-checkbox-live.checked')) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: ease !important;
+}
+@include mochi-motion('reduced', ('.mochi-checkbox-tick')) {
+  clip-path: none !important;
+  opacity: 0;
+}
+@include mochi-motion('reduced', ('.mochi-checkbox.checked .mochi-checkbox-tick')) {
+  opacity: 1;
+}
+
+// Wizard: the progress fades in rather than filling, and the tick fades
+// rather than wiping.
+@include mochi-motion('reduced', ('.mochi-wizard-step-connector-fill')) {
+  transform: none !important;
+  opacity: 0;
+}
+@include mochi-motion('reduced', ('.mochi-wizard-step.completed .mochi-wizard-step-connector-fill')) {
+  opacity: 1;
+}
+
+// Keyframe entrances of small marks (a step's tick, the Dropdown's selected
+// ✓, the DateInput's selected day): a plain fade, no delay.
+@include mochi-motion('reduced', (
+  '.mochi-wizard-step-check',
+  '.mochi-menu-item-check',
+  '.mochi-date-cell-selected',
+)) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-delay: 0s !important;
+  animation-timing-function: ease !important;
 }
 
 // Collapsable content: opacity only, no 4px rise.

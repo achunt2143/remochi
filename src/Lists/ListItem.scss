@@ -18,10 +18,15 @@
   -webkit-user-select: none;
   user-select: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--mochi-duration-control, 160ms) ease;
 
   &:hover {
     background-color: var(--mochi-hover);
+  }
+
+  // The tap tint fades in while held and out on release.
+  &:active {
+    background-color: var(--mochi-active, rgba(0, 0, 0, 0.08));
   }
 
   &.mochi-highlight {

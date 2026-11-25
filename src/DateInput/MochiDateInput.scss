@@ -1,2 +1,13 @@
-/* intentionally empty — MochiDateInput composes MochiInput + MochiPopupPanel.
-   All styling is inherited from those components. */
+/* MochiDateInput composes MochiInput + MochiPopupPanel; the rest of its
+   styling comes from those components. */
+
+// The selected day's fill grows in from the centre when the calendar opens
+// or a month with the selection comes into view.
+.mochi-date-cell-selected {
+  animation: mochi-date-cell-fill var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) 60ms backwards;
+}
+
+@keyframes mochi-date-cell-fill {
+  from { transform: scale(0.6); }
+  to   { transform: scale(1); }
+}

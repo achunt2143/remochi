@@ -60,7 +60,7 @@
   &-arrow {
     color: var(--mochi-text-muted);
     font-size: 10px;
-    transition: transform 0.2s ease;
+    transition: transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
 
     &.open {
       transform: rotate(180deg);

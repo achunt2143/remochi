@@ -12,9 +12,10 @@ export const MochiInput = styled.input.attrs(props => ({
   border-radius: var(--mochi-corner-field, 24px);
   font-size: 1.13rem;
   padding: 8px 22px;
+  // Focus: the border colour and the 3px halo (spreading from 0) ease in.
   transition:
-    box-shadow 0.15s,
-    border-color 0.15s,
+    box-shadow 150ms var(--mochi-ease-arrive, ease),
+    border-color 150ms var(--mochi-ease-arrive, ease),
     color 0.13s,
     background 0.13s;
   outline: none;

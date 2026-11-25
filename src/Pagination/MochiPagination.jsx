@@ -1,5 +1,5 @@
 // MochiPagination.jsx — uses MochiButton for all page controls
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { MochiButton } from '../Button/MochiButton';
 import './MochiPagination.scss';
 
@@ -29,6 +29,42 @@ const MochiPagination = ({
     return pages;
   };
 
+  // The current page's accent bar is one element that slides to the new page
+  // (the Button's own bar is hidden under it, see the SCSS). Measured from
+  // that hidden bar, so it sits exactly where the Button's would.
+  const pagesRef = useRef(null);
+  const [bar, setBar] = useState(null);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const pages = pagesRef.current;
+      const mark = pages?.querySelector('.mochi-pagination-current .mochi-underline');
+      if (!mark) { setBar(null); return; }
+      const pr = pages.getBoundingClientRect();
+      const mr = mark.getBoundingClientRect();
+      // offsetWidth ignores the Button's scaleX, which centres on the bar.
+      const width = mark.offsetWidth;
+      const next = {
+        left: mr.left + mr.width / 2 - width / 2 - pr.left,
+        top: mr.top - pr.top,
+        width,
+      };
+      setBar((prev) =>
+        prev && prev.left === next.left && prev.top === next.top && prev.width === next.width
+          ? prev
+          : { ...next, glide: prev !== null }
+      );
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(pagesRef.current);
+    // The Button sizes its bar once the label is measured, after first paint.
+    const mark = pagesRef.current.querySelector('.mochi-pagination-current .mochi-underline');
+    if (mark) ro.observe(mark);
+    return () => ro.disconnect();
+  }, [currentPage, totalPages, maxVisible]);
+
   const atFirst = currentPage === 1;
   const atLast  = currentPage === totalPages;
 
@@ -56,7 +92,7 @@ const MochiPagination = ({
         </MochiButton>
       )}
 
-      <div className="mochi-pagination-pages">
+      <div ref={pagesRef} className="mochi-pagination-pages">
         {getPageNumbers().map((page, idx) =>
           typeof page === 'string' ? (
             <span key={page} className="mochi-pagination-ellipsis">…</span>
@@ -72,6 +108,14 @@ const MochiPagination = ({
               {String(page)}
             </MochiButton>
           )
+        )}
+        {bar && (
+          <span
+            className="mochi-pagination-bar"
+            aria-hidden="true"
+            data-glide={bar.glide ? 'true' : undefined}
+            style={{ left: bar.left, top: bar.top, width: bar.width }}
+          />
         )}
       </div>
 

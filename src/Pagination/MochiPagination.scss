@@ -17,7 +17,12 @@
       font-weight: bold;
     }
 
-    // The bar stays put; the brackets don't spread as they do on press.
+    // The sliding .mochi-pagination-bar stands in for the Button's own bar.
+    > div > span.mochi-underline {
+      visibility: hidden;
+    }
+
+    // The brackets don't spread as they do on press.
     > div > span.mochi-bracket-left,
     > div > span.mochi-bracket-right {
       transform: none;
@@ -28,6 +33,23 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    position: relative;
+  }
+
+  // One accent bar for the current page; it slides from the old page to the
+  // new one (same size and colour as the Button's bar: 3px, rounded).
+  &-bar {
+    position: absolute;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--mochi-accent, #69cdff);
+    pointer-events: none;
+
+    &[data-glide] {
+      transition:
+        left var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease),
+        width var(--mochi-duration-arrive, 220ms) var(--mochi-ease-forward, ease);
+    }
   }
 
   &-ellipsis {

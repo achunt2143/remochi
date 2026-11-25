@@ -122,6 +122,7 @@ const MochiToggle = React.forwardRef(({
   const classes = [
     'mochi-toggle-button',
     canAnimate && 'mochi-toggle-animate',
+    isOn       && 'mochi-toggle-on',
     disabled   && 'disabled',
     className,
   ].filter(Boolean).join(' ');
@@ -159,7 +160,7 @@ const MochiToggle = React.forwardRef(({
       {/* On label — left side, visible when on */}
       <span
         className="mochi-toggle-content mochi-toggle-content-on"
-        style={{ visibility: isOn ? 'visible' : 'hidden' }}
+        style={{ opacity: isOn ? 1 : 0 }}
       >
         {onContent || '\u00a0'}
       </span>
@@ -167,7 +168,7 @@ const MochiToggle = React.forwardRef(({
       {/* Off label — right side, visible when off */}
       <span
         className="mochi-toggle-content mochi-toggle-content-off"
-        style={{ visibility: isOn ? 'hidden' : 'visible' }}
+        style={{ opacity: isOn ? 0 : 1 }}
       >
         {offContent || '\u00a0'}
       </span>

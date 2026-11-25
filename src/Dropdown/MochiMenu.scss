@@ -27,6 +27,19 @@
   border-radius: var(--mochi-floating-radius, 16px 4px 16px 16px);
 }
 
+// Grows from the trigger edge (MochiMenu sets transform-origin to top or
+// bottom): a short scaleY with a fade, instead of the popup's scale from the
+// middle. Reduced swaps in a plain fade and Off cuts it, via
+// .mochi-contextual-popup in the motion lists.
+.mochi-contextual-popup.mochi-menu {
+  animation-name: mochi-menu-grow;
+}
+
+@keyframes mochi-menu-grow {
+  from { opacity: 0; transform: scaleY(0.96); }
+  to   { opacity: 1; transform: scaleY(1); }
+}
+
 // Scrollable inner container
 .mochi-menu-scroller {
   overflow-y: auto;
@@ -63,7 +76,12 @@
     color: var(--mochi-text, #1a1a1a);
     border-radius: var(--mochi-corner-pill, 9999px);
   }
-  .mochi-menu-item-check { margin-right: 6px; font-style: normal; }
+  // The ✓ fades in a beat after the menu opens.
+  .mochi-menu-item-check {
+    margin-right: 6px;
+    font-style: normal;
+    animation: mochi-fade-in var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) 60ms backwards;
+  }
   &.disabled { opacity: var(--mochi-disabled-opacity, 0.4); cursor: default; }
 }
 

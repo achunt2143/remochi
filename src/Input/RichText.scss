@@ -14,13 +14,18 @@
   white-space: pre-wrap;
   background: var(--mochi-field-bg, #fff);
   border: 1px solid var(--mochi-field-border, rgba(0,0,0,0.12));
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 150ms var(--mochi-ease-arrive, ease),
+    border-color 150ms var(--mochi-ease-arrive, ease),
+    box-shadow 150ms var(--mochi-ease-arrive, ease);
 
   &:focus {
     outline: none;
     background-color: var(--mochi-primary-soft, rgba(105,205,255,0.05));
-    // Mochi's focused-field border (InputDecorator.less: #69cdff).
+    // Mochi's focused-field border (InputDecorator.less: #69cdff), with the
+    // same 3px halo the Input and TextArea have; it spreads in from 0.
     border-color: var(--mochi-accent, #69cdff);
+    box-shadow: 0 0 0 3px var(--mochi-accent-soft, rgba(105,205,255,0.3));
   }
 
   &:focus-visible {

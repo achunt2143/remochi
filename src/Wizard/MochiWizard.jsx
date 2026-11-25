@@ -136,7 +136,11 @@ const MochiWizard = ({
                 )}
               </div>
               <div className="mochi-wizard-step-label">{step.label}</div>
-              {index < steps.length - 1 && <div className="mochi-wizard-step-connector" />}
+              {index < steps.length - 1 && (
+                <div className="mochi-wizard-step-connector">
+                  <span className="mochi-wizard-step-connector-fill" />
+                </div>
+              )}
             </div>
           ))}
         </div>
