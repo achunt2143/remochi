@@ -1,6 +1,28 @@
 import * as React from 'react';
 
 // ---------------------------------------------------------------------------
+// Avatar
+// ---------------------------------------------------------------------------
+export interface AvatarProps
+  extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'> {
+  /** Image URL. If it fails to load, the avatar falls back to the initials or `icon`. */
+  src?: string;
+  /** Image alt text and accessible name. Default: `name`. */
+  alt?: string;
+  /** Initials fallback (first letters of up to two words) and accessible name. */
+  name?: string;
+  /** Shown when there is no image and no `name`. */
+  icon?: React.ReactNode;
+  /** 'sm' 24px, 'md' 40px, 'lg' 56px, 'xl' 96px, or a number of px. The waterdrop corner scales with it (`waterdropRadius`). Default: 'md'. */
+  size?: 'sm' | 'md' | 'lg' | 'xl' | number;
+  className?: string;
+  style?: React.CSSProperties;
+}
+/** A person's or app's picture in the waterdrop shape. The ref goes to the root. */
+export const Avatar: React.ForwardRefExoticComponent<AvatarProps & React.RefAttributes<HTMLSpanElement>>;
+export const MochiAvatar: React.ForwardRefExoticComponent<AvatarProps & React.RefAttributes<HTMLSpanElement>>;
+
+// ---------------------------------------------------------------------------
 // Badge
 // ---------------------------------------------------------------------------
 export interface BadgeProps
@@ -507,7 +529,9 @@ export interface FloatingPanelProps {
   children?: React.ReactNode;
   /** Visual style variant or inline CSS styles. */
   style?: 'default' | 'shadow' | React.CSSProperties;
-  /** Square corners, no edge and no shadow, for a panel that is the whole surface rather than sitting on something. Default: false (the waterdrop, `--mochi-floating-radius`). */
+  /** 'drop' takes the waterdrop accent (`--mochi-drop-radius`, `16px 4px 16px 16px`); 'round' the corner `--mochi-floating-radius` (else `--mochi-corner`, 16px). Default: 'round'. */
+  shape?: 'round' | 'drop';
+  /** Square corners, no edge and no shadow, for a panel that is the whole surface rather than sitting on something; wins over `shape`. Default: false. */
   fullBleed?: boolean;
   className?: string;
   [key: string]: any;
@@ -850,9 +874,15 @@ export interface ThemeWrapperProps extends React.HTMLAttributes<HTMLDivElement> 
    * - Pane: `--mochi-pane-edge`, `--mochi-pane-edge-width` (1px; 2px for the
    *   0.5 look), `--mochi-stack-shadow`, `--mochi-stack-shadow-front` (both
    *   `none`), `--mochi-panel-text-muted`
-   * - Shape: `--mochi-floating-radius` (waterdrop `16px 4px 16px 16px`),
-   *   `--mochi-sheet-radius` (edge-anchored sheets), `--mochi-dialog-radius`,
-   *   `--mochi-corner-xs` (4px) and the rest of the `--mochi-corner-*` ladder
+   * - Shape: `--mochi-drop-radius` (the waterdrop accent, `16px 4px 16px 16px`:
+   *   Avatar, Dialog, FloatingPanel `shape="drop"`), `--mochi-dialog-radius`
+   *   (defaults to the drop), `--mochi-floating-radius` (no default, like
+   *   `--mochi-accent`: PopupPanel, the Dropdown menu and FloatingPanel each
+   *   keep their own ladder corner until a host sets it, e.g. to
+   *   `var(--mochi-drop-radius)`, to retune them all), `--mochi-corner-xs`
+   *   (4px) and the rest of the `--mochi-corner-*` ladder
+   * - Avatar: `--mochi-avatar-bg` (the panel hover grey), `--mochi-avatar-ring`
+   *   (none)
    * - Colour: `--mochi-focus-ring` (the one focus ring), `--mochi-overlay`,
    *   `--mochi-surface-material`
    * - Motion: `--mochi-ease-forward`, `--mochi-duration-stack` (260ms),

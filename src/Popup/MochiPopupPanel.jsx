@@ -259,11 +259,11 @@ export function MochiPopupPanel({
     setWholeSize((prev) => (prev && prev.w === w && prev.h === h ? prev : { w, h }));
   }, [pos]);
 
-  // A corner cap takes the radius of the panel corner it sits on, so it
-  // meets the waterdrop's 4px corner and its 16px ones alike. Read from the
-  // computed style (the token can be overridden, and a corner is capped at
-  // half the panel's short side), in the layout pass so the cap is never
-  // painted with another radius.
+  // A corner cap takes the radius of the panel corner it sits on. The popup
+  // squares that corner (see the styles), so this reads 0, but it is
+  // measured from the computed style, in the layout pass, so a rounder
+  // corner (a host's own styles) would still be joined cleanly and the cap
+  // is never painted with another radius.
   const [cornerRadius, setCornerRadius] = useState(0);
   useLayoutEffect(() => {
     const el = panelRef.current;

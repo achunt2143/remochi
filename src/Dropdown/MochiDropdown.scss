@@ -84,8 +84,9 @@
     z-index: 100;
     background: var(--mochi-surface-material, var(--mochi-panel-bg, var(--mochi-surface)));
     border: 1px solid var(--mochi-panel-border, var(--mochi-border));
-    // The waterdrop, like the popup menu (MochiMenu) it stands in for.
-    border-radius: var(--mochi-floating-radius, 16px 4px 16px 16px);
+    // The field corner, like the popup menu (MochiMenu) it stands in for; a
+    // host's --mochi-floating-radius retunes both.
+    border-radius: var(--mochi-floating-radius, var(--mochi-corner-field, 24px));
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     overflow: hidden;
   }

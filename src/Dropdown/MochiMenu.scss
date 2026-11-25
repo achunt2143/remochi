@@ -22,9 +22,9 @@
 .mochi-contextual-popup.mochi-menu {
   background: var(--mochi-surface-material, var(--mochi-panel-bg, var(--mochi-surface)));
   border-color: var(--mochi-panel-border, var(--mochi-popup-border, #646464));
-  // The waterdrop (Panel reads the same token; stated here so the menu
+  // The field corner (Panel reads the same tokens; stated here so the menu
   // keeps it if its base panel changes).
-  border-radius: var(--mochi-floating-radius, 16px 4px 16px 16px);
+  border-radius: var(--mochi-floating-radius, var(--mochi-corner-field, 24px));
 }
 
 // Grows from the trigger edge (MochiMenu sets transform-origin to top or

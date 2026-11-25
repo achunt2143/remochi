@@ -36,7 +36,7 @@ try {
 
   // Joint check from real screenshots at device scale 1 and 2 (the page's
   // own snapshot isn't stable to a sub-pixel at 2x): the popups (all four
-  // directions), the waterdrop popups in all 8 corner placements, and the
+  // directions), the popups in all 8 corner placements, and the
   // Repanel grabber at 1px and 2px edges, and NubbinDivider (four directions,
   // corner caps, off-centre nubbins) and Divider at fractional lengths
   // (301.5px, 333.3px), light and dark. `probe` swaps the

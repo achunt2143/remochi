@@ -80,8 +80,8 @@ function Popups() {
   ));
 }
 
-// All 8 corner placements, each over the waterdrop's own corners (its 4px
-// one top right, 16px elsewhere): a wide popup gets a vertical placement
+// All 8 corner placements, each with its cap on the squared corner (the
+// other corners keep the field corner): a wide popup gets a vertical placement
 // when its anchor is near the left or right edge of the top or bottom 100px,
 // a tall one a horizontal placement when the anchor is there but mid-width
 // (PopupPanel's logic: the popup is pushed up or down against the viewport

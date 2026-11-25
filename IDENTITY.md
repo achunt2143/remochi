@@ -131,9 +131,10 @@ All on `:root`, all overridable (`theme.scss`):
 | `--mochi-corner-pill` | `9999px` | Dropdown trigger, menu items |
 | `--mochi-scallop` | `45px 0 0 0` | Repanel and FloatingPanel's corner |
 | `--mochi-corner-xs` (0.6.0) | `4px` | The smallest rung of the ladder: List, GridList, Dropdown option |
-| `--mochi-floating-radius` (0.6.0) | `16px 4px 16px 16px` | The waterdrop on floating surfaces: Dialog, PopupPanel, Dropdown menu, FloatingPanel (built in; see 6.3) |
-| `--mochi-dialog-radius` | `var(--mochi-floating-radius)` | Dialog card |
-| `--mochi-sheet-radius` (0.6.0) | the waterdrop's corners on the side facing the page | Phone Dialog sheet, SlidingMenu |
+| `--mochi-drop-radius` (0.6.0) | `16px 4px 16px 16px` | The waterdrop, an accent: Avatar (scaled with size), Dialog, FloatingPanel `shape="drop"` (see 6.3) |
+| `--mochi-dialog-radius` | `var(--mochi-drop-radius)` | Dialog card (phone sheet: the drop's top corners) |
+| `--mochi-floating-radius` (0.6.0) | not set | A host's one corner for every floating surface (PopupPanel, Dropdown menu, FloatingPanel); each falls back to its own ladder corner |
+| `--mochi-avatar-bg` (0.6.0) | `var(--mochi-panel-hover)` | Avatar ground (`--mochi-avatar-ring`: none) |
 | `--mochi-pane-edge-width` (0.6.0) | `1px` | A pane's left edge. `2px` with `--mochi-pane-edge: #666` is the 0.5 look |
 | `--mochi-stack-shadow`, `--mochi-stack-shadow-front` (0.6.0) | `none` | RepanelStack's shadow between panes (the 0.5 look is a drop-shadow) |
 
@@ -214,7 +215,7 @@ remochi ships about 25 groups of components. The ones that carry the identity:
 | **Button `drop`** | `appearance="drop"` (0.5.0): a shaped pill, `--mochi-corner` radius, panel background, `8px 20px` padding. Not a Mochi thing; a modern alternative. Off by default. |
 | **Repanel, RepanelStack, FloatingPanel** | The scallop: a 45 px top-left curve (`--mochi-scallop`), the nubbin grabber on the left edge, inset-shadow variant. In a stack the column behind runs 45 px under the one in front. The pane has a 1 px left edge (`--mochi-pane-edge`) and no stack shadow; the base pane is square. The nubbin is drawn in code over the panel edge, kept outside the clipped body. RepanelStack keeps a left sliver of the past and shows a right peek of the predicted next panel. |
 | **Dialog** | A centred card over a scrim with a 6 px inset; a Mochi Light title (18 px), a divider, content, then centred buttons. `tone`: `normal`, `warning`, `error` (a 2 px coloured line along the top). Becomes a one-handed bottom sheet below 768 px. |
-| **PopupPanel** | Contextual popup, 2 px `#646464` border, the waterdrop corner (`--mochi-floating-radius`), a drawn nubbin pointing at its anchor that the popup grows from, fade in 0.22 s (a plain fade under Reduced). |
+| **PopupPanel** | Contextual popup, 2 px `#646464` border, the field corner (24 px; the corner a corner nubbin sits on is square), a drawn nubbin pointing at its anchor that the popup grows from, fade in 0.22 s (a plain fade under Reduced). |
 | **Spinner** | Drawn in code as an SVG, traced from the original animation: a red circle, a blue square and a yellow triangle (light and dark, normal and large). Reduced holds each shape with a 150 ms crossfade; Off is a still circle. The mark Pyxis took its window controls from. |
 | **Toggle, Checkbox, Radio** | Amber `--mochi-selected` when on, `--mochi-toggle-track` grey when off. |
 | **Slider, ProgressBar** | `--mochi-accent` fill, a bubble popup on the slider knob. |
@@ -249,7 +250,7 @@ remochi has no idea any of this exists, and should not.
 
 | Pyxis adds | What it is |
 |---|---|
-| **The waterdrop corner** | `16 4 16 16`, top-right sharp, on windows, panels, toasts, cards and icons. remochi's floating surfaces have it built in since 0.6.0 (`--mochi-floating-radius`); the rest of remochi sits on the corner ladder (16, 24, pill), plus the scallop. |
+| **The waterdrop corner** | `16 4 16 16`, top-right sharp, on windows, panels, toasts, cards and icons. remochi keeps it as an accent since 0.6.0 (`--mochi-drop-radius`): Avatar, Dialog and FloatingPanel `shape="drop"`; the rest of remochi sits on the corner ladder (16, 24, pill), plus the scallop. |
 | **Wallpaper tint** | The shell's panels, strip and launch bar take colour and ink from the wallpaper's palette (`--px-ink`, `--px-material`, `--px-edge-material`). remochi's greys never change with the time of day. |
 | **Frost** | Title bars are real glass of the wallpaper, drawn by the compositor. remochi surfaces are opaque (or a fixed material). |
 | **Lumen motion** | Bloom, Droplet, Evaporate, Recede, glint. remochi's motion is fades and short rises. |
@@ -267,12 +268,16 @@ The meeting points, and which way each was decided:
   proportions as the waterdrop's large corner. `--mochi-scallop` is the token
   each surface uses to pick. Which surfaces keep the scallop is settled
   component by component, on device.
-- **Floating surfaces are waterdrops.** Since 0.6.0
-  `--mochi-floating-radius` (`16px 4px 16px 16px`) is read by Dialog,
-  PopupPanel, the Dropdown menu and FloatingPanel (`fullBleed` for square),
-  and `--mochi-dialog-radius` defaults to it, so a remochi surface and a shell
-  panel have the same corner without any override. `waterdropRadius(size)`
-  scales it down for small things.
+- **The waterdrop is an accent.** User's call, 2026-11-25: it is reserved
+  for special purposes, not worn by every floating surface. A PopupPanel
+  already points with its nubbin, so a sharp corner would compete with it
+  ("one sharp point per view"), and on only a few floating surfaces it looked
+  inconsistent next to the corner ladder. remochi keeps it on the Avatar
+  (scaled with size by `waterdropRadius`), the Dialog (the one interruption;
+  it matches the Pyxis shell dialog) and FloatingPanel `shape="drop"`.
+  `--mochi-floating-radius` has no default: a host such as Pyxis sets it to
+  `var(--mochi-drop-radius)` and every floating surface follows, without
+  each one being overridden.
 - **The `drop` button.** remochi's pill shape can follow the waterdrop by
   setting `--mochi-button-radius: 16px 4px 16px 16px`. Not used in Pyxis, by the
   user's call.
@@ -310,7 +315,7 @@ variables had to reach `:root`.) The result:
 Exceptions that work from `:root` alone, because they are declared on `:root`
 only: `--mochi-accent`, `--mochi-accent-soft`, `--mochi-selected`,
 `--mochi-toggle-track`, the shape tokens (`--mochi-corner*`,
-`--mochi-scallop`, `--mochi-floating-radius`, `--mochi-sheet-radius`), the pane
+`--mochi-scallop`, `--mochi-drop-radius`), the pane
 and motion tokens, and `--mochi-focus-ring`.
 
 Practical rules for Pyxis code:

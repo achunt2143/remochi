@@ -85,44 +85,58 @@ step over 0.2 px. Compare with the StructurePanel and StructureStack cards.
 ## 2. Signature corners
 
 **Why.** The guide allows two signature corners: the scallop on panes
-anchored to an edge, and the waterdrop `16 4 16 16` on floating surfaces.
-Everything else sits on the corner ladder. Corners follow size: a 40 px
-thing is `12 3 12 12`, a 20 px thing `7 2 7 7`, the full drop from about
-56 px. No corner is bigger than half the short side. Today only the Dialog
-is a waterdrop.
+anchored to an edge, and the waterdrop `16 4 16 16`. Everything else sits on
+the corner ladder. Corners follow size: a 40 px thing is `12 3 12 12`, a
+20 px thing `7 2 7 7`, the full drop from about 56 px. No corner is bigger
+than half the short side. Today only the Dialog is a waterdrop.
+
+**The user's call (2026-11-25): the waterdrop is an accent**, reserved for
+special purposes, not worn by every floating surface. (This replaces the
+first plan, which spread it over all of them.) A PopupPanel already points
+with its nubbin, so a sharp corner competes with it ("one sharp point per
+view"), and on only a few floating surfaces it looked inconsistent next to
+the corner ladder. The drop stays on the new Avatar, the Dialog (the one
+interruption; it matches the Pyxis shell dialog) and an opt-in
+FloatingPanel `shape="drop"`. Hosts like Pyxis can put it on every floating
+surface by setting `--mochi-floating-radius`.
 
 **What and where.**
 
-- **`--mochi-floating-radius`**, default `16px 4px 16px 16px`, declared on
-  `:root` (shape tokens work from `<html>`). Read by:
-  - the Dropdown menu panel (`src/Dropdown/MochiMenu.scss`, now
-    `--mochi-corner-field` 24 px)
-  - PopupPanel (`src/Popup/MochiPopupPanel.styles.jsx`, now 24 px)
-  - `--mochi-dialog-radius` defaults to it, so all floating surfaces
-    change together
-- **PopupPanel corner nubbins.** The corner caps are drawn for a uniform
-  24 px radius. Now that they are drawn in code, make `nubbin.jsx`'s corner
-  caps take the radius of the corner they sit on, so a top-right placement
-  meets the 4 px corner cleanly. Add these cases to the nubbin-diff joint
-  check.
-- **Edge-anchored sheets.** The phone Dialog sheet
-  (`src/Dialog/MochiDialog.scss:200`, hardcoded `16px 4px 0 0`) and
-  SlidingMenu (24 px on the side facing the page) take the waterdrop's
-  corners on the side facing the page, from a shared
-  `--mochi-sheet-radius`.
+- **`--mochi-drop-radius`**, `16px 4px 16px 16px`, declared on `:root`: the
+  one waterdrop value. Read by the Dialog (`--mochi-dialog-radius` defaults
+  to it), the Avatar (scaled with size) and FloatingPanel `shape="drop"`.
+- **`--mochi-floating-radius`** is not declared by default, like
+  `--mochi-accent`. Each floating surface falls back to its own ladder
+  corner: the Dropdown menu panel (`src/Dropdown/MochiMenu.scss`) and
+  PopupPanel (`src/Popup/MochiPopupPanel.styles.jsx`) the field corner, 24 px,
+  FloatingPanel `--mochi-corner`, 16 px. A host that sets it (for example to
+  `var(--mochi-drop-radius)`) retunes them all at once.
+- **PopupPanel corner nubbins.** Back to the uniform field corner, with the
+  corner a corner-placement cap sits on square, as Mochi has it. The caps
+  keep the radius-aware drawing (`nubbin.jsx`) and are handed the measured
+  radius (0 with the square corner). The nubbin-diff joint check covers the
+  corner and pointer placements.
+- **Edge-anchored sheets.** The phone Dialog sheet keeps the drop's top
+  corners (`16px 4px 0 0`); SlidingMenu is plain 24 px on the side facing
+  the page. `--mochi-sheet-radius` is gone.
+- **Avatar.** A new component (`src/Avatar`): a person's or app's picture in
+  the waterdrop, `waterdropRadius(size)` scaling the shape; initials or icon
+  fallback; `--mochi-avatar-bg` (the panel hover grey) with its contrast pair
+  in `check:tokens`.
 - **Corners follow size.** Add a `waterdrop($size)` SCSS function and a
   `waterdropRadius(size)` JS export in `src/shared/`, using the guide's
-  scale and the half-short-side cap. The Slider value bubble is the only
-  small floating thing today; it uses the function.
+  scale and the half-short-side cap. The Slider value bubble and the Avatar
+  use it.
 - **The ladder for everything else.** Move the off-ladder radii (Badge
   10 px, Checkbox 13 px, Collapsable 4 and 32 px, Pagination 8 px, Item 8 px,
   List and GridList 4 px, Dropdown option 4 px, StackedPanels 6 and 10 px,
   Toggle 10 px) onto `--mochi-corner-*`. Add `--mochi-corner-xs: 4px`.
   Circles stay `50%`.
 - **FloatingPanel.** It "fills its container", so the full-bleed rule says
-  square, while its name and the guide's floating rule say waterdrop.
-  Recommendation: waterdrop (`--mochi-floating-radius`) when it sits on
-  something, and a `fullBleed` prop for square with no shadow. Decision 2.
+  square, while its name says floating. It keeps its 16 px corner
+  (`--mochi-floating-radius`, else `--mochi-corner`), takes `shape="drop"`
+  for the waterdrop, and `fullBleed` for square with no shadow (it wins over
+  `shape`). Decision 2.
 
 ---
 
@@ -377,7 +391,8 @@ Wizard the same way.
 - `RELEASE_NOTES.md` `v0.6.0`, with an "Upgrading from 0.5.x" section:
   - the lighter pane and no stack shadow (and the tokens that bring them
     back)
-  - waterdrop corners on Dropdown, PopupPanel and the sheets
+  - the waterdrop as an accent (Avatar, Dialog, `FloatingPanel`
+    `shape="drop"`) and `--mochi-floating-radius` for hosts
   - the Pagination, Item and Dropdown selection changes
   - the left sliver
   - the Badge warning ink
@@ -433,14 +448,16 @@ There is no unit test suite (`npm test` is a stub).
 - With Pyxis-style tokens through `tokens` (an app accent on
   `--mochi-accent`, `--mochi-header-tracking: 0.14em`, `data-motion` set by
   the host): accent fills, rings and selection follow; amber stays amber;
-  floating surfaces are waterdrops; edge panes keep the scallop.
+  floating surfaces take the waterdrop (`--mochi-floating-radius`); edge
+  panes keep the scallop.
 
 ## 15. Decisions needed
 
 1. **Mochi pane by default** (1 px left edge, no stack shadow)?
    Recommended: yes. It is both Mochi and Pyxis's "light, not chrome".
-2. **FloatingPanel:** waterdrop by default with a `fullBleed` prop for
-   square (recommended), or square by default?
+2. **FloatingPanel:** decided 2026-11-25: a round 16 px corner by default,
+   `shape="drop"` for the waterdrop and `fullBleed` for square.
+   The waterdrop is an accent overall (section 2).
 3. **Peeks in 0.6.0** (recommended), or the foundations first as 0.6.0 and
    peeks in 0.7.0?
 4. **Spinner outline:** keep the traced white/black theme outline (the

@@ -146,8 +146,9 @@ $mochi-panel-radius: 45px;
 }
 
 // ── FloatingPanel overrides ────────────────────────────────────────────────
-// The waterdrop (--mochi-floating-radius) on all corners; fills its
-// container completely. `fullBleed` is square with no shadow.
+// The corner (--mochi-floating-radius, else --mochi-corner) on all corners;
+// fills its container completely. shape="drop" takes the waterdrop accent
+// (--mochi-drop-radius); `fullBleed` is square with no shadow.
 .mochi-floating-panel {
   display: block;
   width: 100%;
@@ -159,7 +160,14 @@ $mochi-panel-radius: 45px;
 
   &.mochi-panel--default,
   &.mochi-panel--shadow {
-    border-radius: var(--mochi-floating-radius, 16px 4px 16px 16px);
+    border-radius: var(--mochi-floating-radius, var(--mochi-corner, 16px));
+  }
+
+  &.mochi-floating-panel--drop {
+    &.mochi-panel--default,
+    &.mochi-panel--shadow {
+      border-radius: var(--mochi-drop-radius, 16px 4px 16px 16px);
+    }
   }
 
   // Full-bleed: square, no edge and no shadow (the shadow variant's inset

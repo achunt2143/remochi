@@ -6,7 +6,7 @@ See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for what's new in the latest release,
 
 ## Features
 
-- Authentic **Mochi visual style**: Rounded shapes, smooth animations, bright blues and warm yellows. A light pane, the scallop on edge-anchored panes and the waterdrop on floating surfaces
+- Authentic **Mochi visual style**: Rounded shapes, smooth animations, bright blues and warm yellows. A light pane, the scallop on edge-anchored panes and the waterdrop as an accent (the `Avatar`, the `Dialog`, `FloatingPanel` `shape="drop"`)
 - **Motion that answers a question**: Full, Reduced (a fade of 150ms at most) and Off, set by `ThemeWrapper`'s `motion` prop, `data-motion` on `<html>` or the OS, with high-contrast and reduced-transparency modes to match
 - Clean React components built with **functional components** and **hooks**
 - Fully **accessible** with keyboard support and ARIA attributes
@@ -24,7 +24,7 @@ See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for what's new in the latest release,
 
 ## Theming
 
-Wrap your app in `ThemeWrapper` for light and dark themes. Its `tokens` prop overrides `--mochi-*` custom properties, such as `--mochi-accent`, `--mochi-floating-radius`, `--mochi-pane-edge` and `--mochi-focus-ring`. `motion`, `contrast` and `transparency` set the accessibility modes. Run `npm run check:tokens` to keep bare hex colours out of component styles. See the [component guide](./docs/remochi-component-guide.md) and [IDENTITY.md](./IDENTITY.md).
+Wrap your app in `ThemeWrapper` for light and dark themes. Its `tokens` prop overrides `--mochi-*` custom properties, such as `--mochi-accent`, `--mochi-drop-radius`, `--mochi-floating-radius` (unset by default; set it to `var(--mochi-drop-radius)` for waterdrop floating surfaces), `--mochi-pane-edge` and `--mochi-focus-ring`. `motion`, `contrast` and `transparency` set the accessibility modes. Run `npm run check:tokens` to keep bare hex colours out of component styles. See the [component guide](./docs/remochi-component-guide.md) and [IDENTITY.md](./IDENTITY.md).
 
 ## Installation
 

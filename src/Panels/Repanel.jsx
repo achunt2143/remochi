@@ -11,6 +11,7 @@ import Header from '../Headers/Header';
 // --mochi-pane-edge-width: 1px by default, measured from the panel), so the
 // line runs straight out of the edge as one stroke; with the 0.5 look
 // (2px, #666666) it joins just as cleanly.
+// It casts no shadow either (the edge has none): light, not chrome.
 const HANDLE_STROKE = 'var(--mochi-pane-edge, #cccccc)';
 const EDGE_WIDTH = 1;
 const HANDLE_FILL = {
@@ -93,7 +94,7 @@ function ShadowHandle({ panelWidth, panelHeight, edgeWidth }) {
       </defs>
       <path d={outline} style={{ fill: HANDLE_FILL.shadow }} />
       <path d={outline} filter={`url(#${id})`} />
-      <Nubbin x={0} y={bump} direction="left" length={HANDLE_LENGTH} strokeWidth={edgeWidth} stroke={HANDLE_STROKE} shadow />
+      <Nubbin x={0} y={bump} direction="left" length={HANDLE_LENGTH} strokeWidth={edgeWidth} stroke={HANDLE_STROKE} />
     </svg>
   );
 }
@@ -246,7 +247,6 @@ const Repanel = ({
           strokeWidth={edgeWidth}
           stroke={HANDLE_STROKE}
           fill={HANDLE_FILL[resolvedVariant] ?? HANDLE_FILL.default}
-          shadow
         />
       )}
     </div>

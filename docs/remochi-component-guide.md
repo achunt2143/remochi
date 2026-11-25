@@ -23,6 +23,7 @@ import {
   Toggle,
   Checkbox,
   Radio,
+  Avatar,
   Badge,
   Dropdown,
   Dialog,
@@ -85,6 +86,8 @@ Run `npm run check:tokens` to keep bare hex colours out of component styles and 
 ```
 
 Screen widths are `SCREEN_NARROW` (768) and `SCREEN_WIDE` (1280), exported with `useWidthClass(ref)`, which returns `'narrow' | 'medium' | 'wide'` for an element's own width. `waterdropRadius(size)` returns the waterdrop corner scaled to a surface's short side.
+
+Corners: the waterdrop (`--mochi-drop-radius`, `16px 4px 16px 16px`, top-right nearly sharp) is an accent for special purposes, not the corner of every floating surface: the `Avatar`, the `Dialog` and `FloatingPanel shape="drop"` wear it. `PopupPanel` and the `Dropdown` menu keep the 24px field corner, `FloatingPanel` its 16px corner, and `SlidingMenu` rounds its page side at 24px. `--mochi-floating-radius` is unset by default; a host that sets it (for example to `var(--mochi-drop-radius)`) retunes every floating surface.
 
 ## Recommended app structure
 
@@ -262,6 +265,16 @@ const dropdownOptions = [
 
 ## Status, layout, and content
 
+### Avatar
+
+`Avatar` is a person's or app's picture in the waterdrop shape, which scales with the size (`waterdropRadius`: 12/3 at 40px, the full 16/4 from about 56px). `size` is `'sm'` (24), `'md'` (40, default), `'lg'` (56), `'xl'` (96) or a number of px. Pass `src` (with `alt`) for a picture; `name` gives the initials (first letters of up to two words) and the accessible name, and `icon` is shown when there is neither. If the image fails to load it falls back to the initials or icon. The ref goes to the root.
+
+```jsx
+<Avatar src="/ada.png" alt="Ada Lovelace" size="lg" />
+<Avatar name="Ada Lovelace" />
+<Avatar icon={<MailIcon />} size="sm" />
+```
+
 ### Badge
 
 `Badge` typings expose `content`, `background`, and `color`; there is no `variant` or `count` anymore [cite:28]. To show a status, pass the text via `content` or children and use `background`/`color` to style.
@@ -356,7 +369,7 @@ const data: UserRow[] = [
 
 ### Repanel and FloatingPanel
 
-`Repanel` is a full-height panel with a rounded left edge and flush right edge — used standalone as a percentage-width layout column (`width` is a percentage of its row, e.g. `25`), or as the stackable card surface rendered inside `RepanelStack` below. `style` can be `"default"` or `"shadow"` for a raised, inset-shadow look. `FloatingPanel` is the same surface but fills its container with the waterdrop corner (`--mochi-floating-radius`), for use outside a row layout; `fullBleed` makes it square with no shadow when it is the whole surface. Panes draw a 1px left edge (`--mochi-pane-edge`).
+`Repanel` is a full-height panel with a rounded left edge and flush right edge — used standalone as a percentage-width layout column (`width` is a percentage of its row, e.g. `25`), or as the stackable card surface rendered inside `RepanelStack` below. `style` can be `"default"` or `"shadow"` for a raised, inset-shadow look. `FloatingPanel` is the same surface but fills its container with a 16px corner (`--mochi-floating-radius`, else `--mochi-corner`), for use outside a row layout; `shape="drop"` gives it the waterdrop accent (`--mochi-drop-radius`), and `fullBleed` makes it square with no shadow when it is the whole surface (it wins over `shape`). Panes draw a 1px left edge (`--mochi-pane-edge`).
 
 Example:
 
@@ -369,6 +382,10 @@ Example:
 
 <FloatingPanel style="shadow">
   <div style={{ padding: 16 }}>Shadowed content</div>
+</FloatingPanel>
+
+<FloatingPanel shape="drop">
+  <div style={{ padding: 16 }}>Waterdrop corner</div>
 </FloatingPanel>
 ```
 

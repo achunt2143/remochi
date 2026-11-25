@@ -337,6 +337,8 @@ $mochi-faces: (
   // rather than a subtle highlight. This is a solid, slightly lighter
   // shade of --mochi-panel-bg (#404040) instead.
   --mochi-panel-hover: #4d4d4d;
+  // The Avatar's ground: the panel hover grey.
+  --mochi-avatar-bg: var(--mochi-panel-hover);
 
   // Slider's unfilled track. Mochi only defined a light look (#a2a2a2);
   // in dark mode that's brighter than the text it sits beside, so this
@@ -437,6 +439,7 @@ $mochi-faces: (
   --mochi-toggle-knob:  #ffffff;
   --mochi-mark:         #ffffff;
   --mochi-panel-hover:  #ececec;
+  --mochi-avatar-bg:    var(--mochi-panel-hover);
 
   // Slider's unfilled track — Mochi's own #a2a2a2 (Slider.less/
   // ProgressBar.less). It previously reused --mochi-hover (4% black),
@@ -501,18 +504,20 @@ $mochi-faces: (
   --mochi-scallop:      45px 0 0 0;
 
   // The two signature corners (the rest sit on the ladder above): the
-  // scallop for panes anchored to an edge, and the waterdrop for floating
-  // surfaces (top-right nearly sharp). Dialog, the Dropdown menu and
-  // PopupPanel read --mochi-floating-radius; --mochi-dialog-radius defaults
-  // to it. For a surface smaller than ~56px use waterdropRadius(size)
-  // (shared/waterdrop.js) so the corner follows its size.
-  --mochi-floating-radius: 16px 4px 16px 16px;
-  // The waterdrop's top corners, for a sheet anchored to an edge (the
-  // flush side stays square): this is the bottom sheet, and the phone Dialog.
-  // A sheet on another edge is the same drop turned to face the page, built
-  // from --mochi-corner and --mochi-corner-xs in MochiSlidingMenu.scss:
-  // docked left 0 16px 4px 0, docked right 4px 0 0 16px, top 0 0 16px 4px.
-  --mochi-sheet-radius: 16px 4px 0 0;
+  // scallop for panes anchored to an edge, and the waterdrop (top-right
+  // nearly sharp), an accent kept for special purposes: the Avatar, the
+  // Dialog (the one interruption) and FloatingPanel shape="drop". A popup
+  // already points with its nubbin, so it keeps the field corner.
+  // --mochi-dialog-radius (not declared either) defaults to it in the Dialog
+  // itself, so a drop set on a wrapper reaches it. For a surface smaller than
+  // ~56px use waterdropRadius(size) (shared/waterdrop.js) so the corner
+  // follows its size.
+  --mochi-drop-radius: 16px 4px 16px 16px;
+  // --mochi-floating-radius is not declared, like --mochi-accent: each
+  // floating surface (PopupPanel, the Dropdown menu, FloatingPanel) falls
+  // back to its own ladder corner. A host that sets it (for example to
+  // var(--mochi-drop-radius), as the Pyxis shell does) retunes all of them
+  // at once.
 
   // The pane's edge: a 1px hairline on its left, no drop shadow between
   // stacked panes. The 0.5 look is --mochi-pane-edge-width: 2px,
@@ -774,6 +779,7 @@ $mochi-fade-selectors: (
   '.mochi-date-cell',
   '.mochi-dialog-close',
   '.mochi-video-controls',
+  '.mochi-avatar-image',
 );
 
 // Everything with a transition or keyframe, for Off.
