@@ -1,8 +1,9 @@
 // MochiNumberInput.jsx
 // Composes MochiButton + MochiInput — no custom stylesheet needed.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MochiButton } from '../Button/MochiButton';
 import { MochiInput }  from '../Input/MochiInput';
+import './MochiNumberInput.scss';
 
 // Hide the browser’s native number-input spin arrows; we provide our own
 const noSpinStyle = {
@@ -13,6 +14,9 @@ const noSpinStyle = {
   width:            '80px',
   marginRight:      0,       // override MochiInput’s default right margin
 };
+
+// How long the number's move runs: --mochi-duration-control (160ms).
+const MOTION_MS = 160;
 
 const MochiNumberInput = ({
   value    = 0,
@@ -29,22 +33,34 @@ const MochiNumberInput = ({
   ...rest
 }) => {
   const [local, setLocal] = useState(Number(value));
+  // A step by the buttons moves the number: the new one rises in from below
+  // (or drops in from above) while the old one fades out the other way.
+  // { dir: 'up' | 'down', from, to, id } — `id` restarts the motion on a
+  // quick second press. Typing and a changed `value` prop don't animate.
+  const [motion, setMotion] = useState(null);
+  const motionTimer = useRef(null);
 
   useEffect(() => { setLocal(Number(value)); }, [value]);
+  useEffect(() => () => clearTimeout(motionTimer.current), []);
 
-  const commit = (next) => {
+  const commit = (next, dir) => {
+    if (dir && next !== local) {
+      setMotion({ dir, from: local, to: next, id: (motion?.id ?? 0) + 1 });
+      clearTimeout(motionTimer.current);
+      motionTimer.current = setTimeout(() => setMotion(null), MOTION_MS);
+    }
     setLocal(next);
     onChange?.(next);
   };
 
   const decrement = () => {
     const next = local - step;
-    if (min === undefined || next >= min) commit(next);
+    if (min === undefined || next >= min) commit(next, 'down');
   };
 
   const increment = () => {
     const next = local + step;
-    if (max === undefined || next <= max) commit(next);
+    if (max === undefined || next <= max) commit(next, 'up');
   };
 
   const handleChange = (e) => {
@@ -80,16 +96,30 @@ const MochiNumberInput = ({
           </MochiButton>
         )}
 
-        <MochiInput
-          // type="number"
-          value={local}
-          onChange={handleChange}
-          disabled={disabled}
-          min={min}
-          max={max}
-          step={step}
-          style={noSpinStyle}
-        />
+        <span className="mochi-number-field">
+          <MochiInput
+            // type="number"
+            className={motion ? `mochi-number-moving-${motion.id % 2}` : undefined}
+            value={local}
+            onChange={handleChange}
+            disabled={disabled}
+            min={min}
+            max={max}
+            step={step}
+            style={noSpinStyle}
+          />
+          {motion && (
+            <>
+              {/* The input hides its own text while the two copies move. */}
+              <span key={`to-${motion.id}`} className={`mochi-number-ghost mochi-number-in-${motion.dir}`} aria-hidden="true">
+                {motion.to}
+              </span>
+              <span key={`from-${motion.id}`} className={`mochi-number-ghost mochi-number-out-${motion.dir}`} aria-hidden="true">
+                {motion.from}
+              </span>
+            </>
+          )}
+        </span>
 
         {unit && (
           <span style={{ color: 'var(--mochi-text-muted, #555555)', fontSize: '0.9rem' }}>

@@ -49,6 +49,8 @@ function sameDay(a, b) {
 function Calendar({ selected, onSelect, minDate, maxDate }) {
   const init = selected ?? new Date();
   const [view, setView] = useState(new Date(init.getFullYear(), init.getMonth(), 1));
+  // Which arrow the month last changed by: the day grid arrives from that side.
+  const [slide, setSlide] = useState(null);
 
   const year  = view.getFullYear();
   const month = view.getMonth();
@@ -69,17 +71,22 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
     border: 'none',
     background: 'none',
     fontFamily: 'inherit',
-    transition: 'background 0.15s',
+    transition: 'background var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease)',
+  };
+
+  const goMonth = (delta) => {
+    setSlide(delta > 0 ? 'next' : 'prev');
+    setView(new Date(year, month + delta, 1));
   };
 
   return (
     <div style={{ width: '252px', userSelect: 'none' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <MochiButton type="normal" onClick={() => setView(new Date(year, month - 1, 1))} aria-label="Previous month">‹</MochiButton>
+        <MochiButton type="normal" onClick={() => goMonth(-1)} aria-label="Previous month">‹</MochiButton>
         <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--mochi-text, #1a1a1a)' }}>
           {MONTHS[month]} {year}
         </span>
-        <MochiButton type="normal" onClick={() => setView(new Date(year, month + 1, 1))} aria-label="Next month">›</MochiButton>
+        <MochiButton type="normal" onClick={() => goMonth(1)} aria-label="Next month">›</MochiButton>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '4px' }}>
@@ -91,7 +98,12 @@ function Calendar({ selected, onSelect, minDate, maxDate }) {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+      {/* Keyed by month so a change remounts it and the slide runs. */}
+      <div
+        key={`${year}-${month}`}
+        className={slide ? `mochi-date-grid mochi-date-grid-${slide}` : 'mochi-date-grid'}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}
+      >
         {cells.map((cell, idx) => {
           const sel      = sameDay(cell.date, selected);
           const disabled = isDisabled(cell.date);

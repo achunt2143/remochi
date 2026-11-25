@@ -14,13 +14,17 @@
   white-space: pre-wrap;
   background: var(--mochi-field-bg, #fff);
   border: 1px solid var(--mochi-field-border, rgba(0,0,0,0.12));
+  outline: 2px solid transparent;
+  outline-offset: 0;
   transition:
-    background-color 150ms var(--mochi-ease-arrive, ease),
-    border-color 150ms var(--mochi-ease-arrive, ease),
-    box-shadow 150ms var(--mochi-ease-arrive, ease);
+    background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
+    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   &:focus {
-    outline: none;
     background-color: var(--mochi-primary-soft, rgba(105,205,255,0.05));
     // Mochi's focused-field border (InputDecorator.less: #69cdff), with the
     // same 3px halo the Input and TextArea have; it spreads in from 0.
@@ -29,7 +33,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mochi-focus-ring, #357099);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: 1px;
   }
 
@@ -46,7 +50,6 @@
     height: 10px;
     background-color: var(--mochi-text-muted, #555555);
     border-radius: 10px;
-    transition: background-color 0.2s ease;
     &:hover { background-color: var(--mochi-text, #1a1a1a); }
   }
 

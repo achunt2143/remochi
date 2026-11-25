@@ -11,3 +11,21 @@
   from { transform: scale(0.6); }
   to   { transform: scale(1); }
 }
+
+// Changing month slides the day grid in from the side of the arrow used: the
+// next month from the right, the previous from the left.
+.mochi-date-grid-next {
+  animation: mochi-date-grid-from-right var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) backwards;
+}
+.mochi-date-grid-prev {
+  animation: mochi-date-grid-from-left var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) backwards;
+}
+
+@keyframes mochi-date-grid-from-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mochi-date-grid-from-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}

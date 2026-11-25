@@ -18,7 +18,7 @@
   -webkit-user-select: none;
   user-select: none;
   cursor: pointer;
-  transition: background-color var(--mochi-duration-control, 160ms) ease;
+  transition: background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
 
   &:hover {
     background-color: var(--mochi-hover);

@@ -27,14 +27,24 @@
   cursor: pointer;
   text-decoration: none;
   text-align: left;
-  transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
-              color            150ms cubic-bezier(0.16, 1, 0.3, 1),
-              transform        150ms cubic-bezier(0.16, 1, 0.3, 1);
+  // The active row's tint (and ink) fades as the selection moves.
+  transition: background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+              color            var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+              transform        var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+              opacity          var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+              outline-color    var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+              outline-offset   var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
+  // Resting ring is invisible; focus-visible eases it in (below).
+  outline: 2px solid transparent;
+  outline-offset: 0;
   position: relative;
   overflow: hidden;
 
+  // Nothing animates on hover: the tint arrives at once (and fades out when
+  // the pointer leaves).
   &:hover:not(.mochi-sliding-menu-item--disabled) {
     background-color: var(--item-hover-bg);
+    transition: none;
   }
 
   &:active:not(.mochi-sliding-menu-item--disabled) {
@@ -42,7 +52,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mochi-focus-ring, #357099);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: -2px;
   }
 }

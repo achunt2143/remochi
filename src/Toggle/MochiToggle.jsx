@@ -18,6 +18,9 @@ import './MochiToggle.scss';
  *   onContent      {string}   Label shown when on (default: 'On')
  *   offContent     {string}   Label shown when off (default: 'Off')
  */
+// Resting knob width — keep in step with .mochi-toggle-button-knob.
+const KNOB_WIDTH = 20;
+
 const MochiToggle = React.forwardRef(({
   value = false,
   checked,
@@ -59,8 +62,9 @@ const MochiToggle = React.forwardRef(({
   const applyKnobPosition = useCallback((on) => {
     if (!trackRef.current || !knobRef.current) return;
     const trackW = trackRef.current.offsetWidth;
-    const knobW  = knobRef.current.offsetWidth;
-    const xPos   = on ? trackW - knobW - 4 : 0; // 4 = margin 2px * 2
+    // The knob's resting width, not its measured one: while the toggle is held
+    // the knob is squished 4px wider, and measuring that left On 4px short.
+    const xPos   = on ? trackW - KNOB_WIDTH - 4 : 0; // 4 = margin 2px * 2
     knobRef.current.style.transform = `translateX(${xPos}px)`;
   }, []);
 

@@ -14,9 +14,10 @@
   border-radius: var(--mochi-corner-sm, 10px);
   // The press scale and the selected tint ease in and out.
   transition:
-    background-color var(--mochi-duration-control, 160ms) ease,
-    border-color var(--mochi-duration-control, 160ms) ease,
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+    background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
   position: relative;
 
   &.hoverable:hover:not(.disabled) {
@@ -66,7 +67,10 @@
     border-radius: var(--mochi-corner-sm, 10px);
     font-size: 20px;
     color: var(--mochi-primary);
-    transition: all 0.2s ease;
+    transition:
+      background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+      border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+      transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
 
     &[role='button'] {
       cursor: pointer;

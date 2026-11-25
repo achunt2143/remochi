@@ -37,7 +37,7 @@
   // hidden by default; shown on hover / when paused
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity var(--mochi-duration-arrive, 220ms) var(--mochi-ease-arrive, ease);
 
   &.visible {
     opacity: 1;
@@ -86,7 +86,6 @@
   // Hover: grow slightly so the user knows it's interactive
   &:hover > * {
     height: 6px !important;
-    transition: height 0.15s ease;
   }
 }
 

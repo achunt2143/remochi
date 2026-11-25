@@ -33,6 +33,12 @@
     height: 54px;
   }
 
+  // The focus ring and the disabled dimming ease; the track colour joins
+  // them under .mochi-toggle-animate below.
+  transition:
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
+
   &:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px var(--mochi-focus-ring, #357099);
@@ -47,7 +53,10 @@
 
 /* Track colour travels with the knob — only when canAnimate is true */
 .mochi-toggle-animate {
-  transition: background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
+  transition:
+    background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 }
 
 /* White sliding knob */

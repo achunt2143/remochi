@@ -83,11 +83,11 @@
       color: var(--mochi-text-muted);
       z-index: 2;
       transition:
-        background-color var(--mochi-duration-control, 160ms) ease,
-        border-color var(--mochi-duration-control, 160ms) ease,
-        color var(--mochi-duration-control, 160ms) ease,
-        box-shadow var(--mochi-duration-control, 160ms) ease,
-        transform var(--mochi-duration-control, 160ms) ease;
+        background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+        border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+        color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+        box-shadow var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+        transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
     }
 
     // A completed step's tick draws itself, wiping in from the left.
@@ -103,7 +103,7 @@
       text-align: center;
       max-width: 80px;
       word-wrap: break-word;
-      transition: color var(--mochi-duration-control, 160ms) ease;
+      transition: color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
     }
 
     &-connector {
@@ -114,7 +114,7 @@
       height: 2px;
       background: var(--mochi-border);
       z-index: 1;
-      transition: opacity var(--mochi-duration-control, 160ms) ease;
+      transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
 
       // The progress between steps fills from the finished step toward the
       // next one.
@@ -176,4 +176,21 @@
 @keyframes mochi-wizard-check {
   from { clip-path: inset(0 100% 0 0); }
   to   { clip-path: inset(0 0 0 0); }
+}
+
+// A step's content enters from the side it came from, a short way, fading in.
+.mochi-wizard-enter-right {
+  animation: mochi-wizard-from-right var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) backwards;
+}
+.mochi-wizard-enter-left {
+  animation: mochi-wizard-from-left var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) backwards;
+}
+
+@keyframes mochi-wizard-from-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mochi-wizard-from-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }

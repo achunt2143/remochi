@@ -3,7 +3,7 @@ import styled from "styled-components";
 const SIZE = 30;
 const BORDER = 2;
 
-const MochiRadioLabel = styled.label`
+const MochiRadioLabel = styled.label.attrs({ className: "mochi-radio-label" })`
   display: flex;
   align-items: center;
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
@@ -13,6 +13,8 @@ const MochiRadioLabel = styled.label`
   padding: 6px 10px;
   opacity: ${({ disabled }) => (disabled ? "var(--mochi-disabled-opacity, 0.4)" : 1)};
   user-select: none;
+  // Disabled dims, enabled restores: the opacity eases.
+  transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
 `;
 
 // The checked fill is a fixed amber "selected" accent (--mochi-selected),
@@ -44,8 +46,8 @@ const MochiRadioOuter = styled.span.attrs({ className: "mochi-radio-box" })`
   margin-right: 8px;
   box-sizing: border-box;
   transition:
-    background 0.15s,
-    border-color var(--mochi-duration-control, 160ms),
+    background var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
     transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
   position: relative;
 

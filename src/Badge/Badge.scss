@@ -26,6 +26,8 @@
   text-align: center;
   vertical-align: middle;
   white-space: nowrap;
+  // First appearance: fades in from a touch smaller. No bounce.
+  animation: mochi-badge-appear var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) backwards;
 
   &.oval {
     border-radius: var(--mochi-corner-pill, 9999px);
@@ -54,4 +56,31 @@
   font-weight: normal;
   line-height: 1;
   vertical-align: middle;
+}
+
+@keyframes mochi-badge-appear {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+// A changed count crossfades in place: the new number fades in, the old one
+// (laid over it) fades out.
+.mochi-badge-count {
+  position: relative;
+}
+.mochi-badge-count-new {
+  animation: mochi-fade-in var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) backwards;
+}
+.mochi-badge-count-old {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: mochi-badge-count-out var(--mochi-duration-control, 160ms) linear forwards;
+}
+@keyframes mochi-badge-count-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }

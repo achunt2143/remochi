@@ -65,7 +65,10 @@ What animates in Full (all within 220ms; small state changes use `--mochi-durati
 - `Pagination`: one accent bar slides to the current page. `ViewSelectButton`: its bar travels between segments.
 - `Dropdown`: the chevron turns 180 degrees, the menu grows from the trigger edge and the selected check fades in. `Collapsable`: the chevron turns and the content eases open on grid rows. `DateInput`: the selected day's fill grows in.
 - `Item`, `ListItem` and `GridList`: press and selection tints fade, and the `GridList` ring eases in. `Input`, `TextArea` and `RichText`: the focus border and 3px halo ease in.
-- `Wizard`: a completed step's tick draws and the progress between steps fills.
+- `Wizard`: a completed step's tick draws and the progress between steps fills, and a step's content enters from the right going forward (Next, Skip) and from the left going back, 12px with a fade.
+- `NumberInput`: the figure moves with the change, rising in from 4px below on increment (the old one fades up and out) and the reverse on decrement. `DateInput`: changing month slides the day grid in 12px from the side of the arrow used, with a fade.
+- `Table`: the sort arrow turns over when the direction flips, the active header's colour eases, and the row tint fades. `Badge`: it fades and scales in from 0.9 when it appears, and a changed count crossfades (no bounce). `ProgressBar`: the fill eases on `--mochi-ease-forward`, 160ms for a short change and 220ms for a long one.
+- Focus rings (`Button`, `Toggle`, `Checkbox`, fields, `Dropdown`, `GridList`, menu rows and the rest) ease in over `--mochi-duration-focus` (120ms), and a control becoming enabled or disabled eases its opacity over the control duration. A `SlidingMenu` row's active tint fades while its hover tint stays instant.
 
 Under Reduced these become opacity fades with no scale or travel, and under Off they are instant.
 

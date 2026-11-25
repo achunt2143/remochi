@@ -76,7 +76,9 @@
 .mochi-checkbox-animate {
   transition:
     background-color 90ms linear,
-    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
+    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   .mochi-checkbox-tick {
     transition: clip-path 90ms var(--mochi-ease-arrive, ease);

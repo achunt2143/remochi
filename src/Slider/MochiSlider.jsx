@@ -111,7 +111,7 @@ const PopupText = styled.div.attrs({ className: "mochi-slider-bubble" })`
   pointer-events: none;
   z-index: 101;
   opacity: ${({ $shown }) => ($shown ? 1 : 0)};
-  transition: opacity var(--mochi-duration-control, 160ms);
+  transition: opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease);
 `;
 
 // Wraps the bubble's canvas and text, over the knob's own box. Always

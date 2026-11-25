@@ -17,8 +17,9 @@
   user-select: none;
   border-radius: var(--mochi-corner-xs, 4px);
   transition:
-    background-color 180ms ease,
-    color 180ms ease;
+    background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    box-shadow var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   &:hover {
     background-color: var(--mochi-hover, rgba(0,0,0,0.05));
@@ -58,8 +59,8 @@
   opacity: 0;
   transform: translateY(-4px);
   transition:
-    opacity var(--mochi-duration-control, 160ms) ease 40ms,
-    transform var(--mochi-duration-control, 160ms) ease 40ms;
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) 40ms,
+    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease) 40ms;
 
   .mochi-collapsable-body[style*="1fr"] & {
     opacity: 1;

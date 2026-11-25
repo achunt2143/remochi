@@ -128,16 +128,24 @@ const ButtonWrapper = styled.button`
     $appearance === "drop"
       ? `var(--mochi-button-ink, ${textColor($variant)})`
       : textColor($variant)};
-  outline: none;
-  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  // The press leans in and settles back; disabled eases its opacity; the
+  // focus ring eases in (outline-colour and -offset from nothing).
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  transition:
+    transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    background var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   &:focus {
-    outline: none;
     ${({ $appearance }) => ($appearance === "drop" ? "" : "color: var(--mochi-text, #1a1a1a);")}
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mochi-focus-ring, #357099);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: 2px;
     border-radius: ${({ $appearance }) =>
       $appearance === "drop"
@@ -181,7 +189,8 @@ const UnderlineBar = styled.span`
   transform-origin: center;
   transform: scaleX(0);
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  // The bar draws in on press and settles back on release.
+  transition: transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease), opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
   pointer-events: none;
 `;
 
@@ -194,7 +203,7 @@ const bracketStyle = css`
   vertical-align: middle;
   margin: 0 2px;
   display: inline-block;
-  transition: color 0.2s, transform 0.15s ease;
+  transition: color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease), transform var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
 `;
 
 const Bracket = styled.span`

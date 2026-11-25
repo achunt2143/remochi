@@ -13,11 +13,15 @@
   border-radius: var(--radius-md, 6px);
   padding: 8px 12px;
   resize: vertical;
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 0;
   transition:
-    border-color 150ms var(--mochi-ease-arrive, ease),
-    background 150ms var(--mochi-ease-arrive, ease),
-    box-shadow 150ms var(--mochi-ease-arrive, ease);
+    border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
+    background var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
+    box-shadow var(--mochi-duration-control, 160ms) var(--mochi-ease-arrive, ease),
+    opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+    outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+    outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
   // Mochi's focused-field border (InputDecorator.less: #69cdff).
   &:focus {
@@ -27,7 +31,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mochi-focus-ring, #357099);
+    outline-color: var(--mochi-focus-ring, #357099);
     outline-offset: 1px;
   }
 
@@ -47,7 +51,6 @@
     height: 10px;
     background-color: var(--mochi-text-muted, #555555);
     border-radius: 10px;
-    transition: background-color 0.2s ease;
     &:hover { background-color: var(--mochi-text, #1a1a1a); }
   }
 }
@@ -65,7 +68,6 @@
   font-style: italic;
   color: var(--mochi-text, #1a1a1a);
   cursor: pointer;
-  transition: cursor 0.2s ease;
 
   &:focus  { cursor: text; outline: none; }
   &:disabled { cursor: default; opacity: var(--mochi-disabled-opacity, 0.4); }

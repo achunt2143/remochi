@@ -551,6 +551,9 @@ $mochi-faces: (
   // A small control changing state (a checkbox ticking, a toggle flipping, a
   // chevron turning): quicker than an arrival, never blocking input.
   --mochi-duration-control: 160ms;
+  // A focus ring easing in (outline-offset and colour from nothing), never
+  // popping.
+  --mochi-duration-focus:   120ms;
   // The longest a Reduced-motion fade may run.
   --mochi-duration-reduced: 150ms;
 
@@ -724,7 +727,7 @@ $mochi-solid-overlay: (dark: #050608, light: #cfd0d6);
 
 // Reduced: a colour or opacity fade, no transform.
 @mixin mochi-fade-only {
-  transition-property: opacity, background-color, color, border-color !important;
+  transition-property: opacity, background-color, color, border-color, outline-color !important;
   transition-duration: var(--mochi-duration-reduced, 150ms) !important;
   transition-delay: 0s !important;
 }
@@ -740,11 +743,13 @@ $mochi-fade-selectors: (
   '.mochi-view-select-button-item',
   '.mochi-button-decorator',
   '.mochi-collapsable-header',
+  '.mochi-toggle-button',
   '.mochi-toggle-animate',
   '.mochi-toggle-animate .mochi-toggle-button-knob',
   '.mochi-toggle-content',
   '.mochi-checkbox-animate',
   '.mochi-checkbox-tick',
+  '.mochi-radio-label',
   '.mochi-radio-box',
   '.mochi-radio-fill',
   '.mochi-radio-check',
@@ -756,10 +761,12 @@ $mochi-fade-selectors: (
   '.mochi-wizard-step-connector-fill',
   '.mochi-dropdown-trigger',
   '.mochi-dropdown-option',
+  '.mochi-dropdown-search-input',
   '.mochi-table tbody tr',
   '.mochi-table-header',
   '.mochi-list-item',
   '.mochi-item',
+  '.mochi-item-icon',
   '.mochi-gridlist-imageitem',
   '.mochi-input',
   '.mochi-textarea',
@@ -793,6 +800,20 @@ $mochi-motion-selectors: list.join((
   '.mochi-wizard-step-check',
   '.mochi-video-timeline > *',
   '.mochi-input-decorator > textarea',
+  '.mochi-table-sort-indicator',
+  '.mochi-badge-inner',
+  '.mochi-badge-count-new',
+  '.mochi-badge-count-old',
+  '.mochi-date-grid-next',
+  '.mochi-date-grid-prev',
+  '.mochi-wizard-enter-right',
+  '.mochi-wizard-enter-left',
+  '.mochi-number-moving-0',
+  '.mochi-number-moving-1',
+  '.mochi-number-in-up',
+  '.mochi-number-in-down',
+  '.mochi-number-out-up',
+  '.mochi-number-out-down',
 ), $mochi-fade-selectors, comma);
 
 @keyframes mochi-fade-in {
@@ -868,6 +889,7 @@ $mochi-motion-selectors: list.join((
   '.mochi-dropdown-arrow',
   '.mochi-video-timeline > *',
   '.mochi-input-decorator > textarea',
+  '.mochi-table-sort-indicator',
 )) {
   transition: none !important;
 }
@@ -919,11 +941,44 @@ $mochi-motion-selectors: list.join((
   '.mochi-wizard-step-check',
   '.mochi-menu-item-check',
   '.mochi-date-cell-selected',
+  '.mochi-badge-inner',
+  '.mochi-badge-count-new',
+  '.mochi-number-in-up',
+  '.mochi-number-in-down',
 )) {
   animation-name: mochi-fade-in !important;
   animation-duration: var(--mochi-duration-reduced, 150ms) !important;
   animation-delay: 0s !important;
   animation-timing-function: ease !important;
+}
+
+// Entrances that slide a short way (the DateInput's day grid, a Wizard step's
+// content): the same fade, in place.
+@include mochi-motion('reduced', (
+  '.mochi-date-grid-next',
+  '.mochi-date-grid-prev',
+  '.mochi-wizard-enter-right',
+  '.mochi-wizard-enter-left',
+)) {
+  animation-name: mochi-fade-in !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: ease !important;
+}
+
+// NumberInput: the figure that leaves fades in place (no rise or drop), and
+// the input's own text stays hidden only as long as that fade.
+@include mochi-motion('reduced', ('.mochi-number-out-up', '.mochi-number-out-down')) {
+  animation-name: mochi-number-fade-out !important;
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+  animation-timing-function: linear !important;
+}
+@include mochi-motion('reduced', ('.mochi-number-moving-0', '.mochi-number-moving-1')) {
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
+}
+
+// Badge: the count that leaves fades for no longer than Reduced allows.
+@include mochi-motion('reduced', ('.mochi-badge-count-old')) {
+  animation-duration: var(--mochi-duration-reduced, 150ms) !important;
 }
 
 // Collapsable content: opacity only, no 4px rise.
@@ -990,6 +1045,14 @@ $mochi-motion-selectors: list.join((
 @include mochi-motion('off', $mochi-motion-selectors) {
   transition: none !important;
   animation: none !important;
+}
+// ...and the copies that exist only to animate (a Badge's old count, the
+// NumberInput's two figures) aren't shown at all.
+@include mochi-motion('off', (
+  '.mochi-badge-count-old',
+  '.mochi-number-ghost',
+)) {
+  display: none !important;
 }
 
 // ============================================

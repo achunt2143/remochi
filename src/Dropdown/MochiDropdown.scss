@@ -24,7 +24,16 @@
     border: 1px solid var(--mochi-border);
     border-radius: var(--mochi-corner-pill, 9999px);
     cursor: pointer;
-    transition: all 0.2s ease;
+    // Named properties, not `all`: the tint and border follow the state, the
+    // focus ring eases in, disabled eases its opacity.
+    transition:
+      background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+      border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+      opacity var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+      outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+      outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
+    outline: 2px solid transparent;
+    outline-offset: 0;
 
     // --mochi-panel-hover (not --mochi-hover) — same reasoning as
     // MochiItem.scss's .hoverable:hover: this trigger already paints its
@@ -42,7 +51,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--mochi-focus-ring, #357099);
+      outline-color: var(--mochi-focus-ring, #357099);
       outline-offset: 2px;
     }
 
@@ -94,14 +103,19 @@
     border-radius: var(--mochi-corner-pill, 9999px);
     color: var(--mochi-text);
     font-size: 14px;
-    outline: none;
+    outline: 2px solid transparent;
+    outline-offset: 0;
+    transition:
+      border-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease),
+      outline-color var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease),
+      outline-offset var(--mochi-duration-focus, 120ms) var(--mochi-ease-arrive, ease);
 
     &:focus {
       border-color: var(--mochi-primary);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--mochi-focus-ring, #357099);
+      outline-color: var(--mochi-focus-ring, #357099);
       outline-offset: 1px;
     }
   }
@@ -138,7 +152,7 @@
     padding: 10px 12px;
     color: var(--mochi-text);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--mochi-duration-control, 160ms) var(--mochi-ease-forward, ease);
 
     &:hover {
       background: var(--mochi-hover);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useLayoutEffect } from 'react';
 import './Badge.scss';
 
 // Variant → background color map. Themed via the same --mochi-* tokens
@@ -53,6 +53,19 @@ const Badge = ({
   className  = '',
   ...rest
 }) => {
+  // A changed count crossfades: the previous number stays on top, fading out
+  // (the new one fades in beneath), then goes. See .mochi-badge-count-old.
+  const lastCount = useRef(count);
+  const [leaving, setLeaving] = useState(null);
+  useLayoutEffect(() => {
+    const was = lastCount.current;
+    lastCount.current = count;
+    if (was === undefined || count === undefined || was === count) return undefined;
+    setLeaving({ value: was, key: Date.now() });
+    const timer = setTimeout(() => setLeaving(null), 160);
+    return () => clearTimeout(timer);
+  }, [count]);
+
   // Resolve label: children > content > empty
   const label = children ?? (content !== undefined ? String(content) : '');
   const isEmpty = label === '' && count === undefined;
@@ -73,7 +86,19 @@ const Badge = ({
       >
         {label}
         {count !== undefined && (
-          <span className="mochi-badge-count">{count}</span>
+          <span className="mochi-badge-count">
+            <span
+              key={count}
+              className={leaving ? 'mochi-badge-count-new' : undefined}
+            >
+              {count}
+            </span>
+            {leaving && (
+              <span key={leaving.key} className="mochi-badge-count-old" aria-hidden="true">
+                {leaving.value}
+              </span>
+            )}
+          </span>
         )}
       </div>
     </div>
